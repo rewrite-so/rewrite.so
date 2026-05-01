@@ -2,6 +2,7 @@ import { buildMessages } from '@rewrite/prompts';
 import { MAX_INPUT_CHARS, RewriteRequestSchema, type Style } from '@rewrite/shared';
 import { Hono } from 'hono';
 import { muxToSSE } from '../lib/sse.ts';
+import { stripThinking } from '../lib/strip-thinking.ts';
 import { streamCompletion } from '../lib/upstream.ts';
 import type { AppEnv } from '../types.ts';
 
@@ -45,16 +46,18 @@ rewriteRoute.post('/v1/rewrite', async (c) => {
 
   const streams = req.styles.map((style) => ({
     style: style as Style,
-    iter: streamCompletion(
-      upstreamConfig,
-      buildMessages({
-        style: style as Style,
-        targetLang,
-        text: req.text,
-        hasSelection: req.hasSelection,
-        ...(req.context ? { context: req.context } : {}),
-      }),
-      signal,
+    iter: stripThinking(
+      streamCompletion(
+        upstreamConfig,
+        buildMessages({
+          style: style as Style,
+          targetLang,
+          text: req.text,
+          hasSelection: req.hasSelection,
+          ...(req.context ? { context: req.context } : {}),
+        }),
+        signal,
+      ),
     ),
   }));
 
