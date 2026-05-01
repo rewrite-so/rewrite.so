@@ -1,6 +1,9 @@
 import { buildMessages } from '@rewrite/prompts';
 import { MAX_INPUT_CHARS, RewriteRequestSchema, type Style } from '@rewrite/shared';
 import { Hono } from 'hono';
+import { BURST_BUCKETS, consume } from '../do/rate-limiter.ts';
+import { createAuth } from '../lib/auth.ts';
+import { checkAndIncrement, hashIp, type Subject, type Tier } from '../lib/quota.ts';
 import { muxToSSE } from '../lib/sse.ts';
 import { stripThinking } from '../lib/strip-thinking.ts';
 import { streamCompletion } from '../lib/upstream.ts';
@@ -26,11 +29,61 @@ rewriteRoute.post('/v1/rewrite', async (c) => {
   }
   const req = parsed.data;
 
-  // 服务端目标语言判定：优先用客户端给的 lang；'auto' 兜底为 'en'
-  // (客户端已经做过启发式；服务端不重复判定)
-  const targetLang = req.lang === 'auto' ? 'en' : req.lang;
+  // ===== Subject 选择 =====
+  // 优先级: 登录用户 (user) > 扩展未登录 (install) > 匿名 IP (ip)
+  const auth = createAuth(c.env);
+  const session = await auth.api.getSession({ headers: c.req.raw.headers });
+  const userId = session?.user.id;
 
-  // upstream 配置（无内置默认值，必须由环境变量提供）
+  let subject: Subject;
+  let tier: Tier;
+  if (userId) {
+    subject = { kind: 'user', id: userId };
+    // Phase 4 后这里要查 subscriptions 决定 free / pro。MVP 起步先全 free。
+    tier = 'free';
+  } else if (req.installId) {
+    subject = { kind: 'install', id: req.installId };
+    tier = 'anonymous_install';
+  } else {
+    const ip =
+      c.req.header('cf-connecting-ip') ||
+      c.req.header('x-forwarded-for')?.split(',')[0]?.trim() ||
+      '0.0.0.0';
+    const ipHash = await hashIp(ip, c.env.BETTER_AUTH_SECRET);
+    subject = { kind: 'ip', id: ipHash };
+    tier = 'anonymous_ip';
+  }
+
+  // ===== Burst 限流（DO） =====
+  const bucket =
+    subject.kind === 'user'
+      ? BURST_BUCKETS.user
+      : subject.kind === 'install'
+        ? BURST_BUCKETS.install
+        : BURST_BUCKETS.ip;
+  const burst = await consume(c.env.RATE_LIMITER, subject, bucket);
+  if (!burst.allowed) {
+    return c.json({ error: 'rate_limit', retryAfterMs: burst.retryAfterMs }, 429, {
+      'retry-after': String(Math.ceil(burst.retryAfterMs / 1000)),
+    });
+  }
+
+  // ===== 月配额（D1 usage_monthly） =====
+  // BYOK 在 Phase 4 接入；MVP 全 isBYOK=false
+  const quota = await checkAndIncrement(c.env.DB, subject, tier, false);
+  if (!quota.allowed) {
+    return c.json(
+      {
+        error: 'quota_exceeded',
+        used: quota.used,
+        limit: quota.limit,
+        resetAt: quota.resetAt,
+      },
+      429,
+    );
+  }
+
+  // ===== 上游配置 =====
   const baseUrl = c.env.OPENAI_BASE_URL;
   const apiKey = c.env.OPENAI_API_KEY;
   const model = c.env.OPENAI_MODEL;
@@ -39,9 +92,11 @@ rewriteRoute.post('/v1/rewrite', async (c) => {
   }
   const upstreamConfig = { baseUrl, apiKey, model };
 
+  // ===== 服务端目标语言判定：优先客户端给的 lang；'auto' 兜底为 'en' =====
+  const targetLang = req.lang === 'auto' ? 'en' : req.lang;
+
   // AbortSignal: client 断开 → c.req.raw.signal abort → 级联到 3 路 fetch
   const signal = c.req.raw.signal;
-
   const requestId = crypto.randomUUID();
 
   const streams = req.styles.map((style) => ({
@@ -68,8 +123,10 @@ rewriteRoute.post('/v1/rewrite', async (c) => {
     headers: {
       'content-type': 'text/event-stream; charset=utf-8',
       'cache-control': 'no-cache, no-transform',
-      'x-accel-buffering': 'no', // 禁止任何中间代理缓冲
+      'x-accel-buffering': 'no',
       connection: 'keep-alive',
+      'x-rs-quota-remaining': String(quota.remaining),
+      'x-rs-quota-limit': String(quota.limit),
     },
   });
 });

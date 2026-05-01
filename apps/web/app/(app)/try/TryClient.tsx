@@ -4,7 +4,9 @@ import { createWebApiClient, mount } from '@rewrite/core';
 import { type Locale, pickLocale, t } from '@rewrite/shared';
 import { useEffect, useRef, useState } from 'react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:8787';
+// 留空让 fetch 走 same-origin（Next rewrites 代理到 wrangler dev）
+// 这样 better-auth session cookie 是 web origin 的，不需跨域
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? '';
 
 // SSR 时 navigator 不可用，固定用 'en'；客户端 mount 后再切到真实 locale，
 // 避免 hydration mismatch（placeholder 文本不能随 client navigator 变化）。

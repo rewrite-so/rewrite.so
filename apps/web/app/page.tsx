@@ -20,7 +20,7 @@ export default function HomePage() {
         在任何网页输入框，按两下 Shift 即可获得 3 种风格的 AI 改写：贴近原文、口语、正式。
         全键盘操作，用完即走。
       </p>
-      <div style={{ marginTop: '2.5rem', display: 'flex', gap: '12px' }}>
+      <div style={{ marginTop: '2.5rem', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
         <Link
           href="/try"
           style={{
@@ -34,6 +34,20 @@ export default function HomePage() {
           }}
         >
           网页试用 →
+        </Link>
+        <Link
+          href="/login"
+          style={{
+            padding: '12px 20px',
+            border: '1px solid #d4d4d8',
+            borderRadius: 10,
+            textDecoration: 'none',
+            color: '#111',
+            fontWeight: 500,
+            fontSize: '0.95rem',
+          }}
+        >
+          登录
         </Link>
         <a
           href="https://github.com/rewrite-so/rewrite.so"

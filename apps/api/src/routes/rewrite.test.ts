@@ -1,11 +1,50 @@
 import { parseSSEStream, type SSEEvent } from '@rewrite/shared';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import app from '../index.ts';
+
+// 必须在 import app 之前 mock auth，避免 better-auth 在测试环境下查 D1
+vi.mock('../lib/auth.ts', () => ({
+  createAuth: () => ({
+    api: { getSession: async () => null },
+    handler: async () => new Response('mock', { status: 200 }),
+  }),
+}));
+
+const app = (await import('../index.ts')).default;
+
+// Fake D1：所有 SELECT 返 null，UPSERT no-op
+const fakeDB = {
+  prepare: (_sql: string) => ({
+    bind: (..._args: unknown[]) => ({
+      first: async () => null,
+      run: async () => ({ success: true }),
+      all: async () => ({ results: [], success: true }),
+    }),
+  }),
+} as unknown as D1Database;
+
+// Fake DurableObjectNamespace：所有 consume 返 allowed=true
+const fakeRateLimiter = {
+  idFromName: (_name: string) => ({}) as DurableObjectId,
+  get: (_id: DurableObjectId) =>
+    ({
+      fetch: async () =>
+        Response.json({ allowed: true, remaining: 99, retryAfterMs: 0 }, { status: 200 }),
+    }) as unknown as DurableObjectStub,
+} as unknown as DurableObjectNamespace;
+
+const fakeKV = {} as unknown as KVNamespace;
 
 const MOCK_ENV = {
   OPENAI_BASE_URL: 'https://upstream.test/v1',
   OPENAI_API_KEY: 'sk-test',
   OPENAI_MODEL: 'gpt-4o-mini',
+  BETTER_AUTH_SECRET: 'test-secret',
+  BETTER_AUTH_URL: 'http://localhost',
+  RESEND_API_KEY: '',
+  RESEND_FROM_EMAIL: '',
+  DB: fakeDB,
+  KV: fakeKV,
+  RATE_LIMITER: fakeRateLimiter,
 } as const;
 
 function makeUpstreamSSE(text: string): Response {
@@ -121,7 +160,7 @@ describe('POST /v1/rewrite', () => {
           styles: ['faithful', 'casual', 'formal'],
         }),
       },
-      { OPENAI_BASE_URL: '', OPENAI_API_KEY: '', OPENAI_MODEL: '' },
+      { ...MOCK_ENV, OPENAI_BASE_URL: '', OPENAI_API_KEY: '', OPENAI_MODEL: '' },
     );
     expect(res.status).toBe(503);
   });

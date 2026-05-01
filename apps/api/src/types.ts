@@ -16,10 +16,10 @@ export interface Bindings {
   CREEM_PRO_YEARLY_PRODUCT_ID: string;
   TURNSTILE_SECRET: string;
 
-  // ===== Phase 2 起启用 =====
-  // DB: D1Database;
-  // KV: KVNamespace;
-  // RATE_LIMITER: DurableObjectNamespace;
+  // ===== Bindings =====
+  DB: D1Database;
+  KV: KVNamespace;
+  RATE_LIMITER: DurableObjectNamespace;
 }
 
 export type AppEnv = {
