@@ -4,7 +4,6 @@
     "lib": ["ES2022"],
     "types": ["@cloudflare/workers-types/2023-07-01"],
     "noEmit": true,
-    "rootDir": ".",
     "baseUrl": ".",
     "paths": {
       "@rewrite/shared": ["../../packages/shared/src"],

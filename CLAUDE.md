@@ -57,6 +57,8 @@
 
 ## 工具链坑位
 
+- **wrangler dev 与系统代理冲突**：当用户机器有 `HTTP_PROXY` / `HTTPS_PROXY` 环境变量时，worker 内 `fetch()` 会被强制走代理（即使是 localhost）。本地端到端调试 mock upstream 时必须先 `unset` 这些变量，或用 `env -u HTTP_PROXY ...` 启动。生产环境 Workers 没这个问题。
+- **mock-upstream.mjs 必须 listen 在 `127.0.0.1` 而非默认 `0.0.0.0`**：避免 IPv6/IPv4 双栈解析在 wrangler workerd 里出现连接挂起。
 - **CRXJS + pnpm monorepo 必备**：
   - `vite.config.ts` 中 `optimizeDeps.exclude` 必须排 workspace 包（`@rewrite/core` 等），否则首次冷启动 Vite 把 workspace 扁平化失败。
   - workspace 包名不能含 `.`（用 `@rewrite/core` 不要 `@rewrite/core.ext`）。

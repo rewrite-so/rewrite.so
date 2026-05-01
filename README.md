@@ -28,12 +28,30 @@ cp .env.example .env.local
 # 填入 OPENAI_BASE_URL / OPENAI_API_KEY / OPENAI_MODEL 等
 ```
 
-### 本地开发
+### 本地开发（端到端）
+
+打开 3 个终端：
 
 ```bash
-pnpm dev:api      # Cloudflare Workers API（http://localhost:8787）
-pnpm dev:web      # Next.js 网页（http://localhost:3000）
-pnpm dev:ext      # Chrome 扩展（在 chrome://extensions 加载 apps/extension/dist 未打包）
+# 终端 1：mock 上游（如果你有真实 OpenAI 兼容 key 可跳过）
+node scripts/mock-upstream.mjs   # listen on 127.0.0.1:9999
+
+# 终端 2：API（需先复制 .dev.vars.example 到 .dev.vars 并填值）
+cp apps/api/.dev.vars.example apps/api/.dev.vars
+pnpm dev:api                      # http://localhost:8787
+
+# 终端 3：网页
+cp apps/web/.env.local.example apps/web/.env.local
+pnpm dev:web                      # http://localhost:3000
+
+# 扩展（dev 期间在 chrome://extensions 加载 apps/extension/dist 未打包）
+pnpm dev:ext
+```
+
+**已知坑（macOS 用户）**：如果你的环境有 `HTTP_PROXY` / `HTTPS_PROXY`，wrangler dev 会让 worker 内的 fetch 走代理，连 localhost:9999 都会失败。启 `pnpm dev:api` 前 `unset` 代理变量，或者用：
+
+```bash
+env -u HTTP_PROXY -u http_proxy -u HTTPS_PROXY -u https_proxy -u ALL_PROXY -u all_proxy pnpm dev:api
 ```
 
 ### 检查与构建

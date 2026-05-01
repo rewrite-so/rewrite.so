@@ -1,0 +1,13 @@
+# 本地 wrangler dev 用的 secret 文件。复制为 .dev.vars（被 .gitignore 忽略）。
+#
+# 方式 A：用本地 mock upstream 跑端到端（不需要真实 API key）
+#   node scripts/mock-upstream.mjs
+#
+OPENAI_BASE_URL=http://127.0.0.1:9999/v1
+OPENAI_API_KEY=mock
+OPENAI_MODEL=mock
+
+# 方式 B：用真实 OpenAI 兼容 endpoint（取消注释并填入）
+# OPENAI_BASE_URL=https://api.openai.com/v1
+# OPENAI_API_KEY=sk-...
+# OPENAI_MODEL=gpt-4o-mini

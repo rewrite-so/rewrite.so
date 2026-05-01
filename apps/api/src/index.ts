@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import { rewriteRoute } from './routes/rewrite.ts';
 import type { AppEnv } from './types.ts';
 
 const app = new Hono<AppEnv>();
@@ -20,6 +21,8 @@ app.get('/health', (c) => {
 });
 
 // Phase 1: POST /v1/rewrite (SSE)
+app.route('/', rewriteRoute);
+
 // Phase 2: /api/auth/*, /v1/me/*
 // Phase 4: /v1/billing/*, /webhooks/creem
 
