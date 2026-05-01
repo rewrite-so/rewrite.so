@@ -1,0 +1,33 @@
+{
+  "name": "rewrite-so",
+  "version": "0.0.0",
+  "private": true,
+  "description": "输入框级 AI 改写引擎 — 双击 Shift 即时优化你的表达",
+  "homepage": "https://rewrite.so",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rewrite-so/rewrite.so.git"
+  },
+  "license": "MIT",
+  "packageManager": "pnpm@9.15.4",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "dev:api": "turbo run dev --filter=@rewrite/api",
+    "dev:web": "turbo run dev --filter=@rewrite/web",
+    "dev:ext": "turbo run dev --filter=@rewrite/extension",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "fix": "biome check --write ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.13",
+    "turbo": "^2.9.7",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,0 +1,24 @@
+name = "rewrite-web"
+main = ".open-next/worker.js"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[assets]
+directory = ".open-next/assets"
+binding = "ASSETS"
+
+# Production routes - 待 Phase 5 上线时启用
+# routes = [
+#   { pattern = "rewrite.so/*", zone_name = "rewrite.so" }
+# ]
+
+[observability]
+enabled = true
+
+# ===== KV: Next 增量缓存（OpenNext 使用）=====
+# [[kv_namespaces]]
+# binding = "NEXT_INC_CACHE_KV"
+# id = "PLACEHOLDER"
+
+[vars]
+NEXT_PUBLIC_API_BASE = "https://api.rewrite.so"

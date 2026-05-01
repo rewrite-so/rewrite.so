@@ -1,0 +1,26 @@
+{
+  "name": "@rewrite/extension",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "package": "pnpm build && cd dist && zip -r ../dist-zip/rewrite-so-${npm_package_version}.zip .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@rewrite/core": "workspace:*",
+    "@rewrite/shared": "workspace:*",
+    "preact": "^10.29.1"
+  },
+  "devDependencies": {
+    "@crxjs/vite-plugin": "^2.4.0",
+    "@preact/preset-vite": "^2.10.5",
+    "@types/chrome": "^0.1.40",
+    "typescript": "^5.9.3",
+    "vite": "^8.0.10",
+    "vitest": "^4.1.5"
+  }
+}

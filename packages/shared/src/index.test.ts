@@ -1,0 +1,26 @@
+import { describe, expect, it } from 'vitest';
+import { ALL_STYLES, MAX_INPUT_CHARS, QUOTA, STYLE_LABEL } from './index.ts';
+
+describe('shared constants', () => {
+  it('exposes 3 styles in fixed order', () => {
+    expect(ALL_STYLES).toEqual(['faithful', 'casual', 'formal']);
+  });
+
+  it('has zh-CN and en labels for every style', () => {
+    for (const s of ALL_STYLES) {
+      expect(STYLE_LABEL[s]).toHaveProperty('zh-CN');
+      expect(STYLE_LABEL[s]).toHaveProperty('en');
+    }
+  });
+
+  it('caps input at 4000 chars', () => {
+    expect(MAX_INPUT_CHARS).toBe(4000);
+  });
+
+  it('quota is monthly: 10 / 5 / 30 / 2000', () => {
+    expect(QUOTA.anonymousIp).toBe(10);
+    expect(QUOTA.anonymousInstall).toBe(5);
+    expect(QUOTA.loggedInFree).toBe(30);
+    expect(QUOTA.pro).toBe(2000);
+  });
+});

@@ -1,0 +1,42 @@
+name = "rewrite-api"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Production routes - 待 Phase 5 上线时启用
+# routes = [
+#   { pattern = "api.rewrite.so/*", zone_name = "rewrite.so" }
+# ]
+
+[observability]
+enabled = true
+
+# ===== D1: 业务数据库（Phase 2 启用） =====
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "rewrite-so"
+# database_id = "PLACEHOLDER"
+
+# ===== Durable Object: 限流（Phase 2 启用） =====
+# [[durable_objects.bindings]]
+# name = "RATE_LIMITER"
+# class_name = "RateLimiter"
+#
+# [[migrations]]
+# tag = "v1"
+# new_sqlite_classes = ["RateLimiter"]
+
+# ===== KV: 用户设置缓存（Phase 2 启用） =====
+# [[kv_namespaces]]
+# binding = "KV"
+# id = "PLACEHOLDER"
+
+# ===== Secrets（用 wrangler secret put 设置）=====
+# OPENAI_BASE_URL / OPENAI_API_KEY / OPENAI_MODEL
+# BYOK_MASTER_KEY
+# GOOGLE_OAUTH_CLIENT_ID / GOOGLE_OAUTH_CLIENT_SECRET
+# BETTER_AUTH_SECRET
+# RESEND_API_KEY
+# CREEM_API_KEY / CREEM_WEBHOOK_SECRET
+# CREEM_PRO_MONTHLY_PRODUCT_ID / CREEM_PRO_YEARLY_PRODUCT_ID
+# TURNSTILE_SECRET
