@@ -6,7 +6,6 @@
     "jsxImportSource": "preact",
     "noEmit": true,
     "types": ["chrome", "vite/client"],
-    "rootDir": ".",
     "baseUrl": ".",
     "paths": {
       "react": ["./node_modules/preact/compat"],

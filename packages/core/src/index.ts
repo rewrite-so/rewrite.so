@@ -25,6 +25,8 @@ export interface MountOptions {
   /** 用户偏好目标语言；'auto' 触发自动检测 */
   userPrefLang?: string;
   uiLocale?: Locale;
+  /** 扩展安装 ID（匿名维度），rewrite 请求会带上 */
+  installId?: string;
   /** web 模式下浮层底部显示"安装扩展"链接 */
   showInstallHook?: boolean;
   onInstallClick?: () => void;
@@ -123,6 +125,7 @@ export function mount(opts: MountOptions): MountHandle {
       lang: targetLang,
       styles: [...ALL_STYLES],
       ...(read.context ? { context: read.context } : {}),
+      ...(opts.installId ? { installId: opts.installId } : {}),
     };
 
     const ac = new AbortController();
@@ -182,4 +185,10 @@ export function mount(opts: MountOptions): MountHandle {
 // re-exports for consumers
 export type { RewriteApiClient } from './transport/api-client.ts';
 export { createWebApiClient } from './transport/api-client.ts';
+// onboarding 等场景需要单独使用 trigger
+export {
+  attachDoubleShift,
+  type DoubleShiftHandle,
+  type DoubleShiftOptions,
+} from './trigger/double-shift.ts';
 export type { Style };

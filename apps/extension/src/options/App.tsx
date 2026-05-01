@@ -1,17 +1,35 @@
+import { useEffect, useState } from 'preact/hooks';
+import { getUserPrefs, patchUserPrefs, type UserPrefs } from '../lib/storage.ts';
+import { Onboarding } from './Onboarding.tsx';
+import { Settings } from './Settings.tsx';
+
 export function App() {
+  const [prefs, setPrefs] = useState<UserPrefs | null>(null);
+
+  useEffect(() => {
+    getUserPrefs().then(setPrefs);
+  }, []);
+
+  if (!prefs) return null;
+
+  if (!prefs.hasCompletedOnboarding) {
+    return (
+      <Onboarding
+        onComplete={async (patch) => {
+          const next = await patchUserPrefs({ ...patch, hasCompletedOnboarding: true });
+          setPrefs(next);
+        }}
+      />
+    );
+  }
+
   return (
-    <main
-      style={{
-        maxWidth: 720,
-        margin: '40px auto',
-        padding: 24,
-        fontFamily: 'system-ui, sans-serif',
+    <Settings
+      prefs={prefs}
+      onUpdate={async (patch) => {
+        const next = await patchUserPrefs(patch);
+        setPrefs(next);
       }}
-    >
-      <h1 style={{ fontSize: 24, margin: 0 }}>rewrite.so 设置</h1>
-      <p style={{ marginTop: 12, color: '#666' }}>
-        Phase 0 占位 — Phase 3 将注入 onboarding wizard、目标语言、BYOK 表单。
-      </p>
-    </main>
+    />
   );
 }

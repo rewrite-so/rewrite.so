@@ -1,5 +1,42 @@
-// content script 入口 - host = 'extension'
-// Phase 1 将引入 @rewrite/core 的 mount(opts)
-console.info('[rewrite.so] content script loaded (Phase 0 placeholder)');
+import { type MountOptions, mount } from '@rewrite/core';
+import { type Locale, pickLocale } from '@rewrite/shared';
+import {
+  getOrCreateInstallId,
+  getUserPrefs,
+  onPrefsChanged,
+  type UserPrefs,
+} from '../lib/storage.ts';
+import { createPortApiClient } from './port-client.ts';
 
-export {};
+function resolveUiLocale(prefs: UserPrefs): Locale {
+  if (prefs.uiLocale === 'auto') return pickLocale(navigator.language);
+  return prefs.uiLocale;
+}
+
+async function bootstrap(): Promise<void> {
+  const [prefs, installId] = await Promise.all([getUserPrefs(), getOrCreateInstallId()]);
+  if (!prefs.triggerEnabled) return;
+
+  const apiClient = createPortApiClient();
+
+  const buildOpts = (p: UserPrefs): MountOptions => ({
+    host: 'extension',
+    apiClient,
+    shadowMode: 'closed',
+    userPrefLang: p.targetLang,
+    uiLocale: resolveUiLocale(p),
+    installId,
+  });
+
+  let handle = mount(buildOpts(prefs));
+
+  onPrefsChanged((next) => {
+    handle.unmount();
+    if (!next.triggerEnabled) return;
+    handle = mount(buildOpts(next));
+  });
+}
+
+bootstrap().catch((err) => {
+  console.warn('[rewrite.so] content bootstrap failed', err);
+});
