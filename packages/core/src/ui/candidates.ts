@@ -155,6 +155,17 @@ function openPanel(
   window.addEventListener('scroll', onScrollOrResize, { capture: true, passive: true });
   window.addEventListener('resize', onScrollOrResize, { passive: true });
 
+  // 点击 shadow host 之外的任何地方（含原输入框）→ 关闭浮窗
+  // closed shadow DOM 下，shadow 内的 click event 在外部观察到的 target 会被
+  // retarget 成 shadow 的 host element。利用这点判断点击是否在浮层内。
+  const shadowHost = root.host as Element | null;
+  const onDocMouseDown = (ev: Event) => {
+    const t = ev.target as Element | null;
+    if (shadowHost && t && (t === shadowHost || shadowHost.contains(t))) return;
+    callbacks.onCancel();
+  };
+  document.addEventListener('mousedown', onDocMouseDown, { capture: true });
+
   let closed = false;
 
   const close = () => {
@@ -163,6 +174,7 @@ function openPanel(
     window.removeEventListener('keydown', onKeyDown, { capture: true });
     window.removeEventListener('scroll', onScrollOrResize, { capture: true });
     window.removeEventListener('resize', onScrollOrResize);
+    document.removeEventListener('mousedown', onDocMouseDown, { capture: true });
     panel.remove();
   };
 

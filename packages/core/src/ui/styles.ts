@@ -14,33 +14,68 @@ export const SHADOW_STYLES = `
 
 .dot {
   position: fixed;
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
-  background: light-dark(rgba(0, 0, 0, 0.32), rgba(255, 255, 255, 0.4));
+  background: light-dark(#1f1f22, #e8e8ea);
   pointer-events: auto;
-  cursor: help;
+  cursor: default;
   z-index: 2147483646;
-  transition: opacity 120ms ease;
+  transition: transform 160ms cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 160ms ease,
+    box-shadow 160ms ease;
   opacity: 0;
+  transform: scale(0.9);
 }
-.dot.visible { opacity: 1; }
-.dot:hover { opacity: 1; transform: scale(1.5); }
+.dot.visible {
+  opacity: 0.55;
+  transform: scale(1);
+  animation: rs-dot-breathe 3s ease-in-out infinite;
+}
+.dot:hover {
+  opacity: 0.95;
+  transform: scale(1.3);
+  animation: none;
+  box-shadow:
+    0 0 0 1.5px light-dark(rgba(255, 255, 255, 0.92), rgba(20, 20, 22, 0.92)),
+    0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes rs-dot-breathe {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.4; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dot.visible { animation: none; }
+}
 
 .dot-tooltip {
   position: fixed;
-  padding: 4px 8px;
-  border-radius: 6px;
+  padding: 5px 9px;
+  border-radius: 7px;
   background: light-dark(#1f1f1f, #f5f5f5);
   color: light-dark(#fff, #1f1f1f);
   font-size: 12px;
+  font-weight: 500;
   white-space: nowrap;
   pointer-events: none;
   z-index: 2147483647;
   opacity: 0;
-  transition: opacity 120ms ease;
+  transform: translateY(2px);
+  transition: opacity 140ms ease, transform 140ms ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
 }
-.dot-tooltip.visible { opacity: 1; }
+.dot-tooltip.visible { opacity: 1; transform: translateY(0); }
+.dot-tooltip kbd {
+  display: inline-block;
+  padding: 0 4px;
+  margin: 0 1px;
+  border-radius: 3px;
+  background: light-dark(rgba(255, 255, 255, 0.15), rgba(0, 0, 0, 0.08));
+  font-size: 11px;
+  font-family: inherit;
+}
 
 .panel {
   position: fixed;

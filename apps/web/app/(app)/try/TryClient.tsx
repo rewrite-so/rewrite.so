@@ -1,23 +1,30 @@
 'use client';
 
 import { createWebApiClient, mount } from '@rewrite/core';
-import { pickLocale, t } from '@rewrite/shared';
+import { type Locale, pickLocale, t } from '@rewrite/shared';
 import { useEffect, useRef, useState } from 'react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:8787';
 
+// SSR 时 navigator 不可用，固定用 'en'；客户端 mount 后再切到真实 locale，
+// 避免 hydration mismatch（placeholder 文本不能随 client navigator 变化）。
+const SSR_LOCALE: Locale = 'en';
+
 export function TryClient() {
   const taRef = useRef<HTMLTextAreaElement | null>(null);
   const [hintVisible, setHintVisible] = useState(false);
+  const [locale, setLocale] = useState<Locale>(SSR_LOCALE);
 
   useEffect(() => {
-    const locale = pickLocale(navigator.language);
+    const real = pickLocale(navigator.language);
+    if (real !== SSR_LOCALE) setLocale(real);
+
     const apiClient = createWebApiClient({ apiBase: API_BASE });
     const handle = mount({
       host: 'web',
       apiClient,
       shadowMode: 'open',
-      uiLocale: locale,
+      uiLocale: real,
       showInstallHook: true,
       onInstallClick: () => {
         // Phase 5 接 Chrome Web Store 链接
@@ -58,9 +65,6 @@ export function TryClient() {
       window.removeEventListener('keydown', onKeyDown, { capture: true });
     };
   }, []);
-
-  const navLang = typeof navigator !== 'undefined' ? navigator.language : 'en-US';
-  const locale = pickLocale(navLang);
 
   return (
     <div style={{ position: 'relative' }}>

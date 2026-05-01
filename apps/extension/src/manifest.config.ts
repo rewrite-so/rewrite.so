@@ -25,5 +25,10 @@ export default defineManifest({
     },
   ],
   permissions: ['activeTab', 'storage'],
-  host_permissions: ['https://api.rewrite.so/*'],
+  host_permissions: [
+    'https://api.rewrite.so/*',
+    // 开发期 wrangler dev
+    'http://localhost:8787/*',
+    'http://127.0.0.1:8787/*',
+  ],
 });

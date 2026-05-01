@@ -1,4 +1,4 @@
-import { type I18nKey, type Locale, t } from '@rewrite/shared';
+import type { Locale } from '@rewrite/shared';
 
 export interface DotController {
   /** 显示并跟随某输入框的右下角 */
@@ -9,17 +9,26 @@ export interface DotController {
   destroy(): void;
 }
 
-const DOT_OFFSET = 4; // 右下角偏移 px
-const TOOLTIP_KEY: I18nKey = 'hint.doubleShift';
+const DOT_OFFSET = 6; // 右下角偏移 px
 
 export function createDot(root: ShadowRoot, locale: Locale): DotController {
   const dot = document.createElement('div');
   dot.className = 'dot';
   dot.setAttribute('aria-hidden', 'true');
+  dot.title = locale === 'zh-CN' ? '双击 Shift 改写' : 'Double-Shift to rewrite';
 
   const tooltip = document.createElement('div');
   tooltip.className = 'dot-tooltip';
-  tooltip.textContent = t(TOOLTIP_KEY, locale);
+  // 用 kbd 包装 Shift 让 tooltip 看起来更精致
+  const kbd1 = document.createElement('kbd');
+  kbd1.textContent = 'Shift';
+  const kbd2 = document.createElement('kbd');
+  kbd2.textContent = 'Shift';
+  const txt = document.createTextNode(locale === 'zh-CN' ? ' 改写' : ' to rewrite');
+  tooltip.appendChild(kbd1);
+  tooltip.appendChild(document.createTextNode(' '));
+  tooltip.appendChild(kbd2);
+  tooltip.appendChild(txt);
 
   root.appendChild(dot);
   root.appendChild(tooltip);

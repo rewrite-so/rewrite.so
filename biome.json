@@ -7,7 +7,7 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["**", "!scripts", "!**/.wrangler-state"]
+    "includes": ["**", "!scripts", "!**/.wrangler-state", "!**/next-env.d.ts"]
   },
   "formatter": {
     "enabled": true,
