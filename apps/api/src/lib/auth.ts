@@ -1,3 +1,4 @@
+import { pickLocale } from '@rewrite/shared';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { magicLink } from 'better-auth/plugins';
@@ -6,6 +7,16 @@ import { Resend } from 'resend';
 import { authSchema } from '../db/auth-schema.ts';
 import { sendWelcomeNow } from '../emails/dispatcher.ts';
 import type { Bindings } from '../types.ts';
+
+/**
+ * 从 Accept-Language 头解析首选 locale 并归并到我们支持的 7 种之一。
+ * 解析规则：取第一个非权重项（"zh-CN,zh;q=0.9,en;q=0.8" → "zh-CN"），交给 pickLocale。
+ */
+function detectLocaleFromHeaders(headers: Headers | undefined): string {
+  const accept = headers?.get('accept-language') ?? '';
+  const primary = accept.split(',')[0]?.trim().split(';')[0];
+  return pickLocale(primary || undefined);
+}
 
 /**
  * 创建 better-auth 实例。每次请求构造一次（D1Database 在 env 里，不能复用）。
@@ -77,8 +88,26 @@ export function createAuth(env: Bindings) {
     databaseHooks: {
       user: {
         create: {
-          after: async (user) => {
-            // Best-effort welcome email. If it fails (Resend down, rate limit,
+          after: async (user, ctx) => {
+            // 1) 注册时把 Accept-Language 推导出的 ui_locale 落到 user_settings —— 不要把
+            //    'auto' 当默认值。这样从一开始邮件、popup、扩展都用对的语言。
+            //    ctx 在 better-auth 部分调用路径里可能是 undefined，所以做防御性兜底到 'en'。
+            const reqHeaders = ctx?.request?.headers ?? ctx?.headers;
+            const uiLocale = detectLocaleFromHeaders(reqHeaders);
+            const now = Math.floor(Date.now() / 1000);
+            try {
+              await env.DB.prepare(
+                `INSERT INTO user_settings (user_id, target_lang, ui_locale, updated_at)
+                 VALUES (?, 'auto', ?, ?)
+                 ON CONFLICT(user_id) DO NOTHING`,
+              )
+                .bind(user.id, uiLocale, now)
+                .run();
+            } catch {
+              // 不阻塞注册流程；GET /v1/me/settings 在缺行时已有 'auto' 兜底。
+            }
+
+            // 2) Best-effort welcome email. If it fails (Resend down, rate limit,
             // etc.), the daily cron will pick up users with welcome_sent_at IS NULL.
             await sendWelcomeNow(env, {
               id: user.id,

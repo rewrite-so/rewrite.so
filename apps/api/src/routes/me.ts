@@ -16,7 +16,7 @@ interface UserSettingsRow {
 const SettingsPatchSchema = z
   .object({
     targetLang: z.string().min(1).max(20).optional(),
-    uiLocale: z.enum(['auto', 'zh-CN', 'en']).optional(),
+    uiLocale: z.enum(['auto', 'en', 'zh-CN', 'ja', 'ko', 'es', 'fr', 'de']).optional(),
   })
   .strict();
 
