@@ -40,6 +40,113 @@
     "copyright": "© {year} rewrite.so. Todos los derechos reservados.",
     "paymentsBy": "Pagos procesados por <creem>Creem</creem>, nuestro Merchant of Record."
   },
+  "home": {
+    "hero": {
+      "eyebrow": "Código abierto · Apache 2.0 · Sin tracking",
+      "h1Line1": "Reescritura con IA",
+      "h1Line2": "que no almacena tu texto.",
+      "intro": "Pulsa <kbd>Shift</kbd> dos veces en cualquier campo de entrada web. Tres reescrituras de IA se generan en paralelo. Pulsa <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> para aceptar. Las entradas y salidas <strong>nunca se escriben en disco</strong> — verificable en el código fuente.",
+      "ctaPrimary": "Probar gratis →",
+      "ctaSecondary": "⭐ Estrella en GitHub",
+      "fineprint": "{count} reescrituras gratis al mes · Sin tarjeta · BYOK para uso ilimitado"
+    },
+    "privacy": {
+      "eyebrow": "El contrato de privacidad",
+      "h2": "Tu texto nunca se almacena. Punto.",
+      "body": "Ni en bases de datos. Ni en logs. Ni en reportadores de errores. Ni en analíticas. El texto que reescribes pasa por el worker una vez y desaparece. No usamos ningún APM de terceros (Sentry, Datadog, etc.) precisamente porque capturarían los cuerpos de las solicitudes por defecto. Esto no es una promesa — es la arquitectura, y el código fuente está abierto para que lo verifiques.",
+      "linkDoc": "Leer el documento técnico de privacidad →",
+      "linkSource": "Ver el código del manejador de reescritura →",
+      "logTitle": "# Lo que se registra",
+      "notLoggedTitle": "# Lo que nunca se registra",
+      "redacted": {
+        "input": "tu texto de entrada",
+        "rewrites": "las reescrituras",
+        "rawIp": "IP en bruto",
+        "apiKey": "tu clave API"
+      }
+    },
+    "howItWorks": {
+      "h2": "Cómo funciona",
+      "stepLabel": "PASO {num}",
+      "step1": {
+        "title": "Doble Shift",
+        "body": "En 500ms, en cualquier campo enfocado de la página — input, textarea o contenteditable. Los campos PII (contraseña, CVV, OTP) están excluidos por código."
+      },
+      "step2": {
+        "title": "3 estilos en paralelo",
+        "body": "Fiel, casual, formal — generados concurrentemente en una única respuesta SSE multiplexada. Primer token en pocos cientos de milisegundos."
+      },
+      "step3": {
+        "title": "Pulsa para aceptar",
+        "body": "La tecla numérica reemplaza la entrada. ↑↓+Enter también funciona. Esc para descartar. Doble Shift de nuevo para regenerar."
+      }
+    },
+    "features": {
+      "h2": "Hecho para gente que se preocupa por cómo funciona",
+      "openSource": {
+        "label": "CÓDIGO ABIERTO",
+        "title": "100% Apache 2.0",
+        "body": "Auto-aloja, audita, bifurca. Las afirmaciones de privacidad arriba no son marketing — son código que puedes leer en <repo>github.com/rewrite-so/rewrite.so</repo>."
+      },
+      "byok": {
+        "label": "BYOK",
+        "title": "Trae tu propia clave",
+        "body": "Conecta tu base URL + clave + modelo compatible con OpenAI. Las reescrituras van directamente a tu proveedor, cifradas con AES-GCM en reposo, nunca registradas. No cuenta contra la cuota mensual."
+      },
+      "pii": {
+        "label": "EXCLUSIÓN PII DURA",
+        "title": "No se activa en campos de contraseña",
+        "body": "Password / cc-* / current-password / new-password / one-time-code / campos con name o id que coincidan con password|pin|cvv|cvc|otp|secret|token — todos hardcodeados para ser ignorados. No es un ajuste. No es un feature flag."
+      },
+      "stack": {
+        "label": "STACK",
+        "title": "Cloudflare Workers + D1 + Hono",
+        "body": "Worker desplegado en el edge, formato OpenAI Chat Completions, fan-out concurrente de 3 vías con cancelación en cascada del cliente. ~5000 líneas de TypeScript. Modo strict. Sin ORM para tablas de negocio."
+      },
+      "crossLang": {
+        "label": "MULTI-IDIOMA",
+        "title": "La traducción es implícita",
+        "body": "Configura un idioma objetivo fijo o detéctalo automáticamente desde la página. ¿Escribir en inglés en un email chino o japonés en Slack? Solo reescribe — la traducción ocurre silenciosamente."
+      },
+      "keyboard": {
+        "label": "SOLO TECLADO",
+        "title": "Nunca rompe tu flujo",
+        "body": "La UI es invisible por defecto. Solo aparece un punto translúcido de 8px cuando un campo está enfocado. La necesitas: doble Shift. No la necesitas: no está ahí."
+      }
+    },
+    "pricing": {
+      "h2": "Precios simples de dos niveles",
+      "free": {
+        "title": "Free",
+        "price": "$0",
+        "sub": "{count} reescrituras / mes para usuarios registrados",
+        "feat1": "Los 3 estilos",
+        "feat2": "Detección automática de idioma",
+        "feat3": "Las entradas nunca se almacenan"
+      },
+      "pro": {
+        "title": "Pro",
+        "price": "${monthly} / mes",
+        "sub": "Facturación anual ${total} (ahorra {percent}% vs ${monthlyAlt}/mes mensual)",
+        "feat1": "{count, number} reescrituras / mes",
+        "feat2": "BYOK = ilimitado",
+        "feat3": "Soporte prioritario"
+      },
+      "ctaSeeFull": "Ver precios completos y FAQ →"
+    },
+    "finalCta": {
+      "h2": "Pruébalo. Toma 30 segundos.",
+      "body": "Sin registro. Abre <code>/try</code> para la demo. Instala la extensión para usarlo en todos los sitios.",
+      "primary": "Probar gratis →",
+      "secondary": "Iniciar sesión"
+    },
+    "demo": {
+      "anyInput": "cualquier campo de entrada",
+      "youTyped": "# Escribiste:",
+      "streams": "→ 3 streams iniciados, ~200ms primer token",
+      "accepted": "→ aceptado, entrada reemplazada"
+    }
+  },
   "hint": {
     "doubleShift": "Pulsa Shift Shift para reescribir",
     "tryOnAnyInput": "Instala la extensión para usarla en cualquier sitio"

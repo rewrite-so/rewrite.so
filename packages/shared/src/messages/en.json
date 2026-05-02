@@ -40,6 +40,113 @@
     "copyright": "© {year} rewrite.so. All rights reserved.",
     "paymentsBy": "Payments processed by <creem>Creem</creem>, our Merchant of Record."
   },
+  "home": {
+    "hero": {
+      "eyebrow": "Open source · Apache 2.0 · No tracking",
+      "h1Line1": "AI rewriting",
+      "h1Line2": "that doesn't store your text.",
+      "intro": "Double-tap <kbd>Shift</kbd> in any web input box. Three AI rewrites stream in parallel. Press <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> to accept. Inputs and outputs are <strong>never written to disk</strong> — verifiable in the source.",
+      "ctaPrimary": "Try it free →",
+      "ctaSecondary": "⭐ Star on GitHub",
+      "fineprint": "{count} free rewrites/month · No card · Bring your own API key for unlimited"
+    },
+    "privacy": {
+      "eyebrow": "The privacy contract",
+      "h2": "Your text is never stored. Period.",
+      "body": "Not in databases. Not in logs. Not in error reporters. Not in analytics. The text you rewrite passes through the worker once and is gone. We don't use any third-party APM (Sentry, Datadog, etc.) precisely because they'd capture request bodies by default. This is not a promise — it's the architecture, and the source code is open for you to verify.",
+      "linkDoc": "Read the technical privacy doc →",
+      "linkSource": "See the rewrite handler source →",
+      "logTitle": "# What gets logged",
+      "notLoggedTitle": "# What never does",
+      "redacted": {
+        "input": "your input text",
+        "rewrites": "the rewrites",
+        "rawIp": "raw IP",
+        "apiKey": "your API key"
+      }
+    },
+    "howItWorks": {
+      "h2": "How it works",
+      "stepLabel": "STEP {num}",
+      "step1": {
+        "title": "Double-tap Shift",
+        "body": "Within 500ms, in any focused input on the page — input, textarea, or contenteditable. PII fields (password, CVV, OTP) are hard-excluded."
+      },
+      "step2": {
+        "title": "3 styles, parallel",
+        "body": "Faithful, casual, formal — generated concurrently in a single multiplexed SSE response. First token in a few hundred milliseconds."
+      },
+      "step3": {
+        "title": "Press to accept",
+        "body": "Number key replaces the input. ↑↓+Enter also works. Esc to dismiss. Double-tap Shift again to regenerate."
+      }
+    },
+    "features": {
+      "h2": "Built for people who care about how it works",
+      "openSource": {
+        "label": "OPEN SOURCE",
+        "title": "100% Apache 2.0",
+        "body": "Self-host, audit, fork. The privacy claims above aren't marketing — they're code you can read at <repo>github.com/rewrite-so/rewrite.so</repo>."
+      },
+      "byok": {
+        "label": "BYOK",
+        "title": "Bring Your Own Key",
+        "body": "Plug in your OpenAI-compatible base URL + key + model. Rewrites go directly to your provider, AES-GCM-encrypted at rest, never logged. Doesn't count against the monthly quota."
+      },
+      "pii": {
+        "label": "HARD PII EXCLUSION",
+        "title": "Won't fire in password fields",
+        "body": "Password / cc-* / current-password / new-password / one-time-code / fields with name or id matching password|pin|cvv|cvc|otp|secret|token — all hard-coded to be ignored. Not a setting. Not a feature flag."
+      },
+      "stack": {
+        "label": "STACK",
+        "title": "Cloudflare Workers + D1 + Hono",
+        "body": "Edge-deployed worker, OpenAI Chat Completions wire format, 3-way concurrent fan-out with cascading client-abort. ~5000 lines of TypeScript. Strict mode. No ORM for business tables."
+      },
+      "crossLang": {
+        "label": "CROSS-LANGUAGE",
+        "title": "Translation is implicit",
+        "body": "Set a fixed target language or auto-detect from the page. Writing English in a Chinese email or Japanese in Slack? Just rewrite — translation happens silently."
+      },
+      "keyboard": {
+        "label": "KEYBOARD-ONLY",
+        "title": "Never breaks your flow",
+        "body": "UI is invisible by default. Only an 8px translucent dot appears when an input is focused. Need it: double-tap Shift. Don't need it: it isn't there."
+      }
+    },
+    "pricing": {
+      "h2": "Simple two-tier pricing",
+      "free": {
+        "title": "Free",
+        "price": "$0",
+        "sub": "{count} rewrites / month for signed-in users",
+        "feat1": "All 3 styles",
+        "feat2": "Auto language detection",
+        "feat3": "Inputs never stored"
+      },
+      "pro": {
+        "title": "Pro",
+        "price": "${monthly} / mo",
+        "sub": "Billed annually ${total} (save {percent}% vs ${monthlyAlt}/mo monthly)",
+        "feat1": "{count, number} rewrites / month",
+        "feat2": "BYOK = unlimited",
+        "feat3": "Priority support"
+      },
+      "ctaSeeFull": "See full pricing & FAQ →"
+    },
+    "finalCta": {
+      "h2": "Try it. Takes 30 seconds.",
+      "body": "No signup. Open <code>/try</code> for the demo. Install the extension to use it on every site.",
+      "primary": "Try it free →",
+      "secondary": "Sign in"
+    },
+    "demo": {
+      "anyInput": "any input box",
+      "youTyped": "# You typed:",
+      "streams": "→ 3 streams in, ~200ms first token",
+      "accepted": "→ accepted, input replaced"
+    }
+  },
   "hint": {
     "doubleShift": "Press Shift Shift to rewrite",
     "tryOnAnyInput": "Install the extension to use it on any site"

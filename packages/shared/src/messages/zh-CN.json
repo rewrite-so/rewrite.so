@@ -40,6 +40,113 @@
     "copyright": "© {year} rewrite.so 版权所有。",
     "paymentsBy": "支付由 <creem>Creem</creem> 处理，作为我们的 Merchant of Record。"
   },
+  "home": {
+    "hero": {
+      "eyebrow": "开源 · Apache 2.0 · 不追踪",
+      "h1Line1": "AI 改写",
+      "h1Line2": "不存你的文本",
+      "intro": "在任意网页输入框双击 <kbd>Shift</kbd>。3 个 AI 改写候选并行流式生成。按 <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> 采纳。原文与输出<strong>从不写入磁盘</strong>——源码可验证。",
+      "ctaPrimary": "免费试用 →",
+      "ctaSecondary": "⭐ Star on GitHub",
+      "fineprint": "每月 {count} 次免费 · 无需信用卡 · BYOK 无限改写"
+    },
+    "privacy": {
+      "eyebrow": "隐私契约",
+      "h2": "你的文本永不存储。就这么简单。",
+      "body": "不存数据库。不进日志。不上报错监控。不入分析。改写文本仅在 worker 处理一次后立即丢弃。我们刻意不接入第三方 APM（Sentry、Datadog 等）——因为它们默认会抓 request body。这不是承诺——这是架构本身，源码完全开放给你审计。",
+      "linkDoc": "阅读技术隐私文档 →",
+      "linkSource": "查看 rewrite handler 源码 →",
+      "logTitle": "# 会记录的",
+      "notLoggedTitle": "# 永远不记录的",
+      "redacted": {
+        "input": "你的原文",
+        "rewrites": "改写结果",
+        "rawIp": "原始 IP",
+        "apiKey": "你的 API key"
+      }
+    },
+    "howItWorks": {
+      "h2": "工作流程",
+      "stepLabel": "步骤 {num}",
+      "step1": {
+        "title": "双击 Shift",
+        "body": "500ms 内，在页面任意聚焦的输入框 —— input / textarea / contenteditable。密码、CVV、OTP 等 PII 字段硬排除。"
+      },
+      "step2": {
+        "title": "3 风格并行",
+        "body": "贴近原文 / 口语 / 正式 —— 单条多路 SSE 响应中并发生成，首 token 几百毫秒到达。"
+      },
+      "step3": {
+        "title": "按键采纳",
+        "body": "数字键直接替换输入框。↑↓+Enter 也行。Esc 取消。再次双击 Shift 重新生成。"
+      }
+    },
+    "features": {
+      "h2": "为关心实现细节的人打造",
+      "openSource": {
+        "label": "开源",
+        "title": "100% Apache 2.0",
+        "body": "可自部署、可审计、可 fork。上面的隐私声明不是营销话术——是你能在 <repo>github.com/rewrite-so/rewrite.so</repo> 读到的代码。"
+      },
+      "byok": {
+        "label": "BYOK",
+        "title": "自带 API key",
+        "body": "填入 OpenAI 兼容的 base URL + key + model。改写直达你的 provider，AES-GCM 加密静态存储，永不记录日志。不计入月配额。"
+      },
+      "pii": {
+        "label": "PII 硬排除",
+        "title": "在密码框完全不响应",
+        "body": "Password / cc-* / current-password / new-password / one-time-code / 名称或 id 含 password|pin|cvv|cvc|otp|secret|token —— 全部硬编码忽略。不是设置项，不是 feature flag。"
+      },
+      "stack": {
+        "label": "技术栈",
+        "title": "Cloudflare Workers + D1 + Hono",
+        "body": "边缘部署 worker，OpenAI Chat Completions 协议，3 路并发 fan-out 含级联客户端中止。约 5000 行 TypeScript。Strict mode。业务表不用 ORM。"
+      },
+      "crossLang": {
+        "label": "跨语言",
+        "title": "翻译隐式发生",
+        "body": "设置固定目标语言或按页面自动检测。在中文邮件里写英文？Slack 里写日文？直接改写——翻译悄悄发生。"
+      },
+      "keyboard": {
+        "label": "纯键盘",
+        "title": "永不打断写作流",
+        "body": "UI 默认隐身。仅当输入框聚焦时浮出 8px 半透明小点。需要时双击 Shift；不需要时它就不在。"
+      }
+    },
+    "pricing": {
+      "h2": "极简两档定价",
+      "free": {
+        "title": "Free",
+        "price": "$0",
+        "sub": "登录用户每月 {count} 次改写",
+        "feat1": "3 种风格全开",
+        "feat2": "自动检测语言",
+        "feat3": "原文从不存储"
+      },
+      "pro": {
+        "title": "Pro",
+        "price": "${monthly} / 月",
+        "sub": "年付总价 ${total}（vs 月付 ${monthlyAlt}/月，省 {percent}%）",
+        "feat1": "每月 {count, number} 次改写",
+        "feat2": "BYOK 无限",
+        "feat3": "优先支持"
+      },
+      "ctaSeeFull": "查看完整定价与常见问题 →"
+    },
+    "finalCta": {
+      "h2": "30 秒试一下。",
+      "body": "无需注册。打开 <code>/try</code> 体验。装上扩展就能在所有网站用。",
+      "primary": "免费试用 →",
+      "secondary": "登录"
+    },
+    "demo": {
+      "anyInput": "任意输入框",
+      "youTyped": "# 你输入了：",
+      "streams": "→ 3 路流式开始，首 token 约 200ms",
+      "accepted": "→ 已采纳，输入框被替换"
+    }
+  },
   "hint": {
     "doubleShift": "按 Shift Shift 即可改写",
     "tryOnAnyInput": "安装扩展，在任何网站都能用"

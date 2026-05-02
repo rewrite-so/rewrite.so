@@ -40,6 +40,113 @@
     "copyright": "© {year} rewrite.so. 판권 소유.",
     "paymentsBy": "결제는 Merchant of Record인 <creem>Creem</creem>을(를) 통해 처리됩니다."
   },
+  "home": {
+    "hero": {
+      "eyebrow": "오픈소스 · Apache 2.0 · 추적 없음",
+      "h1Line1": "AI 재작성,",
+      "h1Line2": "당신의 텍스트를 저장하지 않습니다.",
+      "intro": "어떤 웹 입력란에서든 <kbd>Shift</kbd>를 두 번 누르세요. 3개의 AI 재작성이 병렬 스트리밍됩니다. <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd>으로 채택. 입력과 출력은 <strong>디스크에 절대 기록되지 않습니다</strong> — 소스 코드로 검증 가능합니다.",
+      "ctaPrimary": "무료 체험 →",
+      "ctaSecondary": "⭐ GitHub Star",
+      "fineprint": "월 {count}회 무료 · 카드 불필요 · BYOK로 무제한"
+    },
+    "privacy": {
+      "eyebrow": "프라이버시 계약",
+      "h2": "당신의 텍스트는 저장되지 않습니다. 그것뿐입니다.",
+      "body": "데이터베이스에 저장하지 않습니다. 로그에 남기지 않습니다. 에러 리포터에 들어가지 않습니다. 분석에 사용하지 않습니다. 재작성하는 텍스트는 worker를 한 번 통과하면 사라집니다. Sentry, Datadog 등 서드파티 APM도 사용하지 않습니다 — 그들이 기본적으로 요청 본문을 캡처하기 때문입니다. 이는 약속이 아닌 — 아키텍처 자체이며, 소스 코드는 검증을 위해 공개되어 있습니다.",
+      "linkDoc": "기술 프라이버시 문서 보기 →",
+      "linkSource": "rewrite 핸들러 소스 보기 →",
+      "logTitle": "# 기록되는 것",
+      "notLoggedTitle": "# 절대 기록되지 않는 것",
+      "redacted": {
+        "input": "당신의 입력 텍스트",
+        "rewrites": "재작성 결과",
+        "rawIp": "원시 IP",
+        "apiKey": "당신의 API 키"
+      }
+    },
+    "howItWorks": {
+      "h2": "작동 방식",
+      "stepLabel": "단계 {num}",
+      "step1": {
+        "title": "Shift 두 번 누르기",
+        "body": "500ms 이내, 페이지의 어떤 포커스된 입력란이든 — input, textarea, contenteditable. PII 필드(비밀번호, CVV, OTP)는 하드 제외됩니다."
+      },
+      "step2": {
+        "title": "3가지 스타일, 병렬",
+        "body": "충실, 캐주얼, 격식 — 단일 멀티플렉스 SSE 응답에서 동시 생성. 첫 토큰은 수백 밀리초 안에 도착."
+      },
+      "step3": {
+        "title": "키로 채택",
+        "body": "숫자 키가 입력란을 대체합니다. ↑↓+Enter도 작동합니다. Esc로 취소. Shift를 다시 두 번 눌러 재생성."
+      }
+    },
+    "features": {
+      "h2": "구현 방식에 신경 쓰는 사람들을 위해",
+      "openSource": {
+        "label": "오픈소스",
+        "title": "100% Apache 2.0",
+        "body": "셀프 호스팅, 감사, 포크 가능. 위의 프라이버시 주장은 마케팅이 아닌 — <repo>github.com/rewrite-so/rewrite.so</repo>에서 읽을 수 있는 코드입니다."
+      },
+      "byok": {
+        "label": "BYOK",
+        "title": "자신의 API 키 사용",
+        "body": "OpenAI 호환 base URL + 키 + 모델을 입력하세요. 재작성은 당신의 제공업체로 직접 전송되고, AES-GCM으로 정적 암호화되며, 로그되지 않습니다. 월간 할당량에 포함되지 않습니다."
+      },
+      "pii": {
+        "label": "PII 하드 제외",
+        "title": "비밀번호 필드에서 작동하지 않음",
+        "body": "Password / cc-* / current-password / new-password / one-time-code / name 또는 id가 password|pin|cvv|cvc|otp|secret|token을 포함하는 필드 — 모두 하드코딩되어 무시됩니다. 설정이 아닙니다. 기능 플래그가 아닙니다."
+      },
+      "stack": {
+        "label": "스택",
+        "title": "Cloudflare Workers + D1 + Hono",
+        "body": "엣지 배포 worker, OpenAI Chat Completions 와이어 포맷, 클라이언트 중단을 캐스케이드하는 3-way 동시 fan-out. 약 5000줄의 TypeScript. Strict 모드. 비즈니스 테이블에 ORM 없음."
+      },
+      "crossLang": {
+        "label": "다국어",
+        "title": "번역은 암묵적",
+        "body": "고정된 목표 언어를 설정하거나 페이지에서 자동 감지. 중국어 이메일에 영어를 쓰거나 Slack에 일본어로 쓴다면? 그냥 다시 쓰세요 — 번역은 조용히 일어납니다."
+      },
+      "keyboard": {
+        "label": "키보드 전용",
+        "title": "작업 흐름을 끊지 않음",
+        "body": "UI는 기본적으로 보이지 않습니다. 입력란이 포커스되었을 때만 8px 반투명 점이 나타납니다. 필요할 때: Shift 두 번. 필요 없을 때: 거기 없습니다."
+      }
+    },
+    "pricing": {
+      "h2": "심플한 2단계 요금",
+      "free": {
+        "title": "Free",
+        "price": "$0",
+        "sub": "로그인 사용자에게 월 {count}회 재작성",
+        "feat1": "3가지 스타일 모두",
+        "feat2": "자동 언어 감지",
+        "feat3": "입력은 저장되지 않음"
+      },
+      "pro": {
+        "title": "Pro",
+        "price": "${monthly} / 월",
+        "sub": "연간 ${total} 청구 (월 ${monthlyAlt}/월 대비 {percent}% 절약)",
+        "feat1": "월 {count, number}회 재작성",
+        "feat2": "BYOK = 무제한",
+        "feat3": "우선 지원"
+      },
+      "ctaSeeFull": "전체 요금과 FAQ 보기 →"
+    },
+    "finalCta": {
+      "h2": "30초면 됩니다.",
+      "body": "가입 불필요. 데모는 <code>/try</code>를 여세요. 모든 사이트에서 쓰려면 확장 프로그램을 설치하세요.",
+      "primary": "무료 체험 →",
+      "secondary": "로그인"
+    },
+    "demo": {
+      "anyInput": "어떤 입력란이든",
+      "youTyped": "# 입력한 내용:",
+      "streams": "→ 3개 스트림 시작, 첫 토큰 약 200ms",
+      "accepted": "→ 채택됨, 입력란 대체됨"
+    }
+  },
   "hint": {
     "doubleShift": "Shift Shift을 눌러 다시 쓰기",
     "tryOnAnyInput": "확장 프로그램을 설치하면 어떤 사이트에서도 사용할 수 있습니다"

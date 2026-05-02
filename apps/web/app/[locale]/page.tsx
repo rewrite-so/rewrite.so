@@ -1,7 +1,12 @@
 import { PRO_PRICE, QUOTA } from '@rewrite/shared';
-import Link from 'next/link';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { Link } from '../../i18n/navigation.ts';
 
-export default function HomePage() {
+export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations('home');
+
   return (
     <main
       style={{
@@ -32,7 +37,7 @@ export default function HomePage() {
                 marginBottom: 16,
               }}
             >
-              Open source · Apache 2.0 · No tracking
+              {t('hero.eyebrow')}
             </p>
             <h1
               style={{
@@ -43,14 +48,15 @@ export default function HomePage() {
                 lineHeight: 1.1,
               }}
             >
-              AI rewriting
+              {t('hero.h1Line1')}
               <br />
-              that doesn’t store your text.
+              {t('hero.h1Line2')}
             </h1>
             <p style={{ marginTop: 20, color: '#444', fontSize: '1.05rem', maxWidth: 560 }}>
-              Double-tap <Kbd>Shift</Kbd> in any web input box. Three AI rewrites stream in
-              parallel. Press <Kbd>1</Kbd> / <Kbd>2</Kbd> / <Kbd>3</Kbd> to accept. Inputs and
-              outputs are <strong>never written to disk</strong> — verifiable in the source.
+              {t.rich('hero.intro', {
+                kbd: (chunks) => <Kbd>{chunks}</Kbd>,
+                strong: (chunks) => <strong>{chunks}</strong>,
+              })}
             </p>
 
             <div
@@ -63,7 +69,7 @@ export default function HomePage() {
               }}
             >
               <Link href="/try" style={btnPrimary}>
-                Try it free →
+                {t('hero.ctaPrimary')}
               </Link>
               <a
                 href="https://github.com/rewrite-so/rewrite.so"
@@ -71,18 +77,22 @@ export default function HomePage() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                ⭐ Star on GitHub
+                {t('hero.ctaSecondary')}
               </a>
             </div>
 
             <p style={{ marginTop: 16, fontSize: 13, color: '#888' }}>
-              {QUOTA.loggedInFree} free rewrites/month · No card · Bring your own API key for
-              unlimited
+              {t('hero.fineprint', { count: QUOTA.loggedInFree })}
             </p>
           </div>
 
           {/* Right: visual placeholder for demo (GIF / video to be added) */}
-          <DemoVisual />
+          <DemoVisual
+            anyInput={t('demo.anyInput')}
+            youTyped={t('demo.youTyped')}
+            streams={t('demo.streams')}
+            accepted={t('demo.accepted')}
+          />
         </div>
       </section>
 
@@ -117,7 +127,7 @@ export default function HomePage() {
                 marginBottom: 12,
               }}
             >
-              The privacy contract
+              {t('privacy.eyebrow')}
             </p>
             <h2
               style={{
@@ -128,14 +138,10 @@ export default function HomePage() {
                 letterSpacing: '-0.01em',
               }}
             >
-              Your text is never stored. Period.
+              {t('privacy.h2')}
             </h2>
             <p style={{ marginTop: 16, color: '#bbb', fontSize: 15, maxWidth: 600 }}>
-              Not in databases. Not in logs. Not in error reporters. Not in analytics. The text you
-              rewrite passes through the worker once and is gone. We don’t use any third-party APM
-              (Sentry, Datadog, etc.) precisely because they’d capture request bodies by default.
-              This is not a promise — it’s the architecture, and the source code is open for you to
-              verify.
+              {t('privacy.body')}
             </p>
             <div style={{ marginTop: 20, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
               <a
@@ -144,7 +150,7 @@ export default function HomePage() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Read the technical privacy doc →
+                {t('privacy.linkDoc')}
               </a>
               <a
                 href="https://github.com/rewrite-so/rewrite.so/blob/main/apps/api/src/routes/rewrite.ts"
@@ -152,7 +158,7 @@ export default function HomePage() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                See the rewrite handler source →
+                {t('privacy.linkSource')}
               </a>
             </div>
           </div>
@@ -170,23 +176,33 @@ export default function HomePage() {
               minWidth: 260,
             }}
           >
-            <div style={{ color: '#888', marginBottom: 6 }}># What gets logged</div>
+            <div style={{ color: '#888', marginBottom: 6 }}>{t('privacy.logTitle')}</div>
             <div>length=187</div>
             <div>lang=en</div>
             <div>style=faithful</div>
             <div>status=200</div>
-            <div style={{ color: '#888', marginTop: 12, marginBottom: 6 }}># What never does</div>
-            <div style={{ textDecoration: 'line-through', color: '#7a7a7a' }}>your input text</div>
-            <div style={{ textDecoration: 'line-through', color: '#7a7a7a' }}>the rewrites</div>
-            <div style={{ textDecoration: 'line-through', color: '#7a7a7a' }}>raw IP</div>
-            <div style={{ textDecoration: 'line-through', color: '#7a7a7a' }}>your API key</div>
+            <div style={{ color: '#888', marginTop: 12, marginBottom: 6 }}>
+              {t('privacy.notLoggedTitle')}
+            </div>
+            <div style={{ textDecoration: 'line-through', color: '#7a7a7a' }}>
+              {t('privacy.redacted.input')}
+            </div>
+            <div style={{ textDecoration: 'line-through', color: '#7a7a7a' }}>
+              {t('privacy.redacted.rewrites')}
+            </div>
+            <div style={{ textDecoration: 'line-through', color: '#7a7a7a' }}>
+              {t('privacy.redacted.rawIp')}
+            </div>
+            <div style={{ textDecoration: 'line-through', color: '#7a7a7a' }}>
+              {t('privacy.redacted.apiKey')}
+            </div>
           </div>
         </div>
       </section>
 
       {/* ===== How it works ===== */}
       <section style={section}>
-        <h2 style={h2}>How it works</h2>
+        <h2 style={h2}>{t('howItWorks.h2')}</h2>
         <div
           style={{
             display: 'grid',
@@ -195,18 +211,18 @@ export default function HomePage() {
           }}
         >
           <Step
-            num="1"
+            stepLabel={t('howItWorks.stepLabel', { num: '1' })}
             visual={
               <span style={{ display: 'inline-flex', gap: 6 }}>
                 <Kbd large>Shift</Kbd>
                 <Kbd large>Shift</Kbd>
               </span>
             }
-            title="Double-tap Shift"
-            body="Within 500ms, in any focused input on the page — input, textarea, or contenteditable. PII fields (password, CVV, OTP) are hard-excluded."
+            title={t('howItWorks.step1.title')}
+            body={t('howItWorks.step1.body')}
           />
           <Step
-            num="2"
+            stepLabel={t('howItWorks.stepLabel', { num: '2' })}
             visual={
               <code
                 style={{
@@ -223,11 +239,11 @@ export default function HomePage() {
                 3 SSE streams
               </code>
             }
-            title="3 styles, parallel"
-            body="Faithful, casual, formal — generated concurrently in a single multiplexed SSE response. First token in a few hundred milliseconds."
+            title={t('howItWorks.step2.title')}
+            body={t('howItWorks.step2.body')}
           />
           <Step
-            num="3"
+            stepLabel={t('howItWorks.stepLabel', { num: '3' })}
             visual={
               <span style={{ display: 'inline-flex', gap: 6 }}>
                 <Kbd large>1</Kbd>
@@ -235,59 +251,56 @@ export default function HomePage() {
                 <Kbd large>3</Kbd>
               </span>
             }
-            title="Press to accept"
-            body="Number key replaces the input. ↑↓+Enter also works. Esc to dismiss. Double-tap Shift again to regenerate."
+            title={t('howItWorks.step3.title')}
+            body={t('howItWorks.step3.body')}
           />
         </div>
       </section>
 
-      {/* ===== Features (privacy already extracted to its own section) ===== */}
+      {/* ===== Features ===== */}
       <section style={section}>
-        <h2 style={h2}>Built for people who care about how it works</h2>
+        <h2 style={h2}>{t('features.h2')}</h2>
         <div style={grid2}>
           <Feature
-            label="OPEN SOURCE"
-            title="100% Apache 2.0"
-            body={
-              <>
-                Self-host, audit, fork. The privacy claims above aren’t marketing — they’re code you
-                can read at{' '}
+            label={t('features.openSource.label')}
+            title={t('features.openSource.title')}
+            body={t.rich('features.openSource.body', {
+              repo: (chunks) => (
                 <a
                   href="https://github.com/rewrite-so/rewrite.so"
                   target="_blank"
                   rel="noopener noreferrer"
                   style={linkDark}
                 >
-                  github.com/rewrite-so/rewrite.so
+                  {chunks}
                 </a>
-                .
-              </>
-            }
+              ),
+            })}
           />
           <Feature
-            label="BYOK"
-            title="Bring Your Own Key"
-            body="Plug in your OpenAI-compatible base URL + key + model. Rewrites go directly to your provider, AES-GCM-encrypted at rest, never logged. Doesn’t count against the monthly quota."
+            label={t('features.byok.label')}
+            title={t('features.byok.title')}
+            body={t('features.byok.body')}
           />
           <Feature
-            label="HARD PII EXCLUSION"
-            title="Won’t fire in password fields"
-            body="Password / cc-* / current-password / new-password / one-time-code / fields with name or id matching password|pin|cvv|cvc|otp|secret|token — all hard-coded to be ignored. Not a setting. Not a feature flag."
+            label={t('features.pii.label')}
+            title={t('features.pii.title')}
+            body={t('features.pii.body')}
           />
           <Feature
-            label="STACK"
-            title="Cloudflare Workers + D1 + Hono"
-            body="Edge-deployed worker, OpenAI Chat Completions wire format, 3-way concurrent fan-out with cascading client-abort. ~5000 lines of TypeScript. Strict mode. No ORM for business tables."
+            label={t('features.stack.label')}
+            title={t('features.stack.title')}
+            body={t('features.stack.body')}
           />
           <Feature
-            label="CROSS-LANGUAGE"
-            title="Translation is implicit"
-            body="Set a fixed target language or auto-detect from the page. Writing English in a Chinese email or Japanese in Slack? Just rewrite — translation happens silently."
+            label={t('features.crossLang.label')}
+            title={t('features.crossLang.title')}
+            body={t('features.crossLang.body')}
           />
           <Feature
-            label="KEYBOARD-ONLY"
-            title="Never breaks your flow"
-            body="UI is invisible by default. Only an 8px translucent dot appears when an input is focused. Need it: double-tap Shift. Don’t need it: it isn’t there."
+            label={t('features.keyboard.label')}
+            title={t('features.keyboard.title')}
+            body={t('features.keyboard.body')}
           />
         </div>
       </section>
@@ -296,29 +309,33 @@ export default function HomePage() {
       <section
         style={{ ...section, background: '#fafafa', borderRadius: 16, padding: '48px 24px' }}
       >
-        <h2 style={h2}>Simple two-tier pricing</h2>
+        <h2 style={h2}>{t('pricing.h2')}</h2>
         <div style={{ ...grid2, gap: 16 }}>
           <PriceTeaser
-            title="Free"
-            price="$0"
-            sub={`${QUOTA.loggedInFree} rewrites / month for signed-in users`}
-            features={['All 3 styles', 'Auto language detection', 'Inputs never stored']}
+            title={t('pricing.free.title')}
+            price={t('pricing.free.price')}
+            sub={t('pricing.free.sub', { count: QUOTA.loggedInFree })}
+            features={[t('pricing.free.feat1'), t('pricing.free.feat2'), t('pricing.free.feat3')]}
           />
           <PriceTeaser
-            title="Pro"
-            price={`$${PRO_PRICE.yearlyMonthly} / mo`}
-            sub={`Billed annually $${PRO_PRICE.yearlyTotal} (save ${PRO_PRICE.yearlySavingsPercent}% vs $${PRO_PRICE.monthly}/mo monthly)`}
+            title={t('pricing.pro.title')}
+            price={t('pricing.pro.price', { monthly: PRO_PRICE.yearlyMonthly })}
+            sub={t('pricing.pro.sub', {
+              total: PRO_PRICE.yearlyTotal,
+              percent: PRO_PRICE.yearlySavingsPercent,
+              monthlyAlt: PRO_PRICE.monthly,
+            })}
             features={[
-              `${QUOTA.pro.toLocaleString()} rewrites / month`,
-              'BYOK = unlimited',
-              'Priority support',
+              t('pricing.pro.feat1', { count: QUOTA.pro }),
+              t('pricing.pro.feat2'),
+              t('pricing.pro.feat3'),
             ]}
             highlight
           />
         </div>
         <div style={{ marginTop: 24, textAlign: 'center' }}>
           <Link href="/pricing" style={btnSecondary}>
-            See full pricing & FAQ →
+            {t('pricing.ctaSeeFull')}
           </Link>
         </div>
       </section>
@@ -332,17 +349,30 @@ export default function HomePage() {
           textAlign: 'center',
         }}
       >
-        <h2 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>Try it. Takes 30 seconds.</h2>
+        <h2 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>{t('finalCta.h2')}</h2>
         <p style={{ color: '#555', marginTop: 12 }}>
-          No signup. Open <code>/try</code> for the demo. Install the extension to use it on every
-          site.
+          {t.rich('finalCta.body', {
+            code: (chunks) => (
+              <code
+                style={{
+                  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+                  fontSize: 13,
+                  background: '#f4f4f5',
+                  padding: '1px 6px',
+                  borderRadius: 4,
+                }}
+              >
+                {chunks}
+              </code>
+            ),
+          })}
         </p>
         <div style={{ marginTop: 24, display: 'inline-flex', gap: 12, flexWrap: 'wrap' }}>
           <Link href="/try" style={btnPrimary}>
-            Try it free →
+            {t('finalCta.primary')}
           </Link>
           <Link href="/login" style={btnSecondary}>
-            Sign in
+            {t('finalCta.secondary')}
           </Link>
         </div>
       </section>
@@ -350,9 +380,17 @@ export default function HomePage() {
   );
 }
 
-// ===== Visual placeholder for demo GIF =====
-// TODO: replace with actual GIF/video once recorded
-function DemoVisual() {
+function DemoVisual({
+  anyInput,
+  youTyped,
+  streams,
+  accepted,
+}: {
+  anyInput: string;
+  youTyped: string;
+  streams: string;
+  accepted: string;
+}) {
   return (
     <div
       aria-hidden="true"
@@ -379,10 +417,10 @@ function DemoVisual() {
         <span style={dot('#ef4444')} />
         <span style={dot('#f59e0b')} />
         <span style={dot('#22c55e')} />
-        <span style={{ marginLeft: 12, fontSize: 11, color: '#888' }}>any input box</span>
+        <span style={{ marginLeft: 12, fontSize: 11, color: '#888' }}>{anyInput}</span>
       </div>
 
-      <div style={{ color: '#999', marginBottom: 8 }}># You typed:</div>
+      <div style={{ color: '#999', marginBottom: 8 }}>{youTyped}</div>
       <div style={{ marginBottom: 14, padding: '6px 8px', background: '#fff', borderRadius: 4 }}>
         hi can u help me with the meeting tmr
       </div>
@@ -392,7 +430,7 @@ function DemoVisual() {
       >
         <Kbd small>Shift</Kbd>
         <Kbd small>Shift</Kbd>
-        <span style={{ marginLeft: 4 }}>→ 3 streams in, ~200ms first token</span>
+        <span style={{ marginLeft: 4 }}>{streams}</span>
       </div>
 
       <div style={{ display: 'grid', gap: 6, marginBottom: 8 }}>
@@ -409,7 +447,7 @@ function DemoVisual() {
 
       <div style={{ color: '#999', marginTop: 14, display: 'flex', alignItems: 'center', gap: 6 }}>
         <Kbd small>1</Kbd>
-        <span>→ accepted, input replaced</span>
+        <span>{accepted}</span>
       </div>
     </div>
   );
@@ -538,12 +576,12 @@ function Kbd({
 }
 
 function Step({
-  num,
+  stepLabel,
   visual,
   title,
   body,
 }: {
-  num: string;
+  stepLabel: string;
   visual: React.ReactNode;
   title: string;
   body: string;
@@ -566,7 +604,7 @@ function Step({
           marginBottom: 16,
         }}
       >
-        STEP {num}
+        {stepLabel}
       </div>
       <div style={{ marginBottom: 16 }}>{visual}</div>
       <div style={{ fontSize: 16, fontWeight: 600 }}>{title}</div>

@@ -40,6 +40,113 @@
     "copyright": "© {year} rewrite.so. Alle Rechte vorbehalten.",
     "paymentsBy": "Zahlungen abgewickelt von <creem>Creem</creem>, unserem Merchant of Record."
   },
+  "home": {
+    "hero": {
+      "eyebrow": "Open Source · Apache 2.0 · Kein Tracking",
+      "h1Line1": "AI-Umschreibung,",
+      "h1Line2": "die deinen Text nicht speichert.",
+      "intro": "Drücke <kbd>Shift</kbd> doppelt in einem beliebigen Web-Eingabefeld. Drei AI-Umschreibungen werden parallel gestreamt. Drücke <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> zum Akzeptieren. Eingaben und Ausgaben werden <strong>nie auf die Festplatte geschrieben</strong> — im Quellcode überprüfbar.",
+      "ctaPrimary": "Kostenlos testen →",
+      "ctaSecondary": "⭐ Star auf GitHub",
+      "fineprint": "{count} kostenlose Umschreibungen/Monat · Keine Kreditkarte · BYOK für unbegrenzt"
+    },
+    "privacy": {
+      "eyebrow": "Der Datenschutzvertrag",
+      "h2": "Dein Text wird nie gespeichert. Punkt.",
+      "body": "Nicht in Datenbanken. Nicht in Logs. Nicht in Fehler-Reportern. Nicht in Analytics. Der Text, den du umschreibst, durchläuft den Worker einmal und ist weg. Wir nutzen kein Drittanbieter-APM (Sentry, Datadog usw.) — genau weil sie standardmäßig Request-Bodies erfassen würden. Das ist kein Versprechen — es ist die Architektur, und der Quellcode ist offen für deine Überprüfung.",
+      "linkDoc": "Technisches Datenschutzdokument lesen →",
+      "linkSource": "Rewrite-Handler-Quelltext ansehen →",
+      "logTitle": "# Was geloggt wird",
+      "notLoggedTitle": "# Was nie geloggt wird",
+      "redacted": {
+        "input": "dein Eingabetext",
+        "rewrites": "die Umschreibungen",
+        "rawIp": "rohe IP",
+        "apiKey": "dein API-Schlüssel"
+      }
+    },
+    "howItWorks": {
+      "h2": "So funktioniert's",
+      "stepLabel": "SCHRITT {num}",
+      "step1": {
+        "title": "Doppel-Shift",
+        "body": "Innerhalb von 500ms, in jedem fokussierten Eingabefeld auf der Seite — input, textarea oder contenteditable. PII-Felder (Passwort, CVV, OTP) sind hart ausgeschlossen."
+      },
+      "step2": {
+        "title": "3 Stile parallel",
+        "body": "Treu, locker, formell — gleichzeitig in einer einzigen multiplexten SSE-Antwort generiert. Erstes Token in wenigen hundert Millisekunden."
+      },
+      "step3": {
+        "title": "Drücken zum Akzeptieren",
+        "body": "Zifferntaste ersetzt die Eingabe. ↑↓+Enter funktioniert auch. Esc zum Verwerfen. Doppel-Shift erneut für Regenerierung."
+      }
+    },
+    "features": {
+      "h2": "Gebaut für Menschen, die wissen wollen, wie es funktioniert",
+      "openSource": {
+        "label": "OPEN SOURCE",
+        "title": "100% Apache 2.0",
+        "body": "Selbst hosten, prüfen, forken. Die obigen Datenschutz-Aussagen sind kein Marketing — es ist Code, den du auf <repo>github.com/rewrite-so/rewrite.so</repo> lesen kannst."
+      },
+      "byok": {
+        "label": "BYOK",
+        "title": "Bring deinen eigenen Schlüssel",
+        "body": "Stecke deine OpenAI-kompatible Base URL + Schlüssel + Modell ein. Umschreibungen gehen direkt zu deinem Provider, AES-GCM-verschlüsselt at rest, nie geloggt. Zählt nicht gegen das Monatskontingent."
+      },
+      "pii": {
+        "label": "PII HART AUSGESCHLOSSEN",
+        "title": "Wird in Passwortfeldern nicht ausgelöst",
+        "body": "Password / cc-* / current-password / new-password / one-time-code / Felder mit name oder id, die password|pin|cvv|cvc|otp|secret|token enthalten — alle hart codiert, um ignoriert zu werden. Keine Einstellung. Kein Feature-Flag."
+      },
+      "stack": {
+        "label": "STACK",
+        "title": "Cloudflare Workers + D1 + Hono",
+        "body": "Edge-deployed Worker, OpenAI-Chat-Completions-Wire-Format, 3-Wege gleichzeitiges Fan-out mit kaskadierendem Client-Abort. ~5000 Zeilen TypeScript. Strict-Modus. Kein ORM für Geschäftstabellen."
+      },
+      "crossLang": {
+        "label": "SPRACHENÜBERGREIFEND",
+        "title": "Übersetzung ist implizit",
+        "body": "Setze eine feste Zielsprache oder erkenne automatisch von der Seite. Englisch in einer chinesischen E-Mail oder Japanisch in Slack schreiben? Einfach umschreiben — die Übersetzung passiert lautlos."
+      },
+      "keyboard": {
+        "label": "NUR TASTATUR",
+        "title": "Unterbricht deinen Flow nie",
+        "body": "UI ist standardmäßig unsichtbar. Nur ein 8px durchscheinender Punkt erscheint, wenn ein Eingabefeld fokussiert ist. Brauchst du es: Doppel-Shift. Brauchst du es nicht: es ist nicht da."
+      }
+    },
+    "pricing": {
+      "h2": "Einfache zwei-stufige Preise",
+      "free": {
+        "title": "Free",
+        "price": "$0",
+        "sub": "{count} Umschreibungen / Monat für angemeldete Nutzer",
+        "feat1": "Alle 3 Stile",
+        "feat2": "Auto-Spracherkennung",
+        "feat3": "Eingaben werden nie gespeichert"
+      },
+      "pro": {
+        "title": "Pro",
+        "price": "${monthly} / Mon",
+        "sub": "Jährlich abgerechnet ${total} (spare {percent}% vs ${monthlyAlt}/Mon monatlich)",
+        "feat1": "{count, number} Umschreibungen / Monat",
+        "feat2": "BYOK = unbegrenzt",
+        "feat3": "Priorisierter Support"
+      },
+      "ctaSeeFull": "Vollständige Preise & FAQ →"
+    },
+    "finalCta": {
+      "h2": "Probier's. Dauert 30 Sekunden.",
+      "body": "Keine Anmeldung. Öffne <code>/try</code> für die Demo. Installiere die Erweiterung, um sie auf jeder Seite zu nutzen.",
+      "primary": "Kostenlos testen →",
+      "secondary": "Anmelden"
+    },
+    "demo": {
+      "anyInput": "beliebiges Eingabefeld",
+      "youTyped": "# Du hast getippt:",
+      "streams": "→ 3 Streams gestartet, ~200ms erstes Token",
+      "accepted": "→ akzeptiert, Eingabe ersetzt"
+    }
+  },
   "hint": {
     "doubleShift": "Shift Shift drücken zum Umschreiben",
     "tryOnAnyInput": "Installiere die Erweiterung, um sie auf jeder Seite zu nutzen"
