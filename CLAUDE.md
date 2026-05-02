@@ -94,6 +94,15 @@
 - **secrets**：CI 不会自动同步 wrangler secrets（如 OPENAI_API_KEY、
   BETTER_AUTH_SECRET）；改 secret 时手动 `wrangler secret put` 或在 dashboard 改。
 
+## Web build 时的 env 烘焙
+
+- **`next.config.mjs` 的 rewrites destination 是 build-time 烘焙**：`process.env.API_BASE_URL`
+  在 build 时读，destination 字符串被写进 `routes-manifest.json`。`wrangler.toml [vars]` 是
+  runtime-only，**不影响 build**。GHA `deploy-web.yml` 的 OpenNext build step 必须显式
+  `env: API_BASE_URL: https://api.rewrite.so`，否则 fallback 到 `http://localhost:8787`
+  → prod 上 `/v1/*` 和 `/api/auth/*` 代理全部 500。
+- **新增 build-time env 同样要在 deploy-web.yml 加 env block**（如 NEXT_PUBLIC_*）。
+
 ## 工具链坑位
 
 - **wrangler dev 与系统代理冲突**：当用户机器有 `HTTP_PROXY` / `HTTPS_PROXY` 环境变量时，worker 内 `fetch()` 会被强制走代理（即使是 localhost）。本地端到端调试 mock upstream 时必须先 `unset` 这些变量，或用 `env -u HTTP_PROXY ...` 启动。生产环境 Workers 没这个问题。

@@ -41,8 +41,12 @@ jobs:
       - name: Typecheck
         run: pnpm --filter @rewrite/web typecheck
 
+      # build 时把 API_BASE_URL 烘焙进 next rewrites（destination 在 build 时定死）
+      # wrangler.toml [vars] 是 runtime-only 不影响 build，所以这里必须显式 export
       - name: OpenNext build
         working-directory: apps/web
+        env:
+          API_BASE_URL: https://api.rewrite.so
         run: pnpm exec opennextjs-cloudflare build
 
       - name: Deploy worker
