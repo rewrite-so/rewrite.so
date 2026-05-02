@@ -1,6 +1,11 @@
-# rewrite.so
+# rewrite.so™
+
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)
+[![Trademark](https://img.shields.io/badge/trademark-policy-orange.svg)](./TRADEMARK.md)
 
 > 在任何网页输入框双击 Shift，立刻拿到 3 种风格的 AI 改写。
+>
+> *Double-tap Shift in any web input box to get 3 style rewrites instantly.*
 
 rewrite.so 是一款"输入框级"AI 改写引擎。统一处理翻译、纠错和润色——本质是一个 Rewrite Engine。所有交互收敛到一个手势（双击 Shift），UI 默认隐身（输入框聚焦时右下角 8px 半透明小点），不抢焦点、不打断心流。
 
@@ -124,6 +129,24 @@ rewrite.so/
 - iframe 内输入框（MV3 `all_frames: false`）
 - Firefox / Safari（v0.2 适配）
 
-## License
+## License & trademark
 
-MIT
+Code is licensed under [Apache License 2.0](./LICENSE).
+
+The name **rewrite.so**™, the **rewrite** wordmark in connection with AI text
+rewriting, and the visual identity are unregistered trademarks of
+Lin Shuaibin and are **not** covered by the Apache license. See
+[TRADEMARK.md](./TRADEMARK.md) for details.
+
+### Self-hosting & forks (TL;DR)
+
+✅ **Self-host for personal or internal team use** — go ahead, no permission needed.
+
+✅ **Fork and modify under a different name** — pick something distinct (e.g.
+`MyEditorAI`), replace UI copy, and you’re free to redistribute.
+
+❌ **Do not run a hosted SaaS** under the name `rewrite.so`, `rewrite`, or any
+confusingly similar variant. The trademark exists so users know what they’re
+getting when someone recommends "rewrite.so".
+
+Full policy: [TRADEMARK.md](./TRADEMARK.md). Questions: hello@rewrite.so.

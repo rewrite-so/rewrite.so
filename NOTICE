@@ -1,0 +1,12 @@
+rewrite.so
+Copyright 2026 Lin Shuaibin
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+"rewrite.so" is an unregistered trademark of Lin Shuaibin. Use of the
+trademark is governed by the policy in TRADEMARK.md, which is separate
+from and not granted by the Apache License.
+
+This product includes third-party software components. Their license
+notices are reproduced in their respective node_modules / package
+directories.

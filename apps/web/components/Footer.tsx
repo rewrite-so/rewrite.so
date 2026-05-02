@@ -41,6 +41,17 @@ export function Footer() {
         <div>
           <div style={{ fontSize: 14, fontWeight: 600, color: '#111', marginBottom: 6 }}>
             rewrite.so
+            <span
+              style={{
+                fontSize: 9,
+                fontWeight: 500,
+                verticalAlign: 'super',
+                marginLeft: 1,
+                color: '#888',
+              }}
+            >
+              ™
+            </span>
           </div>
           <div style={{ fontSize: 12, color: '#888', lineHeight: 1.55 }}>
             Double-tap Shift, instant AI rewrite in any input box.
