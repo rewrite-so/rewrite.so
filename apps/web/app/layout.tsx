@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { Footer } from '../components/Footer.tsx';
+import { TopNav } from '../components/TopNav.tsx';
 
 export const metadata: Metadata = {
   title: 'rewrite.so — Double-tap Shift to rewrite',
@@ -19,6 +20,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           flexDirection: 'column',
         }}
       >
+        <TopNav />
         <div style={{ flex: 1 }}>{children}</div>
         <Footer />
       </body>
