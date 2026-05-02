@@ -21,13 +21,14 @@ export default function HomePage() {
             lineHeight: 1.1,
           }}
         >
-          双击 Shift。
+          Double-tap Shift.
           <br />
-          即时改写。
+          Instant rewrite.
         </h1>
         <p style={{ marginTop: 20, color: '#555', fontSize: '1.1rem', maxWidth: 640 }}>
-          在任何网页的输入框聚焦时按两下 Shift，浮出 3 种风格的 AI 改写候选：贴近原文、口语、正式。
-          数字键直接采纳。全键盘，零鼠标，写到一半不离开当下。
+          In any web input box, double-tap Shift to summon 3 streaming AI rewrites — faithful,
+          casual, formal. Press 1 / 2 / 3 to accept. Keyboard-only. Zero mouse. Never breaks your
+          flow.
         </p>
 
         <div
@@ -40,10 +41,10 @@ export default function HomePage() {
           }}
         >
           <Link href="/try" style={btnPrimary}>
-            网页试用 →
+            Try it in your browser →
           </Link>
           <Link href="/pricing" style={btnSecondary}>
-            查看价格
+            Pricing
           </Link>
           <a
             href="https://github.com/rewrite-so/rewrite.so"
@@ -56,60 +57,60 @@ export default function HomePage() {
         </div>
 
         <p style={{ marginTop: 16, fontSize: 13, color: '#888' }}>
-          免费档每月 {QUOTA.loggedInFree} 次（登录用户）/ {QUOTA.anonymousIp}{' '}
-          次（匿名访客）。无需信用卡。
+          Free tier: {QUOTA.loggedInFree} rewrites/month signed-in, {QUOTA.anonymousIp}/month
+          anonymous. No card required.
         </p>
       </section>
 
       {/* ===== How it works ===== */}
       <section style={section}>
-        <h2 style={h2}>怎么用</h2>
+        <h2 style={h2}>How it works</h2>
         <div style={grid3}>
           <Step
             num="1"
-            title="按 Shift Shift"
-            body="在任何网页的输入框（&lt;input&gt; / &lt;textarea&gt; / contenteditable）聚焦时双击 Shift。"
+            title="Tap Shift twice"
+            body="Focus any input on the page (input, textarea, or contenteditable), then double-tap Shift within 500ms."
           />
           <Step
             num="2"
-            title="3 种风格流式生成"
-            body="贴近原文 / 口语 / 正式 三个候选并发生成，逐字流式渲染，几百毫秒首字到达。"
+            title="3 styles stream in"
+            body="Faithful, casual, and formal candidates generate in parallel and stream character by character. First token in a few hundred milliseconds."
           />
           <Step
             num="3"
-            title="按 1 / 2 / 3 采纳"
-            body="数字键直接替换；↑↓+Enter 也行；Esc 取消；再次双击 Shift 重生成。"
+            title="Press 1 / 2 / 3"
+            body="Accept by number key. ↑↓ + Enter also works. Esc to dismiss. Double-tap Shift again to regenerate."
           />
         </div>
       </section>
 
       {/* ===== Features ===== */}
       <section style={section}>
-        <h2 style={h2}>为什么不一样</h2>
+        <h2 style={h2}>Why it’s different</h2>
         <div style={grid2}>
           <Feature
-            title="不中断心流"
-            body="UI 默认隐身。只在输入框聚焦时浮一个 8px 半透明小点。需要时双击 Shift；不需要时它压根不存在。"
+            title="Never breaks your flow"
+            body="UI is invisible by default. Only an 8px translucent dot appears when an input is focused. Need it: double-tap Shift. Don’t need it: it isn’t there."
           />
           <Feature
-            title="完全不存原文"
-            body="输入和改写结果只在请求中流过，从不写入数据库、日志、Sentry。我们能给的隐私底线就是不留底。"
+            title="Your text is never stored"
+            body="Inputs and outputs pass through but are never written to a database, log, or APM. Privacy by architecture, not just by promise."
           />
           <Feature
-            title="跨语种自动翻译"
-            body="目标语言可设固定，也可自动检测页面语言。中文 → 英文邮件、英文 → 中文回复都隐式吸收进 rewrite。"
+            title="Cross-language, on by default"
+            body="Set a fixed target language or auto-detect from the page. Writing English for a Chinese email or Japanese in a Slack thread? Just rewrite — translation is implicit."
           />
           <Feature
-            title="PII 输入框硬排除"
-            body="密码、信用卡、CVV、OTP 输入框：不弹小点、不响应触发。这是写在代码里的硬约束，不会因为 PR 简化掉。"
+            title="Hard PII exclusion"
+            body="Password, credit card, CVV, OTP fields: no dot, no trigger, no exception. Hard-coded in the source — not a setting that can be flipped off by a future PR."
           />
           <Feature
-            title="BYOK = 无限"
-            body="Pro 用户可填自己的 OpenAI 兼容 base_url + key + model。改写直连你的上游，不计入月配额。"
+            title="BYOK for unlimited"
+            body="Pro users plug in their own OpenAI-compatible base URL + key + model. Rewrites go directly to your provider and don’t count against the monthly quota."
           />
           <Feature
-            title="开源"
-            body="代码 100% 开源，可自部署、可审计、可贡献。隐私承诺有源码可对照。"
+            title="Open source"
+            body="100% open source. Self-host, audit, contribute. Our privacy claims are verifiable in the code."
           />
         </div>
       </section>
@@ -118,25 +119,29 @@ export default function HomePage() {
       <section
         style={{ ...section, background: '#fafafa', borderRadius: 16, padding: '48px 24px' }}
       >
-        <h2 style={h2}>简单两档</h2>
+        <h2 style={h2}>Simple two-tier pricing</h2>
         <div style={{ ...grid2, gap: 16 }}>
           <PriceTeaser
             title="Free"
             price="$0"
-            sub={`${QUOTA.loggedInFree} 次 / 月（登录用户）`}
-            features={['3 种风格', '页面语言自动检测', '不记录原文']}
+            sub={`${QUOTA.loggedInFree} rewrites / month for signed-in users`}
+            features={['All 3 styles', 'Auto language detection', 'Inputs never stored']}
           />
           <PriceTeaser
             title="Pro"
-            price={`$${PRO_PRICE.yearlyMonthly} / 月`}
-            sub={`年付 $${PRO_PRICE.yearlyTotal}，省 ${PRO_PRICE.yearlySavingsPercent}%（月付 $${PRO_PRICE.monthly}）`}
-            features={[`${QUOTA.pro.toLocaleString()} 次 / 月`, 'BYOK 解锁无限', '优先支持']}
+            price={`$${PRO_PRICE.yearlyMonthly} / mo`}
+            sub={`Billed annually $${PRO_PRICE.yearlyTotal} (save ${PRO_PRICE.yearlySavingsPercent}% vs $${PRO_PRICE.monthly}/mo monthly)`}
+            features={[
+              `${QUOTA.pro.toLocaleString()} rewrites / month`,
+              'BYOK for unlimited',
+              'Priority support',
+            ]}
             highlight
           />
         </div>
         <div style={{ marginTop: 24, textAlign: 'center' }}>
           <Link href="/pricing" style={btnSecondary}>
-            完整定价 + FAQ →
+            Full pricing + FAQ →
           </Link>
         </div>
       </section>
@@ -150,16 +155,17 @@ export default function HomePage() {
           textAlign: 'center',
         }}
       >
-        <h2 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>试一下，30 秒就能感受到</h2>
+        <h2 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>Try it. Takes 30 seconds.</h2>
         <p style={{ color: '#555', marginTop: 12 }}>
-          不用注册，直接进 /try 看 demo。装扩展后任何网站都能用。
+          No signup. Open <code>/try</code> for the demo. Install the extension to use it on every
+          site.
         </p>
         <div style={{ marginTop: 24, display: 'inline-flex', gap: 12, flexWrap: 'wrap' }}>
           <Link href="/try" style={btnPrimary}>
-            网页试用 →
+            Try it in your browser →
           </Link>
           <Link href="/login" style={btnSecondary}>
-            登录
+            Sign in
           </Link>
         </div>
       </section>

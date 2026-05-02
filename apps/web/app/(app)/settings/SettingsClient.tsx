@@ -35,14 +35,14 @@ interface ByokConfig {
 }
 
 const LANG_OPTIONS: Array<{ value: string; label: string }> = [
-  { value: 'auto', label: '自动检测页面语言' },
+  { value: 'auto', label: 'Auto-detect from page' },
   { value: 'en', label: 'English' },
-  { value: 'zh-CN', label: '中文（简体）' },
-  { value: 'ja', label: '日本語' },
-  { value: 'ko', label: '한국어' },
-  { value: 'es', label: 'Español' },
-  { value: 'fr', label: 'Français' },
-  { value: 'de', label: 'Deutsch' },
+  { value: 'zh-CN', label: '简体中文 (Chinese, Simplified)' },
+  { value: 'ja', label: '日本語 (Japanese)' },
+  { value: 'ko', label: '한국어 (Korean)' },
+  { value: 'es', label: 'Español (Spanish)' },
+  { value: 'fr', label: 'Français (French)' },
+  { value: 'de', label: 'Deutsch (German)' },
 ];
 
 export function SettingsClient() {
@@ -85,7 +85,11 @@ export function SettingsClient() {
   }, []);
 
   async function deleteByok() {
-    if (!confirm('删除 BYOK 配置后会回到平台默认 upstream 并重新计入月配额，确认继续？')) {
+    if (
+      !confirm(
+        'Delete BYOK config? Rewrites will fall back to the default upstream and start counting against your monthly quota again.',
+      )
+    ) {
       return;
     }
     const res = await fetch('/v1/me/byok', { method: 'DELETE', credentials: 'include' });
@@ -115,13 +119,13 @@ export function SettingsClient() {
   }
 
   if (!me) {
-    return <p style={{ marginTop: 32, color: '#888' }}>加载中…</p>;
+    return <p style={{ marginTop: 32, color: '#888' }}>Loading…</p>;
   }
 
   if (!me.user) {
     return (
       <section style={{ marginTop: 32 }}>
-        <p style={{ color: '#666', fontSize: 14, lineHeight: 1.55 }}>你还没有登录。</p>
+        <p style={{ color: '#666', fontSize: 14, lineHeight: 1.55 }}>You’re not signed in.</p>
         <a
           href="/login"
           style={{
@@ -136,7 +140,7 @@ export function SettingsClient() {
             fontWeight: 500,
           }}
         >
-          登录 →
+          Sign in →
         </a>
         {usage && (
           <div style={{ ...cardStyle, marginTop: 24 }}>
@@ -150,8 +154,8 @@ export function SettingsClient() {
   return (
     <section style={{ marginTop: 32 }}>
       <div style={cardStyle}>
-        <Row label="邮箱" value={me.user.email} />
-        {me.user.name && <Row label="姓名" value={me.user.name} />}
+        <Row label="Email" value={me.user.email} />
+        {me.user.name && <Row label="Name" value={me.user.name} />}
       </div>
 
       {usage && (
@@ -172,9 +176,10 @@ export function SettingsClient() {
             }}
           >
             <div>
-              <div style={{ fontSize: 14, color: '#111' }}>目标语言</div>
+              <div style={{ fontSize: 14, color: '#111' }}>Target language</div>
               <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>
-                改写结果输出为这个语言；输入是别的语言时自动翻译。
+                Rewrites are produced in this language. If your input is in a different language,
+                it’s translated.
               </div>
             </div>
             <select
@@ -220,7 +225,7 @@ export function SettingsClient() {
             cursor: 'pointer',
           }}
         >
-          {signingOut ? '退出中…' : '退出登录'}
+          {signingOut ? 'Signing out…' : 'Sign out'}
         </button>
       </div>
     </section>
@@ -241,13 +246,16 @@ function SubscriptionSection({ me }: { me: UserInfo }) {
   }
 
   if (me.tier === 'pro' && me.subscription) {
-    const periodEnd = new Date(me.subscription.currentPeriodEnd).toLocaleDateString('zh-CN');
+    const periodEnd = new Date(me.subscription.currentPeriodEnd).toLocaleDateString('en-US');
     return (
       <div style={{ ...cardStyle, marginTop: 16 }}>
-        <Row label="订阅" value={`Pro ${me.subscription.plan === 'yearly' ? '年付' : '月付'}`} />
-        <Row label="状态" value={statusLabel(me.subscription.status)} />
         <Row
-          label={me.subscription.cancelAtPeriodEnd ? '将到期于' : '下次续费'}
+          label="Subscription"
+          value={`Pro ${me.subscription.plan === 'yearly' ? 'Annual' : 'Monthly'}`}
+        />
+        <Row label="Status" value={statusLabel(me.subscription.status)} />
+        <Row
+          label={me.subscription.cancelAtPeriodEnd ? 'Ends on' : 'Next renewal'}
           value={periodEnd}
         />
         <div style={{ padding: '12px 0' }}>
@@ -265,7 +273,7 @@ function SubscriptionSection({ me }: { me: UserInfo }) {
               cursor: 'pointer',
             }}
           >
-            {loading ? '跳转中…' : '管理订阅 / 发票'}
+            {loading ? 'Redirecting…' : 'Manage subscription / invoices'}
           </button>
         </div>
       </div>
@@ -273,7 +281,7 @@ function SubscriptionSection({ me }: { me: UserInfo }) {
   }
   return (
     <div style={{ ...cardStyle, marginTop: 16 }}>
-      <Row label="订阅" value="Free（30 次 / 月）" />
+      <Row label="Subscription" value="Free (30 rewrites / month)" />
       <div style={{ padding: '12px 0' }}>
         <a
           href="/billing"
@@ -288,7 +296,7 @@ function SubscriptionSection({ me }: { me: UserInfo }) {
             textDecoration: 'none',
           }}
         >
-          升级 Pro →
+          Upgrade to Pro →
         </a>
       </div>
     </div>
@@ -298,17 +306,17 @@ function SubscriptionSection({ me }: { me: UserInfo }) {
 function statusLabel(s: string): string {
   switch (s) {
     case 'active':
-      return '正常';
+      return 'Active';
     case 'trialing':
-      return '试用中';
+      return 'Trialing';
     case 'paused':
-      return '已暂停';
+      return 'Paused';
     case 'canceled':
-      return '已取消（周期末到期）';
+      return 'Canceled (ends at period end)';
     case 'past_due':
-      return '逾期未付款';
+      return 'Past due';
     case 'expired':
-      return '已到期';
+      return 'Expired';
     default:
       return s;
   }
@@ -342,7 +350,7 @@ function ByokSection({
       });
       const data = (await res.json()) as { configured?: boolean; error?: string; keyMask?: string };
       if (!res.ok) {
-        setError(data.error ?? '保存失败');
+        setError(data.error ?? 'Save failed');
         return;
       }
       onChange({
@@ -367,11 +375,13 @@ function ByokSection({
           borderBottom: '1px solid #f0f0f0',
         }}
       >
-        <div style={{ fontSize: 14, color: '#111', fontWeight: 500 }}>BYOK（自带 API Key）</div>
+        <div style={{ fontSize: 14, color: '#111', fontWeight: 500 }}>
+          BYOK (Bring Your Own Key)
+        </div>
         <div style={{ fontSize: 12, color: '#888', marginTop: 2, lineHeight: 1.6 }}>
-          填入你自己的 OpenAI 兼容 endpoint 和 key 后，所有改写直连你的上游，
-          <strong style={{ color: '#111' }}>不计入 2,000 次月配额</strong>。Key 用 AES-GCM
-          加密存储，永不日志输出。
+          Plug in your own OpenAI-compatible endpoint and key. Rewrites go directly to your provider
+          and <strong style={{ color: '#111' }}>don’t count against the 2,000 / month quota</strong>
+          . Your key is stored AES-GCM encrypted and never written to logs.
         </div>
       </div>
 
@@ -382,14 +392,14 @@ function ByokSection({
           <Row label="API Key" value={`****${byok.keyMask ?? ''}`} />
           <div style={{ padding: '12px 0', display: 'flex', gap: 8 }}>
             <button type="button" onClick={() => setEditing(true)} style={btnSecondary}>
-              修改
+              Edit
             </button>
             <button
               type="button"
               onClick={onDelete}
               style={{ ...btnSecondary, color: '#dc2626', borderColor: '#fca5a5' }}
             >
-              删除
+              Delete
             </button>
           </div>
         </>
@@ -428,7 +438,7 @@ function ByokSection({
                 opacity: !baseUrl || !model || !apiKey || saving ? 0.5 : 1,
               }}
             >
-              {saving ? '保存中…' : '保存'}
+              {saving ? 'Saving…' : 'Save'}
             </button>
             {editing && (
               <button
@@ -439,7 +449,7 @@ function ByokSection({
                 }}
                 style={btnSecondary}
               >
-                取消
+                Cancel
               </button>
             )}
           </div>
@@ -498,25 +508,25 @@ const btnSecondary = {
 
 function Quota({ usage }: { usage: Usage }) {
   const tierLabel: Record<Usage['tier'], string> = {
-    anonymous: '匿名访客（按 IP）',
-    anonymous_install: '扩展未登录',
-    free: '免费用户',
+    anonymous: 'Anonymous (per IP)',
+    anonymous_install: 'Extension (unsigned)',
+    free: 'Free',
     pro: 'Pro',
   };
   const reset = new Date(usage.resetAt);
-  const resetLabel = reset.toLocaleString('zh-CN', { month: 'long', day: 'numeric' });
+  const resetLabel = reset.toLocaleString('en-US', { month: 'long', day: 'numeric' });
   return (
     <>
-      <Row label="档位" value={tierLabel[usage.tier]} />
+      <Row label="Tier" value={tierLabel[usage.tier]} />
       <Row
-        label="本月配额"
+        label="This month"
         value={
           Number.isFinite(usage.limit)
-            ? `${usage.used} / ${usage.limit}（剩 ${usage.remaining}）`
-            : '无限'
+            ? `${usage.used} / ${usage.limit} (${usage.remaining} left)`
+            : 'Unlimited'
         }
       />
-      <Row label="下次重置" value={`${resetLabel} 00:00 UTC`} />
+      <Row label="Resets on" value={`${resetLabel} 00:00 UTC`} />
     </>
   );
 }

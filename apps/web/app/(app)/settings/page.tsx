@@ -1,7 +1,7 @@
 import { SettingsClient } from './SettingsClient.tsx';
 
 export const metadata = {
-  title: '设置 — rewrite.so',
+  title: 'Settings — rewrite.so',
 };
 
 export default function SettingsPage() {
@@ -14,7 +14,7 @@ export default function SettingsPage() {
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
       }}
     >
-      <h1 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>设置</h1>
+      <h1 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>Settings</h1>
       <SettingsClient />
     </main>
   );

@@ -43,18 +43,18 @@ export function BillingClient() {
         }),
       });
       if (res.status === 401) {
-        // 未登录 → 跳到 login，登录后回到 billing
+        // not signed in → /login then back to /billing
         location.href = `/login?next=/billing`;
         return;
       }
       const data = (await res.json()) as { url?: string; error?: string };
       if (!res.ok || !data.url) {
-        setError(data.error ?? '创建结账失败');
+        setError(data.error ?? 'Failed to create checkout');
         return;
       }
       location.href = data.url;
     } catch (err) {
-      setError(err instanceof Error ? err.message : '网络错误');
+      setError(err instanceof Error ? err.message : 'Network error');
     } finally {
       setLoading(false);
     }
@@ -68,7 +68,7 @@ export function BillingClient() {
       if (data.url) {
         location.href = data.url;
       } else {
-        setError(data.error ?? '打开门户失败');
+        setError(data.error ?? 'Failed to open portal');
       }
     } finally {
       setLoading(false);
@@ -76,7 +76,7 @@ export function BillingClient() {
   }
 
   if (!me) {
-    return <p style={{ marginTop: 32, color: '#888' }}>加载中…</p>;
+    return <p style={{ marginTop: 32, color: '#888' }}>Loading…</p>;
   }
 
   const subscribed = me.subscription !== null && me.tier === 'pro';
@@ -95,11 +95,11 @@ export function BillingClient() {
             marginBottom: 24,
           }}
         >
-          你已订阅 Pro（{me.subscription?.plan === 'yearly' ? '年付' : '月付'}）。 周期结束：
+          You’re on Pro ({me.subscription?.plan === 'yearly' ? 'Annual' : 'Monthly'}). Period ends:{' '}
           {me.subscription
-            ? new Date(me.subscription.currentPeriodEnd).toLocaleDateString('zh-CN')
+            ? new Date(me.subscription.currentPeriodEnd).toLocaleDateString('en-US')
             : '-'}
-          {me.subscription?.cancelAtPeriodEnd && '（将在周期末取消）'}
+          {me.subscription?.cancelAtPeriodEnd && ' (will cancel at period end)'}
           <button
             type="button"
             onClick={openPortal}
@@ -115,12 +115,12 @@ export function BillingClient() {
               cursor: 'pointer',
             }}
           >
-            管理订阅
+            Manage subscription
           </button>
         </div>
       )}
 
-      {/* 月/年 toggle */}
+      {/* Monthly / Yearly toggle */}
       <div
         style={{
           display: 'inline-flex',
@@ -131,10 +131,10 @@ export function BillingClient() {
         }}
       >
         <ToggleBtn active={plan === 'monthly'} onClick={() => setPlan('monthly')}>
-          月付
+          Monthly
         </ToggleBtn>
         <ToggleBtn active={plan === 'yearly'} onClick={() => setPlan('yearly')}>
-          年付
+          Annual
           <span
             style={{
               marginLeft: 6,
@@ -146,7 +146,7 @@ export function BillingClient() {
               fontWeight: 600,
             }}
           >
-            省 {PRO_PRICE.yearlySavingsPercent}%
+            save {PRO_PRICE.yearlySavingsPercent}%
           </span>
         </ToggleBtn>
       </div>
@@ -157,29 +157,41 @@ export function BillingClient() {
           title="Free"
           price="$0"
           period=""
-          features={['30 次 / 月', '3 种风格流式改写', '页面语言自动检测', '隐私优先 — 不记录原文']}
-          cta={subscribed ? '当前为更高档位' : me.user ? '当前档位' : '免费使用'}
+          features={[
+            '30 rewrites / month',
+            'All 3 streaming styles',
+            'Auto language detection',
+            'Privacy first — inputs never stored',
+          ]}
+          cta={subscribed ? 'Lower tier' : me.user ? 'Current tier' : 'Use free'}
           disabled
         />
         <PlanCard
           title="Pro"
           price={plan === 'monthly' ? `$${PRO_PRICE.monthly}` : `$${PRO_PRICE.yearlyMonthly}`}
-          period={plan === 'monthly' ? '/月' : `/月（年付 $${PRO_PRICE.yearlyTotal}）`}
-          features={['2,000 次 / 月', '3 种风格流式改写', '自带 API Key（BYOK）= 无限', '优先支持']}
+          period={
+            plan === 'monthly' ? '/ month' : `/ month (billed annually $${PRO_PRICE.yearlyTotal})`
+          }
+          features={[
+            '2,000 rewrites / month',
+            'All 3 streaming styles',
+            'BYOK = unlimited',
+            'Priority support',
+          ]}
           highlight
           cta={
             subscribed
-              ? '已订阅'
+              ? 'Subscribed'
               : loading
-                ? '跳转中…'
-                : `订阅 Pro ${plan === 'monthly' ? '月付' : '年付'}`
+                ? 'Redirecting…'
+                : `Subscribe to Pro ${plan === 'monthly' ? 'Monthly' : 'Annual'}`
           }
           onClick={() => !subscribed && checkout(plan)}
           disabled={subscribed || loading}
         />
       </div>
 
-      {error && <p style={{ color: '#dc2626', fontSize: 13, marginTop: 16 }}>错误：{error}</p>}
+      {error && <p style={{ color: '#dc2626', fontSize: 13, marginTop: 16 }}>Error: {error}</p>}
     </section>
   );
 }

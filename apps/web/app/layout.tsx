@@ -3,13 +3,14 @@ import type { ReactNode } from 'react';
 import { Footer } from '../components/Footer.tsx';
 
 export const metadata: Metadata = {
-  title: 'rewrite.so — 双击 Shift 即时改写',
-  description: '输入框级 AI 改写引擎，3 种风格，键盘选择，不中断心流。',
+  title: 'rewrite.so — Double-tap Shift to rewrite',
+  description:
+    'Input-box-level AI rewrite engine. 3 styles, keyboard-only, never breaks your flow.',
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="zh-CN">
+    <html lang="en">
       <body
         style={{
           margin: 0,

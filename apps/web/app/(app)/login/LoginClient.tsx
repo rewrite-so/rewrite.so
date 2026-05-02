@@ -42,10 +42,11 @@ export function LoginClient() {
     return (
       <div style={{ marginTop: 28, padding: 16, border: '1px solid #d4d4d8', borderRadius: 10 }}>
         <p style={{ margin: 0, fontSize: 14 }}>
-          ✓ 登录链接已发送到 <code>{email}</code>。
+          ✓ Login link sent to <code>{email}</code>.
         </p>
         <p style={{ margin: '8px 0 0', color: '#888', fontSize: 12 }}>
-          检查收件箱（包括垃圾邮件），点击邮件里的"登录 rewrite.so"按钮。链接 15 分钟内有效。
+          Check your inbox (and spam folder). Click the &ldquo;Sign in to rewrite.so&rdquo; button.
+          The link is valid for 15 minutes.
         </p>
       </div>
     );
@@ -89,7 +90,7 @@ export function LoginClient() {
           cursor: status === 'sending' ? 'wait' : 'pointer',
         }}
       >
-        {status === 'sending' ? '发送中…' : '发送登录链接'}
+        {status === 'sending' ? 'Sending…' : 'Send login link'}
       </button>
       {error && <p style={{ marginTop: 12, color: '#dc2626', fontSize: 13 }}>{error}</p>}
     </form>
