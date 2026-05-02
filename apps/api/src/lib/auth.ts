@@ -13,7 +13,7 @@ import type { Bindings } from '../types.ts';
  * - drizzle 仅给 better-auth 4 张表用（CLAUDE.md 已说明这是"D1 不用 ORM"原则的唯一例外）
  * - 启用 Magic Link（通过 Resend 发送）
  * - Google OAuth 待用户提供 client id/secret 后开启
- * - cookie domain 生产环境用 `.rewrite.so`，让主域和 api 子域共享
+ * - 生产环境 cookie domain = `.rewrite.so`，主域和 api 子域共享 session cookie
  */
 export function createAuth(env: Bindings) {
   const db = drizzle(env.DB, { schema: authSchema });
@@ -26,34 +26,38 @@ export function createAuth(env: Bindings) {
     'https://api.rewrite.so',
   ];
 
+  // 生产环境（api.rewrite.so）下让 cookie domain = .rewrite.so，
+  // 这样 api 设的 session cookie 在 web origin (rewrite.so) 也能读到 —
+  // 避免依赖 next rewrites 代理 set-cookie（OpenNext 对 GET + 特定 query 的 rewrite 有 bug）。
+  const apiUrl = env.BETTER_AUTH_URL || 'http://localhost:8787';
+  const isProdRewriteSo = apiUrl.endsWith('rewrite.so') || apiUrl.includes('rewrite.so/');
+  const crossSubDomain = isProdRewriteSo
+    ? { crossSubDomainCookies: { enabled: true, domain: '.rewrite.so' } }
+    : {};
+
   return betterAuth({
     database: drizzleAdapter(db, {
       provider: 'sqlite',
       schema: authSchema,
     }),
     secret: env.BETTER_AUTH_SECRET,
-    baseURL: env.BETTER_AUTH_URL || 'http://localhost:8787',
+    baseURL: apiUrl,
     trustedOrigins,
     advanced: {
       defaultCookieAttributes: {
         sameSite: 'lax',
-        secure: env.BETTER_AUTH_URL?.startsWith('https://') ?? false,
+        secure: apiUrl.startsWith('https://'),
       },
+      ...crossSubDomain,
     },
     plugins: [
       magicLink({
         sendMagicLink: async ({ email, url }) => {
-          // 把 better-auth 生成的 url（host = api origin）改成 web origin。
-          // 这样 magic link 点击后浏览器访问 web origin → next rewrites 代理回 api →
-          // better-auth set-cookie 透传到 web origin，cookie 落在浏览器主域上。
-          const apiOrigin = env.BETTER_AUTH_URL || 'http://localhost:8787';
-          const webOrigin = env.WEB_ORIGIN || 'http://localhost:3000';
-          const finalUrl = url.startsWith(apiOrigin)
-            ? `${webOrigin}${url.slice(apiOrigin.length)}`
-            : url;
-
+          // 邮件链接直指 api origin，让 better-auth 在 api worker 直接处理 verify
+          // 并 302 redirect 到 callbackURL (web origin)。cookie domain=.rewrite.so
+          // 跨子域共享，所以 redirect 后 web 端也能读到 session。
           if (!resend) {
-            console.warn('[auth] RESEND_API_KEY missing; magic link URL:', finalUrl);
+            console.warn('[auth] RESEND_API_KEY missing; magic link URL:', url);
             return;
           }
           const from = env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
@@ -61,8 +65,8 @@ export function createAuth(env: Bindings) {
             from: `rewrite.so <${from}>`,
             to: email,
             subject: '登录 rewrite.so',
-            html: renderMagicLinkHtml(finalUrl, email),
-            text: renderMagicLinkText(finalUrl),
+            html: renderMagicLinkHtml(url, email),
+            text: renderMagicLinkText(url),
           });
         },
         expiresIn: 60 * 15, // 15 分钟

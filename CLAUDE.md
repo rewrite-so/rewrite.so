@@ -33,13 +33,17 @@
 - **drizzle 仅给 better-auth 4 张表用**：业务表保持裸 SQL，这是"D1 不用 ORM"原则的唯一例外。不要顺手把业务表也搬到 drizzle。
 - **D1 不用 ORM 迁移工具**：手写 `migrations/NNNN_xxx.sql`，文件名严格按 4 位数字编号。
 - **better-auth session 是 cookie 不是 Bearer**：扩展必须 background 代理请求
-- **Magic Link 邮件链接的 host 必须是 web origin（不是 api origin）**：
-  better-auth 默认生成 `${baseURL}/api/auth/magic-link/verify?...`（baseURL = api origin）。
-  如果用户在邮件里点这个链接，cookie 会落在 api origin (8787 / api.rewrite.so) 上，
-  web 端 (3000 / rewrite.so) 拿不到。`lib/auth.ts` 的 sendMagicLink 把 url 的 host
-  替换成 `WEB_ORIGIN`；前端调用 `/api/auth/sign-in/magic-link` 时 callbackURL 也用绝对 URL
-  指向 web origin。Web 端通过 next rewrites 代理 `/api/auth/*` 到 wrangler，
-  Set-Cookie 透传后落在 web origin（dev: localhost；prod: rewrite.so）。才能携带 cookie；content script 直接 fetch 拿不到。
+- **Magic Link 邮件链接 = api origin（不能改成 web origin）**：
+  曾尝试把链接 host 替换成 web origin，靠 next rewrites 代理 verify 到 api。但
+  **OpenNext 在 Cloudflare Workers 上对 GET `/api/auth/magic-link/verify?token=...` 这种
+  GET + 长 query 的 rewrite 有 bug 返 404**（同 path 不带 query 的 GET 和 POST 都正常）。
+  因此 sendMagicLink 不再做 host 替换，让浏览器直接打 `https://api.rewrite.so/...`，
+  better-auth 在 api worker 处理完 verify 后 302 redirect 到 callbackURL（web origin）。
+- **Cookie domain 必须是 `.rewrite.so`（生产）**：让 api 设的 session cookie 被
+  `rewrite.so` 子域共享。`lib/auth.ts` 用 `crossSubDomainCookies: { enabled: true, domain: '.rewrite.so' }`
+  仅当 baseURL 含 rewrite.so 时启用（dev localhost 不能这么设）。前端 `LoginClient` 传
+  `callbackURL: \`${window.location.origin}/settings\`` 让 verify 后跳回 web origin，
+  此时 cookie 已落在 .rewrite.so 上，web 端读得到。
 - **Creem webhook 路径必须是 `/webhooks/creem`** 而不是 `/api/...`：避免 OpenNext path 重写。
 
 ## 配额与计费
