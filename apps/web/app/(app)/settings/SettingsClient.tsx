@@ -4,6 +4,13 @@ import { useEffect, useState } from 'react';
 
 interface UserInfo {
   user: { id: string; email: string; name?: string | null; image?: string | null } | null;
+  tier?: 'free' | 'pro';
+  subscription?: {
+    plan: string;
+    status: string;
+    currentPeriodEnd: string;
+    cancelAtPeriodEnd: boolean;
+  } | null;
 }
 
 interface Usage {
@@ -17,6 +24,14 @@ interface Usage {
 interface UserSettings {
   targetLang: string;
   uiLocale: 'auto' | 'zh-CN' | 'en';
+}
+
+interface ByokConfig {
+  configured: boolean;
+  baseUrl?: string;
+  model?: string;
+  keyMask?: string;
+  updatedAt?: string;
 }
 
 const LANG_OPTIONS: Array<{ value: string; label: string }> = [
@@ -34,6 +49,7 @@ export function SettingsClient() {
   const [me, setMe] = useState<UserInfo | null>(null);
   const [usage, setUsage] = useState<Usage | null>(null);
   const [settings, setSettings] = useState<UserSettings | null>(null);
+  const [byok, setByok] = useState<ByokConfig | null>(null);
   const [savingLang, setSavingLang] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
 
@@ -50,10 +66,14 @@ export function SettingsClient() {
         setMe(meData);
         setUsage(await usageRes.json());
 
-        // 仅登录用户加载 settings
+        // 仅登录用户加载 settings + byok
         if (meData.user) {
-          const sRes = await fetch('/v1/me/settings', { credentials: 'include' });
+          const [sRes, byokRes] = await Promise.all([
+            fetch('/v1/me/settings', { credentials: 'include' }),
+            fetch('/v1/me/byok', { credentials: 'include' }),
+          ]);
           if (sRes.ok && !cancelled) setSettings(await sRes.json());
+          if (byokRes.ok && !cancelled) setByok(await byokRes.json());
         }
       } catch (err) {
         console.warn('settings load failed', err);
@@ -63,6 +83,14 @@ export function SettingsClient() {
       cancelled = true;
     };
   }, []);
+
+  async function deleteByok() {
+    if (!confirm('删除 BYOK 配置后会回到平台默认 upstream 并重新计入月配额，确认继续？')) {
+      return;
+    }
+    const res = await fetch('/v1/me/byok', { method: 'DELETE', credentials: 'include' });
+    if (res.ok) setByok({ configured: false });
+  }
 
   async function updateTargetLang(value: string) {
     if (!settings || savingLang) return;
@@ -173,6 +201,12 @@ export function SettingsClient() {
         </div>
       )}
 
+      <SubscriptionSection me={me} />
+
+      {me.tier === 'pro' && (
+        <ByokSection byok={byok} onChange={setByok} onDelete={deleteByok} />
+      )}
+
       <div style={{ marginTop: 24 }}>
         <button
           type="button"
@@ -194,6 +228,277 @@ export function SettingsClient() {
     </section>
   );
 }
+
+function SubscriptionSection({ me }: { me: UserInfo }) {
+  const [loading, setLoading] = useState(false);
+  async function openPortal() {
+    setLoading(true);
+    try {
+      const res = await fetch('/v1/billing/portal', { credentials: 'include' });
+      const data = (await res.json()) as { url?: string };
+      if (data.url) location.href = data.url;
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (me.tier === 'pro' && me.subscription) {
+    const periodEnd = new Date(me.subscription.currentPeriodEnd).toLocaleDateString('zh-CN');
+    return (
+      <div style={{ ...cardStyle, marginTop: 16 }}>
+        <Row label="订阅" value={`Pro ${me.subscription.plan === 'yearly' ? '年付' : '月付'}`} />
+        <Row label="状态" value={statusLabel(me.subscription.status)} />
+        <Row
+          label={me.subscription.cancelAtPeriodEnd ? '将到期于' : '下次续费'}
+          value={periodEnd}
+        />
+        <div style={{ padding: '12px 0' }}>
+          <button
+            type="button"
+            onClick={openPortal}
+            disabled={loading}
+            style={{
+              padding: '7px 12px',
+              fontSize: 13,
+              background: '#fff',
+              color: '#111',
+              border: '1px solid #d4d4d8',
+              borderRadius: 6,
+              cursor: 'pointer',
+            }}
+          >
+            {loading ? '跳转中…' : '管理订阅 / 发票'}
+          </button>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div style={{ ...cardStyle, marginTop: 16 }}>
+      <Row label="订阅" value="Free（30 次 / 月）" />
+      <div style={{ padding: '12px 0' }}>
+        <a
+          href="/billing"
+          style={{
+            display: 'inline-block',
+            padding: '7px 12px',
+            fontSize: 13,
+            background: '#111',
+            color: '#fff',
+            border: 'none',
+            borderRadius: 6,
+            textDecoration: 'none',
+          }}
+        >
+          升级 Pro →
+        </a>
+      </div>
+    </div>
+  );
+}
+
+function statusLabel(s: string): string {
+  switch (s) {
+    case 'active':
+      return '正常';
+    case 'trialing':
+      return '试用中';
+    case 'paused':
+      return '已暂停';
+    case 'canceled':
+      return '已取消（周期末到期）';
+    case 'past_due':
+      return '逾期未付款';
+    case 'expired':
+      return '已到期';
+    default:
+      return s;
+  }
+}
+
+function ByokSection({
+  byok,
+  onChange,
+  onDelete,
+}: {
+  byok: ByokConfig | null;
+  onChange: (b: ByokConfig) => void;
+  onDelete: () => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [baseUrl, setBaseUrl] = useState('');
+  const [model, setModel] = useState('');
+  const [apiKey, setApiKey] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function save() {
+    setError(null);
+    setSaving(true);
+    try {
+      const res = await fetch('/v1/me/byok', {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ baseUrl, model, apiKey }),
+      });
+      const data = (await res.json()) as { configured?: boolean; error?: string; keyMask?: string };
+      if (!res.ok) {
+        setError(data.error ?? '保存失败');
+        return;
+      }
+      onChange({
+        configured: true,
+        baseUrl,
+        model,
+        keyMask: data.keyMask,
+        updatedAt: new Date().toISOString(),
+      });
+      setEditing(false);
+      setApiKey('');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div style={{ ...cardStyle, marginTop: 16 }}>
+      <div
+        style={{
+          padding: '10px 0',
+          borderBottom: '1px solid #f0f0f0',
+        }}
+      >
+        <div style={{ fontSize: 14, color: '#111', fontWeight: 500 }}>BYOK（自带 API Key）</div>
+        <div style={{ fontSize: 12, color: '#888', marginTop: 2, lineHeight: 1.6 }}>
+          填入你自己的 OpenAI 兼容 endpoint 和 key 后，所有改写直连你的上游，
+          <strong style={{ color: '#111' }}>不计入 2,000 次月配额</strong>。Key 用 AES-GCM 加密存储，永不日志输出。
+        </div>
+      </div>
+
+      {byok?.configured && !editing && (
+        <>
+          <Row label="Base URL" value={byok.baseUrl ?? '-'} />
+          <Row label="Model" value={byok.model ?? '-'} />
+          <Row label="API Key" value={`****${byok.keyMask ?? ''}`} />
+          <div style={{ padding: '12px 0', display: 'flex', gap: 8 }}>
+            <button type="button" onClick={() => setEditing(true)} style={btnSecondary}>
+              修改
+            </button>
+            <button
+              type="button"
+              onClick={onDelete}
+              style={{ ...btnSecondary, color: '#dc2626', borderColor: '#fca5a5' }}
+            >
+              删除
+            </button>
+          </div>
+        </>
+      )}
+
+      {(!byok?.configured || editing) && (
+        <div style={{ padding: '12px 0' }}>
+          <Field
+            label="Base URL"
+            value={baseUrl}
+            onChange={setBaseUrl}
+            placeholder="https://api.openai.com/v1"
+          />
+          <Field
+            label="Model"
+            value={model}
+            onChange={setModel}
+            placeholder="gpt-4o-mini"
+          />
+          <Field
+            label="API Key"
+            value={apiKey}
+            onChange={setApiKey}
+            placeholder="sk-..."
+            type="password"
+          />
+          {error && <p style={{ color: '#dc2626', fontSize: 12, margin: '4px 0' }}>{error}</p>}
+          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+            <button
+              type="button"
+              onClick={save}
+              disabled={!baseUrl || !model || !apiKey || saving}
+              style={{
+                padding: '7px 12px',
+                fontSize: 13,
+                background: '#111',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 6,
+                cursor: 'pointer',
+                opacity: !baseUrl || !model || !apiKey || saving ? 0.5 : 1,
+              }}
+            >
+              {saving ? '保存中…' : '保存'}
+            </button>
+            {editing && (
+              <button
+                type="button"
+                onClick={() => {
+                  setEditing(false);
+                  setError(null);
+                }}
+                style={btnSecondary}
+              >
+                取消
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Field({
+  label,
+  value,
+  onChange,
+  placeholder,
+  type = 'text',
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  type?: string;
+}) {
+  return (
+    <label style={{ display: 'block', marginBottom: 10 }}>
+      <span style={{ display: 'block', fontSize: 12, color: '#888', marginBottom: 4 }}>{label}</span>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.currentTarget.value)}
+        placeholder={placeholder}
+        style={{
+          width: '100%',
+          padding: '7px 10px',
+          fontSize: 13,
+          border: '1px solid #d4d4d8',
+          borderRadius: 6,
+          fontFamily: 'inherit',
+          boxSizing: 'border-box',
+        }}
+      />
+    </label>
+  );
+}
+
+const btnSecondary = {
+  padding: '7px 12px',
+  fontSize: 13,
+  background: '#fff',
+  color: '#111',
+  border: '1px solid #d4d4d8',
+  borderRadius: 6,
+  cursor: 'pointer',
+};
 
 function Quota({ usage }: { usage: Usage }) {
   const tierLabel: Record<Usage['tier'], string> = {

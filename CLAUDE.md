@@ -48,6 +48,17 @@
 - **配额数字（10/5/30/2000）改动需重算成本**：当前售价（月付 $13.99 / 年付 $7.99/月，即 $95.88/年）下 Pro 跑满约 $4/月，留 $4-10 利润。匿名/扩展/登录免费档不应放宽至单用户成本超 $0.20/月。
 - **BYOK 用户走 token bucket（100 req/min 反代滥用底线）但不查月配额**：防止当作我们 SSE 的反代。
 - **installId 永不重置**：包括登录后；登录会做 `usage_monthly` 一次性 merge。
+- **resolveUserTier 是订阅 → 配额档位的唯一入口**：`/v1/rewrite` 和 `/v1/me/usage` 都通过它查 subscriptions
+  表决定 free/pro。`status` 为 `active|trialing|paused`，或 `canceled` 但 `current_period_end > now`，
+  都返回 'pro'。其它（包括 `expired|past_due`）返回 'free'。webhook 状态机和这个查询逻辑必须一致。
+- **Webhook 路径 `/webhooks/creem`**：Creem 用 header `creem-signature` 传 hex 编码的 HMAC-SHA256，
+  必须用原始 `c.req.text()` 做签名校验（JSON.parse 后再 stringify 会丢空白导致签名对不上）。
+  幂等用 `webhook_events` 表的 `event_id` PK，先查 → 处理 → 写。
+- **BYOK 仅 Pro 用户可配（在 PUT 路径校验）**：但 /v1/rewrite 在执行时只看 byok_keys 表是否有行，
+  不再二次校验订阅——避免订阅过期后用户的 BYOK 突然失效。订阅过期时若想强制回退，
+  应在 webhook subscription.expired 处理器里清掉 byok_keys。MVP 不做。
+- **BYOK_MASTER_KEY 是 base64 编码的 32 字节 AES-GCM key**（`openssl rand -base64 32` 生成）。
+  改 master key 会让所有 byok_keys 失效。`key_version` 字段保留给将来多 key 轮换用，MVP v=1。
 
 ## 前端实现要点
 

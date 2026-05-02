@@ -3,11 +3,25 @@ import { MAX_INPUT_CHARS, RewriteRequestSchema, type Style } from '@rewrite/shar
 import { Hono } from 'hono';
 import { BURST_BUCKETS, consume } from '../do/rate-limiter.ts';
 import { createAuth } from '../lib/auth.ts';
-import { checkAndIncrement, hashIp, type Subject, type Tier } from '../lib/quota.ts';
+import { decryptApiKey } from '../lib/crypto.ts';
+import {
+  checkAndIncrement,
+  hashIp,
+  resolveUserTier,
+  type Subject,
+  type Tier,
+} from '../lib/quota.ts';
 import { muxToSSE } from '../lib/sse.ts';
 import { stripThinking } from '../lib/strip-thinking.ts';
 import { streamCompletion } from '../lib/upstream.ts';
 import type { AppEnv } from '../types.ts';
+
+interface ByokConfigRow {
+  base_url: string;
+  model: string;
+  encrypted_api_key: string;
+  iv: string;
+}
 
 export const rewriteRoute = new Hono<AppEnv>();
 
@@ -38,10 +52,10 @@ rewriteRoute.post('/v1/rewrite', async (c) => {
   let subject: Subject;
   let tier: Tier;
   let userTargetLang: string | null = null;
+  let byokConfig: ByokConfigRow | null = null;
   if (userId) {
     subject = { kind: 'user', id: userId };
-    // Phase 4 后这里要查 subscriptions 决定 free / pro。MVP 起步先全 free。
-    tier = 'free';
+    tier = await resolveUserTier(c.env.DB, userId);
     // 拿账号偏好的 target_lang，登录用户优先用账号设置覆盖客户端 lang
     const prefs = await c.env.DB.prepare('SELECT target_lang FROM user_settings WHERE user_id = ?')
       .bind(userId)
@@ -49,6 +63,12 @@ rewriteRoute.post('/v1/rewrite', async (c) => {
     if (prefs?.target_lang && prefs.target_lang !== 'auto') {
       userTargetLang = prefs.target_lang;
     }
+    // BYOK 配置（仅 Pro 用户能配，但这里不再校验 tier，写入路径已校验过）
+    byokConfig = await c.env.DB.prepare(
+      'SELECT base_url, model, encrypted_api_key, iv FROM byok_keys WHERE user_id = ?',
+    )
+      .bind(userId)
+      .first<ByokConfigRow>();
   } else if (req.installId) {
     subject = { kind: 'install', id: req.installId };
     tier = 'anonymous_install';
@@ -77,8 +97,9 @@ rewriteRoute.post('/v1/rewrite', async (c) => {
   }
 
   // ===== 月配额（D1 usage_monthly） =====
-  // BYOK 在 Phase 4 接入；MVP 全 isBYOK=false
-  const quota = await checkAndIncrement(c.env.DB, subject, tier, false);
+  // BYOK 用户：不查月配额，仅记 byok_count；DO burst 仍生效作为反代滥用底线
+  const isBYOK = byokConfig !== null;
+  const quota = await checkAndIncrement(c.env.DB, subject, tier, isBYOK);
   if (!quota.allowed) {
     return c.json(
       {
@@ -92,13 +113,34 @@ rewriteRoute.post('/v1/rewrite', async (c) => {
   }
 
   // ===== 上游配置 =====
-  const baseUrl = c.env.OPENAI_BASE_URL;
-  const apiKey = c.env.OPENAI_API_KEY;
-  const model = c.env.OPENAI_MODEL;
-  if (!baseUrl || !apiKey || !model) {
-    return c.json({ error: 'upstream_not_configured' }, 503);
+  // BYOK 用户用自己的 base_url/key/model；其他用户走平台默认
+  let upstreamConfig: { baseUrl: string; apiKey: string; model: string };
+  if (byokConfig) {
+    let plainKey: string;
+    try {
+      plainKey = await decryptApiKey(
+        byokConfig.encrypted_api_key,
+        byokConfig.iv,
+        c.env.BYOK_MASTER_KEY,
+      );
+    } catch (err) {
+      console.error('[rewrite] byok decrypt failed', err);
+      return c.json({ error: 'byok_decrypt_failed' }, 500);
+    }
+    upstreamConfig = {
+      baseUrl: byokConfig.base_url,
+      apiKey: plainKey,
+      model: byokConfig.model,
+    };
+  } else {
+    const baseUrl = c.env.OPENAI_BASE_URL;
+    const apiKey = c.env.OPENAI_API_KEY;
+    const model = c.env.OPENAI_MODEL;
+    if (!baseUrl || !apiKey || !model) {
+      return c.json({ error: 'upstream_not_configured' }, 503);
+    }
+    upstreamConfig = { baseUrl, apiKey, model };
   }
-  const upstreamConfig = { baseUrl, apiKey, model };
 
   // ===== 服务端目标语言判定 =====
   // 优先级: 账号偏好（登录用户）> 客户端 lang > 'en' 兜底

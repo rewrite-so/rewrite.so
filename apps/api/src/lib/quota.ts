@@ -138,6 +138,33 @@ async function upsertUsage(
     .run();
 }
 
+/**
+ * 根据 subscriptions 表决定登录用户的 tier。
+ *
+ * 'pro' 条件：
+ * - status IN ('active', 'trialing', 'paused')   — 正常订阅
+ * - status = 'canceled' AND current_period_end > now  — 用户取消但已付到周期末
+ *
+ * 否则：'free'（包括 expired / past_due / 未订阅）。
+ */
+export async function resolveUserTier(db: D1Database, userId: string): Promise<Tier> {
+  const now = Date.now();
+  const row = await db
+    .prepare(
+      `SELECT status, current_period_end FROM subscriptions
+         WHERE user_id = ?
+         ORDER BY updated_at DESC
+         LIMIT 1`,
+    )
+    .bind(userId)
+    .first<{ status: string; current_period_end: number }>();
+  if (!row) return 'free';
+  const s = row.status;
+  if (s === 'active' || s === 'trialing' || s === 'paused') return 'pro';
+  if (s === 'canceled' && row.current_period_end > now) return 'pro';
+  return 'free';
+}
+
 /** 返回 'YYYY-MM' (UTC)。 */
 export function currentMonthUtc(d: Date = new Date()): string {
   const y = d.getUTCFullYear();
