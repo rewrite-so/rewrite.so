@@ -1,5 +1,6 @@
 import { useTranslations } from 'next-intl';
 import { Link } from '../i18n/navigation.ts';
+import { LanguageSwitcher } from './LanguageSwitcher.tsx';
 
 const NAV_LINK = {
   fontSize: 14,
@@ -86,8 +87,9 @@ export function TopNav() {
           </a>
         </div>
 
-        {/* Right CTAs */}
-        <Link href="/login" style={NAV_LINK}>
+        {/* Right: language switcher + CTAs */}
+        <LanguageSwitcher />
+        <Link href="/login" style={{ ...NAV_LINK, marginLeft: 4 }}>
           {t('signIn')}
         </Link>
         <Link href="/try" style={{ ...NAV_LINK_PRIMARY, marginLeft: 8 }}>

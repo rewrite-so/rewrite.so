@@ -1,6 +1,8 @@
 'use client';
 
+import type { Locale, StoredLocale } from '@rewrite/shared';
 import { useEffect, useState } from 'react';
+import { usePathname, useRouter } from '../../../../i18n/navigation.ts';
 
 interface UserInfo {
   user: { id: string; email: string; name?: string | null; image?: string | null } | null;
@@ -23,8 +25,19 @@ interface Usage {
 
 interface UserSettings {
   targetLang: string;
-  uiLocale: 'auto' | 'zh-CN' | 'en';
+  uiLocale: StoredLocale;
 }
+
+const UI_LOCALE_OPTIONS: Array<{ value: StoredLocale; label: string }> = [
+  { value: 'auto', label: 'Auto (use system)' },
+  { value: 'en', label: 'English' },
+  { value: 'zh-CN', label: '简体中文' },
+  { value: 'ja', label: '日本語' },
+  { value: 'ko', label: '한국어' },
+  { value: 'es', label: 'Español' },
+  { value: 'fr', label: 'Français' },
+  { value: 'de', label: 'Deutsch' },
+];
 
 interface ByokConfig {
   configured: boolean;
@@ -46,11 +59,14 @@ const LANG_OPTIONS: Array<{ value: string; label: string }> = [
 ];
 
 export function SettingsClient() {
+  const router = useRouter();
+  const pathname = usePathname();
   const [me, setMe] = useState<UserInfo | null>(null);
   const [usage, setUsage] = useState<Usage | null>(null);
   const [settings, setSettings] = useState<UserSettings | null>(null);
   const [byok, setByok] = useState<ByokConfig | null>(null);
   const [savingLang, setSavingLang] = useState(false);
+  const [savingUiLocale, setSavingUiLocale] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
@@ -109,6 +125,36 @@ export function SettingsClient() {
       if (res.ok) setSettings(await res.json());
     } finally {
       setSavingLang(false);
+    }
+  }
+
+  async function updateUiLocale(value: StoredLocale) {
+    if (!settings || savingUiLocale) return;
+    setSavingUiLocale(true);
+    try {
+      const res = await fetch('/v1/me/settings', {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ uiLocale: value }),
+      });
+      if (res.ok) {
+        setSettings(await res.json());
+        // 同步到 next-intl 的 cookie，并切换 URL 到对应 locale —— 让浏览器 UI 立刻换语言。
+        // 'auto' 时清 cookie，让 middleware 退化到 Accept-Language 检测。
+        if (value === 'auto') {
+          // biome-ignore lint/suspicious/noDocumentCookie: 标准 API 足够；Cookie Store 跨浏览器尚未普及
+          document.cookie = 'NEXT_LOCALE=; path=/; max-age=0; samesite=lax';
+          // 'auto' 仍需要刷新到具体 locale，让 middleware 重新协商。简单粗暴：reload。
+          location.reload();
+        } else {
+          // biome-ignore lint/suspicious/noDocumentCookie: 同上
+          document.cookie = `NEXT_LOCALE=${value}; path=/; max-age=31536000; samesite=lax`;
+          router.replace(pathname, { locale: value as Locale });
+        }
+      }
+    } finally {
+      setSavingUiLocale(false);
     }
   }
 
@@ -197,6 +243,42 @@ export function SettingsClient() {
               }}
             >
               {LANG_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '10px 0',
+            }}
+          >
+            <div>
+              <div style={{ fontSize: 14, color: '#111' }}>UI language</div>
+              <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>
+                Interface language. Independent of the rewrite target language above.
+              </div>
+            </div>
+            <select
+              value={settings.uiLocale}
+              onChange={(e) => updateUiLocale(e.currentTarget.value as StoredLocale)}
+              disabled={savingUiLocale}
+              style={{
+                padding: '7px 10px',
+                fontSize: 13,
+                border: '1px solid #d4d4d8',
+                borderRadius: 6,
+                background: '#fff',
+                fontFamily: 'inherit',
+                minWidth: 180,
+              }}
+            >
+              {UI_LOCALE_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
                   {o.label}
                 </option>
