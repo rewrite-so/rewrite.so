@@ -111,7 +111,22 @@ export function Footer() {
       <div
         style={{
           maxWidth: 1080,
-          margin: '32px auto 0',
+          margin: '24px auto 0',
+          fontSize: 11,
+          color: '#999',
+          lineHeight: 1.5,
+          textAlign: 'center',
+        }}
+      >
+        rewrite.so is an independent product. Not affiliated with, endorsed by, or sponsored by
+        OpenAI, Anthropic, Google, or any other AI model provider. Underlying language models are
+        accessed via standard OpenAI-compatible APIs.
+      </div>
+
+      <div
+        style={{
+          maxWidth: 1080,
+          margin: '20px auto 0',
           paddingTop: 24,
           borderTop: '1px solid #e4e4e7',
           display: 'flex',
