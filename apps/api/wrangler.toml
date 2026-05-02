@@ -11,6 +11,11 @@ routes = [
 [observability]
 enabled = true
 
+# Cron Trigger: 每天 09:00 UTC 跑一次 onboarding 邮件 dispatcher。
+# dispatcher 内部按 user_email_state 列幂等，重跑不会重发。
+[triggers]
+crons = ["0 9 * * *"]
+
 # ===== D1: 业务数据库 =====
 [[d1_databases]]
 binding = "DB"

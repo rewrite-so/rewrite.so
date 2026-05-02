@@ -9,7 +9,7 @@ vi.mock('../lib/auth.ts', () => ({
   }),
 }));
 
-const app = (await import('../index.ts')).default;
+const app = (await import('../index.ts')).app;
 
 // Fake D1：所有 SELECT 返 null，UPSERT no-op
 const fakeDB = {

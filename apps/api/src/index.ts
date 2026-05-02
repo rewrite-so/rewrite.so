@@ -1,12 +1,14 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import { processOnboardingEmails } from './emails/dispatcher.ts';
 import { createAuth } from './lib/auth.ts';
 import { log } from './lib/log.ts';
 import { billingRoute } from './routes/billing.ts';
 import { meRoute } from './routes/me.ts';
 import { rewriteRoute } from './routes/rewrite.ts';
+import { unsubscribeRoute } from './routes/unsubscribe.ts';
 import { webhookRoute } from './routes/webhook.ts';
-import type { AppEnv } from './types.ts';
+import type { AppEnv, Bindings } from './types.ts';
 
 const app = new Hono<AppEnv>();
 
@@ -84,6 +86,8 @@ app.on(['GET', 'POST'], '/api/auth/*', (c) => {
 // Phase 4: 订阅 + Webhook
 app.route('/', billingRoute);
 app.route('/', webhookRoute);
+// Phase 5: onboarding email unsubscribe
+app.route('/', unsubscribeRoute);
 
 app.notFound((c) => c.json({ error: 'not_found' }, 404));
 
@@ -97,7 +101,25 @@ app.onError((err, c) => {
   return c.json({ error: 'internal_error' }, 500);
 });
 
-export default app;
+// 单独 export app 给测试用（Hono `.request(path, init, env)` helper）
+export { app };
+
+// Cloudflare Workers 模块格式：导出对象包含 fetch + scheduled 处理器
+export default {
+  fetch: app.fetch,
+  /**
+   * Cron Trigger handler — 由 wrangler.toml [triggers] crons 调度。
+   * 每天跑一次 onboarding 邮件 dispatcher。
+   * 失败不抛（避免 CF 重试触发重复邮件 — dispatcher 内部已用 sent_at 列做幂等）。
+   */
+  async scheduled(event: ScheduledEvent, env: Bindings, ctx: ExecutionContext): Promise<void> {
+    ctx.waitUntil(
+      processOnboardingEmails(env).catch((err) => {
+        log.error('cron.error', { cron: event.cron, err });
+      }),
+    );
+  },
+};
 
 // Durable Object 类必须从 worker entry 导出，wrangler.toml 才能挂上 binding
 export { RateLimiter } from './do/rate-limiter.ts';

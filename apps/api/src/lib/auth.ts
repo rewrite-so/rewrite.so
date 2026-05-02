@@ -4,6 +4,7 @@ import { magicLink } from 'better-auth/plugins';
 import { drizzle } from 'drizzle-orm/d1';
 import { Resend } from 'resend';
 import { authSchema } from '../db/auth-schema.ts';
+import { sendWelcomeNow } from '../emails/dispatcher.ts';
 import type { Bindings } from '../types.ts';
 
 /**
@@ -65,40 +66,55 @@ export function createAuth(env: Bindings) {
           await resend.emails.send({
             from: `rewrite.so <${from}>`,
             to: email,
-            subject: '登录 rewrite.so',
+            subject: 'Sign in to rewrite.so',
             html: renderMagicLinkHtml(url, email),
             text: renderMagicLinkText(url),
           });
         },
-        expiresIn: 60 * 15, // 15 分钟
+        expiresIn: 60 * 15, // 15 minutes
       }),
     ],
+    databaseHooks: {
+      user: {
+        create: {
+          after: async (user) => {
+            // Best-effort welcome email. If it fails (Resend down, rate limit,
+            // etc.), the daily cron will pick up users with welcome_sent_at IS NULL.
+            await sendWelcomeNow(env, {
+              id: user.id,
+              email: user.email,
+              name: user.name ?? null,
+            });
+          },
+        },
+      },
+    },
   });
 }
 
 function renderMagicLinkHtml(url: string, email: string): string {
   return `<!doctype html>
 <html><body style="font-family:system-ui,sans-serif;max-width:520px;margin:32px auto;padding:24px;color:#1f1f22;">
-<h2 style="margin:0 0 12px;font-size:18px;font-weight:600">登录 rewrite.so</h2>
+<h2 style="margin:0 0 12px;font-size:18px;font-weight:600">Sign in to rewrite.so</h2>
 <p style="color:#555;font-size:14px;line-height:1.55;margin:0 0 20px">
-  你好！点击下面的按钮即可登录 <code>${escapeHtml(email)}</code>。链接 15 分钟内有效。
+  Click the button below to sign in to <code>${escapeHtml(email)}</code>. The link is valid for 15 minutes.
 </p>
 <p style="margin:24px 0">
   <a href="${escapeHtml(url)}"
      style="display:inline-block;padding:11px 22px;background:#111;color:#fff;text-decoration:none;border-radius:8px;font-size:14px;font-weight:500">
-    登录 rewrite.so
+    Sign in to rewrite.so
   </a>
 </p>
 <p style="color:#999;font-size:12px;line-height:1.5;margin:24px 0 0">
-  如果按钮无法点击，复制此链接到浏览器：<br>
+  If the button doesn’t work, paste this link into your browser:<br>
   <span style="word-break:break-all">${escapeHtml(url)}</span>
 </p>
-<p style="color:#bbb;font-size:11px;margin:16px 0 0">如果你没有请求登录，忽略此邮件即可。</p>
+<p style="color:#bbb;font-size:11px;margin:16px 0 0">If you didn’t request this, just ignore the email.</p>
 </body></html>`;
 }
 
 function renderMagicLinkText(url: string): string {
-  return `登录 rewrite.so：${url}\n\n链接 15 分钟内有效。如果你没有请求登录，忽略此邮件即可。`;
+  return `Sign in to rewrite.so: ${url}\n\nLink valid for 15 minutes. If you didn’t request this, ignore the email.`;
 }
 
 function escapeHtml(s: string): string {

@@ -10,7 +10,11 @@
  *
  * If you find yourself wanting to log a string that came from the user,
  * log its length instead.
+ *
+ * This file is the ONE allowed user of console.* — all other code uses
+ * log.{info,warn,error}.
  */
+// biome-ignore-all lint/suspicious/noConsole: centralized logging boundary, see file doc.
 
 export type LogLevel = 'info' | 'warn' | 'error';
 
