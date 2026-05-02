@@ -37,10 +37,18 @@ rewriteRoute.post('/v1/rewrite', async (c) => {
 
   let subject: Subject;
   let tier: Tier;
+  let userTargetLang: string | null = null;
   if (userId) {
     subject = { kind: 'user', id: userId };
     // Phase 4 后这里要查 subscriptions 决定 free / pro。MVP 起步先全 free。
     tier = 'free';
+    // 拿账号偏好的 target_lang，登录用户优先用账号设置覆盖客户端 lang
+    const prefs = await c.env.DB.prepare('SELECT target_lang FROM user_settings WHERE user_id = ?')
+      .bind(userId)
+      .first<{ target_lang: string }>();
+    if (prefs?.target_lang && prefs.target_lang !== 'auto') {
+      userTargetLang = prefs.target_lang;
+    }
   } else if (req.installId) {
     subject = { kind: 'install', id: req.installId };
     tier = 'anonymous_install';
@@ -92,8 +100,10 @@ rewriteRoute.post('/v1/rewrite', async (c) => {
   }
   const upstreamConfig = { baseUrl, apiKey, model };
 
-  // ===== 服务端目标语言判定：优先客户端给的 lang；'auto' 兜底为 'en' =====
-  const targetLang = req.lang === 'auto' ? 'en' : req.lang;
+  // ===== 服务端目标语言判定 =====
+  // 优先级: 账号偏好（登录用户）> 客户端 lang > 'en' 兜底
+  // 客户端 lang='auto' 表示让服务端决定（取自启发式或账号偏好）
+  const targetLang = userTargetLang ?? (req.lang === 'auto' ? 'en' : req.lang);
 
   // AbortSignal: client 断开 → c.req.raw.signal abort → 级联到 3 路 fetch
   const signal = c.req.raw.signal;

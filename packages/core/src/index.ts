@@ -30,6 +30,8 @@ export interface MountOptions {
   /** web 模式下浮层底部显示"安装扩展"链接 */
   showInstallHook?: boolean;
   onInstallClick?: () => void;
+  /** 错误时显示登录 CTA 的目标 URL（如 web: '/login'，扩展: 'https://rewrite.so/login'） */
+  loginUrl?: string;
   onError?: (e: Error) => void;
 }
 
@@ -134,6 +136,7 @@ export function mount(opts: MountOptions): MountHandle {
       target,
       locale: uiLocale,
       ...(opts.showInstallHook ? { showInstallHook: opts.showInstallHook } : {}),
+      ...(opts.loginUrl ? { loginUrl: opts.loginUrl } : {}),
     });
     currentPanel = panel;
 
@@ -162,10 +165,28 @@ export function mount(opts: MountOptions): MountHandle {
       }
     } catch (err) {
       if ((err as Error).name === 'AbortError') return; // 用户取消
-      panel.setGlobalError('upstream_error');
+      // ApiError（HTTP 4xx/5xx）解析 detailObj 拿到 error code
+      const code = extractErrorCode(err);
+      panel.setGlobalError(code, extractErrorDetail(err));
       opts.onError?.(err as Error);
     }
   };
+
+  function extractErrorCode(err: unknown): string {
+    if (err && typeof err === 'object' && 'detailObj' in err) {
+      const d = (err as { detailObj?: Record<string, unknown> | null }).detailObj;
+      const code = d?.error;
+      if (typeof code === 'string') return code;
+    }
+    return 'upstream_error';
+  }
+  function extractErrorDetail(err: unknown): Record<string, unknown> | undefined {
+    if (err && typeof err === 'object' && 'detailObj' in err) {
+      const d = (err as { detailObj?: Record<string, unknown> | null }).detailObj;
+      if (d && typeof d === 'object') return d;
+    }
+    return undefined;
+  }
 
   const trigger = attachDoubleShift(window, { onTrigger: handleTrigger });
 

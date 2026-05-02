@@ -22,8 +22,8 @@ export interface CandidatesHandle {
   appendDelta(style: Style, text: string): void;
   setDone(style: Style, finalText: string): void;
   setError(style: Style, code: string): void;
-  /** 整体错误（如鉴权失败），3 卡片都标 error */
-  setGlobalError(code: string): void;
+  /** 整体错误：替换整个浮层为单一错误卡片（含 CTA 链接，按 code 决定文案） */
+  setGlobalError(code: string, detail?: Record<string, unknown>): void;
   close(): void;
 }
 
@@ -32,6 +32,8 @@ export interface OpenOptions {
   locale: Locale;
   /** web 模式下 true，浮层底部显示"安装扩展"链接 */
   showInstallHook?: boolean;
+  /** 登录引导 URL（错误状态显示登录 CTA 时跳转） */
+  loginUrl?: string;
 }
 
 export function createCandidates(
@@ -208,11 +210,82 @@ function openPanel(
       span.textContent = errorMessage(code, opts.locale);
       entry.textEl.appendChild(span);
     },
-    setGlobalError(code) {
-      for (const style of ALL_STYLES) this.setError(style, code);
+    setGlobalError(code, detail) {
+      if (closed) return;
+      // 替换整个浮层为单一错误卡片 + CTA
+      panel.innerHTML = '';
+      panel.classList.add('global-error');
+
+      const errEl = document.createElement('div');
+      errEl.className = 'global-error-card';
+
+      const title = document.createElement('div');
+      title.className = 'global-error-title';
+      title.textContent = errorMessage(code, opts.locale);
+      errEl.appendChild(title);
+
+      const sub = describeErrorDetail(code, detail, opts.locale);
+      if (sub) {
+        const subEl = document.createElement('div');
+        subEl.className = 'global-error-sub';
+        subEl.textContent = sub;
+        errEl.appendChild(subEl);
+      }
+
+      const ctaInfo = decideCTA(code, opts);
+      if (ctaInfo) {
+        const cta = document.createElement('button');
+        cta.type = 'button';
+        cta.className = 'global-error-cta';
+        cta.textContent = ctaInfo.label;
+        cta.addEventListener('click', ctaInfo.onClick);
+        errEl.appendChild(cta);
+      }
+
+      panel.appendChild(errEl);
+      // 重新定位（panel 高度变了）
+      positionPanel(panel, opts.target);
     },
     close,
   };
+}
+
+function decideCTA(code: string, opts: OpenOptions): { label: string; onClick: () => void } | null {
+  // 配额超限 / 鉴权失败：引导登录（如果有 loginUrl）
+  if ((code === 'quota_exceeded' || code === 'unauthorized') && opts.loginUrl) {
+    return {
+      label: opts.locale === 'zh-CN' ? '登录解锁更多 →' : 'Sign in for more →',
+      onClick: () => {
+        if (opts.loginUrl) window.open(opts.loginUrl, '_blank');
+      },
+    };
+  }
+  return null;
+}
+
+function describeErrorDetail(
+  code: string,
+  detail: Record<string, unknown> | undefined,
+  locale: Locale,
+): string | null {
+  if (!detail) return null;
+  if (code === 'quota_exceeded') {
+    const used = typeof detail.used === 'number' ? detail.used : null;
+    const limit = typeof detail.limit === 'number' ? detail.limit : null;
+    if (used != null && limit != null) {
+      return locale === 'zh-CN'
+        ? `已用 ${used} / ${limit}，下个月初重置。`
+        : `Used ${used} / ${limit}. Resets at the start of next month.`;
+    }
+  }
+  if (code === 'rate_limit') {
+    const ms = typeof detail.retryAfterMs === 'number' ? detail.retryAfterMs : null;
+    if (ms != null) {
+      const sec = Math.max(1, Math.ceil(ms / 1000));
+      return locale === 'zh-CN' ? `请 ${sec} 秒后重试。` : `Try again in ${sec}s.`;
+    }
+  }
+  return null;
 }
 
 function positionPanel(panel: HTMLElement, target: HTMLElement): void {

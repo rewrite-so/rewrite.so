@@ -1,9 +1,22 @@
 import { Hono } from 'hono';
+import { z } from 'zod';
 import { createAuth } from '../lib/auth.ts';
 import { getUsage, hashIp, type Subject, type Tier } from '../lib/quota.ts';
 import type { AppEnv } from '../types.ts';
 
 export const meRoute = new Hono<AppEnv>();
+
+interface UserSettingsRow {
+  target_lang: string;
+  ui_locale: string;
+}
+
+const SettingsPatchSchema = z
+  .object({
+    targetLang: z.string().min(1).max(20).optional(),
+    uiLocale: z.enum(['auto', 'zh-CN', 'en']).optional(),
+  })
+  .strict();
 
 /**
  * GET /v1/me/usage
@@ -69,4 +82,71 @@ meRoute.get('/v1/me', async (c) => {
       image: session.user.image,
     },
   });
+});
+
+/**
+ * GET /v1/me/settings
+ * 返回当前登录用户的偏好（target_lang / ui_locale）。
+ * 未登录返 401 unauthorized。
+ */
+meRoute.get('/v1/me/settings', async (c) => {
+  const auth = createAuth(c.env);
+  const session = await auth.api.getSession({ headers: c.req.raw.headers });
+  if (!session) return c.json({ error: 'unauthorized' }, 401);
+
+  const row = await c.env.DB.prepare(
+    'SELECT target_lang, ui_locale FROM user_settings WHERE user_id = ?',
+  )
+    .bind(session.user.id)
+    .first<UserSettingsRow>();
+
+  return c.json({
+    targetLang: row?.target_lang ?? 'auto',
+    uiLocale: row?.ui_locale ?? 'auto',
+  });
+});
+
+/**
+ * PATCH /v1/me/settings
+ * 增量更新偏好。未登录返 401。
+ */
+meRoute.patch('/v1/me/settings', async (c) => {
+  const auth = createAuth(c.env);
+  const session = await auth.api.getSession({ headers: c.req.raw.headers });
+  if (!session) return c.json({ error: 'unauthorized' }, 401);
+
+  let body: unknown;
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ error: 'invalid_json' }, 400);
+  }
+  const parsed = SettingsPatchSchema.safeParse(body);
+  if (!parsed.success) {
+    return c.json({ error: 'invalid_input', detail: parsed.error.issues[0]?.message }, 400);
+  }
+
+  // 先读现值，merge patch，再 upsert（避免 SQL UPSERT 时 null 默认值覆盖未传字段）
+  const current = await c.env.DB.prepare(
+    'SELECT target_lang, ui_locale FROM user_settings WHERE user_id = ?',
+  )
+    .bind(session.user.id)
+    .first<UserSettingsRow>();
+
+  const targetLang = parsed.data.targetLang ?? current?.target_lang ?? 'auto';
+  const uiLocale = parsed.data.uiLocale ?? current?.ui_locale ?? 'auto';
+  const now = Date.now();
+
+  await c.env.DB.prepare(
+    `INSERT INTO user_settings (user_id, target_lang, ui_locale, updated_at)
+     VALUES (?, ?, ?, ?)
+     ON CONFLICT (user_id) DO UPDATE SET
+       target_lang = excluded.target_lang,
+       ui_locale = excluded.ui_locale,
+       updated_at = excluded.updated_at`,
+  )
+    .bind(session.user.id, targetLang, uiLocale, now)
+    .run();
+
+  return c.json({ targetLang, uiLocale });
 });

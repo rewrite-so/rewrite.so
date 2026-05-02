@@ -1,4 +1,46 @@
+import { useEffect, useState } from 'preact/hooks';
+import { API_BASE, WEB_BASE } from '../lib/config.ts';
+import { getOrCreateInstallId } from '../lib/storage.ts';
+
+interface Usage {
+  used: number;
+  limit: number;
+  remaining: number;
+  resetAt: string;
+  tier: 'anonymous' | 'anonymous_install' | 'free' | 'pro';
+}
+
+const TIER_LABEL: Record<Usage['tier'], string> = {
+  anonymous: '匿名',
+  anonymous_install: '未登录',
+  free: '免费',
+  pro: 'Pro',
+};
+
 export function App() {
+  const [usage, setUsage] = useState<Usage | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const installId = await getOrCreateInstallId();
+        const res = await fetch(
+          `${API_BASE}/v1/me/usage?installId=${encodeURIComponent(installId)}`,
+        );
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = (await res.json()) as Usage;
+        if (!cancelled) setUsage(data);
+      } catch (e) {
+        if (!cancelled) setError((e as Error).message);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <div style={{ width: 280, padding: 16, fontFamily: 'system-ui, sans-serif' }}>
       <header style={{ marginBottom: 12 }}>
@@ -9,19 +51,57 @@ export function App() {
       </header>
 
       <div style={cardStyle}>
-        <div style={{ fontSize: 11, color: '#888' }}>本月剩余</div>
-        <div style={{ fontSize: 18, fontWeight: 600, marginTop: 2 }}>未登录 · 5 次</div>
+        {error ? (
+          <div style={{ fontSize: 12, color: '#dc2626' }}>无法加载配额：{error}</div>
+        ) : usage ? (
+          <UsageDisplay usage={usage} />
+        ) : (
+          <div style={{ fontSize: 12, color: '#888' }}>加载中…</div>
+        )}
       </div>
 
       <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
         <button type="button" style={btnStyle} onClick={() => chrome.runtime.openOptionsPage()}>
           设置
         </button>
-        <button type="button" style={btnPrimaryStyle} disabled>
-          登录（Phase 2）
+        <button
+          type="button"
+          style={btnPrimaryStyle}
+          onClick={() => chrome.tabs.create({ url: `${WEB_BASE}/login` })}
+        >
+          {usage?.tier === 'free' || usage?.tier === 'pro' ? '我的' : '登录'}
         </button>
       </div>
     </div>
+  );
+}
+
+function UsageDisplay({ usage }: { usage: Usage }) {
+  const reset = new Date(usage.resetAt);
+  const resetLabel = reset.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' });
+  const isLow = usage.remaining <= Math.max(1, Math.floor(usage.limit * 0.2));
+  const totalLabel = Number.isFinite(usage.limit) ? usage.limit : '∞';
+  return (
+    <>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'baseline',
+          marginBottom: 6,
+        }}
+      >
+        <span style={{ fontSize: 11, color: '#888' }}>本月剩余</span>
+        <span style={{ fontSize: 11, color: '#888' }}>{TIER_LABEL[usage.tier]}</span>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+        <span style={{ fontSize: 22, fontWeight: 600, color: isLow ? '#dc2626' : '#111' }}>
+          {Number.isFinite(usage.remaining) ? usage.remaining : '∞'}
+        </span>
+        <span style={{ fontSize: 12, color: '#888' }}>/ {totalLabel}</span>
+      </div>
+      <div style={{ marginTop: 6, fontSize: 11, color: '#999' }}>{resetLabel} 重置</div>
+    </>
   );
 }
 
@@ -55,6 +135,4 @@ const btnPrimaryStyle = {
   background: '#111',
   color: '#fff',
   border: 'none',
-  opacity: 0.5,
-  cursor: 'not-allowed',
 };

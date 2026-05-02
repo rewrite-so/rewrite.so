@@ -181,4 +181,38 @@ export const SHADOW_STYLES = `
   text-underline-offset: 2px;
   cursor: pointer;
 }
+
+.panel.global-error {
+  padding: 18px 20px;
+}
+.global-error-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+.global-error-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: light-dark(#1f1f22, #f5f5f5);
+}
+.global-error-sub {
+  font-size: 12px;
+  color: light-dark(rgba(0,0,0,0.55), rgba(255,255,255,0.55));
+  line-height: 1.5;
+}
+.global-error-cta {
+  margin-top: 4px;
+  padding: 7px 13px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  color: light-dark(#fff, #1f1f22);
+  background: light-dark(#1f1f22, #f5f5f5);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: opacity 120ms ease;
+}
+.global-error-cta:hover { opacity: 0.85; }
 `;

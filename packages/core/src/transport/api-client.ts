@@ -33,12 +33,21 @@ export function createWebApiClient(opts: { apiBase: string }): RewriteApiClient 
 }
 
 export class ApiError extends Error {
+  /** 解析后的错误体（如 { error: 'quota_exceeded', used, limit, resetAt }），失败为 null */
+  public detailObj: Record<string, unknown> | null = null;
+
   constructor(
     public status: number,
     public detail: string,
   ) {
     super(`API error ${status}: ${detail}`);
     this.name = 'ApiError';
+    try {
+      const parsed = JSON.parse(detail);
+      if (parsed && typeof parsed === 'object') this.detailObj = parsed as Record<string, unknown>;
+    } catch {
+      // detail 不是 JSON，保持 null
+    }
   }
 }
 

@@ -1,5 +1,6 @@
 import { type MountOptions, mount } from '@rewrite/core';
 import { type Locale, pickLocale } from '@rewrite/shared';
+import { WEB_BASE } from '../lib/config.ts';
 import {
   getOrCreateInstallId,
   getUserPrefs,
@@ -26,6 +27,7 @@ async function bootstrap(): Promise<void> {
     userPrefLang: p.targetLang,
     uiLocale: resolveUiLocale(p),
     installId,
+    loginUrl: `${WEB_BASE}/login`,
   });
 
   let handle = mount(buildOpts(prefs));

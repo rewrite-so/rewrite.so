@@ -1,6 +1,5 @@
+import { API_BASE } from '../lib/config.ts';
 import { type FromBackground, type FromContent, PORT_NAME_REWRITE } from '../lib/port-protocol.ts';
-
-const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? 'http://localhost:8787';
 
 chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === 'install') {

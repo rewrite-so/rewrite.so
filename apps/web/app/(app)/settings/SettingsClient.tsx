@@ -14,9 +14,27 @@ interface Usage {
   tier: 'anonymous' | 'anonymous_install' | 'free' | 'pro';
 }
 
+interface UserSettings {
+  targetLang: string;
+  uiLocale: 'auto' | 'zh-CN' | 'en';
+}
+
+const LANG_OPTIONS: Array<{ value: string; label: string }> = [
+  { value: 'auto', label: '自动检测页面语言' },
+  { value: 'en', label: 'English' },
+  { value: 'zh-CN', label: '中文（简体）' },
+  { value: 'ja', label: '日本語' },
+  { value: 'ko', label: '한국어' },
+  { value: 'es', label: 'Español' },
+  { value: 'fr', label: 'Français' },
+  { value: 'de', label: 'Deutsch' },
+];
+
 export function SettingsClient() {
   const [me, setMe] = useState<UserInfo | null>(null);
   const [usage, setUsage] = useState<Usage | null>(null);
+  const [settings, setSettings] = useState<UserSettings | null>(null);
+  const [savingLang, setSavingLang] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
@@ -28,8 +46,15 @@ export function SettingsClient() {
           fetch('/v1/me/usage', { credentials: 'include' }),
         ]);
         if (cancelled) return;
-        setMe(await meRes.json());
+        const meData: UserInfo = await meRes.json();
+        setMe(meData);
         setUsage(await usageRes.json());
+
+        // 仅登录用户加载 settings
+        if (meData.user) {
+          const sRes = await fetch('/v1/me/settings', { credentials: 'include' });
+          if (sRes.ok && !cancelled) setSettings(await sRes.json());
+        }
       } catch (err) {
         console.warn('settings load failed', err);
       }
@@ -38,6 +63,22 @@ export function SettingsClient() {
       cancelled = true;
     };
   }, []);
+
+  async function updateTargetLang(value: string) {
+    if (!settings || savingLang) return;
+    setSavingLang(true);
+    try {
+      const res = await fetch('/v1/me/settings', {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ targetLang: value }),
+      });
+      if (res.ok) setSettings(await res.json());
+    } finally {
+      setSavingLang(false);
+    }
+  }
 
   async function signOut() {
     setSigningOut(true);
@@ -70,7 +111,7 @@ export function SettingsClient() {
           登录 →
         </a>
         {usage && (
-          <div style={cardStyle}>
+          <div style={{ ...cardStyle, marginTop: 24 }}>
             <Quota usage={usage} />
           </div>
         )}
@@ -88,6 +129,47 @@ export function SettingsClient() {
       {usage && (
         <div style={{ ...cardStyle, marginTop: 16 }}>
           <Quota usage={usage} />
+        </div>
+      )}
+
+      {settings && (
+        <div style={{ ...cardStyle, marginTop: 16 }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '10px 0',
+              borderBottom: '1px solid #f0f0f0',
+            }}
+          >
+            <div>
+              <div style={{ fontSize: 14, color: '#111' }}>目标语言</div>
+              <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>
+                改写结果输出为这个语言；输入是别的语言时自动翻译。
+              </div>
+            </div>
+            <select
+              value={settings.targetLang}
+              onChange={(e) => updateTargetLang(e.currentTarget.value)}
+              disabled={savingLang}
+              style={{
+                padding: '7px 10px',
+                fontSize: 13,
+                border: '1px solid #d4d4d8',
+                borderRadius: 6,
+                background: '#fff',
+                fontFamily: 'inherit',
+                minWidth: 180,
+              }}
+            >
+              {LANG_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       )}
 
