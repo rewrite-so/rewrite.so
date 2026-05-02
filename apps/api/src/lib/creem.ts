@@ -11,7 +11,13 @@
  *   checkout：checkout.completed / .abandoned
  */
 
-const CREEM_API = 'https://api.creem.io/v1';
+// Creem test mode 走 test-api.creem.io；生产走 api.creem.io。
+// 根据 x-api-key 前缀自动路由（creem_test_* → test，creem_* → live）。
+function creemBase(apiKey: string): string {
+  return apiKey.startsWith('creem_test_')
+    ? 'https://test-api.creem.io/v1'
+    : 'https://api.creem.io/v1';
+}
 
 export type CreemPlan = 'monthly' | 'yearly';
 
@@ -37,7 +43,7 @@ export interface CreateCheckoutOutput {
 export async function createCheckoutSession(
   input: CreateCheckoutInput,
 ): Promise<CreateCheckoutOutput> {
-  const res = await fetch(`${CREEM_API}/checkouts`, {
+  const res = await fetch(`${creemBase(input.apiKey)}/checkouts`, {
     method: 'POST',
     headers: {
       'x-api-key': input.apiKey,
@@ -69,7 +75,7 @@ export interface CreatePortalOutput {
 }
 
 export async function createPortalSession(input: CreatePortalInput): Promise<CreatePortalOutput> {
-  const res = await fetch(`${CREEM_API}/customers/billing`, {
+  const res = await fetch(`${creemBase(input.apiKey)}/customers/billing`, {
     method: 'POST',
     headers: {
       'x-api-key': input.apiKey,

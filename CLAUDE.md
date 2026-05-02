@@ -58,6 +58,9 @@
 - **Webhook 路径 `/webhooks/creem`**：Creem 用 header `creem-signature` 传 hex 编码的 HMAC-SHA256，
   必须用原始 `c.req.text()` 做签名校验（JSON.parse 后再 stringify 会丢空白导致签名对不上）。
   幂等用 `webhook_events` 表的 `event_id` PK，先查 → 处理 → 写。
+- **Creem test mode 走 `https://test-api.creem.io`，生产走 `https://api.creem.io`**：
+  `creem.ts` 的 `creemBase(apiKey)` 按 key 前缀自动路由（`creem_test_*` → test，`creem_*` → live）。
+  写错 base URL 会一律 401 invalid key（test key 在 live endpoint 上无效）。
 - **BYOK 仅 Pro 用户可配（在 PUT 路径校验）**：但 /v1/rewrite 在执行时只看 byok_keys 表是否有行，
   不再二次校验订阅——避免订阅过期后用户的 BYOK 突然失效。订阅过期时若想强制回退，
   应在 webhook subscription.expired 处理器里清掉 byok_keys。MVP 不做。
