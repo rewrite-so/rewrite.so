@@ -1,0 +1,24 @@
+{
+  "hint": {
+    "doubleShift": "Press Shift Shift to rewrite",
+    "tryOnAnyInput": "Install the extension to use it on any site"
+  },
+  "cta": {
+    "installExtension": "Install extension →"
+  },
+  "state": {
+    "thinking": "Thinking…"
+  },
+  "error": {
+    "rateLimit": "Too many requests, please slow down",
+    "quotaExceeded": "Monthly quota reached. Sign in or upgrade.",
+    "upstream": "Upstream model error, please retry",
+    "tooLong": "Input exceeds 4000 characters",
+    "invalidInput": "Invalid input",
+    "unauthorized": "Please sign in first",
+    "network": "Network error"
+  },
+  "placeholder": {
+    "tryHere": "Type here, then press Shift Shift to rewrite"
+  }
+}

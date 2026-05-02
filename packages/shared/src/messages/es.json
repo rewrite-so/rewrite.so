@@ -1,0 +1,24 @@
+{
+  "hint": {
+    "doubleShift": "Pulsa Shift Shift para reescribir",
+    "tryOnAnyInput": "Instala la extensión para usarla en cualquier sitio"
+  },
+  "cta": {
+    "installExtension": "Instalar extensión →"
+  },
+  "state": {
+    "thinking": "Pensando…"
+  },
+  "error": {
+    "rateLimit": "Demasiadas solicitudes, espera un momento",
+    "quotaExceeded": "Cuota mensual alcanzada. Inicia sesión o actualiza tu plan.",
+    "upstream": "Error del modelo, inténtalo de nuevo",
+    "tooLong": "El texto supera los 4000 caracteres",
+    "invalidInput": "Entrada no válida",
+    "unauthorized": "Inicia sesión primero",
+    "network": "Error de red"
+  },
+  "placeholder": {
+    "tryHere": "Escribe aquí, luego pulsa Shift Shift para reescribir"
+  }
+}

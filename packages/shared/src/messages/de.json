@@ -1,0 +1,24 @@
+{
+  "hint": {
+    "doubleShift": "Shift Shift drücken zum Umschreiben",
+    "tryOnAnyInput": "Installiere die Erweiterung, um sie auf jeder Seite zu nutzen"
+  },
+  "cta": {
+    "installExtension": "Erweiterung installieren →"
+  },
+  "state": {
+    "thinking": "Denkt nach…"
+  },
+  "error": {
+    "rateLimit": "Zu viele Anfragen, bitte warte einen Moment",
+    "quotaExceeded": "Monatliches Kontingent erreicht. Melde dich an oder upgrade.",
+    "upstream": "Modellfehler, bitte erneut versuchen",
+    "tooLong": "Text überschreitet 4000 Zeichen",
+    "invalidInput": "Ungültige Eingabe",
+    "unauthorized": "Bitte zuerst anmelden",
+    "network": "Netzwerkfehler"
+  },
+  "placeholder": {
+    "tryHere": "Hier tippen, dann Shift Shift drücken zum Umschreiben"
+  }
+}

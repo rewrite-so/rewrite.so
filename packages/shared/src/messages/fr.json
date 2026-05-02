@@ -1,0 +1,24 @@
+{
+  "hint": {
+    "doubleShift": "Appuyez sur Shift Shift pour réécrire",
+    "tryOnAnyInput": "Installez l'extension pour l'utiliser sur n'importe quel site"
+  },
+  "cta": {
+    "installExtension": "Installer l'extension →"
+  },
+  "state": {
+    "thinking": "Réflexion en cours…"
+  },
+  "error": {
+    "rateLimit": "Trop de requêtes, veuillez patienter",
+    "quotaExceeded": "Quota mensuel atteint. Connectez-vous ou passez à un plan supérieur.",
+    "upstream": "Erreur du modèle, veuillez réessayer",
+    "tooLong": "Le texte dépasse 4000 caractères",
+    "invalidInput": "Entrée invalide",
+    "unauthorized": "Veuillez vous connecter",
+    "network": "Erreur réseau"
+  },
+  "placeholder": {
+    "tryHere": "Tapez ici, puis appuyez sur Shift Shift pour réécrire"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "hint": {
+    "doubleShift": "Shift Shift で書き換え",
+    "tryOnAnyInput": "拡張機能をインストールして、どのサイトでも使えます"
+  },
+  "cta": {
+    "installExtension": "拡張機能をインストール →"
+  },
+  "state": {
+    "thinking": "考えています…"
+  },
+  "error": {
+    "rateLimit": "リクエストが多すぎます。少し時間を置いてから再試行してください",
+    "quotaExceeded": "今月の利用上限に達しました。ログインまたはアップグレードしてください",
+    "upstream": "モデルでエラーが発生しました。再試行してください",
+    "tooLong": "入力が 4000 文字を超えています",
+    "invalidInput": "入力が無効です",
+    "unauthorized": "ログインしてください",
+    "network": "ネットワークエラー"
+  },
+  "placeholder": {
+    "tryHere": "ここに入力して、Shift Shift で書き換え"
+  }
+}

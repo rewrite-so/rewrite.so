@@ -1,15 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { ALL_STYLES, MAX_INPUT_CHARS, QUOTA, STYLE_LABEL } from './index.ts';
+import { ALL_STYLES, LOCALES, MAX_INPUT_CHARS, QUOTA, STYLE_LABEL } from './index.ts';
 
 describe('shared constants', () => {
   it('exposes 3 styles in fixed order', () => {
     expect(ALL_STYLES).toEqual(['faithful', 'casual', 'formal']);
   });
 
-  it('has zh-CN and en labels for every style', () => {
+  it('has labels for every style × every locale', () => {
     for (const s of ALL_STYLES) {
-      expect(STYLE_LABEL[s]).toHaveProperty('zh-CN');
-      expect(STYLE_LABEL[s]).toHaveProperty('en');
+      for (const locale of LOCALES) {
+        expect(STYLE_LABEL[s][locale], `${s}.${locale}`).toBeTruthy();
+      }
     }
   });
 

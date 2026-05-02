@@ -1,0 +1,24 @@
+{
+  "hint": {
+    "doubleShift": "按 Shift Shift 即可改写",
+    "tryOnAnyInput": "安装扩展，在任何网站都能用"
+  },
+  "cta": {
+    "installExtension": "安装扩展 →"
+  },
+  "state": {
+    "thinking": "思考中…"
+  },
+  "error": {
+    "rateLimit": "请求过快，稍后再试",
+    "quotaExceeded": "本月配额已用完，请登录或升级",
+    "upstream": "上游模型出错，请重试",
+    "tooLong": "输入超过 4000 字符",
+    "invalidInput": "输入不合法",
+    "unauthorized": "请登录后再试",
+    "network": "网络异常"
+  },
+  "placeholder": {
+    "tryHere": "在此输入文本，按 Shift Shift 改写"
+  }
+}
