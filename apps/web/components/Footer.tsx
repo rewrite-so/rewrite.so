@@ -105,6 +105,14 @@ export function Footer() {
           <Link href="/contact" style={LINK}>
             Contact
           </Link>
+          <a
+            href="https://stats.uptimerobot.com/ISstIMdFhH"
+            style={LINK}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Service status ↗
+          </a>
           <a href="mailto:hello@rewrite.so" style={LINK}>
             hello@rewrite.so
           </a>
