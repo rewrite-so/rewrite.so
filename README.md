@@ -129,6 +129,18 @@ rewrite.so/
 - **Payments** — [Creem](https://creem.io) as Merchant of Record ($13.99/mo or $7.99/mo billed annually)
 - **Code quality** — TypeScript + Biome + vitest + Playwright
 
+## Internationalization
+
+The UI supports 7 locales: `en` (default) · `zh-CN` · `ja` · `ko` · `es` · `fr` · `de`.
+
+- **Source of truth**: `packages/shared/src/messages/{locale}.json`
+- **Routing**: `localePrefix: 'as-needed'` — English at `/`, others at `/{locale}/...`
+- **Adding a language**: see [docs/i18n.md](./docs/i18n.md) for the step-by-step
+- **Validate**: `pnpm i18n:validate` (also runs in CI on every PR)
+
+UI locale and rewrite content locale are independent: a user reading the site in
+English may still ask for rewrites in Japanese.
+
 ## Known unsupported
 
 - Google Docs (canvas-rendered editor)

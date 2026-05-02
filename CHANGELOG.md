@@ -8,8 +8,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Onboarding email sequence (welcome / day 1 / day 7 / day 14 / day 30) — _planned_
+- **i18n** — 7 UI locales (`en` / `zh-CN` / `ja` / `ko` / `es` / `fr` / `de`) covering
+  marketing pages, app pages (try / login / settings / unsubscribe), the in-page
+  floating UI, and TopNav language switcher. URL strategy `localePrefix: 'as-needed'`
+  (English at root, others at `/{locale}/...`).
+- **i18n SEO** — `<link rel="alternate" hreflang>` × 7 + `x-default` per page;
+  `apps/web/app/sitemap.ts` enumerates `pages × locales` with hreflang alternates.
+- **i18n CI gate** — `scripts/i18n-validate.mjs` (`pnpm i18n:validate`) wired into
+  CI; PRs with mismatched key sets across locales fail fast.
+- **Auth hook** — better-auth `user.create.after` now writes `user_settings.ui_locale`
+  from request `Accept-Language`, so first-time users get correct emails / popup
+  language without falling back to `'auto'` at runtime.
 - Cloudflare Web Store extension submission — _planned_
+
+### Changed
+- `apps/web/app/layout.tsx` is now `app/[locale]/layout.tsx`; all pages moved under
+  `[locale]/`. The dynamic `generateMetadata` produces locale-aware title / description /
+  hreflang alternates.
+- `STYLE_LABEL` (faithful / casual / formal) extended from 2 to 7 locales.
+- `Locale` type widened from `'en' | 'zh-CN'` to all 7; `StoredLocale = Locale | 'auto'`
+  added for `user_settings.ui_locale` storage.
+
+### Notes
+- ja / ko / es / fr / de translations are AI-generated initial drafts, awaiting
+  native review.
+- Legal pages (terms / privacy / refund / aup) currently English-only; metadata
+  titles are localized but body text is deferred (legal review needed).
 
 ---
 

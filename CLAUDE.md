@@ -128,8 +128,40 @@
 - **Gmail compose**：iframe + 复杂 contenteditable，需重大架构变更。
 - **MV3 service worker 30s 强 kill**：单次 SSE 一般 < 5s 不触边界；如果未来加长流式（如自定义 prompt 大输入）需重新评估。
 
+## i18n（多语言）
+
+- **UI locale ≠ content locale**：UI 文案语言走 `user_settings.ui_locale` /
+  next-intl；改写目标语言走 `user_settings.target_lang` +
+  `packages/core/src/lang/detect.ts`。两者**永不混用**——一个英国人也可能想把中文改写成
+  中文（UI=en，content=zh）。
+- **Catalog 单一来源**：`packages/shared/src/messages/{locale}.json` 是所有 UI 字符串的
+  唯一来源；apps/web 直接 `import` 这些 JSON（包 exports 已暴露 `./messages/*.json`）。
+  改文案只改一处。**不要**手编 `apps/web/messages/`（不存在）或扩展端的本地副本。
+- **支持语言**：`en` / `zh-CN` / `ja` / `ko` / `es` / `fr` / `de`（共 7）。`StoredLocale`
+  额外含 `'auto'`，仅用于 user_settings.ui_locale 的存储值（运行时由 resolveLocale 解析）。
+- **`zh-TW` 当前归并到 `zh-CN`**：`pickLocale` 显式约定。**v0.2 复议触发条件**：
+  ≥3 名繁体用户反馈差异强烈，则新加 `zh-TW.json` + 改 LOCALES 数组。
+- **AI 翻译标记**：ja/ko/es/fr/de 由 LLM 翻译初稿，PR description 必须标 "AI-translated,
+  awaiting native review"。`scripts/i18n-translate.ts`（待补）按 source-hash cache 幂等：
+  改一个英文 key 不会触发整个文件重翻。
+- **注册时 ui_locale 必须落 DB**：`apps/api/src/lib/auth.ts` 的 `databaseHooks.user.create.after`
+  从请求 Accept-Language 推导 → `pickLocale` → INSERT user_settings。**不要**把 'auto' 当
+  默认值——'auto' 是用户*显式*选择的"跟系统"标记。
+- **邮件 locale fallback 顺序**：`user_settings.ui_locale` ≠ 'auto' → 用之；否则 'en'。
+  dispatcher 在 cron Worker 里没 navigator 上下文，**不要**试图运行时 detect。
+- **`localePrefix: 'as-needed'`**：默认 en 走根 `/`，其它带前缀 `/zh-CN/...`。修改
+  `defaultLocale` 会影响 SEO 与 sitemap，慎重。
+- **hreflang + sitemap 是 SEO 必需**：每页 layout 输出 7 个 `<link rel="alternate" hreflang>`
+  + `x-default`；`apps/web/app/sitemap.ts` 输出含 `xhtml:link rel="alternate"`。
+  新增 page 必须同步更新 `PUBLIC_PATHS` 列表。
+- **`pnpm i18n:validate` 是 CI gate**：PR 改任何 messages JSON 都必须保证 7 个文件 key 集
+  一致 + 叶子非空字符串，否则 CI 红。
+- **next-intl `middleware.ts` 在 Next 16 已 deprecated（推荐改名 proxy.ts）**：当前
+  `next-intl` 4.11 仍生成 middleware.ts 风格代码，警告但功能正常。等 next-intl 适配
+  Next 16 的 proxy 命名后再改。
+
 ## 环境变量
 
-`OPENAI_BASE_URL` / `OPENAI_API_KEY` / `OPENAI_MODEL`（**无内置默认值**）/ `BYOK_MASTER_KEY` / `CREEM_*` / `RESEND_API_KEY` / `GOOGLE_OAUTH_*` / `TURNSTILE_*` / `BETTER_AUTH_*`。
+`OPENAI_BASE_URL` / `OPENAI_API_KEY` / `OPENAI_MODEL`（**无内置默认值**）/ `BYOK_MASTER_KEY` / `CREEM_*` / `RESEND_API_KEY` / `GOOGLE_OAUTH_*` / `TURNSTILE_*` / `BETTER_AUTH_*` / `NEXT_PUBLIC_SITE_ORIGIN`（i18n hreflang/sitemap 绝对 URL，默认 `https://rewrite.so`）。
 
 详见 `.env.example`。
