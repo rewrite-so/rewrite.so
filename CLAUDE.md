@@ -67,9 +67,16 @@
 - **path filter 触发**：`deploy-api` / `deploy-web` 只在 push main 且 `apps/api/**`、
   `apps/web/**`、`packages/**`、`pnpm-lock.yaml` 改动时跑。改 docs / extension /
   workflow 自身**不会**触发部署。
-- **不自动跑 migrations**：D1 schema 改动通过 `migrate-d1.yml` 手动 dispatch 跑，
-  避免误删表。文件名严格按 `NNNN_xxx.sql` 编号；新加 migration 时新建文件，
-  不要修改已部署过的旧 migration（生产已执行过，UPSERT 风险）。
+- **D1 migrations 自动跑**：`deploy-api.yml` 在 deploy 之前自动跑
+  `wrangler d1 migrations apply rewrite-so --remote`。wrangler 用 `d1_migrations`
+  表追踪已应用版本，幂等：已应用的跳过、新加的按文件名顺序执行。
+  - 文件名严格 `NNNN_xxx.sql`（4 位数字 + 下划线 + 描述），按字典序应用
+  - **不要修改已部署过的旧 migration**（已记录在 d1_migrations 表，wrangler 会跳过你的修改；
+    如果 schema 错了，新增 `0002_fix_*.sql` 来纠正）
+  - 紧急人工干预走 `migrate-d1.yml` workflow_dispatch（指定 file 跑特定 SQL，
+    或 target=local-dry-run 试运行）
+  - `wrangler.toml` 的 `[[d1_databases]]` 配 `migrations_dir = "src/db/migrations"`，
+    不要改
 - **release 扩展**：tag 必须 `ext-v*` 前缀（如 `ext-v0.1.0`），其它 tag 不会触发。
   zip artifact 同时上传到 Actions artifacts 和 GitHub Release，方便不发布也能拿到
   打包结果。

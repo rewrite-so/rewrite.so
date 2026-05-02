@@ -1,8 +1,8 @@
 name: Deploy API
 
 # 触发：
-# - push 到 main 且改了 apps/api/** 或 packages/** 或 lockfile
-# - 手动从 Actions 标签触发（workflow_dispatch）
+# - push 到 main 且改了 apps/api/** / packages/** / lockfile
+# - 手动 dispatch
 on:
   push:
     branches: [main]
@@ -15,7 +15,7 @@ on:
 
 concurrency:
   group: deploy-api
-  cancel-in-progress: false  # 部署不取消上一次（避免半部署）
+  cancel-in-progress: false  # 不取消进行中的部署，避免半部署
 
 jobs:
   deploy:
@@ -40,13 +40,21 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
+      # typecheck 留作 deploy gate（防部署破损版本）；test 不重复跑（ci.yml 已跑过）
       - name: Typecheck
         run: pnpm --filter @rewrite/api typecheck
 
-      - name: Test
-        run: pnpm --filter @rewrite/api test
+      # 自动跑 D1 migrations。wrangler 用 d1_migrations 表追踪已应用版本，
+      # 已应用的 NNNN_*.sql 会被跳过；新加的按文件名顺序执行。
+      # 必须在 deploy 之前跑（schema 先就位，新代码才能用）。
+      - name: Apply D1 migrations
+        working-directory: apps/api
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: pnpm exec wrangler d1 migrations apply rewrite-so --remote
 
-      - name: Deploy
+      - name: Deploy worker
         working-directory: apps/api
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

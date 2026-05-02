@@ -1,16 +1,19 @@
-name: Apply D1 migrations
+name: D1 migrations (manual)
 
-# 仅手动触发（避免误删表）。每次有新 migration 时去 Actions 标签页跑。
-# 输入 file 时只跑指定文件；留空则跑全部 migrations 目录（按文件名排序）。
+# 日常 migration 由 deploy-api.yml 自动跑（在 deploy 之前）。
+# 本 workflow 只用于手动场景：
+# - 跑某个特定 migration（input file）作为补救
+# - 跑某个 SQL 脚本（input file 路径）作为运维（如临时 backfill）
+# - 在 local-dry-run 模式下试运行（target=local-dry-run）
 on:
   workflow_dispatch:
     inputs:
       file:
-        description: '只跑指定 migration 文件（如 0002_creem.sql），留空跑全部'
+        description: '指定 sql 文件路径（相对 apps/api/）。留空则等价 wrangler d1 migrations apply'
         required: false
         default: ''
       target:
-        description: '目标环境'
+        description: '目标'
         required: true
         type: choice
         default: production
@@ -19,7 +22,7 @@ on:
           - local-dry-run
 
 jobs:
-  migrate:
+  run:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -36,27 +39,23 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
 
-      - name: Apply migration(s)
+      - name: Run
         working-directory: apps/api
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           set -e
-          FLAG=""
           if [[ "${{ inputs.target }}" == "production" ]]; then
             FLAG="--remote"
           else
             FLAG="--local"
           fi
 
-          if [[ -n "${{ inputs.file }}" ]]; then
-            FILES=("src/db/migrations/${{ inputs.file }}")
+          if [[ -z "${{ inputs.file }}" ]]; then
+            echo "==> wrangler d1 migrations apply (跑所有未应用的 migrations)"
+            pnpm exec wrangler d1 migrations apply rewrite-so $FLAG
           else
-            FILES=(src/db/migrations/*.sql)
+            echo "==> wrangler d1 execute --file=${{ inputs.file }}"
+            pnpm exec wrangler d1 execute rewrite-so $FLAG --file="${{ inputs.file }}" --yes
           fi
-
-          for f in "${FILES[@]}"; do
-            echo "==> applying $f to ${{ inputs.target }}"
-            pnpm exec wrangler d1 execute rewrite-so $FLAG --file="$f" --yes
-          done

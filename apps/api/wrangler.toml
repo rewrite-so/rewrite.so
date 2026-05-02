@@ -16,6 +16,9 @@ enabled = true
 binding = "DB"
 database_name = "rewrite-so"
 database_id = "d11cbc0a-f2ac-4d2d-8338-336a9c90a07b"
+# wrangler 内置 migrations runner：扫这个目录的 NNNN_*.sql，
+# 用 d1_migrations 表追踪已应用版本，幂等。
+migrations_dir = "src/db/migrations"
 
 # ===== KV: 用户设置缓存 =====
 [[kv_namespaces]]

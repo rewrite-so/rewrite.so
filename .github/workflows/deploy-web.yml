@@ -37,6 +37,7 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
+      # typecheck 留作 deploy gate；test 不重复跑（ci.yml 已跑过）
       - name: Typecheck
         run: pnpm --filter @rewrite/web typecheck
 
@@ -44,7 +45,7 @@ jobs:
         working-directory: apps/web
         run: pnpm exec opennextjs-cloudflare build
 
-      - name: Deploy
+      - name: Deploy worker
         working-directory: apps/web
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
