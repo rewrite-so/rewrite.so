@@ -1,24 +1,27 @@
 name = "rewrite-web"
+account_id = "fac906e305f0f4df576524f107365e35"
 main = ".open-next/worker.js"
 compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
+
+routes = [
+  { pattern = "rewrite.so/*", zone_name = "rewrite.so" }
+]
 
 [assets]
 directory = ".open-next/assets"
 binding = "ASSETS"
 
-# Production routes - 待 Phase 5 上线时启用
-# routes = [
-#   { pattern = "rewrite.so/*", zone_name = "rewrite.so" }
-# ]
-
 [observability]
 enabled = true
 
-# ===== KV: Next 增量缓存（OpenNext 使用）=====
-# [[kv_namespaces]]
-# binding = "NEXT_INC_CACHE_KV"
-# id = "PLACEHOLDER"
+# OpenNext 增量缓存 KV
+[[kv_namespaces]]
+binding = "NEXT_INC_CACHE_KV"
+id = "e9afa86593794f3e8b020648bc4671e3"
 
 [vars]
-NEXT_PUBLIC_API_BASE = "https://api.rewrite.so"
+# server-side only：Next rewrites 把 /api/auth/* + /v1/* 代理到这个 host
+API_BASE_URL = "https://api.rewrite.so"
+# client-side（NEXT_PUBLIC_）：留空让 fetch 走相对路径（same-origin via rewrites）
+NEXT_PUBLIC_API_BASE = ""

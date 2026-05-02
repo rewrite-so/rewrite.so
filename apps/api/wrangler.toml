@@ -4,10 +4,9 @@ main = "src/index.ts"
 compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
 
-# Production routes - 待 Phase 5 上线时启用
-# routes = [
-#   { pattern = "api.rewrite.so/*", zone_name = "rewrite.so" }
-# ]
+routes = [
+  { pattern = "api.rewrite.so", custom_domain = true }
+]
 
 [observability]
 enabled = true

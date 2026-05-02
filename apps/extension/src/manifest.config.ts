@@ -13,13 +13,13 @@ export default defineManifest({
   },
   options_page: 'src/options/index.html',
   background: {
-    service_worker: 'src/background/index.ts',
+    service_worker: 'src/background/service-worker.ts',
     type: 'module',
   },
   content_scripts: [
     {
       matches: ['<all_urls>'],
-      js: ['src/content/index.ts'],
+      js: ['src/content/inject.ts'],
       run_at: 'document_idle',
       all_frames: false,
     },

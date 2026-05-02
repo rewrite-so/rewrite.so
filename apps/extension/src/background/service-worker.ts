@@ -8,17 +8,20 @@ chrome.runtime.onInstalled.addListener((details) => {
 });
 
 chrome.runtime.onConnect.addListener((port) => {
+  console.info('[rewrite.so/bg] port connect', port.name, 'sender:', port.sender?.url);
   if (port.name !== PORT_NAME_REWRITE) return;
 
   const ac = new AbortController();
 
   port.onDisconnect.addListener(() => {
+    console.info('[rewrite.so/bg] port disconnect');
     ac.abort();
   });
 
   port.onMessage.addListener((raw: unknown) => {
     const msg = raw as FromContent;
     if (msg.type !== 'rewrite') return;
+    console.info('[rewrite.so/bg] rewrite request', msg.req.text.slice(0, 40));
     void handleRewrite(port, msg, ac.signal);
   });
 });
@@ -38,6 +41,7 @@ async function handleRewrite(
 
   let res: Response;
   try {
+    console.info('[rewrite.so/bg] fetch', `${API_BASE}/v1/rewrite`);
     res = await fetch(`${API_BASE}/v1/rewrite`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -45,8 +49,10 @@ async function handleRewrite(
       signal,
       credentials: 'include',
     });
+    console.info('[rewrite.so/bg] fetch ok status=', res.status);
   } catch (err) {
     if ((err as Error).name === 'AbortError') return;
+    console.warn('[rewrite.so/bg] fetch failed:', (err as Error).message, err);
     send({ type: 'error', code: 'network', message: (err as Error).message });
     send({ type: 'end' });
     return;
@@ -54,16 +60,20 @@ async function handleRewrite(
 
   if (!res.ok) {
     const detail = await res.text().catch(() => '');
+    console.warn('[rewrite.so/bg] non-2xx', res.status, detail.slice(0, 200));
+    // 把 api 返回的原始 JSON 直接透传给 content（detailObj 能拿到 used/limit/resetAt 等）
     send({
       type: 'error',
       code:
         res.status === 429
-          ? 'rate_limit'
+          ? detail.includes('quota_exceeded')
+            ? 'quota_exceeded'
+            : 'rate_limit'
           : res.status === 413
             ? 'input_too_long'
             : 'upstream_error',
       status: res.status,
-      message: detail.slice(0, 200),
+      message: detail.slice(0, 500),
     });
     send({ type: 'end' });
     return;
