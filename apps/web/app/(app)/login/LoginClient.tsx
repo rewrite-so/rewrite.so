@@ -16,14 +16,15 @@ export function LoginClient() {
     setError(null);
 
     try {
-      // better-auth Magic Link 端点；same-origin 通过 next rewrites 代理到 wrangler
+      // callbackURL 必须是绝对 URL 指向 web origin（dev: localhost:3000, prod: rewrite.so）。
+      // better-auth 默认会把相对路径拼到 baseURL（api origin），那里没有 web 路由 → 404。
       const res = await fetch('/api/auth/sign-in/magic-link', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
           email: email.trim(),
-          callbackURL: '/settings',
+          callbackURL: `${window.location.origin}/settings`,
         }),
       });
       if (!res.ok) {

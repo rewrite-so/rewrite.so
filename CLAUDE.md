@@ -32,7 +32,14 @@
 - **D1 不支持 RETURNING * 的全部场景**：用先 `INSERT` 后 `SELECT by id`，不要假设 RETURNING 总能用。
 - **drizzle 仅给 better-auth 4 张表用**：业务表保持裸 SQL，这是"D1 不用 ORM"原则的唯一例外。不要顺手把业务表也搬到 drizzle。
 - **D1 不用 ORM 迁移工具**：手写 `migrations/NNNN_xxx.sql`，文件名严格按 4 位数字编号。
-- **better-auth session 是 cookie 不是 Bearer**：扩展必须 background 代理请求才能携带 cookie；content script 直接 fetch 拿不到。
+- **better-auth session 是 cookie 不是 Bearer**：扩展必须 background 代理请求
+- **Magic Link 邮件链接的 host 必须是 web origin（不是 api origin）**：
+  better-auth 默认生成 `${baseURL}/api/auth/magic-link/verify?...`（baseURL = api origin）。
+  如果用户在邮件里点这个链接，cookie 会落在 api origin (8787 / api.rewrite.so) 上，
+  web 端 (3000 / rewrite.so) 拿不到。`lib/auth.ts` 的 sendMagicLink 把 url 的 host
+  替换成 `WEB_ORIGIN`；前端调用 `/api/auth/sign-in/magic-link` 时 callbackURL 也用绝对 URL
+  指向 web origin。Web 端通过 next rewrites 代理 `/api/auth/*` 到 wrangler，
+  Set-Cookie 透传后落在 web origin（dev: localhost；prod: rewrite.so）。才能携带 cookie；content script 直接 fetch 拿不到。
 - **Creem webhook 路径必须是 `/webhooks/creem`** 而不是 `/api/...`：避免 OpenNext path 重写。
 
 ## 配额与计费

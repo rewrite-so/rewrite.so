@@ -43,8 +43,17 @@ export function createAuth(env: Bindings) {
     plugins: [
       magicLink({
         sendMagicLink: async ({ email, url }) => {
+          // 把 better-auth 生成的 url（host = api origin）改成 web origin。
+          // 这样 magic link 点击后浏览器访问 web origin → next rewrites 代理回 api →
+          // better-auth set-cookie 透传到 web origin，cookie 落在浏览器主域上。
+          const apiOrigin = env.BETTER_AUTH_URL || 'http://localhost:8787';
+          const webOrigin = env.WEB_ORIGIN || 'http://localhost:3000';
+          const finalUrl = url.startsWith(apiOrigin)
+            ? `${webOrigin}${url.slice(apiOrigin.length)}`
+            : url;
+
           if (!resend) {
-            console.warn('[auth] RESEND_API_KEY missing; magic link URL:', url);
+            console.warn('[auth] RESEND_API_KEY missing; magic link URL:', finalUrl);
             return;
           }
           const from = env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
@@ -52,8 +61,8 @@ export function createAuth(env: Bindings) {
             from: `rewrite.so <${from}>`,
             to: email,
             subject: '登录 rewrite.so',
-            html: renderMagicLinkHtml(url, email),
-            text: renderMagicLinkText(url),
+            html: renderMagicLinkHtml(finalUrl, email),
+            text: renderMagicLinkText(finalUrl),
           });
         },
         expiresIn: 60 * 15, // 15 分钟
