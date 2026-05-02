@@ -1,4 +1,5 @@
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { Link } from '../i18n/navigation.ts';
 
 const COL_HEADING = {
   fontSize: 12,
@@ -19,6 +20,7 @@ const LINK = {
 };
 
 export function Footer() {
+  const t = useTranslations('footer');
   return (
     <footer
       style={{
@@ -53,57 +55,55 @@ export function Footer() {
               ™
             </span>
           </div>
-          <div style={{ fontSize: 12, color: '#888', lineHeight: 1.55 }}>
-            Double-tap Shift, instant AI rewrite in any input box.
-          </div>
+          <div style={{ fontSize: 12, color: '#888', lineHeight: 1.55 }}>{t('tagline')}</div>
         </div>
 
         <div>
-          <h4 style={COL_HEADING}>Product</h4>
+          <h4 style={COL_HEADING}>{t('heading.product')}</h4>
           <Link href="/" style={LINK}>
-            Home
+            {t('link.home')}
           </Link>
           <Link href="/try" style={LINK}>
-            Try it
+            {t('link.tryIt')}
           </Link>
           <Link href="/pricing" style={LINK}>
-            Pricing
+            {t('link.pricing')}
           </Link>
         </div>
 
         <div>
-          <h4 style={COL_HEADING}>Account</h4>
+          <h4 style={COL_HEADING}>{t('heading.account')}</h4>
           <Link href="/login" style={LINK}>
-            Sign in
+            {t('link.signIn')}
           </Link>
           <Link href="/settings" style={LINK}>
-            Settings
+            {t('link.settings')}
           </Link>
           <Link href="/billing" style={LINK}>
-            Billing
+            {t('link.billing')}
           </Link>
         </div>
 
         <div>
-          <h4 style={COL_HEADING}>Legal</h4>
+          <h4 style={COL_HEADING}>{t('heading.legal')}</h4>
           <Link href="/terms" style={LINK}>
-            Terms of Service
+            {t('link.terms')}
           </Link>
           <Link href="/privacy" style={LINK}>
-            Privacy Policy
+            {t('link.privacy')}
           </Link>
           <Link href="/refund" style={LINK}>
-            Refund Policy
+            {t('link.refund')}
           </Link>
           <Link href="/aup" style={LINK}>
-            Acceptable Use
+            {t('link.aup')}
           </Link>
         </div>
 
         <div>
-          <h4 style={COL_HEADING}>Support</h4>
+          <h4 style={COL_HEADING}>{t('heading.support')}</h4>
           <Link href="/contact" style={LINK}>
-            Contact
+            {t('link.contact')}
           </Link>
           <a
             href="https://stats.uptimerobot.com/ISstIMdFhH"
@@ -111,7 +111,7 @@ export function Footer() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            Service status ↗
+            {t('link.serviceStatus')}
           </a>
           <a href="mailto:hello@rewrite.so" style={LINK}>
             hello@rewrite.so
@@ -122,7 +122,7 @@ export function Footer() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            GitHub
+            {t('link.github')}
           </a>
         </div>
       </div>
@@ -137,9 +137,7 @@ export function Footer() {
           textAlign: 'center',
         }}
       >
-        rewrite.so is an independent product. Not affiliated with, endorsed by, or sponsored by
-        OpenAI, Anthropic, Google, or any other AI model provider. Underlying language models are
-        accessed via standard OpenAI-compatible APIs.
+        {t('disclaimer')}
       </div>
 
       <div
@@ -156,18 +154,20 @@ export function Footer() {
           color: '#888',
         }}
       >
-        <span>© {new Date().getFullYear()} rewrite.so. All rights reserved.</span>
+        <span>{t('copyright', { year: new Date().getFullYear() })}</span>
         <span>
-          Payments processed by{' '}
-          <a
-            href="https://creem.io"
-            style={{ color: '#666', textDecoration: 'none' }}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Creem
-          </a>
-          , our Merchant of Record.
+          {t.rich('paymentsBy', {
+            creem: (chunks) => (
+              <a
+                href="https://creem.io"
+                style={{ color: '#666', textDecoration: 'none' }}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {chunks}
+              </a>
+            ),
+          })}
         </span>
       </div>
     </footer>

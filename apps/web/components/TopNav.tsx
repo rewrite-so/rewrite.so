@@ -1,4 +1,5 @@
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { Link } from '../i18n/navigation.ts';
 
 const NAV_LINK = {
   fontSize: 14,
@@ -18,6 +19,7 @@ const NAV_LINK_PRIMARY = {
 };
 
 export function TopNav() {
+  const t = useTranslations('nav');
   return (
     <nav
       style={{
@@ -69,10 +71,10 @@ export function TopNav() {
         {/* Center links */}
         <div style={{ display: 'flex', gap: 4, flex: 1 }}>
           <Link href="/try" style={NAV_LINK}>
-            Try
+            {t('try')}
           </Link>
           <Link href="/pricing" style={NAV_LINK}>
-            Pricing
+            {t('pricing')}
           </Link>
           <a
             href="https://github.com/rewrite-so/rewrite.so"
@@ -80,16 +82,16 @@ export function TopNav() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            GitHub
+            {t('github')}
           </a>
         </div>
 
         {/* Right CTAs */}
         <Link href="/login" style={NAV_LINK}>
-          Sign in
+          {t('signIn')}
         </Link>
         <Link href="/try" style={{ ...NAV_LINK_PRIMARY, marginLeft: 8 }}>
-          Try free
+          {t('tryFree')}
         </Link>
       </div>
     </nav>

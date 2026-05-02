@@ -1,4 +1,45 @@
 {
+  "meta": {
+    "home": {
+      "title": "rewrite.so — Shift Shift で書き換え",
+      "description": "入力欄レベルの AI 書き換えエンジン。3 つのスタイル、キーボードのみ、書く流れを妨げません。"
+    }
+  },
+  "nav": {
+    "try": "試す",
+    "pricing": "料金",
+    "github": "GitHub",
+    "signIn": "ログイン",
+    "tryFree": "無料で試す",
+    "languageSwitcher": "言語"
+  },
+  "footer": {
+    "tagline": "Shift Shift で、どの入力欄でも瞬時に AI 書き換え。",
+    "heading": {
+      "product": "プロダクト",
+      "account": "アカウント",
+      "legal": "法務",
+      "support": "サポート"
+    },
+    "link": {
+      "home": "ホーム",
+      "tryIt": "試す",
+      "pricing": "料金",
+      "signIn": "ログイン",
+      "settings": "設定",
+      "billing": "請求",
+      "terms": "利用規約",
+      "privacy": "プライバシーポリシー",
+      "refund": "返金ポリシー",
+      "aup": "利用規定",
+      "contact": "お問い合わせ",
+      "serviceStatus": "サービス状況 ↗",
+      "github": "GitHub"
+    },
+    "disclaimer": "rewrite.so は独立した製品です。OpenAI、Anthropic、Google、その他の AI モデルプロバイダーとの提携、推薦、後援はありません。基盤となる言語モデルは標準の OpenAI 互換 API 経由でアクセスされます。",
+    "copyright": "© {year} rewrite.so All rights reserved.",
+    "paymentsBy": "決済は Merchant of Record である <creem>Creem</creem> が処理しています。"
+  },
   "hint": {
     "doubleShift": "Shift Shift で書き換え",
     "tryOnAnyInput": "拡張機能をインストールして、どのサイトでも使えます"

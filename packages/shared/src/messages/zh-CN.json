@@ -1,4 +1,45 @@
 {
+  "meta": {
+    "home": {
+      "title": "rewrite.so — 双击 Shift 即时改写",
+      "description": "输入框级 AI 改写引擎。3 种风格，纯键盘操作，不打断写作流。"
+    }
+  },
+  "nav": {
+    "try": "试用",
+    "pricing": "价格",
+    "github": "GitHub",
+    "signIn": "登录",
+    "tryFree": "免费试用",
+    "languageSwitcher": "语言"
+  },
+  "footer": {
+    "tagline": "双击 Shift，任何输入框瞬间 AI 改写。",
+    "heading": {
+      "product": "产品",
+      "account": "账户",
+      "legal": "法律",
+      "support": "支持"
+    },
+    "link": {
+      "home": "首页",
+      "tryIt": "试用",
+      "pricing": "价格",
+      "signIn": "登录",
+      "settings": "设置",
+      "billing": "账单",
+      "terms": "服务条款",
+      "privacy": "隐私政策",
+      "refund": "退款政策",
+      "aup": "可接受使用政策",
+      "contact": "联系我们",
+      "serviceStatus": "服务状态 ↗",
+      "github": "GitHub"
+    },
+    "disclaimer": "rewrite.so 是独立产品，与 OpenAI、Anthropic、Google 或其他 AI 模型提供商无任何附属、背书或赞助关系。底层语言模型通过标准 OpenAI 兼容 API 访问。",
+    "copyright": "© {year} rewrite.so 版权所有。",
+    "paymentsBy": "支付由 <creem>Creem</creem> 处理，作为我们的 Merchant of Record。"
+  },
   "hint": {
     "doubleShift": "按 Shift Shift 即可改写",
     "tryOnAnyInput": "安装扩展，在任何网站都能用"

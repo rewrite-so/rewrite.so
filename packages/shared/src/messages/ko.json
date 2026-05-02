@@ -1,4 +1,45 @@
 {
+  "meta": {
+    "home": {
+      "title": "rewrite.so — Shift Shift로 다시 쓰기",
+      "description": "입력란 수준 AI 재작성 엔진. 3가지 스타일, 키보드만, 작업 흐름을 끊지 않습니다."
+    }
+  },
+  "nav": {
+    "try": "체험",
+    "pricing": "요금",
+    "github": "GitHub",
+    "signIn": "로그인",
+    "tryFree": "무료 체험",
+    "languageSwitcher": "언어"
+  },
+  "footer": {
+    "tagline": "Shift Shift만 누르면 어떤 입력란이든 즉시 AI 재작성.",
+    "heading": {
+      "product": "제품",
+      "account": "계정",
+      "legal": "법률",
+      "support": "지원"
+    },
+    "link": {
+      "home": "홈",
+      "tryIt": "체험",
+      "pricing": "요금",
+      "signIn": "로그인",
+      "settings": "설정",
+      "billing": "결제",
+      "terms": "서비스 약관",
+      "privacy": "개인정보 처리방침",
+      "refund": "환불 정책",
+      "aup": "이용 정책",
+      "contact": "문의",
+      "serviceStatus": "서비스 상태 ↗",
+      "github": "GitHub"
+    },
+    "disclaimer": "rewrite.so는 독립 제품입니다. OpenAI, Anthropic, Google 또는 기타 AI 모델 제공업체와 제휴, 추천, 후원 관계가 없습니다. 기저 언어 모델은 표준 OpenAI 호환 API를 통해 액세스됩니다.",
+    "copyright": "© {year} rewrite.so. 판권 소유.",
+    "paymentsBy": "결제는 Merchant of Record인 <creem>Creem</creem>을(를) 통해 처리됩니다."
+  },
   "hint": {
     "doubleShift": "Shift Shift을 눌러 다시 쓰기",
     "tryOnAnyInput": "확장 프로그램을 설치하면 어떤 사이트에서도 사용할 수 있습니다"

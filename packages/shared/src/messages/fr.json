@@ -1,4 +1,45 @@
 {
+  "meta": {
+    "home": {
+      "title": "rewrite.so — Double Shift pour réécrire",
+      "description": "Moteur de réécriture IA au niveau du champ de saisie. 3 styles, clavier uniquement, sans casser votre flux."
+    }
+  },
+  "nav": {
+    "try": "Essayer",
+    "pricing": "Tarifs",
+    "github": "GitHub",
+    "signIn": "Se connecter",
+    "tryFree": "Essai gratuit",
+    "languageSwitcher": "Langue"
+  },
+  "footer": {
+    "tagline": "Double Shift, réécriture IA instantanée dans n'importe quel champ de saisie.",
+    "heading": {
+      "product": "Produit",
+      "account": "Compte",
+      "legal": "Légal",
+      "support": "Support"
+    },
+    "link": {
+      "home": "Accueil",
+      "tryIt": "Essayer",
+      "pricing": "Tarifs",
+      "signIn": "Se connecter",
+      "settings": "Paramètres",
+      "billing": "Facturation",
+      "terms": "Conditions d'utilisation",
+      "privacy": "Politique de confidentialité",
+      "refund": "Politique de remboursement",
+      "aup": "Usage acceptable",
+      "contact": "Contact",
+      "serviceStatus": "État du service ↗",
+      "github": "GitHub"
+    },
+    "disclaimer": "rewrite.so est un produit indépendant. Non affilié, approuvé ou sponsorisé par OpenAI, Anthropic, Google ou tout autre fournisseur de modèles IA. Les modèles de langage sous-jacents sont accédés via des APIs standard compatibles OpenAI.",
+    "copyright": "© {year} rewrite.so. Tous droits réservés.",
+    "paymentsBy": "Paiements traités par <creem>Creem</creem>, notre Merchant of Record."
+  },
   "hint": {
     "doubleShift": "Appuyez sur Shift Shift pour réécrire",
     "tryOnAnyInput": "Installez l'extension pour l'utiliser sur n'importe quel site"

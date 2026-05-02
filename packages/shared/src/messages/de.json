@@ -1,4 +1,45 @@
 {
+  "meta": {
+    "home": {
+      "title": "rewrite.so — Doppel-Shift zum Umschreiben",
+      "description": "AI-Umschreibungs-Engine auf Eingabefeld-Ebene. 3 Stile, nur Tastatur, unterbricht deinen Flow nicht."
+    }
+  },
+  "nav": {
+    "try": "Testen",
+    "pricing": "Preise",
+    "github": "GitHub",
+    "signIn": "Anmelden",
+    "tryFree": "Kostenlos testen",
+    "languageSwitcher": "Sprache"
+  },
+  "footer": {
+    "tagline": "Doppel-Shift, sofortige AI-Umschreibung in jedem Eingabefeld.",
+    "heading": {
+      "product": "Produkt",
+      "account": "Konto",
+      "legal": "Rechtliches",
+      "support": "Support"
+    },
+    "link": {
+      "home": "Startseite",
+      "tryIt": "Testen",
+      "pricing": "Preise",
+      "signIn": "Anmelden",
+      "settings": "Einstellungen",
+      "billing": "Abrechnung",
+      "terms": "Nutzungsbedingungen",
+      "privacy": "Datenschutz",
+      "refund": "Rückgaberichtlinie",
+      "aup": "Nutzungsrichtlinie",
+      "contact": "Kontakt",
+      "serviceStatus": "Service-Status ↗",
+      "github": "GitHub"
+    },
+    "disclaimer": "rewrite.so ist ein unabhängiges Produkt. Nicht assoziiert, befürwortet oder gesponsert von OpenAI, Anthropic, Google oder einem anderen AI-Modell-Anbieter. Zugrundeliegende Sprachmodelle werden über standardmäßige OpenAI-kompatible APIs aufgerufen.",
+    "copyright": "© {year} rewrite.so. Alle Rechte vorbehalten.",
+    "paymentsBy": "Zahlungen abgewickelt von <creem>Creem</creem>, unserem Merchant of Record."
+  },
   "hint": {
     "doubleShift": "Shift Shift drücken zum Umschreiben",
     "tryOnAnyInput": "Installiere die Erweiterung, um sie auf jeder Seite zu nutzen"

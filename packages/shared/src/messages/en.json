@@ -1,4 +1,45 @@
 {
+  "meta": {
+    "home": {
+      "title": "rewrite.so — Double-tap Shift to rewrite",
+      "description": "Input-box-level AI rewrite engine. 3 styles, keyboard-only, never breaks your flow."
+    }
+  },
+  "nav": {
+    "try": "Try",
+    "pricing": "Pricing",
+    "github": "GitHub",
+    "signIn": "Sign in",
+    "tryFree": "Try free",
+    "languageSwitcher": "Language"
+  },
+  "footer": {
+    "tagline": "Double-tap Shift, instant AI rewrite in any input box.",
+    "heading": {
+      "product": "Product",
+      "account": "Account",
+      "legal": "Legal",
+      "support": "Support"
+    },
+    "link": {
+      "home": "Home",
+      "tryIt": "Try it",
+      "pricing": "Pricing",
+      "signIn": "Sign in",
+      "settings": "Settings",
+      "billing": "Billing",
+      "terms": "Terms of Service",
+      "privacy": "Privacy Policy",
+      "refund": "Refund Policy",
+      "aup": "Acceptable Use",
+      "contact": "Contact",
+      "serviceStatus": "Service status ↗",
+      "github": "GitHub"
+    },
+    "disclaimer": "rewrite.so is an independent product. Not affiliated with, endorsed by, or sponsored by OpenAI, Anthropic, Google, or any other AI model provider. Underlying language models are accessed via standard OpenAI-compatible APIs.",
+    "copyright": "© {year} rewrite.so. All rights reserved.",
+    "paymentsBy": "Payments processed by <creem>Creem</creem>, our Merchant of Record."
+  },
   "hint": {
     "doubleShift": "Press Shift Shift to rewrite",
     "tryOnAnyInput": "Install the extension to use it on any site"

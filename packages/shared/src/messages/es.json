@@ -1,4 +1,45 @@
 {
+  "meta": {
+    "home": {
+      "title": "rewrite.so — Doble Shift para reescribir",
+      "description": "Motor de reescritura con IA a nivel de campo de entrada. 3 estilos, solo teclado, sin interrumpir tu flujo."
+    }
+  },
+  "nav": {
+    "try": "Probar",
+    "pricing": "Precios",
+    "github": "GitHub",
+    "signIn": "Iniciar sesión",
+    "tryFree": "Probar gratis",
+    "languageSwitcher": "Idioma"
+  },
+  "footer": {
+    "tagline": "Doble Shift, reescritura con IA al instante en cualquier campo de entrada.",
+    "heading": {
+      "product": "Producto",
+      "account": "Cuenta",
+      "legal": "Legal",
+      "support": "Soporte"
+    },
+    "link": {
+      "home": "Inicio",
+      "tryIt": "Probar",
+      "pricing": "Precios",
+      "signIn": "Iniciar sesión",
+      "settings": "Configuración",
+      "billing": "Facturación",
+      "terms": "Términos del servicio",
+      "privacy": "Política de privacidad",
+      "refund": "Política de reembolso",
+      "aup": "Uso aceptable",
+      "contact": "Contacto",
+      "serviceStatus": "Estado del servicio ↗",
+      "github": "GitHub"
+    },
+    "disclaimer": "rewrite.so es un producto independiente. No está afiliado, respaldado o patrocinado por OpenAI, Anthropic, Google ni ningún otro proveedor de modelos de IA. Los modelos de lenguaje subyacentes se acceden mediante APIs estándar compatibles con OpenAI.",
+    "copyright": "© {year} rewrite.so. Todos los derechos reservados.",
+    "paymentsBy": "Pagos procesados por <creem>Creem</creem>, nuestro Merchant of Record."
+  },
   "hint": {
     "doubleShift": "Pulsa Shift Shift para reescribir",
     "tryOnAnyInput": "Instala la extensión para usarla en cualquier sitio"
