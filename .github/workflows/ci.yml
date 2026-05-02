@@ -34,6 +34,9 @@ jobs:
       - name: Lint (biome)
         run: pnpm lint
 
+      - name: i18n catalog consistency
+        run: pnpm i18n:validate
+
       - name: Typecheck
         run: pnpm typecheck
 
