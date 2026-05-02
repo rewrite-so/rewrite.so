@@ -68,9 +68,7 @@ export interface CreatePortalOutput {
   customer_portal_link: string;
 }
 
-export async function createPortalSession(
-  input: CreatePortalInput,
-): Promise<CreatePortalOutput> {
+export async function createPortalSession(input: CreatePortalInput): Promise<CreatePortalOutput> {
   const res = await fetch(`${CREEM_API}/customers/billing`, {
     method: 'POST',
     headers: {

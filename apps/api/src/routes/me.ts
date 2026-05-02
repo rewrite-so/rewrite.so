@@ -2,13 +2,7 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { createAuth } from '../lib/auth.ts';
 import { encryptApiKey } from '../lib/crypto.ts';
-import {
-  getUsage,
-  hashIp,
-  resolveUserTier,
-  type Subject,
-  type Tier,
-} from '../lib/quota.ts';
+import { getUsage, hashIp, resolveUserTier, type Subject, type Tier } from '../lib/quota.ts';
 import type { AppEnv } from '../types.ts';
 
 export const meRoute = new Hono<AppEnv>();

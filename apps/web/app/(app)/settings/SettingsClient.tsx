@@ -203,9 +203,7 @@ export function SettingsClient() {
 
       <SubscriptionSection me={me} />
 
-      {me.tier === 'pro' && (
-        <ByokSection byok={byok} onChange={setByok} onDelete={deleteByok} />
-      )}
+      {me.tier === 'pro' && <ByokSection byok={byok} onChange={setByok} onDelete={deleteByok} />}
 
       <div style={{ marginTop: 24 }}>
         <button
@@ -372,7 +370,8 @@ function ByokSection({
         <div style={{ fontSize: 14, color: '#111', fontWeight: 500 }}>BYOK（自带 API Key）</div>
         <div style={{ fontSize: 12, color: '#888', marginTop: 2, lineHeight: 1.6 }}>
           填入你自己的 OpenAI 兼容 endpoint 和 key 后，所有改写直连你的上游，
-          <strong style={{ color: '#111' }}>不计入 2,000 次月配额</strong>。Key 用 AES-GCM 加密存储，永不日志输出。
+          <strong style={{ color: '#111' }}>不计入 2,000 次月配额</strong>。Key 用 AES-GCM
+          加密存储，永不日志输出。
         </div>
       </div>
 
@@ -404,12 +403,7 @@ function ByokSection({
             onChange={setBaseUrl}
             placeholder="https://api.openai.com/v1"
           />
-          <Field
-            label="Model"
-            value={model}
-            onChange={setModel}
-            placeholder="gpt-4o-mini"
-          />
+          <Field label="Model" value={model} onChange={setModel} placeholder="gpt-4o-mini" />
           <Field
             label="API Key"
             value={apiKey}
@@ -470,7 +464,9 @@ function Field({
 }) {
   return (
     <label style={{ display: 'block', marginBottom: 10 }}>
-      <span style={{ display: 'block', fontSize: 12, color: '#888', marginBottom: 4 }}>{label}</span>
+      <span style={{ display: 'block', fontSize: 12, color: '#888', marginBottom: 4 }}>
+        {label}
+      </span>
       <input
         type={type}
         value={value}

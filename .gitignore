@@ -48,3 +48,7 @@ apps/extension/dist-zip/
 
 # Temp
 *.tmp
+
+# Claude scheduled tasks lock
+.claude/
+

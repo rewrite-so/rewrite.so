@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { PRO_PRICE } from '@rewrite/shared';
+import { useEffect, useState } from 'react';
 
 type Plan = 'monthly' | 'yearly';
 
@@ -95,8 +95,7 @@ export function BillingClient() {
             marginBottom: 24,
           }}
         >
-          你已订阅 Pro（{me.subscription?.plan === 'yearly' ? '年付' : '月付'}）。
-          周期结束：
+          你已订阅 Pro（{me.subscription?.plan === 'yearly' ? '年付' : '月付'}）。 周期结束：
           {me.subscription
             ? new Date(me.subscription.currentPeriodEnd).toLocaleDateString('zh-CN')
             : '-'}
@@ -158,12 +157,7 @@ export function BillingClient() {
           title="Free"
           price="$0"
           period=""
-          features={[
-            '30 次 / 月',
-            '3 种风格流式改写',
-            '页面语言自动检测',
-            '隐私优先 — 不记录原文',
-          ]}
+          features={['30 次 / 月', '3 种风格流式改写', '页面语言自动检测', '隐私优先 — 不记录原文']}
           cta={subscribed ? '当前为更高档位' : me.user ? '当前档位' : '免费使用'}
           disabled
         />
@@ -171,22 +165,21 @@ export function BillingClient() {
           title="Pro"
           price={plan === 'monthly' ? `$${PRO_PRICE.monthly}` : `$${PRO_PRICE.yearlyMonthly}`}
           period={plan === 'monthly' ? '/月' : `/月（年付 $${PRO_PRICE.yearlyTotal}）`}
-          features={[
-            '2,000 次 / 月',
-            '3 种风格流式改写',
-            '自带 API Key（BYOK）= 无限',
-            '优先支持',
-          ]}
+          features={['2,000 次 / 月', '3 种风格流式改写', '自带 API Key（BYOK）= 无限', '优先支持']}
           highlight
-          cta={subscribed ? '已订阅' : loading ? '跳转中…' : `订阅 Pro ${plan === 'monthly' ? '月付' : '年付'}`}
+          cta={
+            subscribed
+              ? '已订阅'
+              : loading
+                ? '跳转中…'
+                : `订阅 Pro ${plan === 'monthly' ? '月付' : '年付'}`
+          }
           onClick={() => !subscribed && checkout(plan)}
           disabled={subscribed || loading}
         />
       </div>
 
-      {error && (
-        <p style={{ color: '#dc2626', fontSize: 13, marginTop: 16 }}>错误：{error}</p>
-      )}
+      {error && <p style={{ color: '#dc2626', fontSize: 13, marginTop: 16 }}>错误：{error}</p>}
     </section>
   );
 }
