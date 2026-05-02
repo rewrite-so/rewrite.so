@@ -9,6 +9,7 @@ import {
   planFromProductId,
   verifyWebhookSignature,
 } from '../lib/creem.ts';
+import { log } from '../lib/log.ts';
 import type { AppEnv } from '../types.ts';
 
 export const webhookRoute = new Hono<AppEnv>();
@@ -33,7 +34,7 @@ webhookRoute.post('/webhooks/creem', async (c) => {
 
   const ok = await verifyWebhookSignature(rawBody, signature, c.env.CREEM_WEBHOOK_SECRET);
   if (!ok) {
-    console.warn('[webhook] invalid signature');
+    log.warn('webhook.invalid_signature');
     return c.json({ error: 'invalid_signature' }, 401);
   }
 
@@ -59,7 +60,11 @@ webhookRoute.post('/webhooks/creem', async (c) => {
   try {
     await routeEvent(c.env, envelope);
   } catch (err) {
-    console.error('[webhook] handler error', envelope.id, envelope.eventType, err);
+    log.error('webhook.handler_error', {
+      eventId: envelope.id,
+      eventType: envelope.eventType,
+      err,
+    });
     // 不写 webhook_events，让 Creem 重试
     return c.json({ error: 'handler_error' }, 500);
   }
@@ -111,7 +116,7 @@ async function routeEvent(env: AppEnv['Bindings'], evt: CreemEventEnvelope): Pro
       return;
 
     default:
-      console.warn('[webhook] unhandled event', evt.eventType);
+      log.warn('webhook.unhandled', { eventType: evt.eventType });
   }
 }
 
@@ -134,7 +139,7 @@ async function upsertSubscription(
 ): Promise<void> {
   const obj = evt.object as Record<string, unknown> | undefined;
   if (!obj) {
-    console.warn('[webhook] missing object', evt.id);
+    log.warn('webhook.missing_object', { eventId: evt.id });
     return;
   }
 
@@ -144,11 +149,12 @@ async function upsertSubscription(
   const subId = typeof obj.id === 'string' ? obj.id : null;
 
   if (!userId || !customerId || !productId || !subId) {
-    console.warn('[webhook] missing required fields', evt.id, {
-      userId,
-      customerId,
-      productId,
-      subId,
+    log.warn('webhook.missing_fields', {
+      eventId: evt.id,
+      hasUserId: !!userId,
+      hasCustomerId: !!customerId,
+      hasProductId: !!productId,
+      hasSubId: !!subId,
     });
     return;
   }
@@ -159,7 +165,7 @@ async function upsertSubscription(
     env.CREEM_PRO_YEARLY_PRODUCT_ID,
   );
   if (!plan) {
-    console.warn('[webhook] unknown product', evt.id, productId);
+    log.warn('webhook.unknown_product', { eventId: evt.id, productId });
     return;
   }
 

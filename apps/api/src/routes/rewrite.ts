@@ -4,6 +4,7 @@ import { Hono } from 'hono';
 import { BURST_BUCKETS, consume } from '../do/rate-limiter.ts';
 import { createAuth } from '../lib/auth.ts';
 import { decryptApiKey } from '../lib/crypto.ts';
+import { log } from '../lib/log.ts';
 import {
   checkAndIncrement,
   hashIp,
@@ -124,7 +125,7 @@ rewriteRoute.post('/v1/rewrite', async (c) => {
         c.env.BYOK_MASTER_KEY,
       );
     } catch (err) {
-      console.error('[rewrite] byok decrypt failed', err);
+      log.error('rewrite.byok_decrypt_failed', { err });
       return c.json({ error: 'byok_decrypt_failed' }, 500);
     }
     upstreamConfig = {

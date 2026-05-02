@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { createAuth } from '../lib/auth.ts';
 import { createCheckoutSession, createPortalSession } from '../lib/creem.ts';
+import { log } from '../lib/log.ts';
 import type { AppEnv } from '../types.ts';
 
 export const billingRoute = new Hono<AppEnv>();
@@ -63,7 +64,7 @@ billingRoute.post('/v1/billing/checkout', async (c) => {
     });
     return c.json({ url: checkout.checkout_url });
   } catch (err) {
-    console.error('[billing.checkout] creem error', err);
+    log.error('billing.checkout_error', { err });
     return c.json({ error: 'creem_error' }, 502);
   }
 });
@@ -96,7 +97,7 @@ billingRoute.get('/v1/billing/portal', async (c) => {
     });
     return c.json({ url: portal.customer_portal_link });
   } catch (err) {
-    console.error('[billing.portal] creem error', err);
+    log.error('billing.portal_error', { err });
     return c.json({ error: 'creem_error' }, 502);
   }
 });

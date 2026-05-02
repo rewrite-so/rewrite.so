@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { createAuth } from '../lib/auth.ts';
 import { encryptApiKey } from '../lib/crypto.ts';
+import { log } from '../lib/log.ts';
 import { getUsage, hashIp, resolveUserTier, type Subject, type Tier } from '../lib/quota.ts';
 import type { AppEnv } from '../types.ts';
 
@@ -258,7 +259,7 @@ meRoute.put('/v1/me/byok', async (c) => {
   try {
     enc = await encryptApiKey(apiKey, c.env.BYOK_MASTER_KEY);
   } catch (err) {
-    console.error('[byok.put] encrypt failed', err);
+    log.error('byok.encrypt_failed', { err });
     return c.json({ error: 'encrypt_failed' }, 500);
   }
 

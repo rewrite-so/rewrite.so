@@ -57,7 +57,8 @@ export function createAuth(env: Bindings) {
           // 并 302 redirect 到 callbackURL (web origin)。cookie domain=.rewrite.so
           // 跨子域共享，所以 redirect 后 web 端也能读到 session。
           if (!resend) {
-            console.warn('[auth] RESEND_API_KEY missing; magic link URL:', url);
+            // dev fallback: print the URL so devs can click it without a real Resend setup
+            console.warn(`[auth] RESEND_API_KEY missing; magic link: ${url}`);
             return;
           }
           const from = env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
