@@ -1,10 +1,21 @@
+import type { Metadata } from 'next';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { TryClient } from './TryClient.tsx';
 
-export const metadata = {
-  title: 'Try rewrite.so — Double-tap Shift to rewrite',
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'meta.try' });
+  return { title: t('title') };
+}
 
-export default function TryPage() {
+export default async function TryPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations('page.try');
   return (
     <main
       style={{
@@ -16,10 +27,8 @@ export default function TryPage() {
       }}
     >
       <header style={{ marginBottom: 32 }}>
-        <h1 style={{ fontSize: 32, fontWeight: 700, margin: 0 }}>Try it</h1>
-        <p style={{ marginTop: 8, color: '#666', fontSize: 15 }}>
-          Write something in the box below, then double-tap Shift to see 3 style rewrites.
-        </p>
+        <h1 style={{ fontSize: 32, fontWeight: 700, margin: 0 }}>{t('h1')}</h1>
+        <p style={{ marginTop: 8, color: '#666', fontSize: 15 }}>{t('intro')}</p>
       </header>
       <TryClient />
     </main>

@@ -3,6 +3,35 @@
     "home": {
       "title": "rewrite.so — Shift Shift で書き換え",
       "description": "入力欄レベルの AI 書き換えエンジン。3 つのスタイル、キーボードのみ、書く流れを妨げません。"
+    },
+    "login": { "title": "ログイン — rewrite.so" },
+    "try": { "title": "rewrite.so を試す — Shift Shift で書き換え" },
+    "settings": { "title": "設定 — rewrite.so" },
+    "billing": { "title": "請求 — rewrite.so" },
+    "unsubscribe": { "title": "配信停止 — rewrite.so" }
+  },
+  "page": {
+    "login": {
+      "h1": "ログイン",
+      "intro": "メールアドレスを入力すると、ログインリンクをお送りします。パスワードは不要です。",
+      "emailPlaceholder": "you@example.com",
+      "submit": "ログインリンクを送信",
+      "submitting": "送信中…",
+      "sentLine1": "✓ ログインリンクを {email} に送信しました。",
+      "sentLine2": "受信箱（迷惑メールフォルダも）をご確認ください。「Sign in to rewrite.so」ボタンをクリック。リンクは 15 分間有効です。"
+    },
+    "try": {
+      "h1": "試す",
+      "intro": "下のボックスに何か書いて、Shift をダブルタップで 3 スタイルの書き換えを見てください。"
+    },
+    "unsubscribe": {
+      "h1": "配信停止",
+      "footnote": "注: オンボーディングメールのみ停止します。トランザクションメール（ログインリンク、請求書、セキュリティアラート）は法令に従い引き続き送信されます。",
+      "invalidLink": "リンクに必要なパラメータがありません。メールの配信停止リンクを直接お使いいただくか、<email>hello@rewrite.so</email> までご連絡ください。",
+      "submitting": "配信停止中…",
+      "done": "✓ オンボーディングメールの配信を停止しました。これからはお会いできず残念です。",
+      "errorPrefix": "配信停止に失敗しました: ",
+      "tryAgain": "再試行"
     }
   },
   "nav": {

@@ -1,32 +1,27 @@
 'use client';
 
 import { createWebApiClient, mount } from '@rewrite/core';
-import { type Locale, pickLocale, t } from '@rewrite/shared';
+import type { Locale } from '@rewrite/shared';
+import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 
 // 留空让 fetch 走 same-origin（Next rewrites 代理到 wrangler dev）
 // 这样 better-auth session cookie 是 web origin 的，不需跨域
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? '';
 
-// SSR 时 navigator 不可用，固定用 'en'；客户端 mount 后再切到真实 locale，
-// 避免 hydration mismatch（placeholder 文本不能随 client navigator 变化）。
-const SSR_LOCALE: Locale = 'en';
-
 export function TryClient() {
+  const locale = useLocale() as Locale;
+  const t = useTranslations();
   const taRef = useRef<HTMLTextAreaElement | null>(null);
   const [hintVisible, setHintVisible] = useState(false);
-  const [locale, setLocale] = useState<Locale>(SSR_LOCALE);
 
   useEffect(() => {
-    const real = pickLocale(navigator.language);
-    if (real !== SSR_LOCALE) setLocale(real);
-
     const apiClient = createWebApiClient({ apiBase: API_BASE });
     const handle = mount({
       host: 'web',
       apiClient,
       shadowMode: 'open',
-      uiLocale: real,
+      uiLocale: locale,
       showInstallHook: true,
       loginUrl: '/login',
       onInstallClick: () => {
@@ -38,7 +33,7 @@ export function TryClient() {
       },
     });
     return () => handle.unmount();
-  }, []);
+  }, [locale]);
 
   useEffect(() => {
     // 首次访问 hint 兜底（输入框聚焦后显示，触发过一次后消失）
@@ -74,7 +69,7 @@ export function TryClient() {
       <textarea
         ref={taRef}
         defaultValue="hi, can u tell me when is the meeting tmr? i need to prep some slide before that"
-        placeholder={t('placeholder.tryHere', locale)}
+        placeholder={t('placeholder.tryHere')}
         style={{
           width: '100%',
           minHeight: 180,
@@ -123,7 +118,7 @@ export function TryClient() {
           >
             Shift
           </kbd>
-          {t('hint.doubleShift', locale)}
+          {t('hint.doubleShift')}
         </div>
       )}
     </div>

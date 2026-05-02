@@ -3,6 +3,35 @@
     "home": {
       "title": "rewrite.so — 双击 Shift 即时改写",
       "description": "输入框级 AI 改写引擎。3 种风格，纯键盘操作，不打断写作流。"
+    },
+    "login": { "title": "登录 — rewrite.so" },
+    "try": { "title": "试用 rewrite.so — 双击 Shift 改写" },
+    "settings": { "title": "设置 — rewrite.so" },
+    "billing": { "title": "账单 — rewrite.so" },
+    "unsubscribe": { "title": "退订 — rewrite.so" }
+  },
+  "page": {
+    "login": {
+      "h1": "登录",
+      "intro": "输入邮箱，我们会发送登录链接。无需密码。",
+      "emailPlaceholder": "you@example.com",
+      "submit": "发送登录链接",
+      "submitting": "发送中…",
+      "sentLine1": "✓ 登录链接已发送至 {email}。",
+      "sentLine2": "请查收邮箱（也看下垃圾邮件）。点击邮件中的「Sign in to rewrite.so」按钮。链接 15 分钟内有效。"
+    },
+    "try": {
+      "h1": "试用",
+      "intro": "在下面输入框写点什么，然后双击 Shift 看 3 种风格改写。"
+    },
+    "unsubscribe": {
+      "h1": "退订",
+      "footnote": "注：仅停止 onboarding 邮件。交易类邮件——登录链接、付款回执、安全提醒——仍按法律要求继续发送。",
+      "invalidLink": "链接缺少必要参数。请直接使用邮件中的退订链接，或发邮件至 <email>hello@rewrite.so</email>。",
+      "submitting": "退订中…",
+      "done": "✓ 你已成功退订 onboarding 邮件。很抱歉不能再继续给你写信了。",
+      "errorPrefix": "退订失败：",
+      "tryAgain": "重试"
     }
   },
   "nav": {

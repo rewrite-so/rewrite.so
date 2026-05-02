@@ -3,6 +3,35 @@
     "home": {
       "title": "rewrite.so — Double-tap Shift to rewrite",
       "description": "Input-box-level AI rewrite engine. 3 styles, keyboard-only, never breaks your flow."
+    },
+    "login": { "title": "Sign in — rewrite.so" },
+    "try": { "title": "Try rewrite.so — Double-tap Shift to rewrite" },
+    "settings": { "title": "Settings — rewrite.so" },
+    "billing": { "title": "Billing — rewrite.so" },
+    "unsubscribe": { "title": "Unsubscribe — rewrite.so" }
+  },
+  "page": {
+    "login": {
+      "h1": "Sign in",
+      "intro": "Enter your email and we'll send you a login link. No password needed.",
+      "emailPlaceholder": "you@example.com",
+      "submit": "Send login link",
+      "submitting": "Sending…",
+      "sentLine1": "✓ Login link sent to {email}.",
+      "sentLine2": "Check your inbox (and spam folder). Click the \"Sign in to rewrite.so\" button. The link is valid for 15 minutes."
+    },
+    "try": {
+      "h1": "Try it",
+      "intro": "Write something in the box below, then double-tap Shift to see 3 style rewrites."
+    },
+    "unsubscribe": {
+      "h1": "Unsubscribe",
+      "footnote": "Note: this only stops onboarding emails. Transactional emails — login links, billing receipts, security alerts — keep working as required by law.",
+      "invalidLink": "This link is missing required parameters. Please use the unsubscribe link from the email directly, or email <email>hello@rewrite.so</email>.",
+      "submitting": "Unsubscribing…",
+      "done": "✓ You're unsubscribed from onboarding emails. We're sorry to see you stop hearing from us.",
+      "errorPrefix": "Unsubscribe failed: ",
+      "tryAgain": "Try again"
     }
   },
   "nav": {

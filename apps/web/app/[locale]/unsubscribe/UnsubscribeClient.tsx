@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { use, useCallback, useEffect, useRef, useState } from 'react';
 
 type Status = 'pending' | 'submitting' | 'done' | 'error' | 'invalid_link';
@@ -9,6 +10,7 @@ export function UnsubscribeClient({
 }: {
   searchParams: Promise<{ user?: string; token?: string }>;
 }) {
+  const t = useTranslations('page.unsubscribe');
   const params = use(searchParams);
   const user = params.user;
   const token = params.token;
@@ -52,13 +54,14 @@ export function UnsubscribeClient({
   if (status === 'invalid_link') {
     return (
       <p style={{ marginTop: 24, color: '#666', fontSize: 14 }}>
-        This link is missing required parameters. Please use the unsubscribe link from the email
-        directly, or email <a href="mailto:hello@rewrite.so">hello@rewrite.so</a>.
+        {t.rich('invalidLink', {
+          email: (chunks) => <a href="mailto:hello@rewrite.so">{chunks}</a>,
+        })}
       </p>
     );
   }
   if (status === 'submitting' || status === 'pending') {
-    return <p style={{ marginTop: 24, color: '#666', fontSize: 14 }}>Unsubscribing…</p>;
+    return <p style={{ marginTop: 24, color: '#666', fontSize: 14 }}>{t('submitting')}</p>;
   }
   if (status === 'done') {
     return (
@@ -73,13 +76,16 @@ export function UnsubscribeClient({
           color: '#166534',
         }}
       >
-        ✓ You’re unsubscribed from onboarding emails. We’re sorry to see you stop hearing from us.
+        {t('done')}
       </div>
     );
   }
   return (
     <div style={{ marginTop: 24 }}>
-      <p style={{ color: '#dc2626', fontSize: 14 }}>Unsubscribe failed: {error}</p>
+      <p style={{ color: '#dc2626', fontSize: 14 }}>
+        {t('errorPrefix')}
+        {error}
+      </p>
       <button
         type="button"
         onClick={submit}
@@ -95,7 +101,7 @@ export function UnsubscribeClient({
           cursor: 'pointer',
         }}
       >
-        Try again
+        {t('tryAgain')}
       </button>
     </div>
   );

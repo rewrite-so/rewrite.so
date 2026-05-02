@@ -3,6 +3,35 @@
     "home": {
       "title": "rewrite.so — Double Shift pour réécrire",
       "description": "Moteur de réécriture IA au niveau du champ de saisie. 3 styles, clavier uniquement, sans casser votre flux."
+    },
+    "login": { "title": "Connexion — rewrite.so" },
+    "try": { "title": "Essayer rewrite.so — Double Shift pour réécrire" },
+    "settings": { "title": "Paramètres — rewrite.so" },
+    "billing": { "title": "Facturation — rewrite.so" },
+    "unsubscribe": { "title": "Désabonnement — rewrite.so" }
+  },
+  "page": {
+    "login": {
+      "h1": "Se connecter",
+      "intro": "Entrez votre email et nous vous enverrons un lien de connexion. Pas de mot de passe.",
+      "emailPlaceholder": "vous@exemple.com",
+      "submit": "Envoyer le lien de connexion",
+      "submitting": "Envoi…",
+      "sentLine1": "✓ Lien de connexion envoyé à {email}.",
+      "sentLine2": "Vérifiez votre boîte de réception (et le dossier spam). Cliquez sur le bouton \"Sign in to rewrite.so\". Le lien est valide pendant 15 minutes."
+    },
+    "try": {
+      "h1": "Essayer",
+      "intro": "Écrivez quelque chose dans la boîte ci-dessous, puis double-tapez Shift pour voir 3 réécritures de style."
+    },
+    "unsubscribe": {
+      "h1": "Désabonnement",
+      "footnote": "Note : ceci ne stoppe que les emails d'accueil. Les emails transactionnels — liens de connexion, reçus de facturation, alertes de sécurité — continuent comme l'exige la loi.",
+      "invalidLink": "Ce lien manque de paramètres requis. Utilisez le lien de désabonnement directement depuis l'email, ou écrivez à <email>hello@rewrite.so</email>.",
+      "submitting": "Désabonnement…",
+      "done": "✓ Vous êtes désabonné des emails d'accueil. Désolé de ne plus pouvoir vous écrire.",
+      "errorPrefix": "Échec du désabonnement : ",
+      "tryAgain": "Réessayer"
     }
   },
   "nav": {

@@ -1,10 +1,12 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
 type Status = 'idle' | 'sending' | 'sent' | 'error';
 
 export function LoginClient() {
+  const t = useTranslations('page.login');
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<Status>('idle');
   const [error, setError] = useState<string | null>(null);
@@ -41,13 +43,8 @@ export function LoginClient() {
   if (status === 'sent') {
     return (
       <div style={{ marginTop: 28, padding: 16, border: '1px solid #d4d4d8', borderRadius: 10 }}>
-        <p style={{ margin: 0, fontSize: 14 }}>
-          ✓ Login link sent to <code>{email}</code>.
-        </p>
-        <p style={{ margin: '8px 0 0', color: '#888', fontSize: 12 }}>
-          Check your inbox (and spam folder). Click the &ldquo;Sign in to rewrite.so&rdquo; button.
-          The link is valid for 15 minutes.
-        </p>
+        <p style={{ margin: 0, fontSize: 14 }}>{t('sentLine1', { email })}</p>
+        <p style={{ margin: '8px 0 0', color: '#888', fontSize: 12 }}>{t('sentLine2')}</p>
       </div>
     );
   }
@@ -60,7 +57,7 @@ export function LoginClient() {
         autoComplete="email"
         autoCapitalize="off"
         autoCorrect="off"
-        placeholder="you@example.com"
+        placeholder={t('emailPlaceholder')}
         value={email}
         onChange={(e) => setEmail(e.currentTarget.value)}
         style={{
@@ -90,7 +87,7 @@ export function LoginClient() {
           cursor: status === 'sending' ? 'wait' : 'pointer',
         }}
       >
-        {status === 'sending' ? 'Sending…' : 'Send login link'}
+        {status === 'sending' ? t('submitting') : t('submit')}
       </button>
       {error && <p style={{ marginTop: 12, color: '#dc2626', fontSize: 13 }}>{error}</p>}
     </form>

@@ -3,6 +3,35 @@
     "home": {
       "title": "rewrite.so — Doppel-Shift zum Umschreiben",
       "description": "AI-Umschreibungs-Engine auf Eingabefeld-Ebene. 3 Stile, nur Tastatur, unterbricht deinen Flow nicht."
+    },
+    "login": { "title": "Anmelden — rewrite.so" },
+    "try": { "title": "rewrite.so testen — Doppel-Shift zum Umschreiben" },
+    "settings": { "title": "Einstellungen — rewrite.so" },
+    "billing": { "title": "Abrechnung — rewrite.so" },
+    "unsubscribe": { "title": "Abmelden — rewrite.so" }
+  },
+  "page": {
+    "login": {
+      "h1": "Anmelden",
+      "intro": "Gib deine E-Mail ein und wir senden dir einen Login-Link. Kein Passwort nötig.",
+      "emailPlaceholder": "du@beispiel.com",
+      "submit": "Login-Link senden",
+      "submitting": "Sende…",
+      "sentLine1": "✓ Login-Link gesendet an {email}.",
+      "sentLine2": "Prüfe deinen Posteingang (auch Spam). Klicke auf den \"Sign in to rewrite.so\"-Button. Der Link ist 15 Minuten gültig."
+    },
+    "try": {
+      "h1": "Testen",
+      "intro": "Schreibe etwas in das Feld unten und drücke Shift doppelt, um 3 Stil-Umschreibungen zu sehen."
+    },
+    "unsubscribe": {
+      "h1": "Abmelden",
+      "footnote": "Hinweis: Dies stoppt nur Onboarding-E-Mails. Transaktionale E-Mails — Login-Links, Abrechnungsbelege, Sicherheitswarnungen — werden gesetzlich vorgeschrieben weiter gesendet.",
+      "invalidLink": "Diesem Link fehlen erforderliche Parameter. Bitte nutze den Abmelde-Link direkt aus der E-Mail oder schreibe an <email>hello@rewrite.so</email>.",
+      "submitting": "Abmelden…",
+      "done": "✓ Du bist von den Onboarding-E-Mails abgemeldet. Schade, dass wir dir nichts mehr schicken können.",
+      "errorPrefix": "Abmelden fehlgeschlagen: ",
+      "tryAgain": "Erneut versuchen"
     }
   },
   "nav": {

@@ -3,6 +3,35 @@
     "home": {
       "title": "rewrite.so — Shift Shift로 다시 쓰기",
       "description": "입력란 수준 AI 재작성 엔진. 3가지 스타일, 키보드만, 작업 흐름을 끊지 않습니다."
+    },
+    "login": { "title": "로그인 — rewrite.so" },
+    "try": { "title": "rewrite.so 체험 — Shift Shift로 다시 쓰기" },
+    "settings": { "title": "설정 — rewrite.so" },
+    "billing": { "title": "결제 — rewrite.so" },
+    "unsubscribe": { "title": "구독 취소 — rewrite.so" }
+  },
+  "page": {
+    "login": {
+      "h1": "로그인",
+      "intro": "이메일을 입력하면 로그인 링크를 보내드립니다. 비밀번호 불필요.",
+      "emailPlaceholder": "you@example.com",
+      "submit": "로그인 링크 전송",
+      "submitting": "전송 중…",
+      "sentLine1": "✓ 로그인 링크를 {email}로 전송했습니다.",
+      "sentLine2": "받은편지함(스팸함도)을 확인하세요. 「Sign in to rewrite.so」 버튼을 클릭하세요. 링크는 15분간 유효합니다."
+    },
+    "try": {
+      "h1": "체험",
+      "intro": "아래 상자에 무언가 입력하고, Shift를 두 번 눌러 3가지 스타일의 재작성을 확인하세요."
+    },
+    "unsubscribe": {
+      "h1": "구독 취소",
+      "footnote": "참고: 온보딩 이메일만 중단됩니다. 트랜잭션 이메일(로그인 링크, 결제 영수증, 보안 알림)은 법에 따라 계속 발송됩니다.",
+      "invalidLink": "링크에 필요한 파라미터가 없습니다. 이메일의 구독 취소 링크를 직접 사용하거나 <email>hello@rewrite.so</email>로 문의해주세요.",
+      "submitting": "구독 취소 중…",
+      "done": "✓ 온보딩 이메일 구독을 취소했습니다. 더 이상 들려드릴 수 없어 아쉽습니다.",
+      "errorPrefix": "구독 취소 실패: ",
+      "tryAgain": "재시도"
     }
   },
   "nav": {
