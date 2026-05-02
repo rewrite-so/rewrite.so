@@ -1,0 +1,70 @@
+name: Release Extension
+
+# 触发：push tag 'ext-v*'（如 ext-v0.1.0）
+# 或者手动 workflow_dispatch（用于临时打包）
+on:
+  push:
+    tags:
+      - 'ext-v*'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write  # 创建 GitHub Release
+
+concurrency:
+  group: release-extension-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build + Release zip
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build extension (production env)
+        working-directory: apps/extension
+        run: pnpm build
+
+      - name: Compute version label
+        id: ver
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/ext-v* ]]; then
+            echo "label=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+          else
+            echo "label=manual-$(date -u +%Y%m%d-%H%M%S)" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Zip dist
+        working-directory: apps/extension/dist
+        run: zip -r "../../../rewrite-so-extension-${{ steps.ver.outputs.label }}.zip" .
+
+      - name: Upload as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rewrite-so-extension-${{ steps.ver.outputs.label }}
+          path: rewrite-so-extension-${{ steps.ver.outputs.label }}.zip
+          retention-days: 30
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/ext-v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: rewrite-so-extension-${{ steps.ver.outputs.label }}.zip
+          generate_release_notes: true
+          draft: false
+          prerelease: false

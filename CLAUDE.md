@@ -62,6 +62,20 @@
 - **OpenNext 部署目标是 Workers，不是 Pages**：2025 起 Pages 进入维护，新功能只进 Workers Static Assets。`wrangler.toml` 中 `assets.directory = ".open-next/assets"`。
 - **DO 名字 `ip:<sha256(ip + daily_salt)>`**：salt 每天轮换，避免 IP 跨天关联（GDPR 风险）。
 
+## CI/CD（GitHub Actions）
+
+- **path filter 触发**：`deploy-api` / `deploy-web` 只在 push main 且 `apps/api/**`、
+  `apps/web/**`、`packages/**`、`pnpm-lock.yaml` 改动时跑。改 docs / extension /
+  workflow 自身**不会**触发部署。
+- **不自动跑 migrations**：D1 schema 改动通过 `migrate-d1.yml` 手动 dispatch 跑，
+  避免误删表。文件名严格按 `NNNN_xxx.sql` 编号；新加 migration 时新建文件，
+  不要修改已部署过的旧 migration（生产已执行过，UPSERT 风险）。
+- **release 扩展**：tag 必须 `ext-v*` 前缀（如 `ext-v0.1.0`），其它 tag 不会触发。
+  zip artifact 同时上传到 Actions artifacts 和 GitHub Release，方便不发布也能拿到
+  打包结果。
+- **secrets**：CI 不会自动同步 wrangler secrets（如 OPENAI_API_KEY、
+  BETTER_AUTH_SECRET）；改 secret 时手动 `wrangler secret put` 或在 dashboard 改。
+
 ## 工具链坑位
 
 - **wrangler dev 与系统代理冲突**：当用户机器有 `HTTP_PROXY` / `HTTPS_PROXY` 环境变量时，worker 内 `fetch()` 会被强制走代理（即使是 localhost）。本地端到端调试 mock upstream 时必须先 `unset` 这些变量，或用 `env -u HTTP_PROXY ...` 启动。生产环境 Workers 没这个问题。

@@ -64,14 +64,33 @@ pnpm fix          # biome 自动修复
 pnpm build        # 全 package 构建
 ```
 
-### 部署
+### 部署（CI/CD）
 
+GitHub Actions 自动部署，配置在 `.github/workflows/`：
+
+| Workflow | 触发 | 行为 |
+|---|---|---|
+| `ci.yml` | PR + push main | lint + typecheck + test |
+| `deploy-api.yml` | push main 改 `apps/api/` 或 `packages/` | 部署到 `api.rewrite.so` |
+| `deploy-web.yml` | push main 改 `apps/web/` 或 `packages/` | OpenNext build + 部署到 `rewrite.so` |
+| `release-extension.yml` | tag `ext-v*` | 构建 zip + 创建 GitHub Release |
+| `migrate-d1.yml` | 手动 dispatch | 远程跑 D1 migrations（输入 file 名或全部） |
+
+**首次配置**：GitHub repo Settings → Secrets and variables → Actions，加两个 repository secret：
+- `CLOUDFLARE_API_TOKEN`：要权限 `Workers Scripts:Edit + Workers KV Storage:Edit + D1:Edit + Zone DNS:Edit`
+- `CLOUDFLARE_ACCOUNT_ID`：`fac906e305f0f4df576524f107365e35`
+
+**发扩展**：
 ```bash
-pnpm --filter @rewrite/api deploy
+git tag ext-v0.1.0 && git push --tags
+```
+Action 会构建 zip + 创建 Release。zip 手动上传到 Chrome Web Store 审查。
+
+**手动部署**（绕过 CI）：
+```bash
+pnpm --filter @rewrite/api deploy   # 需 CLOUDFLARE_API_TOKEN env
 pnpm --filter @rewrite/web deploy
 ```
-
-扩展通过 Chrome Web Store 发布；同时构建 zip 提供手动安装兜底（`pnpm --filter @rewrite/extension package`）。
 
 ## 仓库结构
 
