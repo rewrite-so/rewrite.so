@@ -151,23 +151,23 @@
   },
   "home": {
     "hero": {
-      "eyebrow": "오픈소스 · Apache 2.0 · 추적 없음",
-      "h1Line1": "AI 재작성,",
-      "h1Line2": "당신의 텍스트를 저장하지 않습니다.",
-      "subHeadline": "Stop overthinking every message.",
-      "polyglot": "Any language in. Any language out.",
-      "intro": "어떤 웹 입력란에서든 <kbd>Shift</kbd>를 두 번 누르세요. 3개의 AI 재작성이 병렬 스트리밍됩니다. <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd>으로 채택. 입력과 출력은 <strong>디스크에 절대 기록되지 않습니다</strong> — 소스 코드로 검증 가능합니다.",
+      "eyebrow": "어떤 입력란이든 · 오픈소스",
+      "h1Line1": "대충 쓰고,",
+      "h1Line2": "자신 있게 보내세요.",
+      "subHeadline": "모든 메시지를 너무 고민하지 마세요.",
+      "polyglot": "어떤 언어로 입력하든, 어떤 언어로든 출력.",
+      "intro": "어떤 웹 입력란에서든 <kbd>Shift</kbd>를 두 번 누르세요. AI가 세 가지 표현을 보여줍니다. <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd>으로 골라 바로 보내세요.",
       "ctaPrimary": "무료 체험 →",
       "ctaSecondary": "⭐ GitHub Star",
       "fineprint": "월 {count}회 무료 · 카드 불필요 · BYOK로 무제한"
     },
     "scenarios": {
-      "h2": "Sound familiar?",
-      "pain1": "You retyped that Slack message 3 times before sending it.",
-      "pain2": "You opened ChatGPT in another tab to \"make it less harsh\".",
-      "pain3": "You translated each sentence in your head before typing.",
-      "pain4": "You re-read the same email 4 times before hitting send.",
-      "outro": "rewrite.so cuts the loop. ↓"
+      "h2": "익숙하신가요?",
+      "pain1": "그 Slack 메시지를 3번 다시 쳐서 보냈죠.",
+      "pain2": "'좀 덜 거칠게' 만들려고 다른 탭에 ChatGPT를 열었죠.",
+      "pain3": "입력하기 전에 머릿속에서 문장마다 번역했죠.",
+      "pain4": "같은 이메일을 보내기 전 4번 읽었죠.",
+      "outro": "rewrite.so가 그 루프를 끊어냅니다. ↓"
     },
     "privacy": {
       "eyebrow": "프라이버시 계약",
@@ -189,11 +189,11 @@
       "stepLabel": "단계 {num}",
       "step1": {
         "title": "Shift 두 번 누르기",
-        "body": "500ms 이내, 페이지의 어떤 포커스된 입력란이든 — input, textarea, contenteditable. PII 필드(비밀번호, CVV, OTP)는 하드 제외됩니다."
+        "body": "500ms 이내에 <kbd>Shift</kbd>를 두 번 누르세요. 비밀번호 / CVV / OTP 필드는 자동으로 건너뜁니다."
       },
       "step2": {
         "title": "3가지 스타일, 병렬",
-        "body": "충실, 캐주얼, 격식 — 단일 멀티플렉스 SSE 응답에서 동시 생성. 첫 토큰은 수백 밀리초 안에 도착."
+        "body": "충실 / 캐주얼 / 격식 — 세 가지 톤을 동시에. 첫 번째는 거의 즉시 나타납니다."
       },
       "step3": {
         "title": "키로 채택",
@@ -204,7 +204,7 @@
       "h2": "구현 방식에 신경 쓰는 사람들을 위해",
       "openSource": {
         "label": "오픈소스",
-        "title": "100% Apache 2.0",
+        "title": "코드를 직접 읽어보세요",
         "body": "셀프 호스팅, 감사, 포크 가능. 위의 프라이버시 주장은 마케팅이 아닌 — <repo>github.com/rewrite-so/rewrite.so</repo>에서 읽을 수 있는 코드입니다."
       },
       "byok": {

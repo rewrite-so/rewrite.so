@@ -151,23 +151,23 @@
   },
   "home": {
     "hero": {
-      "eyebrow": "オープンソース · Apache 2.0 · 追跡なし",
-      "h1Line1": "AI 書き換え、",
-      "h1Line2": "あなたのテキストを保存しません。",
-      "subHeadline": "Stop overthinking every message.",
-      "polyglot": "Any language in. Any language out.",
-      "intro": "ウェブの入力欄で <kbd>Shift</kbd> をダブルタップ。3 つの AI 書き換えが並行ストリーミングで生成。<kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> で採用。入力と出力は<strong>ディスクに書き込まれません</strong> — ソースコードで検証可能。",
+      "eyebrow": "任意の入力欄 · オープンソース",
+      "h1Line1": "ラフに書いて、",
+      "h1Line2": "自信を持って送る。",
+      "subHeadline": "メッセージを送る前に考えすぎない。",
+      "polyglot": "どの言語で書いても、どの言語でも出力。",
+      "intro": "任意のウェブ入力欄で <kbd>Shift</kbd> をダブルタップ。AI が 3 つの言い方を提示。<kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> で選んでそのまま送信。",
       "ctaPrimary": "無料で試す →",
       "ctaSecondary": "⭐ GitHub で Star",
       "fineprint": "月 {count} 回まで無料 · カード不要 · BYOK で無制限"
     },
     "scenarios": {
-      "h2": "Sound familiar?",
-      "pain1": "You retyped that Slack message 3 times before sending it.",
-      "pain2": "You opened ChatGPT in another tab to \"make it less harsh\".",
-      "pain3": "You translated each sentence in your head before typing.",
-      "pain4": "You re-read the same email 4 times before hitting send.",
-      "outro": "rewrite.so cuts the loop. ↓"
+      "h2": "身に覚え、ありませんか？",
+      "pain1": "Slack のあのメッセージ、3 回打ち直してから送信した。",
+      "pain2": "「もう少し柔らかく」のために、別タブで ChatGPT を開いた。",
+      "pain3": "タイプする前に、頭の中で 1 文ずつ翻訳した。",
+      "pain4": "同じメールを送信ボタンを押すまで 4 回読み返した。",
+      "outro": "rewrite.so がそのループを断ちます。 ↓"
     },
     "privacy": {
       "eyebrow": "プライバシー契約",
@@ -189,11 +189,11 @@
       "stepLabel": "ステップ {num}",
       "step1": {
         "title": "Shift をダブルタップ",
-        "body": "500ms 以内、ページ上のフォーカスされた入力欄 — input、textarea、contenteditable のいずれか。PII フィールド（パスワード、CVV、OTP）はハード除外されます。"
+        "body": "500ms 以内に <kbd>Shift</kbd> を 2 回タップ。パスワード / CVV / OTP の各フィールドは自動的にスキップされます。"
       },
       "step2": {
         "title": "3 スタイル並行",
-        "body": "忠実、カジュアル、フォーマル — 単一の多重化 SSE レスポンスで同時生成。最初のトークンは数百ミリ秒で到達。"
+        "body": "忠実 / カジュアル / フォーマル — 3 つのトーンを同時に。最初の 1 つはほぼ瞬時に表示されます。"
       },
       "step3": {
         "title": "キーで採用",
@@ -204,7 +204,7 @@
       "h2": "実装の詳細を気にする人のために",
       "openSource": {
         "label": "オープンソース",
-        "title": "100% Apache 2.0",
+        "title": "コードを自分で読む",
         "body": "セルフホスト、監査、フォーク自由。上記のプライバシー声明はマーケティングではなく — <repo>github.com/rewrite-so/rewrite.so</repo> で読めるコードです。"
       },
       "byok": {
