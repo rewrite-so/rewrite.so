@@ -4,6 +4,7 @@ import { createAuth } from '../lib/auth.ts';
 import { encryptApiKey } from '../lib/crypto.ts';
 import { log } from '../lib/log.ts';
 import { getUsage, hashIp, resolveUserTier, type Subject, type Tier } from '../lib/quota.ts';
+import { sanitizeTargetLang } from '../lib/sanitize-target-lang.ts';
 import type { AppEnv } from '../types.ts';
 
 export const meRoute = new Hono<AppEnv>();
@@ -11,22 +12,6 @@ export const meRoute = new Hono<AppEnv>();
 interface UserSettingsRow {
   target_lang: string;
   ui_locale: string;
-}
-
-/**
- * 改写目标语言可以是 22 个预设代码（"en" / "zh-CN" / ...）、'auto'，或用户自定义
- * 自然语言描述（"Portuguese (Brazilian)" / "粤语正式书面" / "British English"...）。
- * 直接注入 prompt，但前后都 sanitize：去掉引号 / 反斜杠 / 换行 / 控制字符，
- * 防止跳出 prompt 字符串字面量污染上下文。
- */
-function sanitizeTargetLang(raw: string): string {
-  return (
-    raw
-      // biome-ignore lint/suspicious/noControlCharactersInRegex: 故意 strip ASCII 控制字符防 prompt 注入
-      .replace(/["'\\\n\r\t\x00-\x1f\x7f]/g, '')
-      .replace(/\s+/g, ' ')
-      .trim()
-  );
 }
 
 const SettingsPatchSchema = z
@@ -145,8 +130,12 @@ meRoute.get('/v1/me/settings', async (c) => {
     .bind(session.user.id)
     .first<UserSettingsRow>();
 
+  // Lazy sanitize 老数据：v0.1.x 之前的 SettingsClient 用 hardcoded 8 项下拉，
+  // 历史 DB 中无非法字符；但读路径仍跑一遍作为防御纵深，防误入脏数据。
+  const rawTarget = row?.target_lang ?? 'auto';
+  const targetLang = rawTarget === 'auto' ? 'auto' : sanitizeTargetLang(rawTarget) || 'auto';
   return c.json({
-    targetLang: row?.target_lang ?? 'auto',
+    targetLang,
     uiLocale: row?.ui_locale ?? 'auto',
   });
 });

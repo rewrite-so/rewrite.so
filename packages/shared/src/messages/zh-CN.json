@@ -151,7 +151,7 @@
         "custom": "自定义…",
         "customLabelFmt": "自定义：{value}",
         "customPlaceholder": "比如：Portuguese (Brazilian)、British English、粤语",
-        "customHelp": "任意语言、方言或风格描述，会直接传给模型。"
+        "customHelp": "任意语言、方言或风格描述，会直接传给模型。引号和控制字符会被自动过滤。"
       },
       "sub": {
         "label": "订阅",

@@ -9,6 +9,12 @@
 - **触发去抖窗口 500ms**：误触和延迟的权衡值，不要随意调。
 - **候选数固定 3，不能加第 4 个**（产品决策）。
 - **不加自定义 prompt 输入框**（产品决策；BYOK 仅替换 endpoint，不让用户改 prompt）。
+- **自定义 targetLang 例外**：`/settings` 允许任意自然语言描述（"粤语" / "British English" /
+  "Shakespearean"），通过 `lib/sanitize-target-lang.ts` 注入到 prompt。这是有意松绑——
+  `targetLang` 是 prompt 模板里的具名 slot，不是 prompt 自定义；与 BYOK 的"信任已登录用户"
+  哲学一致。**sanitize 是 hard requirement**（防引号/控制字符跳出 string literal）。
+  **不要扩大到 style / candidate 数 / 完整 prompt** —— 那些仍是契约固定。`/try` 不开放
+  custom（匿名快速试用 UX 简洁）。
 - **目标语言默认"自动检测页面语言"**：用户在 onboarding/设置中可改为固定语言。临时覆盖（每次切换）MVP 不做。
 - **单次输入字符上限 4000**：成本控制。改动需重新评估单次成本。
 

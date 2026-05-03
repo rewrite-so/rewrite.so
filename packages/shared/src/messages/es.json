@@ -151,7 +151,7 @@
         "custom": "Personalizado…",
         "customLabelFmt": "Personalizado: {value}",
         "customPlaceholder": "p. ej., Portuguese (Brazilian), British English, español rioplatense",
-        "customHelp": "Cualquier idioma, dialecto o estilo. Se envía tal cual al modelo."
+        "customHelp": "Cualquier idioma, dialecto o estilo. Se envía tal cual al modelo. Las comillas y caracteres de control se eliminan automáticamente."
       },
       "sub": {
         "label": "Suscripción",

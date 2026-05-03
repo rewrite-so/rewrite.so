@@ -151,7 +151,7 @@
         "custom": "사용자 지정…",
         "customLabelFmt": "사용자 지정: {value}",
         "customPlaceholder": "예: Portuguese (Brazilian), British English, 부산 사투리",
-        "customHelp": "언어 / 방언 / 문체 자유 입력. 모델에 그대로 전달됩니다."
+        "customHelp": "언어 / 방언 / 문체 자유 입력. 모델에 그대로 전달됩니다. 따옴표 및 제어 문자는 자동으로 제거됩니다."
       },
       "sub": {
         "label": "구독",

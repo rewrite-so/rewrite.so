@@ -38,6 +38,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   "Shakespearean English" 等），直接注入 prompt。API 端 max length 从 20 → 50，
   并加 sanitize（strip 引号 / 反斜杠 / 换行 / ASCII 控制字符）防 prompt 注入。
   /try 不开放 custom（保持匿名快速试用 UX 简洁）。
+- （CR fixes）自定义 targetLang 打磨 — 选 Custom 后 input 自动聚焦；
+  draft 留空离焦自动 reset 回 stored 值（修"UI 撒谎"bug）；
+  sanitize 抽到 `lib/sanitize-target-lang.ts` 单独模块 + 14 条单元测试覆盖；
+  GET /v1/me/settings 读路径加 lazy sanitize 兜底老脏数据；customHelp
+  文案 7 locale 同步告知"特殊字符会被过滤"。
 
 ### Added
 - **i18n** — 7 UI locales (`en` / `zh-CN` / `ja` / `ko` / `es` / `fr` / `de`) covering

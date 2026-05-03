@@ -3,7 +3,7 @@
 import type { Locale, StoredLocale } from '@rewrite/shared';
 import { REWRITE_TARGET_LABELS, REWRITE_TARGETS } from '@rewrite/shared';
 import { useFormatter, useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from '../../../../i18n/navigation.ts';
 
 interface UserInfo {
@@ -56,6 +56,7 @@ export function SettingsClient() {
   const [customDraft, setCustomDraft] = useState('');
   // 是否正在编辑自定义（用户主动选了 Custom，或已存值就是 custom）
   const [showCustomInput, setShowCustomInput] = useState(false);
+  const customInputRef = useRef<HTMLInputElement | null>(null);
 
   const isStoredCustom = settings ? !PRESET_TARGETS.includes(settings.targetLang) : false;
 
@@ -66,6 +67,13 @@ export function SettingsClient() {
       setShowCustomInput(true);
     }
   }, [settings, isStoredCustom]);
+
+  // 用户主动选 "Custom..." 时自动聚焦 input —— 否则用户得再点一下才能输
+  useEffect(() => {
+    if (showCustomInput && !isStoredCustom) {
+      customInputRef.current?.focus();
+    }
+  }, [showCustomInput, isStoredCustom]);
 
   const uiLocaleOptions: Array<{ value: StoredLocale; label: string }> = [
     { value: 'auto', label: t('lang.autoSystem') },
@@ -157,7 +165,16 @@ export function SettingsClient() {
   function commitCustomTargetLang() {
     if (!settings) return;
     const trimmed = customDraft.trim();
-    if (trimmed.length === 0) return;
+    if (trimmed.length === 0) {
+      // 空值离焦 —— 视为放弃自定义。回到 stored 值（settings.targetLang），select
+      // 自动跳回当前生效的预设，让用户感知"未生效"，避免 UI 撒谎。
+      // 已存自定义值时不 reset（继续显示 input 让用户继续编辑）
+      if (!isStoredCustom) {
+        setShowCustomInput(false);
+        setCustomDraft('');
+      }
+      return;
+    }
     if (trimmed === settings.targetLang) return;
     updateTargetLang(trimmed);
   }
@@ -290,6 +307,7 @@ export function SettingsClient() {
             {showCustomInput && (
               <div style={{ marginTop: 12 }}>
                 <input
+                  ref={customInputRef}
                   type="text"
                   value={customDraft}
                   onChange={(e) => setCustomDraft(e.currentTarget.value)}

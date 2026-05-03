@@ -151,7 +151,7 @@
         "custom": "Eigener Wert…",
         "customLabelFmt": "Eigener Wert: {value}",
         "customPlaceholder": "z. B. Portuguese (Brazilian), British English, Schweizerdeutsch",
-        "customHelp": "Beliebige Sprache, Dialekt oder Stil. Geht direkt an das Modell."
+        "customHelp": "Beliebige Sprache, Dialekt oder Stil. Geht direkt an das Modell. Anführungszeichen und Steuerzeichen werden automatisch entfernt."
       },
       "sub": {
         "label": "Abonnement",

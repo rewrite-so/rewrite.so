@@ -151,7 +151,7 @@
         "custom": "カスタム…",
         "customLabelFmt": "カスタム：{value}",
         "customPlaceholder": "例：Portuguese (Brazilian)、British English、関西弁",
-        "customHelp": "言語・方言・文体を自由記入。モデルにそのまま渡されます。"
+        "customHelp": "言語・方言・文体を自由記入。モデルにそのまま渡されます。引用符と制御文字は自動で除去されます。"
       },
       "sub": {
         "label": "サブスクリプション",
