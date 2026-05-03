@@ -147,7 +147,11 @@
         "ui": "Langue de l'interface",
         "uiHelp": "Langue du site. Indépendante de la langue de réécriture ci-dessus.",
         "autoSystem": "Auto (suivre le système)",
-        "autoFromPage": "Détecter la langue de la page"
+        "autoFromPage": "Détecter la langue de la page",
+        "custom": "Personnalisé…",
+        "customLabelFmt": "Personnalisé : {value}",
+        "customPlaceholder": "ex. : Portuguese (Brazilian), British English, français québécois",
+        "customHelp": "N'importe quelle langue, dialecte ou style. Envoyé tel quel au modèle."
       },
       "sub": {
         "label": "Abonnement",

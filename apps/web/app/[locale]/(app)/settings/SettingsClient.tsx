@@ -38,6 +38,9 @@ interface ByokConfig {
   updatedAt?: string;
 }
 
+const PRESET_TARGETS: readonly string[] = ['auto', ...REWRITE_TARGETS];
+const CUSTOM_SENTINEL = '__custom__';
+
 export function SettingsClient() {
   const t = useTranslations('page.settings');
   const router = useRouter();
@@ -49,6 +52,20 @@ export function SettingsClient() {
   const [savingLang, setSavingLang] = useState(false);
   const [savingUiLocale, setSavingUiLocale] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  // 用户选了 "Custom..." 但还没提交输入框时显示的草稿值
+  const [customDraft, setCustomDraft] = useState('');
+  // 是否正在编辑自定义（用户主动选了 Custom，或已存值就是 custom）
+  const [showCustomInput, setShowCustomInput] = useState(false);
+
+  const isStoredCustom = settings ? !PRESET_TARGETS.includes(settings.targetLang) : false;
+
+  // settings 加载后，如果存的就是 custom 值，激活 input 并把 draft 同步成存值
+  useEffect(() => {
+    if (settings && isStoredCustom) {
+      setCustomDraft(settings.targetLang);
+      setShowCustomInput(true);
+    }
+  }, [settings, isStoredCustom]);
 
   const uiLocaleOptions: Array<{ value: StoredLocale; label: string }> = [
     { value: 'auto', label: t('lang.autoSystem') },
@@ -61,9 +78,14 @@ export function SettingsClient() {
     { value: 'de', label: 'Deutsch' },
   ];
 
+  const customOptionLabel =
+    isStoredCustom && settings
+      ? t('lang.customLabelFmt', { value: settings.targetLang })
+      : t('lang.custom');
   const langOptions: Array<{ value: string; label: string }> = [
     { value: 'auto', label: t('lang.autoFromPage') },
     ...REWRITE_TARGETS.map((code) => ({ value: code, label: REWRITE_TARGET_LABELS[code] })),
+    { value: CUSTOM_SENTINEL, label: customOptionLabel },
   ];
 
   useEffect(() => {
@@ -119,6 +141,25 @@ export function SettingsClient() {
     } finally {
       setSavingLang(false);
     }
+  }
+
+  function handleLangSelectChange(value: string) {
+    if (value === CUSTOM_SENTINEL) {
+      // 选中 "Custom..."：仅切换到输入模式，等用户在 input 提交后再 PATCH
+      setShowCustomInput(true);
+      return;
+    }
+    setShowCustomInput(false);
+    setCustomDraft('');
+    updateTargetLang(value);
+  }
+
+  function commitCustomTargetLang() {
+    if (!settings) return;
+    const trimmed = customDraft.trim();
+    if (trimmed.length === 0) return;
+    if (trimmed === settings.targetLang) return;
+    updateTargetLang(trimmed);
   }
 
   async function updateUiLocale(value: StoredLocale) {
@@ -207,39 +248,76 @@ export function SettingsClient() {
         <div style={{ ...cardStyle, marginTop: 16 }}>
           <div
             style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
               padding: '10px 0',
               borderBottom: '1px solid #f0f0f0',
             }}
           >
-            <div>
-              <div style={{ fontSize: 14, color: '#111' }}>{t('lang.target')}</div>
-              <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>
-                {t('lang.targetHelp')}
-              </div>
-            </div>
-            <select
-              value={settings.targetLang}
-              onChange={(e) => updateTargetLang(e.currentTarget.value)}
-              disabled={savingLang}
+            <div
               style={{
-                padding: '7px 10px',
-                fontSize: 13,
-                border: '1px solid #d4d4d8',
-                borderRadius: 6,
-                background: '#fff',
-                fontFamily: 'inherit',
-                minWidth: 180,
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: 12,
               }}
             >
-              {langOptions.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
+              <div>
+                <div style={{ fontSize: 14, color: '#111' }}>{t('lang.target')}</div>
+                <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>
+                  {t('lang.targetHelp')}
+                </div>
+              </div>
+              <select
+                value={showCustomInput || isStoredCustom ? CUSTOM_SENTINEL : settings.targetLang}
+                onChange={(e) => handleLangSelectChange(e.currentTarget.value)}
+                disabled={savingLang}
+                style={{
+                  padding: '7px 10px',
+                  fontSize: 13,
+                  border: '1px solid #d4d4d8',
+                  borderRadius: 6,
+                  background: '#fff',
+                  fontFamily: 'inherit',
+                  minWidth: 180,
+                }}
+              >
+                {langOptions.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {showCustomInput && (
+              <div style={{ marginTop: 12 }}>
+                <input
+                  type="text"
+                  value={customDraft}
+                  onChange={(e) => setCustomDraft(e.currentTarget.value)}
+                  onBlur={commitCustomTargetLang}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      e.currentTarget.blur();
+                    }
+                  }}
+                  placeholder={t('lang.customPlaceholder')}
+                  maxLength={50}
+                  disabled={savingLang}
+                  style={{
+                    width: '100%',
+                    padding: '7px 10px',
+                    fontSize: 13,
+                    border: '1px solid #d4d4d8',
+                    borderRadius: 6,
+                    fontFamily: 'inherit',
+                    boxSizing: 'border-box',
+                  }}
+                />
+                <div style={{ fontSize: 12, color: '#888', marginTop: 4 }}>
+                  {t('lang.customHelp')}
+                </div>
+              </div>
+            )}
           </div>
 
           <div

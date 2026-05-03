@@ -147,7 +147,11 @@
         "ui": "UI language",
         "uiHelp": "Interface language. Independent of the rewrite target language above.",
         "autoSystem": "Auto (use system)",
-        "autoFromPage": "Auto-detect from page"
+        "autoFromPage": "Auto-detect from page",
+        "custom": "Custom…",
+        "customLabelFmt": "Custom: {value}",
+        "customPlaceholder": "e.g., Portuguese (Brazilian), British English, 粤语",
+        "customHelp": "Any language, dialect, or style description. Sent directly to the model."
       },
       "sub": {
         "label": "Subscription",

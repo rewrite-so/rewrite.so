@@ -13,9 +13,25 @@ interface UserSettingsRow {
   ui_locale: string;
 }
 
+/**
+ * 改写目标语言可以是 22 个预设代码（"en" / "zh-CN" / ...）、'auto'，或用户自定义
+ * 自然语言描述（"Portuguese (Brazilian)" / "粤语正式书面" / "British English"...）。
+ * 直接注入 prompt，但前后都 sanitize：去掉引号 / 反斜杠 / 换行 / 控制字符，
+ * 防止跳出 prompt 字符串字面量污染上下文。
+ */
+function sanitizeTargetLang(raw: string): string {
+  return (
+    raw
+      // biome-ignore lint/suspicious/noControlCharactersInRegex: 故意 strip ASCII 控制字符防 prompt 注入
+      .replace(/["'\\\n\r\t\x00-\x1f\x7f]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+  );
+}
+
 const SettingsPatchSchema = z
   .object({
-    targetLang: z.string().min(1).max(20).optional(),
+    targetLang: z.string().min(1).max(50).optional(),
     uiLocale: z.enum(['auto', 'en', 'zh-CN', 'ja', 'ko', 'es', 'fr', 'de']).optional(),
   })
   .strict();
@@ -162,7 +178,14 @@ meRoute.patch('/v1/me/settings', async (c) => {
     .bind(session.user.id)
     .first<UserSettingsRow>();
 
-  const targetLang = parsed.data.targetLang ?? current?.target_lang ?? 'auto';
+  // sanitize 任何即将写入 DB 并最终注入 prompt 的 targetLang —— 自定义自然语言
+  // 描述（"Portuguese (Brazilian)" / "粤语"）也走同一路径
+  const rawTargetLang = parsed.data.targetLang ?? current?.target_lang ?? 'auto';
+  const cleanedTargetLang = sanitizeTargetLang(rawTargetLang);
+  if (cleanedTargetLang.length === 0) {
+    return c.json({ error: 'invalid_input', detail: 'targetLang empty after sanitize' }, 400);
+  }
+  const targetLang = cleanedTargetLang;
   const uiLocale = parsed.data.uiLocale ?? current?.ui_locale ?? 'auto';
   const now = Date.now();
 

@@ -147,7 +147,11 @@
         "ui": "界面语言",
         "uiHelp": "网站界面语言。和上面的改写目标语言互不相干。",
         "autoSystem": "自动（跟随系统）",
-        "autoFromPage": "自动识别页面语言"
+        "autoFromPage": "自动识别页面语言",
+        "custom": "自定义…",
+        "customLabelFmt": "自定义：{value}",
+        "customPlaceholder": "比如：Portuguese (Brazilian)、British English、粤语",
+        "customHelp": "任意语言、方言或风格描述，会直接传给模型。"
       },
       "sub": {
         "label": "订阅",

@@ -33,6 +33,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   覆盖 OECD + 主要新兴市场。`packages/shared` 新增 `REWRITE_TARGETS` /
   `REWRITE_TARGET_LABELS` 作为单一来源，`/settings` 和 `/try` 两个下拉同步消费。
   注意：UI locale（界面语言）仍是 7 个，与改写目标语言完全独立。
+- `/settings` 改写目标语言下拉新增「Custom...」项 —— 用户可输入任意自然语言
+  描述（"Portuguese (Brazilian)" / "粤语正式书面" / "British English" /
+  "Shakespearean English" 等），直接注入 prompt。API 端 max length 从 20 → 50，
+  并加 sanitize（strip 引号 / 反斜杠 / 换行 / ASCII 控制字符）防 prompt 注入。
+  /try 不开放 custom（保持匿名快速试用 UX 简洁）。
 
 ### Added
 - **i18n** — 7 UI locales (`en` / `zh-CN` / `ja` / `ko` / `es` / `fr` / `de`) covering

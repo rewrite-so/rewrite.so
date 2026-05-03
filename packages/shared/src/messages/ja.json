@@ -147,7 +147,11 @@
         "ui": "UI 言語",
         "uiHelp": "サイトの表示言語。上の書き換え先言語とは別に設定できます。",
         "autoSystem": "自動（システムに合わせる）",
-        "autoFromPage": "ページの言語を自動検出"
+        "autoFromPage": "ページの言語を自動検出",
+        "custom": "カスタム…",
+        "customLabelFmt": "カスタム：{value}",
+        "customPlaceholder": "例：Portuguese (Brazilian)、British English、関西弁",
+        "customHelp": "言語・方言・文体を自由記入。モデルにそのまま渡されます。"
       },
       "sub": {
         "label": "サブスクリプション",
