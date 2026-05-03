@@ -24,12 +24,21 @@
   **不要扩大到 style / candidate 数 / 完整 prompt** —— 那些仍是契约固定。`/try` 不开放
   custom（匿名快速试用 UX 简洁）。
 - **目标语言默认"自动检测页面语言"**：用户在 onboarding/设置中可改为固定语言。临时覆盖（每次切换）MVP 不做。
-- **扩展与 web 在 rewrite.so 自家域互斥**：扩展 manifest 拆两个 content_scripts，
-  `sentinel.ts` 在 rewrite.so / *.rewrite.so / localhost:3000 走 document_start 设
-  `data-rewrite-so-extension="1"`；`inject.ts` 走 `<all_urls>` 但 **exclude_matches
-  必须列上同样的域**。/try 的 `TryClient` 检测该 attr 存在时跳过 `mount()` —— 否则
-  会撞两份 keydown listener，双倍扣配额、双浮层重叠。新加的自家域（如 docs 子域）
-  必须同步加到这两份 matches/exclude_matches。
+- **扩展与 web 在 rewrite.so 自家域：扩展独占接管，web 端跳过 mount**：
+  manifest 拆两个 content_scripts：
+  - `sentinel.ts` 仅在 rewrite.so / *.rewrite.so / localhost:3000 走 document_start，
+    给 `<html>` 设 `data-rewrite-so-extension="1"`
+  - `inject.ts` 走 `<all_urls>`（**含 rewrite.so 自家域**，不要 exclude）+ document_idle
+  
+  /try 的 `TryClient` 检测该 attr 存在时跳过自己的 `mount()` —— 让扩展的 `inject.ts`
+  这一份成为唯一 mount 实例。
+  
+  **历史教训**（commit 524a3af → f2c8534 修）：当时把 inject.ts 的 matches `exclude_matches`
+  rewrite.so，结果**扩展也不跑 + web 端也跳过 → 双方都不 mount**，/try 双击 Shift
+  完全无效。**正确做法是 inject.ts 不 exclude 自家域，让扩展接管。**
+  
+  新加的自家域（如 docs 子域）只需同步加到 sentinel matches，inject 用 `<all_urls>`
+  自动覆盖。
 - **单次输入字符上限 4000**：成本控制。改动需重新评估单次成本。
 
 ## 隐私与安全（硬约束）

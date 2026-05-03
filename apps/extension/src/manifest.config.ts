@@ -18,7 +18,8 @@ export default defineManifest({
   },
   content_scripts: [
     // 1) sentinel：仅在 rewrite.so 自家域跑，document_start 最早注入，让 web 端
-    //    /try 检测到扩展存在并跳过 mount，避免双 mount 撞车（双配额扣减、双浮层）
+    //    /try 检测到扩展存在并跳过自己的 mount，避免双 mount 撞车
+    //    （双 keydown listener、双配额扣减、双浮层重叠）
     {
       matches: [
         'https://rewrite.so/*',
@@ -30,16 +31,13 @@ export default defineManifest({
       run_at: 'document_start',
       all_frames: false,
     },
-    // 2) 主流程 inject：所有其它域跑完整 mount。**必须 exclude rewrite.so 自家域**
-    //    否则会与 /try 的 web mount 撞车
+    // 2) 主流程 inject：所有域（含 rewrite.so 自家域）都跑完整 mount。
+    //    `<all_urls>` 含 rewrite.so —— 配合上面 sentinel 让 /try 端跳过自己 mount，
+    //    扩展 inject 这一份成为唯一 mount 实例。
+    //    历史教训：之前 exclude_matches 把 rewrite.so 排掉了，
+    //    结果 /try 的 web 端跳过 mount + 扩展也不跑 → 双方都不 mount，浮窗死活不弹。
     {
       matches: ['<all_urls>'],
-      exclude_matches: [
-        'https://rewrite.so/*',
-        'https://*.rewrite.so/*',
-        'http://localhost:3000/*',
-        'http://127.0.0.1:3000/*',
-      ],
       js: ['src/content/inject.ts'],
       run_at: 'document_idle',
       all_frames: false,
