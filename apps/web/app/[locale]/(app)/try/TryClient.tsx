@@ -24,24 +24,17 @@ export function TryClient() {
   // 试用页**始终默认英语**作为目标——不用 auto。
   // 用户切换的偏好持久到 localStorage（仅影响 /try，不影响登录用户的 settings）。
   const [targetLang, setTargetLang] = useState<RewriteTarget>('en');
-  // 扩展存在感：扩展的 sentinel.ts 在 document_start 给 <html> 设这个 data-attr。
-  // 已装扩展时跳过 web 自己的 mount()，避免双 keydown listener / 双配额扣减。
-  const [extensionDetected, setExtensionDetected] = useState(false);
 
   useEffect(() => {
     const stored = window.localStorage.getItem(TARGET_LANG_STORAGE);
     if (stored && (REWRITE_TARGETS as readonly string[]).includes(stored)) {
       setTargetLang(stored as RewriteTarget);
     }
-    // sentinel 在 document_start 注入，此时一定已设置好（React useEffect 比 document_start 晚）
-    setExtensionDetected(
-      document.documentElement.getAttribute('data-rewrite-so-extension') === '1',
-    );
   }, []);
 
   useEffect(() => {
-    // 已装扩展时不 mount —— 让扩展接管 keydown / 浮层
-    if (extensionDetected) return;
+    // 注：扩展不在 rewrite.so 自家域工作（manifest exclude_matches），所以
+    // /try 永远是 web 端这一份 mount —— 装扩展的用户在 /try 也是"试用"体验。
     const apiClient = createWebApiClient({ apiBase: API_BASE });
     const handle = mount({
       host: 'web',
@@ -63,7 +56,7 @@ export function TryClient() {
       },
     });
     return () => handle.unmount();
-  }, [locale, targetLang, extensionDetected]);
+  }, [locale, targetLang]);
 
   useEffect(() => {
     // 首次访问 hint 兜底（输入框聚焦后显示，触发过一次后消失）
@@ -101,61 +94,39 @@ export function TryClient() {
 
   return (
     <div style={{ position: 'relative' }}>
-      {extensionDetected && (
-        <div
-          role="status"
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          marginBottom: 12,
+          fontSize: 13,
+          color: '#555',
+        }}
+      >
+        <label htmlFor="try-target-lang" style={{ fontWeight: 500 }}>
+          {t('page.try.targetLangLabel')}
+        </label>
+        <select
+          id="try-target-lang"
+          value={targetLang}
+          onChange={(e) => onTargetLangChange(e.currentTarget.value as RewriteTarget)}
           style={{
-            padding: '12px 16px',
-            background: '#eff6ff',
-            border: '1px solid #bfdbfe',
-            borderRadius: 8,
-            marginBottom: 16,
+            padding: '6px 10px',
             fontSize: 13,
-            lineHeight: 1.55,
-            color: '#1e3a8a',
+            border: '1px solid #d4d4d8',
+            borderRadius: 6,
+            background: '#fff',
+            fontFamily: 'inherit',
           }}
         >
-          <div style={{ fontWeight: 600, marginBottom: 4 }}>
-            {t('page.try.extensionTakeoverTitle')}
-          </div>
-          <div>{t('page.try.extensionTakeoverBody')}</div>
-        </div>
-      )}
-      {!extensionDetected && (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-            marginBottom: 12,
-            fontSize: 13,
-            color: '#555',
-          }}
-        >
-          <label htmlFor="try-target-lang" style={{ fontWeight: 500 }}>
-            {t('page.try.targetLangLabel')}
-          </label>
-          <select
-            id="try-target-lang"
-            value={targetLang}
-            onChange={(e) => onTargetLangChange(e.currentTarget.value as RewriteTarget)}
-            style={{
-              padding: '6px 10px',
-              fontSize: 13,
-              border: '1px solid #d4d4d8',
-              borderRadius: 6,
-              background: '#fff',
-              fontFamily: 'inherit',
-            }}
-          >
-            {REWRITE_TARGETS.map((l) => (
-              <option key={l} value={l}>
-                {REWRITE_TARGET_LABELS[l]}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
+          {REWRITE_TARGETS.map((l) => (
+            <option key={l} value={l}>
+              {REWRITE_TARGET_LABELS[l]}
+            </option>
+          ))}
+        </select>
+      </div>
       <textarea
         ref={taRef}
         defaultValue="hi, can u tell me when is the meeting tmr? i need to prep some slide before that"

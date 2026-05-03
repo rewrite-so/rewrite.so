@@ -53,9 +53,7 @@
     "try": {
       "h1": "Testen",
       "intro": "Schreibe etwas in das Feld unten und drücke Shift doppelt, um 3 Stil-Umschreibungen zu sehen.",
-      "targetLangLabel": "Umschreiben in",
-      "extensionTakeoverTitle": "Deine installierte Extension übernimmt diese Seite",
-      "extensionTakeoverBody": "Das Textfeld unten funktioniert wie gewohnt — tippen und Shift doppelt drücken. Zielsprache und andere Einstellungen kommen aus dem Extension-Popup (das Dropdown oben ist ausgeblendet)."
+      "targetLangLabel": "Umschreiben in"
     },
     "unsubscribe": {
       "h1": "Abmelden",

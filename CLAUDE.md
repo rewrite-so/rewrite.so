@@ -24,21 +24,19 @@
   **不要扩大到 style / candidate 数 / 完整 prompt** —— 那些仍是契约固定。`/try` 不开放
   custom（匿名快速试用 UX 简洁）。
 - **目标语言默认"自动检测页面语言"**：用户在 onboarding/设置中可改为固定语言。临时覆盖（每次切换）MVP 不做。
-- **扩展与 web 在 rewrite.so 自家域：扩展独占接管，web 端跳过 mount**：
-  manifest 拆两个 content_scripts：
-  - `sentinel.ts` 仅在 rewrite.so / *.rewrite.so / localhost:3000 走 document_start，
-    给 `<html>` 设 `data-rewrite-so-extension="1"`
-  - `inject.ts` 走 `<all_urls>`（**含 rewrite.so 自家域**，不要 exclude）+ document_idle
+- **扩展不在 rewrite.so 自家域工作**：扩展 `inject.ts` 的 `exclude_matches` 列上
+  `https://rewrite.so/*` / `https://*.rewrite.so/*` / `http://localhost:3000/*` /
+  `http://127.0.0.1:3000/*`。/try 永远走 web 自带的 `mount()`，无论用户是否装扩展——
+  `/try` 是给"还没装扩展的人"的演示页，已装扩展的人本来就不需要去演示。
   
-  /try 的 `TryClient` 检测该 attr 存在时跳过自己的 `mount()` —— 让扩展的 `inject.ts`
-  这一份成为唯一 mount 实例。
+  设置类页面（/settings, /billing 等）的输入框是配置字段，不应被双击 Shift 改写功能
+  误触发，扩展不工作反而合理。
   
-  **历史教训**（commit 524a3af → f2c8534 修）：当时把 inject.ts 的 matches `exclude_matches`
-  rewrite.so，结果**扩展也不跑 + web 端也跳过 → 双方都不 mount**，/try 双击 Shift
-  完全无效。**正确做法是 inject.ts 不 exclude 自家域，让扩展接管。**
+  **历史曲折**（524a3af → f2c8534 → bd6e032 → 最终方案）：曾尝试"扩展接管 +
+  sentinel.ts 让 web 跳过 mount"的复杂协作，结果反复出问题（双方都不跑 / OpenNext
+  渲染冲突 / 设计复杂度爆炸）。最终回到最简方案：**扩展明确不在自家域工作**。
   
-  新加的自家域（如 docs 子域）只需同步加到 sentinel matches，inject 用 `<all_urls>`
-  自动覆盖。
+  新加自家域（如 docs.rewrite.so）只需同步加到 inject.ts 的 `exclude_matches`。
 - **单次输入字符上限 4000**：成本控制。改动需重新评估单次成本。
 
 ## 隐私与安全（硬约束）

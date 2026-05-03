@@ -53,9 +53,7 @@
     "try": {
       "h1": "试用",
       "intro": "在下面输入框写点什么，然后双击 Shift 看 3 种风格改写。",
-      "targetLangLabel": "改写为",
-      "extensionTakeoverTitle": "已装扩展接管了这个页面",
-      "extensionTakeoverBody": "下方输入框照常用——输入文字双击 Shift 即可。改写目标语言等偏好来自扩展弹窗，不是上方下拉（已隐藏）。"
+      "targetLangLabel": "改写为"
     },
     "unsubscribe": {
       "h1": "退订",

@@ -43,6 +43,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   sanitize 抽到 `lib/sanitize-target-lang.ts` 单独模块 + 14 条单元测试覆盖；
   GET /v1/me/settings 读路径加 lazy sanitize 兜底老脏数据；customHelp
   文案 7 locale 同步告知"特殊字符会被过滤"。
+- 简化扩展 vs /try 协作策略 —— 扩展不在 rewrite.so 自家域工作：
+  - 删除 sentinel.ts content script 整个文件
+  - 扩展 manifest 的 inject.ts 用 `<all_urls>` + `exclude_matches` 排除 rewrite.so / *.rewrite.so / localhost:3000
+  - TryClient 移除 extensionDetected 检测 + banner UI（永远走自己的 mount）
+  - 删除 page.try.extensionTakeoverTitle / extensionTakeoverBody × 7 locale = 14 字符串
+  - 修了 /try "This page couldn't load" 错误（扩展 inject 在 OpenNext SSR 边界引发的渲染冲突）
+  - 历史曲折 524a3af → f2c8534 → bd6e032 → 最终回到最简方案
+  - /try 是给"还没装扩展的人"的演示页；装了扩展的人本来就不需要去演示
 - 修浮窗交互失效 bug —— 鼠标点卡片 / 齿轮 / ↻ Retry 都无反应：
   - 根因：浮层内 `<button>` 元素（齿轮 / ↻ / Retry）mousedown 时浏览器把焦点
     从输入框转移到 button → 输入框 focusout → activeEditable 变 null →
