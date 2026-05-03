@@ -8,7 +8,19 @@
     "try": { "title": "rewrite.so testen — Doppel-Shift zum Umschreiben" },
     "settings": { "title": "Einstellungen — rewrite.so" },
     "billing": { "title": "Abrechnung — rewrite.so" },
-    "unsubscribe": { "title": "Abmelden — rewrite.so" }
+    "unsubscribe": { "title": "Abmelden — rewrite.so" },
+    "pricing": {
+      "title": "Preise — rewrite.so",
+      "description": "Kostenloses Kontingent 30 Umschreibungen/Monat. Pro für $7.99/Mon jährlich: 2.000/Monat + BYOK unbegrenzt."
+    },
+    "contact": {
+      "title": "Kontakt — rewrite.so",
+      "description": "So erreichst du rewrite.so für Support, Abrechnung oder Datenschutzanfragen."
+    },
+    "terms": { "title": "Nutzungsbedingungen — rewrite.so" },
+    "privacy": { "title": "Datenschutz — rewrite.so" },
+    "refund": { "title": "Rückgaberichtlinie — rewrite.so" },
+    "aup": { "title": "Nutzungsrichtlinie — rewrite.so" }
   },
   "page": {
     "login": {

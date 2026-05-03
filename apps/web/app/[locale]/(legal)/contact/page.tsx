@@ -1,7 +1,15 @@
-export const metadata = {
-  title: 'Contact — rewrite.so',
-  description: 'How to reach rewrite.so for support, billing, or privacy requests.',
-};
+import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'meta.contact' });
+  return { title: t('title'), description: t('description') };
+}
 
 export default function ContactPage() {
   return (

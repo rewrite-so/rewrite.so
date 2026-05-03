@@ -1,7 +1,15 @@
-export const metadata = {
-  title: 'Privacy Policy — rewrite.so',
-  description: 'How rewrite.so collects, uses, and protects your data.',
-};
+import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'meta.privacy' });
+  return { title: t('title') };
+}
 
 export default function PrivacyPage() {
   return (

@@ -1,11 +1,17 @@
 import { PRO_PRICE, QUOTA } from '@rewrite/shared';
+import type { Metadata } from 'next';
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 
-export const metadata = {
-  title: 'Pricing — rewrite.so',
-  description:
-    'Free for casual use. Pro at $13.99/mo (or $7.99/mo billed annually) for 2,000 rewrites a month plus BYOK.',
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'meta.pricing' });
+  return { title: t('title'), description: t('description') };
+}
 
 export default function PricingPage() {
   return (

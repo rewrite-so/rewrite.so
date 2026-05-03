@@ -8,7 +8,19 @@
     "try": { "title": "rewrite.so 체험 — Shift Shift로 다시 쓰기" },
     "settings": { "title": "설정 — rewrite.so" },
     "billing": { "title": "결제 — rewrite.so" },
-    "unsubscribe": { "title": "구독 취소 — rewrite.so" }
+    "unsubscribe": { "title": "구독 취소 — rewrite.so" },
+    "pricing": {
+      "title": "요금 — rewrite.so",
+      "description": "무료 등급 월 30회 재작성. Pro는 연간 $7.99/월로 월 2,000회 + BYOK 무제한."
+    },
+    "contact": {
+      "title": "문의 — rewrite.so",
+      "description": "rewrite.so 지원, 결제, 개인정보 관련 문의 방법."
+    },
+    "terms": { "title": "서비스 약관 — rewrite.so" },
+    "privacy": { "title": "개인정보 처리방침 — rewrite.so" },
+    "refund": { "title": "환불 정책 — rewrite.so" },
+    "aup": { "title": "이용 정책 — rewrite.so" }
   },
   "page": {
     "login": {

@@ -1,7 +1,15 @@
-export const metadata = {
-  title: 'Terms of Service — rewrite.so',
-  description: 'Terms governing your use of rewrite.so.',
-};
+import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'meta.terms' });
+  return { title: t('title') };
+}
 
 export default function TermsPage() {
   return (

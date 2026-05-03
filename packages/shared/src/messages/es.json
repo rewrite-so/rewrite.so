@@ -8,7 +8,19 @@
     "try": { "title": "Prueba rewrite.so — Doble Shift para reescribir" },
     "settings": { "title": "Configuración — rewrite.so" },
     "billing": { "title": "Facturación — rewrite.so" },
-    "unsubscribe": { "title": "Darse de baja — rewrite.so" }
+    "unsubscribe": { "title": "Darse de baja — rewrite.so" },
+    "pricing": {
+      "title": "Precios — rewrite.so",
+      "description": "Plan gratuito con 30 reescrituras al mes. Pro a $7.99/mes anual: 2.000/mes más BYOK ilimitado."
+    },
+    "contact": {
+      "title": "Contacto — rewrite.so",
+      "description": "Cómo contactar a rewrite.so para soporte, facturación o privacidad."
+    },
+    "terms": { "title": "Términos del servicio — rewrite.so" },
+    "privacy": { "title": "Política de privacidad — rewrite.so" },
+    "refund": { "title": "Política de reembolso — rewrite.so" },
+    "aup": { "title": "Uso aceptable — rewrite.so" }
   },
   "page": {
     "login": {

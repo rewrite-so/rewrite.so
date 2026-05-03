@@ -8,7 +8,19 @@
     "try": { "title": "rewrite.so を試す — Shift Shift で書き換え" },
     "settings": { "title": "設定 — rewrite.so" },
     "billing": { "title": "請求 — rewrite.so" },
-    "unsubscribe": { "title": "配信停止 — rewrite.so" }
+    "unsubscribe": { "title": "配信停止 — rewrite.so" },
+    "pricing": {
+      "title": "料金 — rewrite.so",
+      "description": "無料プラン月 30 回。Pro は年額 $7.99/月で月 2,000 回 + BYOK 無制限。"
+    },
+    "contact": {
+      "title": "お問い合わせ — rewrite.so",
+      "description": "rewrite.so のサポート、請求、プライバシーに関するお問い合わせ方法。"
+    },
+    "terms": { "title": "利用規約 — rewrite.so" },
+    "privacy": { "title": "プライバシーポリシー — rewrite.so" },
+    "refund": { "title": "返金ポリシー — rewrite.so" },
+    "aup": { "title": "利用規定 — rewrite.so" }
   },
   "page": {
     "login": {

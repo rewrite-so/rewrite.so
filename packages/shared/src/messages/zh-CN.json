@@ -8,7 +8,19 @@
     "try": { "title": "试用 rewrite.so — 双击 Shift 改写" },
     "settings": { "title": "设置 — rewrite.so" },
     "billing": { "title": "账单 — rewrite.so" },
-    "unsubscribe": { "title": "退订 — rewrite.so" }
+    "unsubscribe": { "title": "退订 — rewrite.so" },
+    "pricing": {
+      "title": "价格 — rewrite.so",
+      "description": "免费档每月 30 次改写。Pro 年付 $7.99/月，每月 2000 次 + BYOK 无限。"
+    },
+    "contact": {
+      "title": "联系我们 — rewrite.so",
+      "description": "rewrite.so 的支持、账单与隐私事宜联系方式。"
+    },
+    "terms": { "title": "服务条款 — rewrite.so" },
+    "privacy": { "title": "隐私政策 — rewrite.so" },
+    "refund": { "title": "退款政策 — rewrite.so" },
+    "aup": { "title": "可接受使用政策 — rewrite.so" }
   },
   "page": {
     "login": {

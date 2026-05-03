@@ -8,7 +8,19 @@
     "try": { "title": "Try rewrite.so — Double-tap Shift to rewrite" },
     "settings": { "title": "Settings — rewrite.so" },
     "billing": { "title": "Billing — rewrite.so" },
-    "unsubscribe": { "title": "Unsubscribe — rewrite.so" }
+    "unsubscribe": { "title": "Unsubscribe — rewrite.so" },
+    "pricing": {
+      "title": "Pricing — rewrite.so",
+      "description": "Free tier with 30 monthly rewrites. Pro at $7.99/mo annually for 2,000/month plus BYOK for unlimited."
+    },
+    "contact": {
+      "title": "Contact — rewrite.so",
+      "description": "How to reach rewrite.so for support, billing, or privacy requests."
+    },
+    "terms": { "title": "Terms of Service — rewrite.so" },
+    "privacy": { "title": "Privacy Policy — rewrite.so" },
+    "refund": { "title": "Refund Policy — rewrite.so" },
+    "aup": { "title": "Acceptable Use — rewrite.so" }
   },
   "page": {
     "login": {

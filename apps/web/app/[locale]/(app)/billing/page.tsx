@@ -1,8 +1,16 @@
+import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import { BillingClient } from './BillingClient.tsx';
 
-export const metadata = {
-  title: 'Billing — rewrite.so',
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'meta.billing' });
+  return { title: t('title') };
+}
 
 export default function BillingPage() {
   return (

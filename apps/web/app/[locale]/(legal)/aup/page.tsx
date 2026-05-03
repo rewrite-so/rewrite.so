@@ -1,7 +1,15 @@
-export const metadata = {
-  title: 'Acceptable Use Policy — rewrite.so',
-  description: 'What you can and cannot do with rewrite.so.',
-};
+import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'meta.aup' });
+  return { title: t('title') };
+}
 
 export default function AcceptableUsePage() {
   return (
