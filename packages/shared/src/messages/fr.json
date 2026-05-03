@@ -4,11 +4,21 @@
       "title": "rewrite.so — Double Shift pour réécrire",
       "description": "Moteur de réécriture IA au niveau du champ de saisie. 3 styles, clavier uniquement, sans casser votre flux."
     },
-    "login": { "title": "Connexion — rewrite.so" },
-    "try": { "title": "Essayer rewrite.so — Double Shift pour réécrire" },
-    "settings": { "title": "Paramètres — rewrite.so" },
-    "billing": { "title": "Facturation — rewrite.so" },
-    "unsubscribe": { "title": "Désabonnement — rewrite.so" },
+    "login": {
+      "title": "Connexion — rewrite.so"
+    },
+    "try": {
+      "title": "Essayer rewrite.so — Double Shift pour réécrire"
+    },
+    "settings": {
+      "title": "Paramètres — rewrite.so"
+    },
+    "billing": {
+      "title": "Facturation — rewrite.so"
+    },
+    "unsubscribe": {
+      "title": "Désabonnement — rewrite.so"
+    },
     "pricing": {
       "title": "Tarifs — rewrite.so",
       "description": "Plan gratuit 30 réécritures/mois. Pro à 7.99 $/mois annuel : 2 000/mois + BYOK illimité."
@@ -17,10 +27,18 @@
       "title": "Contact — rewrite.so",
       "description": "Comment contacter rewrite.so pour le support, la facturation ou la confidentialité."
     },
-    "terms": { "title": "Conditions d'utilisation — rewrite.so" },
-    "privacy": { "title": "Politique de confidentialité — rewrite.so" },
-    "refund": { "title": "Politique de remboursement — rewrite.so" },
-    "aup": { "title": "Usage acceptable — rewrite.so" }
+    "terms": {
+      "title": "Conditions d'utilisation — rewrite.so"
+    },
+    "privacy": {
+      "title": "Politique de confidentialité — rewrite.so"
+    },
+    "refund": {
+      "title": "Politique de remboursement — rewrite.so"
+    },
+    "aup": {
+      "title": "Usage acceptable — rewrite.so"
+    }
   },
   "page": {
     "login": {
@@ -163,22 +181,17 @@
     },
     "scenarios": {
       "h2": "Ça vous parle ?",
-      "intro": "Trouver le bon mot prend plus d'espace mental que ça ne le devrait. L'essentiel y passe à ces moments-là :",
-      "pain1": "Vous avez retapé ce message Slack 3 fois avant de l'envoyer.",
-      "pain2": "Vous avez ouvert ChatGPT dans un autre onglet pour « adoucir le ton ».",
-      "pain3": "Vous avez traduit chaque phrase dans votre tête avant de la taper.",
-      "pain4": "Vous avez relu le même email 4 fois avant d'appuyer sur envoyer.",
-      "bridge": "C'est exactement pour ça que rewrite.so est fait :",
+      "bridge": "C'est exactement pour ça que rewrite.so est fait",
       "useCase1": "Écrire dans une langue qui n'est pas la vôtre — apprentissage, travail, échanges avec des collègues ou clients à l'étranger.",
       "useCase2": "Réponses aux clients ou partenaires, quand le ton doit être pile-poil.",
       "useCase3": "Publications publiques — tweets, commentaires Reddit / HN, GitHub Issues, descriptions de PR.",
-      "useCase4": "Emails à froid, excuses, conversations difficiles — quand un mot de travers coûte cher.",
-      "outro": "Une pression. Trois options peaufinées. ↓"
+      "useCase4": "Emails à froid, excuses, conversations difficiles — quand un mot de travers coûte cher."
     },
     "privacy": {
       "eyebrow": "Le contrat de confidentialité",
       "h2": "Votre texte n'est jamais stocké. Point.",
       "body": "Pas dans les bases de données. Pas dans les logs. Pas dans les rapporteurs d'erreurs. Pas dans les analytiques. Le texte que vous réécrivez passe par le worker une fois et disparaît. Nous n'utilisons aucun APM tiers (Sentry, Datadog, etc.) précisément parce qu'ils captureraient les corps de requête par défaut. Ce n'est pas une promesse — c'est l'architecture, et le code source est ouvert pour que vous puissiez le vérifier.",
+      "shortBody": "Seuls length, lang, style, userId et les codes d'erreur peuvent être journalisés. Le texte original et les réécritures sont exclus partout.",
       "linkDoc": "Lire la doc technique de confidentialité →",
       "linkSource": "Voir le source du handler de réécriture →",
       "logTitle": "# Ce qui est enregistré",
@@ -269,7 +282,51 @@
       "anyInput": "n'importe quel champ",
       "youTyped": "# Vous avez tapé :",
       "streams": "→ 3 streams démarrés, ~200ms premier token",
-      "accepted": "→ accepté, champ remplacé"
+      "accepted": "→ accepté, champ remplacé",
+      "selectHint": "Cliquez sur une réécriture ou appuyez sur 1 / 2 / 3",
+      "label": {
+        "faithful": "Fidèle",
+        "casual": "Décontracté",
+        "formal": "Formel"
+      },
+      "examples": {
+        "chinglish": {
+          "badge": "Chinglish → English",
+          "input": "Please help me see this issue tomorrow.",
+          "candidate": {
+            "faithful": "Please help me look into this issue tomorrow.",
+            "casual": "Could you take a look at this tomorrow?",
+            "formal": "Could you please review this issue tomorrow?"
+          }
+        },
+        "zhToEn": {
+          "badge": "中文 → English",
+          "input": "这个需求我今天可能做不完，明天上午给你更新。",
+          "candidate": {
+            "faithful": "I may not be able to finish this request today. I'll update you tomorrow morning.",
+            "casual": "I might not get this done today, but I'll send you an update tomorrow morning.",
+            "formal": "I may not be able to complete this request today, but I will provide an update tomorrow morning."
+          }
+        },
+        "jaToEn": {
+          "badge": "日本語 → English",
+          "input": "明日の午前中までに確認して、更新します。",
+          "candidate": {
+            "faithful": "I'll check it by tomorrow morning and send an update.",
+            "casual": "I'll take a look by tomorrow morning and keep you posted.",
+            "formal": "I will review it by tomorrow morning and provide an update."
+          }
+        },
+        "tone": {
+          "badge": "Tone → English",
+          "input": "This is wrong. Fix it.",
+          "candidate": {
+            "faithful": "This seems incorrect. Could you fix it?",
+            "casual": "I think something's off here. Could you take another look?",
+            "formal": "This appears to be incorrect. Could you please review and correct it?"
+          }
+        }
+      }
     }
   },
   "ext": {

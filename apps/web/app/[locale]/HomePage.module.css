@@ -1,0 +1,853 @@
+.page {
+  background: #fbfaf7;
+  color: #141412;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  line-height: 1.55;
+}
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(20, 20, 18, 0.08);
+}
+
+.heroImage {
+  position: absolute;
+  inset: 0;
+  background-image: url("/images/home-hero.jpg");
+  background-position: center;
+  background-size: cover;
+}
+
+.heroWash {
+  position: absolute;
+  inset: 0;
+  background: rgba(251, 250, 247, 0.78);
+}
+
+.heroInner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 480px);
+  gap: 42px;
+  align-items: center;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 58px 24px 54px;
+}
+
+.heroCopy {
+  max-width: 620px;
+}
+
+.eyebrow,
+.privacyEyebrow {
+  margin: 0 0 12px;
+  color: #3a6f55;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.heroTitle {
+  margin: 0;
+  color: #11110f;
+  font-size: 4rem;
+  font-weight: 760;
+  letter-spacing: 0;
+  line-height: 0.96;
+}
+
+.heroStatement {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 10px;
+  margin: 18px 0 0;
+  color: #23231f;
+  font-size: 1.45rem;
+  font-weight: 680;
+  line-height: 1.24;
+}
+
+.heroLead {
+  max-width: 500px;
+  margin: 12px 0 0;
+  color: #48483f;
+  font-size: 1.04rem;
+}
+
+.heroIntro {
+  max-width: 560px;
+  margin: 22px 0 0;
+  color: #3d3d36;
+  font-size: 0.98rem;
+}
+
+.heroActions,
+.pricingActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-top: 24px;
+}
+
+.primaryButton,
+.secondaryButton {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.primaryButton {
+  background: #11110f;
+  color: #fff;
+  padding: 0 20px;
+}
+
+.secondaryButton {
+  border: 1px solid rgba(17, 17, 15, 0.18);
+  background: rgba(255, 255, 255, 0.76);
+  color: #161613;
+  padding: 0 18px;
+}
+
+.primaryButton:focus-visible,
+.secondaryButton:focus-visible,
+.demoShell:focus-visible,
+.demoCandidate:focus-visible {
+  outline: 3px solid rgba(58, 111, 85, 0.28);
+  outline-offset: 3px;
+}
+
+.fineprint {
+  margin: 15px 0 0;
+  color: #6a6a61;
+  font-size: 0.82rem;
+}
+
+.demoShell {
+  border: 1px solid rgba(17, 17, 15, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 22px 55px rgba(20, 20, 18, 0.14);
+  color: #191916;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78rem;
+  overflow: hidden;
+}
+
+.demoChrome {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  border-bottom: 1px solid rgba(17, 17, 15, 0.08);
+  padding: 12px 14px;
+  color: #77766f;
+  font-size: 0.7rem;
+}
+
+.demoDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: #df6b59;
+}
+
+.demoDot:nth-child(2) {
+  background: #d9ae47;
+}
+
+.demoDot:nth-child(3) {
+  margin-right: 8px;
+  background: #5e9b72;
+}
+
+.demoInputWrap {
+  padding: 18px 18px 0;
+}
+
+.demoScenarioRow {
+  display: flex;
+  min-height: 24px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.demoScenarioBadge {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  border: 1px solid rgba(17, 17, 15, 0.12);
+  border-radius: 999px;
+  background: #171713;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1;
+  overflow-wrap: anywhere;
+  padding: 6px 9px;
+}
+
+.demoScenarioCount {
+  flex: 0 0 auto;
+  color: #929089;
+  font-size: 0.66rem;
+}
+
+.demoMeta {
+  margin-bottom: 8px;
+  color: #77766f;
+  font-size: 0.7rem;
+}
+
+.demoInput {
+  min-height: 54px;
+  border: 1px solid rgba(17, 17, 15, 0.1);
+  border-radius: 8px;
+  background: #fff;
+  padding: 13px 14px;
+  color: #171713;
+  line-height: 1.45;
+  transition:
+    background 220ms ease,
+    border-color 220ms ease,
+    color 220ms ease;
+}
+
+.demoInputStreaming {
+  border-color: rgba(58, 111, 85, 0.28);
+  background: linear-gradient(90deg, #fff 0%, #eef7f1 45%, #fff 90%);
+  background-size: 220% 100%;
+  animation: demoStream 1.1s ease-in-out infinite;
+}
+
+.demoInputAccepted {
+  border-color: rgba(58, 111, 85, 0.42);
+  background: #f6fbf8;
+}
+
+.demoShortcut {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  padding: 13px 18px 10px;
+}
+
+.demoKey,
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(17, 17, 15, 0.18);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  background: #fff;
+  color: #22221e;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  white-space: nowrap;
+}
+
+.demoKey {
+  position: relative;
+  isolation: isolate;
+  min-width: 54px;
+  height: 28px;
+  font-size: 0.68rem;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    transform 180ms ease;
+}
+
+.demoKeyTapFirst {
+  animation: demoShiftTap 680ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.demoKeyTapSecond {
+  animation: demoShiftTap 680ms cubic-bezier(0.2, 0.8, 0.2, 1) 230ms both;
+}
+
+.demoKeyTapFirst::after,
+.demoKeyTapSecond::after {
+  position: absolute;
+  inset: -5px;
+  z-index: -1;
+  border: 1px solid rgba(58, 111, 85, 0.34);
+  border-radius: 8px;
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+}
+
+.demoKeyTapFirst::after {
+  animation: demoShiftRipple 680ms ease-out both;
+}
+
+.demoKeyTapSecond::after {
+  animation: demoShiftRipple 680ms ease-out 230ms both;
+}
+
+.demoKeyActive {
+  border-color: rgba(58, 111, 85, 0.42);
+  background: #e9f5ee;
+  color: #24523b;
+  transform: translateY(1px);
+}
+
+.demoCandidates {
+  display: grid;
+  gap: 8px;
+  padding: 0 18px 14px;
+}
+
+.demoCandidate {
+  display: grid;
+  grid-template-columns: 22px 72px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+  border: 1px solid rgba(17, 17, 15, 0.08);
+  border-radius: 8px;
+  background: #fff;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.2;
+  padding: 9px 10px;
+  text-align: left;
+  transform: translateY(5px);
+  transition:
+    opacity 220ms ease,
+    transform 220ms ease,
+    border-color 220ms ease,
+    background 220ms ease;
+}
+
+.demoCandidate:disabled {
+  cursor: default;
+}
+
+.demoCandidateVisible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.demoCandidateSelected {
+  border-color: rgba(58, 111, 85, 0.42);
+  background: #f1f8f4;
+}
+
+.demoCandidateIndex {
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: #f4f0e9;
+  color: #6a5944;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.demoCandidateLabel {
+  color: #77766f;
+  font-size: 0.68rem;
+}
+
+.demoCandidateText {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: #1e1e1a;
+  line-height: 1.35;
+}
+
+.demoHint {
+  border-top: 1px solid rgba(17, 17, 15, 0.08);
+  padding: 11px 18px;
+  background: rgba(244, 240, 233, 0.6);
+  color: #68675f;
+  font-size: 0.7rem;
+}
+
+@keyframes demoStream {
+  0% {
+    background-position: 100% 0;
+  }
+
+  100% {
+    background-position: 0 0;
+  }
+}
+
+@keyframes demoShiftTap {
+  /* 用 background-color 而非 background shorthand：避免与 demoStream 关键帧
+     的 background-position 在 biome 静态分析下被误判为属性覆写。 */
+  0%,
+  100% {
+    border-color: rgba(17, 17, 15, 0.18);
+    background-color: #fff;
+    color: #22221e;
+    transform: translateY(0);
+  }
+
+  24%,
+  48% {
+    border-color: rgba(58, 111, 85, 0.46);
+    background-color: #e9f5ee;
+    color: #24523b;
+    transform: translateY(2px);
+  }
+}
+
+@keyframes demoShiftRipple {
+  0% {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+
+  32% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.18);
+  }
+}
+
+.proofBand {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 22px 24px;
+  gap: 1px;
+}
+
+.proofItem {
+  min-width: 0;
+  border-left: 1px solid rgba(20, 20, 18, 0.09);
+  padding: 10px 24px;
+}
+
+.proofItem:first-child {
+  border-left: 0;
+  padding-left: 0;
+}
+
+.proofItem strong {
+  display: block;
+  color: #11110f;
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.proofItem span {
+  display: block;
+  margin-top: 5px;
+  color: #626158;
+  font-size: 0.84rem;
+}
+
+.section {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 64px 24px;
+}
+
+.sectionHeader {
+  max-width: 660px;
+  margin-bottom: 28px;
+}
+
+.sectionTitle {
+  margin: 0;
+  color: #171713;
+  font-size: 2rem;
+  line-height: 1.15;
+  letter-spacing: 0;
+}
+
+.useCaseGrid {
+  display: grid;
+  /* auto-fit + minmax 让中段宽度（720-1100px）自动落到 2 列，避免 4 列被中文/日文长文案挤压 */
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.useCase,
+.stepCard,
+.priceCard {
+  border: 1px solid rgba(17, 17, 15, 0.1);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.useCase {
+  padding: 18px;
+}
+
+.useCaseMark {
+  display: block;
+  /* 与 .eyebrow 主品牌绿对齐，避免和橙红撞色 */
+  color: #3a6f55;
+  font-size: 0.74rem;
+  font-weight: 760;
+}
+
+.useCase p {
+  margin: 12px 0 0;
+  color: #3b3b35;
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.howSection {
+  padding-top: 36px;
+}
+
+.stepGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.stepCard {
+  padding: 20px;
+}
+
+.stepLabel {
+  color: #8a887e;
+  font-size: 0.7rem;
+  font-weight: 760;
+  letter-spacing: 0;
+}
+
+.stepVisual {
+  min-height: 36px;
+  margin-top: 18px;
+}
+
+.stepCard h3 {
+  margin: 12px 0 0;
+  color: #171713;
+  font-size: 1.02rem;
+}
+
+.stepCard p {
+  margin: 8px 0 0;
+  color: #5a5a51;
+  font-size: 0.88rem;
+  line-height: 1.62;
+}
+
+.keyPair {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+}
+
+.kbd {
+  min-height: 24px;
+  padding: 0 7px;
+  font-size: 0.75rem;
+}
+
+.kbdLarge {
+  min-height: 31px;
+  padding: 0 11px;
+  font-size: 0.83rem;
+}
+
+.streamPill {
+  display: inline-flex;
+  min-height: 31px;
+  align-items: center;
+  border: 1px solid rgba(58, 111, 85, 0.18);
+  border-radius: 8px;
+  background: #eef7f2;
+  color: #2c6349;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78rem;
+  padding: 0 11px;
+}
+
+.privacyBand {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  gap: 36px;
+  align-items: center;
+  background: #10110f;
+  color: #fff;
+  margin: 24px 0 0;
+  padding: 60px max(24px, calc((100vw - 1120px) / 2 + 24px));
+}
+
+.privacyCopy {
+  min-width: 0;
+}
+
+.privacyEyebrow {
+  color: #93d1ad;
+}
+
+.privacyTitle {
+  max-width: 600px;
+  margin: 0;
+  font-size: 2rem;
+  line-height: 1.15;
+  letter-spacing: 0;
+}
+
+.privacyBody {
+  max-width: 660px;
+  margin: 16px 0 0;
+  color: #d7d6cf;
+  font-size: 0.98rem;
+}
+
+.privacyLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 22px;
+}
+
+.privacyLinks a {
+  color: #93d1ad;
+  font-size: 0.9rem;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.privacyLinks a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.logPanel {
+  display: grid;
+  gap: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background: #161815;
+  padding: 18px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.logGroup {
+  display: grid;
+  gap: 5px;
+}
+
+.logGroup span {
+  color: #84877c;
+  font-size: 0.74rem;
+}
+
+.logGroup code {
+  color: #9de0b7;
+  font-size: 0.78rem;
+}
+
+.logGroup .redacted {
+  color: #74766e;
+  text-decoration: line-through;
+}
+
+.featureRow {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.featureItem {
+  border-top: 2px solid rgba(58, 111, 85, 0.28);
+  padding-top: 14px;
+}
+
+.featureItem span {
+  color: #77766f;
+  font-size: 0.7rem;
+  font-weight: 760;
+}
+
+.featureItem h3 {
+  margin: 8px 0 0;
+  color: #171713;
+  font-size: 1.02rem;
+  line-height: 1.3;
+}
+
+.featureItem p {
+  margin: 8px 0 0;
+  color: #5a5a51;
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+.pricingSection {
+  padding-top: 24px;
+}
+
+.priceGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.priceCard {
+  padding: 22px;
+}
+
+.priceCardHighlight {
+  border-color: rgba(20, 20, 18, 0.7);
+  box-shadow: inset 0 0 0 1px rgba(20, 20, 18, 0.7);
+}
+
+.priceName {
+  color: #727168;
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
+.priceValue {
+  margin-top: 4px;
+  color: #11110f;
+  font-size: 1.8rem;
+  font-weight: 760;
+}
+
+.priceCard p {
+  margin: 6px 0 0;
+  color: #66655d;
+  font-size: 0.86rem;
+}
+
+.priceCard ul {
+  display: grid;
+  gap: 5px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.priceCard li {
+  color: #3d3d36;
+  font-size: 0.88rem;
+}
+
+.priceCard li::before {
+  color: #3a6f55;
+  content: "+ ";
+}
+
+@media (max-width: 900px) {
+  .heroInner {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding: 42px 20px 42px;
+  }
+
+  .heroTitle {
+    font-size: 3rem;
+  }
+
+  .proofBand,
+  .useCaseGrid,
+  .stepGrid,
+  .featureRow,
+  .priceGrid,
+  .privacyBand {
+    grid-template-columns: 1fr;
+  }
+
+  .proofBand {
+    padding: 12px 20px;
+  }
+
+  .proofItem,
+  .proofItem:first-child {
+    border-left: 0;
+    border-top: 1px solid rgba(20, 20, 18, 0.09);
+    padding: 12px 0;
+  }
+
+  .proofItem:first-child {
+    border-top: 0;
+  }
+
+  .section {
+    padding: 48px 20px;
+  }
+
+  .privacyBand {
+    padding: 46px 20px;
+  }
+}
+
+@media (max-width: 560px) {
+  .heroInner {
+    padding-top: 32px;
+  }
+
+  .heroTitle {
+    font-size: 2.45rem;
+  }
+
+  .heroStatement {
+    font-size: 1.18rem;
+  }
+
+  .heroLead,
+  .heroIntro,
+  .privacyBody {
+    font-size: 0.92rem;
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    width: 100%;
+  }
+
+  .demoShell {
+    font-size: 0.72rem;
+  }
+
+  .demoCandidate {
+    grid-template-columns: 20px minmax(0, 1fr);
+  }
+
+  .demoCandidateLabel {
+    display: none;
+  }
+
+  .sectionTitle,
+  .privacyTitle {
+    font-size: 1.55rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .demoInput,
+  .demoKey,
+  .demoCandidate {
+    transition: none;
+  }
+
+  .demoInputStreaming {
+    animation: none;
+  }
+}

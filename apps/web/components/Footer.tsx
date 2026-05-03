@@ -6,7 +6,7 @@ const COL_HEADING = {
   fontWeight: 600,
   color: '#888',
   textTransform: 'uppercase' as const,
-  letterSpacing: '0.04em',
+  letterSpacing: 0,
   margin: 0,
   marginBottom: 12,
 };

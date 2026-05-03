@@ -40,6 +40,7 @@ export function TopNav() {
           padding: '12px 24px',
           display: 'flex',
           alignItems: 'center',
+          flexWrap: 'wrap',
           gap: 4,
         }}
       >
@@ -52,7 +53,7 @@ export function TopNav() {
             color: '#111',
             textDecoration: 'none',
             marginRight: 24,
-            letterSpacing: '-0.01em',
+            letterSpacing: 0,
           }}
         >
           rewrite.so
@@ -70,7 +71,7 @@ export function TopNav() {
         </Link>
 
         {/* Center links */}
-        <div style={{ display: 'flex', gap: 4, flex: 1 }}>
+        <div style={{ display: 'flex', gap: 4, flex: '1 1 220px', flexWrap: 'wrap', minWidth: 0 }}>
           <Link href="/try" style={NAV_LINK}>
             {t('try')}
           </Link>

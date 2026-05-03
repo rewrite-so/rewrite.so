@@ -4,11 +4,21 @@
       "title": "rewrite.so — Shift Shift で書き換え",
       "description": "入力欄レベルの AI 書き換えエンジン。3 つのスタイル、キーボードのみ、書く流れを妨げません。"
     },
-    "login": { "title": "ログイン — rewrite.so" },
-    "try": { "title": "rewrite.so を試す — Shift Shift で書き換え" },
-    "settings": { "title": "設定 — rewrite.so" },
-    "billing": { "title": "請求 — rewrite.so" },
-    "unsubscribe": { "title": "配信停止 — rewrite.so" },
+    "login": {
+      "title": "ログイン — rewrite.so"
+    },
+    "try": {
+      "title": "rewrite.so を試す — Shift Shift で書き換え"
+    },
+    "settings": {
+      "title": "設定 — rewrite.so"
+    },
+    "billing": {
+      "title": "請求 — rewrite.so"
+    },
+    "unsubscribe": {
+      "title": "配信停止 — rewrite.so"
+    },
     "pricing": {
       "title": "料金 — rewrite.so",
       "description": "無料プラン月 30 回。Pro は年額 $7.99/月で月 2,000 回 + BYOK 無制限。"
@@ -17,10 +27,18 @@
       "title": "お問い合わせ — rewrite.so",
       "description": "rewrite.so のサポート、請求、プライバシーに関するお問い合わせ方法。"
     },
-    "terms": { "title": "利用規約 — rewrite.so" },
-    "privacy": { "title": "プライバシーポリシー — rewrite.so" },
-    "refund": { "title": "返金ポリシー — rewrite.so" },
-    "aup": { "title": "利用規定 — rewrite.so" }
+    "terms": {
+      "title": "利用規約 — rewrite.so"
+    },
+    "privacy": {
+      "title": "プライバシーポリシー — rewrite.so"
+    },
+    "refund": {
+      "title": "返金ポリシー — rewrite.so"
+    },
+    "aup": {
+      "title": "利用規定 — rewrite.so"
+    }
   },
   "page": {
     "login": {
@@ -163,22 +181,17 @@
     },
     "scenarios": {
       "h2": "身に覚え、ありませんか？",
-      "intro": "言葉を「ちゃんと」選ぶのに、本来必要以上の脳のスペースを使っています。多くは次のような場面で：",
-      "pain1": "Slack のあのメッセージ、3 回打ち直してから送信した。",
-      "pain2": "「もう少し柔らかく」のために、別タブで ChatGPT を開いた。",
-      "pain3": "タイプする前に、頭の中で 1 文ずつ翻訳した。",
-      "pain4": "同じメールを送信ボタンを押すまで 4 回読み返した。",
-      "bridge": "rewrite.so はまさにそのために作られました：",
+      "bridge": "rewrite.so はまさにそのために作られました",
       "useCase1": "母語以外の言語で書くとき —— 学習中、仕事、海外の同僚や顧客とのやり取り。",
       "useCase2": "顧客や取引先への返信、トーンが微妙な場面。",
       "useCase3": "公開投稿 —— ツイート、Reddit / HN のコメント、GitHub Issues、PR の説明。",
-      "useCase4": "コールドメール、謝罪、難しい会話 —— 一語の選び方が結果を左右する場面。",
-      "outro": "ひとつのキー操作、磨かれた 3 つの選択肢。 ↓"
+      "useCase4": "コールドメール、謝罪、難しい会話 —— 一語の選び方が結果を左右する場面。"
     },
     "privacy": {
       "eyebrow": "プライバシー契約",
       "h2": "あなたのテキストは保存されません。以上。",
       "body": "データベースに保存しません。ログにも残りません。エラーレポーターにも入りません。アナリティクスにも送りません。書き換えるテキストは worker を一度通過すれば消えます。サードパーティの APM（Sentry、Datadog 等）も使いません — 彼らがデフォルトでリクエストボディを取得するからです。これは約束ではなく — アーキテクチャそのものであり、ソースコードは検証のために公開されています。",
+      "shortBody": "ログに残せるのは length / lang / style / userId / エラーコードだけです。元の文章と書き換え結果はどこにも記録しません。",
       "linkDoc": "技術プライバシードキュメントを読む →",
       "linkSource": "rewrite ハンドラのソースを見る →",
       "logTitle": "# 記録されるもの",
@@ -269,7 +282,51 @@
       "anyInput": "任意の入力欄",
       "youTyped": "# 入力した内容：",
       "streams": "→ 3 ストリーム開始、最初のトークン約 200ms",
-      "accepted": "→ 採用、入力欄が置換されました"
+      "accepted": "→ 採用、入力欄が置換されました",
+      "selectHint": "書き換えをクリック、または 1 / 2 / 3 を押す",
+      "label": {
+        "faithful": "忠実",
+        "casual": "カジュアル",
+        "formal": "フォーマル"
+      },
+      "examples": {
+        "chinglish": {
+          "badge": "Chinglish → English",
+          "input": "Please help me see this issue tomorrow.",
+          "candidate": {
+            "faithful": "Please help me look into this issue tomorrow.",
+            "casual": "Could you take a look at this tomorrow?",
+            "formal": "Could you please review this issue tomorrow?"
+          }
+        },
+        "zhToEn": {
+          "badge": "中文 → English",
+          "input": "这个需求我今天可能做不完，明天上午给你更新。",
+          "candidate": {
+            "faithful": "I may not be able to finish this request today. I'll update you tomorrow morning.",
+            "casual": "I might not get this done today, but I'll send you an update tomorrow morning.",
+            "formal": "I may not be able to complete this request today, but I will provide an update tomorrow morning."
+          }
+        },
+        "jaToEn": {
+          "badge": "日本語 → English",
+          "input": "明日の午前中までに確認して、更新します。",
+          "candidate": {
+            "faithful": "I'll check it by tomorrow morning and send an update.",
+            "casual": "I'll take a look by tomorrow morning and keep you posted.",
+            "formal": "I will review it by tomorrow morning and provide an update."
+          }
+        },
+        "tone": {
+          "badge": "Tone → English",
+          "input": "This is wrong. Fix it.",
+          "candidate": {
+            "faithful": "This seems incorrect. Could you fix it?",
+            "casual": "I think something's off here. Could you take another look?",
+            "formal": "This appears to be incorrect. Could you please review and correct it?"
+          }
+        }
+      }
     }
   },
   "ext": {

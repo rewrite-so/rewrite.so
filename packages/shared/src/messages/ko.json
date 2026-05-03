@@ -4,11 +4,21 @@
       "title": "rewrite.so — Shift Shift로 다시 쓰기",
       "description": "입력란 수준 AI 재작성 엔진. 3가지 스타일, 키보드만, 작업 흐름을 끊지 않습니다."
     },
-    "login": { "title": "로그인 — rewrite.so" },
-    "try": { "title": "rewrite.so 체험 — Shift Shift로 다시 쓰기" },
-    "settings": { "title": "설정 — rewrite.so" },
-    "billing": { "title": "결제 — rewrite.so" },
-    "unsubscribe": { "title": "구독 취소 — rewrite.so" },
+    "login": {
+      "title": "로그인 — rewrite.so"
+    },
+    "try": {
+      "title": "rewrite.so 체험 — Shift Shift로 다시 쓰기"
+    },
+    "settings": {
+      "title": "설정 — rewrite.so"
+    },
+    "billing": {
+      "title": "결제 — rewrite.so"
+    },
+    "unsubscribe": {
+      "title": "구독 취소 — rewrite.so"
+    },
     "pricing": {
       "title": "요금 — rewrite.so",
       "description": "무료 등급 월 30회 재작성. Pro는 연간 $7.99/월로 월 2,000회 + BYOK 무제한."
@@ -17,10 +27,18 @@
       "title": "문의 — rewrite.so",
       "description": "rewrite.so 지원, 결제, 개인정보 관련 문의 방법."
     },
-    "terms": { "title": "서비스 약관 — rewrite.so" },
-    "privacy": { "title": "개인정보 처리방침 — rewrite.so" },
-    "refund": { "title": "환불 정책 — rewrite.so" },
-    "aup": { "title": "이용 정책 — rewrite.so" }
+    "terms": {
+      "title": "서비스 약관 — rewrite.so"
+    },
+    "privacy": {
+      "title": "개인정보 처리방침 — rewrite.so"
+    },
+    "refund": {
+      "title": "환불 정책 — rewrite.so"
+    },
+    "aup": {
+      "title": "이용 정책 — rewrite.so"
+    }
   },
   "page": {
     "login": {
@@ -163,22 +181,17 @@
     },
     "scenarios": {
       "h2": "익숙하신가요?",
-      "intro": "'올바른' 표현을 찾는 데 필요 이상의 정신적 에너지가 듭니다. 그 대부분은 이런 순간에:",
-      "pain1": "그 Slack 메시지를 3번 다시 쳐서 보냈죠.",
-      "pain2": "'좀 덜 거칠게' 만들려고 다른 탭에 ChatGPT를 열었죠.",
-      "pain3": "입력하기 전에 머릿속에서 문장마다 번역했죠.",
-      "pain4": "같은 이메일을 보내기 전 4번 읽었죠.",
-      "bridge": "rewrite.so가 바로 이런 순간을 위해 만들어졌습니다:",
+      "bridge": "rewrite.so가 바로 이런 순간을 위해 만들어졌습니다",
       "useCase1": "모국어가 아닌 언어로 쓸 때 — 학습, 업무, 해외 동료나 고객과의 대화.",
       "useCase2": "고객이나 거래처 회신, 톤이 미묘한 경우.",
       "useCase3": "공개 게시물 — 트윗, Reddit / HN 댓글, GitHub Issues, PR 설명.",
-      "useCase4": "콜드 메일, 사과, 어려운 대화 — 한 단어가 결과를 좌우하는 순간.",
-      "outro": "한 번의 키 입력, 다듬어진 세 가지 선택지. ↓"
+      "useCase4": "콜드 메일, 사과, 어려운 대화 — 한 단어가 결과를 좌우하는 순간."
     },
     "privacy": {
       "eyebrow": "프라이버시 계약",
       "h2": "당신의 텍스트는 저장되지 않습니다. 그것뿐입니다.",
       "body": "데이터베이스에 저장하지 않습니다. 로그에 남기지 않습니다. 에러 리포터에 들어가지 않습니다. 분석에 사용하지 않습니다. 재작성하는 텍스트는 worker를 한 번 통과하면 사라집니다. Sentry, Datadog 등 서드파티 APM도 사용하지 않습니다 — 그들이 기본적으로 요청 본문을 캡처하기 때문입니다. 이는 약속이 아닌 — 아키텍처 자체이며, 소스 코드는 검증을 위해 공개되어 있습니다.",
+      "shortBody": "로그에는 length / lang / style / userId / 오류 코드만 남길 수 있습니다. 원문과 재작성 결과는 모든 경로에서 제외됩니다.",
       "linkDoc": "기술 프라이버시 문서 보기 →",
       "linkSource": "rewrite 핸들러 소스 보기 →",
       "logTitle": "# 기록되는 것",
@@ -269,7 +282,51 @@
       "anyInput": "어떤 입력란이든",
       "youTyped": "# 입력한 내용:",
       "streams": "→ 3개 스트림 시작, 첫 토큰 약 200ms",
-      "accepted": "→ 채택됨, 입력란 대체됨"
+      "accepted": "→ 채택됨, 입력란 대체됨",
+      "selectHint": "재작성을 클릭하거나 1 / 2 / 3을 누르세요",
+      "label": {
+        "faithful": "충실",
+        "casual": "캐주얼",
+        "formal": "격식"
+      },
+      "examples": {
+        "chinglish": {
+          "badge": "Chinglish → English",
+          "input": "Please help me see this issue tomorrow.",
+          "candidate": {
+            "faithful": "Please help me look into this issue tomorrow.",
+            "casual": "Could you take a look at this tomorrow?",
+            "formal": "Could you please review this issue tomorrow?"
+          }
+        },
+        "zhToEn": {
+          "badge": "中文 → English",
+          "input": "这个需求我今天可能做不完，明天上午给你更新。",
+          "candidate": {
+            "faithful": "I may not be able to finish this request today. I'll update you tomorrow morning.",
+            "casual": "I might not get this done today, but I'll send you an update tomorrow morning.",
+            "formal": "I may not be able to complete this request today, but I will provide an update tomorrow morning."
+          }
+        },
+        "jaToEn": {
+          "badge": "日本語 → English",
+          "input": "明日の午前中までに確認して、更新します。",
+          "candidate": {
+            "faithful": "I'll check it by tomorrow morning and send an update.",
+            "casual": "I'll take a look by tomorrow morning and keep you posted.",
+            "formal": "I will review it by tomorrow morning and provide an update."
+          }
+        },
+        "tone": {
+          "badge": "Tone → English",
+          "input": "This is wrong. Fix it.",
+          "candidate": {
+            "faithful": "This seems incorrect. Could you fix it?",
+            "casual": "I think something's off here. Could you take another look?",
+            "formal": "This appears to be incorrect. Could you please review and correct it?"
+          }
+        }
+      }
     }
   },
   "ext": {

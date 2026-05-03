@@ -4,11 +4,21 @@
       "title": "rewrite.so — Doble Shift para reescribir",
       "description": "Motor de reescritura con IA a nivel de campo de entrada. 3 estilos, solo teclado, sin interrumpir tu flujo."
     },
-    "login": { "title": "Iniciar sesión — rewrite.so" },
-    "try": { "title": "Prueba rewrite.so — Doble Shift para reescribir" },
-    "settings": { "title": "Configuración — rewrite.so" },
-    "billing": { "title": "Facturación — rewrite.so" },
-    "unsubscribe": { "title": "Darse de baja — rewrite.so" },
+    "login": {
+      "title": "Iniciar sesión — rewrite.so"
+    },
+    "try": {
+      "title": "Prueba rewrite.so — Doble Shift para reescribir"
+    },
+    "settings": {
+      "title": "Configuración — rewrite.so"
+    },
+    "billing": {
+      "title": "Facturación — rewrite.so"
+    },
+    "unsubscribe": {
+      "title": "Darse de baja — rewrite.so"
+    },
     "pricing": {
       "title": "Precios — rewrite.so",
       "description": "Plan gratuito con 30 reescrituras al mes. Pro a $7.99/mes anual: 2.000/mes más BYOK ilimitado."
@@ -17,10 +27,18 @@
       "title": "Contacto — rewrite.so",
       "description": "Cómo contactar a rewrite.so para soporte, facturación o privacidad."
     },
-    "terms": { "title": "Términos del servicio — rewrite.so" },
-    "privacy": { "title": "Política de privacidad — rewrite.so" },
-    "refund": { "title": "Política de reembolso — rewrite.so" },
-    "aup": { "title": "Uso aceptable — rewrite.so" }
+    "terms": {
+      "title": "Términos del servicio — rewrite.so"
+    },
+    "privacy": {
+      "title": "Política de privacidad — rewrite.so"
+    },
+    "refund": {
+      "title": "Política de reembolso — rewrite.so"
+    },
+    "aup": {
+      "title": "Uso aceptable — rewrite.so"
+    }
   },
   "page": {
     "login": {
@@ -163,22 +181,17 @@
     },
     "scenarios": {
       "h2": "¿Te suena familiar?",
-      "intro": "Encontrar la palabra justa consume más energía mental de la que debería. La mayoría se va en estos momentos:",
-      "pain1": "Reescribiste ese mensaje de Slack 3 veces antes de enviarlo.",
-      "pain2": "Abriste ChatGPT en otra pestaña para \"hacerlo menos brusco\".",
-      "pain3": "Tradujiste cada frase en tu cabeza antes de escribirla.",
-      "pain4": "Releíste el mismo email 4 veces antes de pulsar enviar.",
-      "bridge": "Para esto exactamente fue creado rewrite.so:",
+      "bridge": "Para esto exactamente fue creado rewrite.so",
       "useCase1": "Escribir en un idioma que no es el tuyo — aprendizaje, trabajo, hablar con compañeros o clientes en el extranjero.",
       "useCase2": "Responder a clientes o socios cuando el tono tiene que ser justo el adecuado.",
       "useCase3": "Publicaciones públicas — tuits, comentarios en Reddit / HN, issues de GitHub, descripciones de PR.",
-      "useCase4": "Emails fríos, disculpas, conversaciones difíciles — donde una palabra mal puesta cuesta caro.",
-      "outro": "Una pulsación. Tres opciones pulidas. ↓"
+      "useCase4": "Emails fríos, disculpas, conversaciones difíciles — donde una palabra mal puesta cuesta caro."
     },
     "privacy": {
       "eyebrow": "El contrato de privacidad",
       "h2": "Tu texto nunca se almacena. Punto.",
       "body": "Ni en bases de datos. Ni en logs. Ni en reportadores de errores. Ni en analíticas. El texto que reescribes pasa por el worker una vez y desaparece. No usamos ningún APM de terceros (Sentry, Datadog, etc.) precisamente porque capturarían los cuerpos de las solicitudes por defecto. Esto no es una promesa — es la arquitectura, y el código fuente está abierto para que lo verifiques.",
+      "shortBody": "Solo se pueden registrar length, lang, style, userId y códigos de error. El texto original y las reescrituras quedan excluidos en todas partes.",
       "linkDoc": "Leer el documento técnico de privacidad →",
       "linkSource": "Ver el código del manejador de reescritura →",
       "logTitle": "# Lo que se registra",
@@ -269,7 +282,51 @@
       "anyInput": "cualquier campo de entrada",
       "youTyped": "# Escribiste:",
       "streams": "→ 3 streams iniciados, ~200ms primer token",
-      "accepted": "→ aceptado, entrada reemplazada"
+      "accepted": "→ aceptado, entrada reemplazada",
+      "selectHint": "Haz clic en una reescritura o pulsa 1 / 2 / 3",
+      "label": {
+        "faithful": "Fiel",
+        "casual": "Casual",
+        "formal": "Formal"
+      },
+      "examples": {
+        "chinglish": {
+          "badge": "Chinglish → English",
+          "input": "Please help me see this issue tomorrow.",
+          "candidate": {
+            "faithful": "Please help me look into this issue tomorrow.",
+            "casual": "Could you take a look at this tomorrow?",
+            "formal": "Could you please review this issue tomorrow?"
+          }
+        },
+        "zhToEn": {
+          "badge": "中文 → English",
+          "input": "这个需求我今天可能做不完，明天上午给你更新。",
+          "candidate": {
+            "faithful": "I may not be able to finish this request today. I'll update you tomorrow morning.",
+            "casual": "I might not get this done today, but I'll send you an update tomorrow morning.",
+            "formal": "I may not be able to complete this request today, but I will provide an update tomorrow morning."
+          }
+        },
+        "jaToEn": {
+          "badge": "日本語 → English",
+          "input": "明日の午前中までに確認して、更新します。",
+          "candidate": {
+            "faithful": "I'll check it by tomorrow morning and send an update.",
+            "casual": "I'll take a look by tomorrow morning and keep you posted.",
+            "formal": "I will review it by tomorrow morning and provide an update."
+          }
+        },
+        "tone": {
+          "badge": "Tone → English",
+          "input": "This is wrong. Fix it.",
+          "candidate": {
+            "faithful": "This seems incorrect. Could you fix it?",
+            "casual": "I think something's off here. Could you take another look?",
+            "formal": "This appears to be incorrect. Could you please review and correct it?"
+          }
+        }
+      }
     }
   },
   "ext": {

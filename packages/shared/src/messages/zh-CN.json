@@ -4,11 +4,21 @@
       "title": "rewrite.so — 双击 Shift 即时改写",
       "description": "输入框级 AI 改写引擎。3 种风格，纯键盘操作，不打断写作流。"
     },
-    "login": { "title": "登录 — rewrite.so" },
-    "try": { "title": "试用 rewrite.so — 双击 Shift 改写" },
-    "settings": { "title": "设置 — rewrite.so" },
-    "billing": { "title": "账单 — rewrite.so" },
-    "unsubscribe": { "title": "退订 — rewrite.so" },
+    "login": {
+      "title": "登录 — rewrite.so"
+    },
+    "try": {
+      "title": "试用 rewrite.so — 双击 Shift 改写"
+    },
+    "settings": {
+      "title": "设置 — rewrite.so"
+    },
+    "billing": {
+      "title": "账单 — rewrite.so"
+    },
+    "unsubscribe": {
+      "title": "退订 — rewrite.so"
+    },
     "pricing": {
       "title": "价格 — rewrite.so",
       "description": "免费档每月 30 次改写。Pro 年付 $7.99/月，每月 2000 次 + BYOK 无限。"
@@ -17,10 +27,18 @@
       "title": "联系我们 — rewrite.so",
       "description": "rewrite.so 的支持、账单与隐私事宜联系方式。"
     },
-    "terms": { "title": "服务条款 — rewrite.so" },
-    "privacy": { "title": "隐私政策 — rewrite.so" },
-    "refund": { "title": "退款政策 — rewrite.so" },
-    "aup": { "title": "可接受使用政策 — rewrite.so" }
+    "terms": {
+      "title": "服务条款 — rewrite.so"
+    },
+    "privacy": {
+      "title": "隐私政策 — rewrite.so"
+    },
+    "refund": {
+      "title": "退款政策 — rewrite.so"
+    },
+    "aup": {
+      "title": "可接受使用政策 — rewrite.so"
+    }
   },
   "page": {
     "login": {
@@ -163,22 +181,17 @@
     },
     "scenarios": {
       "h2": "这些场景你眼熟吗？",
-      "intro": "写\"对\"一句话，花的脑力往往超出它该有的份量。多数耗在这些时刻：",
-      "pain1": "那条 Slack 消息你重新打了三遍才发出去。",
-      "pain2": "为了\"语气别太硬\"，你打开了另一个 ChatGPT 标签页。",
-      "pain3": "你在脑子里把每句话先翻译一遍才敲下来。",
-      "pain4": "同一封邮件你按\"发送\"前读了四遍。",
-      "bridge": "这正是 rewrite.so 真正派上用场的地方：",
+      "bridge": "这正是 rewrite.so 真正派上用场的地方",
       "useCase1": "用非母语写作——学习中、工作中、跟海外同事或客户沟通的时候。",
       "useCase2": "给客户、合作方回信，语气需要刚刚好的场景。",
       "useCase3": "公开发言——推文、Reddit / HN 评论、GitHub Issues、PR 描述。",
-      "useCase4": "冷邮件、道歉、难开口的对话——一个词用错就尴尬的时刻。",
-      "outro": "一个手势，三种打磨好的说法。 ↓"
+      "useCase4": "冷邮件、道歉、难开口的对话——一个词用错就尴尬的时刻。"
     },
     "privacy": {
       "eyebrow": "隐私契约",
       "h2": "你的文本永不存储。就这么简单。",
       "body": "不存数据库。不进日志。不上报错监控。不入分析。改写文本仅在 worker 处理一次后立即丢弃。我们刻意不接入第三方 APM（Sentry、Datadog 等）——因为它们默认会抓 request body。这不是承诺——这是架构本身，源码完全开放给你审计。",
+      "shortBody": "日志只允许记录 length / lang / style / userId / 错误码。原文和改写结果在所有链路里都被排除。",
       "linkDoc": "阅读技术隐私文档 →",
       "linkSource": "查看 rewrite handler 源码 →",
       "logTitle": "# 会记录的",
@@ -269,7 +282,51 @@
       "anyInput": "任意输入框",
       "youTyped": "# 你输入了：",
       "streams": "→ 3 路流式开始，首 token 约 200ms",
-      "accepted": "→ 已采纳，输入框被替换"
+      "accepted": "→ 已采纳，输入框被替换",
+      "selectHint": "点击一个改写，或按 1 / 2 / 3",
+      "label": {
+        "faithful": "贴近原文",
+        "casual": "口语",
+        "formal": "正式"
+      },
+      "examples": {
+        "chinglish": {
+          "badge": "Chinglish → English",
+          "input": "Please help me see this issue tomorrow.",
+          "candidate": {
+            "faithful": "Please help me look into this issue tomorrow.",
+            "casual": "Could you take a look at this tomorrow?",
+            "formal": "Could you please review this issue tomorrow?"
+          }
+        },
+        "zhToEn": {
+          "badge": "中文 → English",
+          "input": "这个需求我今天可能做不完，明天上午给你更新。",
+          "candidate": {
+            "faithful": "I may not be able to finish this request today. I'll update you tomorrow morning.",
+            "casual": "I might not get this done today, but I'll send you an update tomorrow morning.",
+            "formal": "I may not be able to complete this request today, but I will provide an update tomorrow morning."
+          }
+        },
+        "jaToEn": {
+          "badge": "日本語 → English",
+          "input": "明日の午前中までに確認して、更新します。",
+          "candidate": {
+            "faithful": "I'll check it by tomorrow morning and send an update.",
+            "casual": "I'll take a look by tomorrow morning and keep you posted.",
+            "formal": "I will review it by tomorrow morning and provide an update."
+          }
+        },
+        "tone": {
+          "badge": "Tone → English",
+          "input": "This is wrong. Fix it.",
+          "candidate": {
+            "faithful": "This seems incorrect. Could you fix it?",
+            "casual": "I think something's off here. Could you take another look?",
+            "formal": "This appears to be incorrect. Could you please review and correct it?"
+          }
+        }
+      }
     }
   },
   "ext": {

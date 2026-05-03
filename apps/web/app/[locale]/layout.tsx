@@ -60,8 +60,13 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale}>
+    // suppressHydrationWarning 加在 <html> 和 <body>：常见浏览器扩展（1Password、
+    // Grammarly、深色模式切换器、翻译插件）会在 SSR HTML 到达后向 <html>/<body>
+    // 注入额外属性（data-* / class），导致 React 报 hydration mismatch。这里只
+    // 抑制属性级别的警告，*不会*掩盖 React 树内部真实的 hydration bug——后者仍正常报。
+    <html lang={locale} suppressHydrationWarning>
       <body
+        suppressHydrationWarning
         style={{
           margin: 0,
           minHeight: '100vh',

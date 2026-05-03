@@ -1,6 +1,6 @@
-# CLAUDE.md
+# AGENTS.md
 
-本文件仅记录"未来 Claude 必须知道、且无法从代码或 git log 推导"的项目约定。
+本文件仅记录"未来 Codex 必须知道、且无法从代码或 git log 推导"的项目约定。
 代码自解释的内容（目录结构、文件清单、API 列表、`package.json scripts` 命令）一律不写在这里——它们在 README 或代码本身。
 
 ## 产品契约（不可静默更改）
@@ -119,15 +119,6 @@
   - workspace 包名不能含 `.`（用 `@rewrite/core` 不要 `@rewrite/core.ext`）。
   - content script 入口必须是本地 host 文件（`apps/extension/src/content/index.ts`），不能直接引 workspace 包文件。
   - `resolve.alias` 中 `react → preact/compat` 仅给扩展自己的 popup/options 用，content script 不应引入框架。
-- **`apps/web` dev 用 `next dev --webpack`，不用 Turbopack**：landing 页用 CSS Modules
-  + `<Image>` 背景；Turbopack 在 Next 16 早期版本对某些 CSS Modules 边界（含字体加载或
-  `background-image` URL 重写）偶发 layout 错位 / class hash 不稳。webpack 启动慢但
-  渲染稳定。等 Turbopack 在 Next 16.x 稳定后再换。production `next build` 不受影响。
-- **`<html suppressHydrationWarning>` + `<body suppressHydrationWarning>` 是有意为之**：
-  浏览器扩展（1Password / Grammarly / 深色模式切换器 / 翻译插件）会在 SSR HTML 到达后
-  注入 `data-*` / class 到 `<html>` 或 `<body>`，触发 React hydration mismatch 警告。
-  `suppressHydrationWarning` 仅抑制这些**属性级别**警告，**不会**掩盖 React 树内部
-  真实的 hydration bug（后者照样报）。不要因"看着像调试障眼法"就移除。
 
 ## 已知不支持场景
 
