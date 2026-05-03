@@ -16,6 +16,69 @@ export const DEFAULT_LOCALE: Locale = 'en';
 export const STORED_LOCALE_VALUES: readonly StoredLocale[] = ['auto', ...LOCALES];
 
 /**
+ * 改写目标语言（rewrite target）—— 与 UI locale 完全独立。
+ * UI 只能是 LOCALES 中的 7 个；改写目标可以是这 22 个里的任何一个，
+ * 也可以是 'auto'（让 detectTargetLang 在调用方运行时推导）。
+ *
+ * API 端不限制具体 BCP-47 值（z.string().min(1).max(20)）；prompt 直接拿
+ * 字符串注入到 system prompt。新增/删除一个 target 只需改这两个常量。
+ */
+export const REWRITE_TARGETS = [
+  'en',
+  'zh-CN',
+  'zh-TW',
+  'ja',
+  'ko',
+  'es',
+  'fr',
+  'de',
+  'pt',
+  'it',
+  'ru',
+  'ar',
+  'hi',
+  'nl',
+  'pl',
+  'tr',
+  'vi',
+  'id',
+  'th',
+  'sv',
+  'da',
+  'he',
+] as const;
+export type RewriteTarget = (typeof REWRITE_TARGETS)[number];
+
+/**
+ * 改写目标的原生显示名（用于 UI 下拉选项）。
+ * 故意用各语言的原生写法 —— 避免依赖当前 UI locale 翻译，单一来源。
+ */
+export const REWRITE_TARGET_LABELS: Record<RewriteTarget, string> = {
+  en: 'English',
+  'zh-CN': '简体中文',
+  'zh-TW': '繁體中文',
+  ja: '日本語',
+  ko: '한국어',
+  es: 'Español',
+  fr: 'Français',
+  de: 'Deutsch',
+  pt: 'Português',
+  it: 'Italiano',
+  ru: 'Русский',
+  ar: 'العربية',
+  hi: 'हिन्दी',
+  nl: 'Nederlands',
+  pl: 'Polski',
+  tr: 'Türkçe',
+  vi: 'Tiếng Việt',
+  id: 'Bahasa Indonesia',
+  th: 'ไทย',
+  sv: 'Svenska',
+  da: 'Dansk',
+  he: 'עברית',
+};
+
+/**
  * @deprecated Use `string`. Kept for backward compatibility with call sites
  * that imported `I18nKey` when keys were a literal union.
  */

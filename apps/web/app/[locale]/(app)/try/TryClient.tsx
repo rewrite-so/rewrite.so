@@ -1,7 +1,12 @@
 'use client';
 
 import { createWebApiClient, mount } from '@rewrite/core';
-import { LOCALES, type Locale } from '@rewrite/shared';
+import {
+  type Locale,
+  REWRITE_TARGET_LABELS,
+  REWRITE_TARGETS,
+  type RewriteTarget,
+} from '@rewrite/shared';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 
@@ -11,16 +16,6 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? '';
 
 const TARGET_LANG_STORAGE = 'rewrite-so-try-target-lang-v1';
 
-const LANG_LABELS: Record<Locale, string> = {
-  en: 'English',
-  'zh-CN': '中文（简体）',
-  ja: '日本語',
-  ko: '한국어',
-  es: 'Español',
-  fr: 'Français',
-  de: 'Deutsch',
-};
-
 export function TryClient() {
   const locale = useLocale() as Locale;
   const t = useTranslations();
@@ -28,12 +23,12 @@ export function TryClient() {
   const [hintVisible, setHintVisible] = useState(false);
   // 试用页**始终默认英语**作为目标——不用 auto。
   // 用户切换的偏好持久到 localStorage（仅影响 /try，不影响登录用户的 settings）。
-  const [targetLang, setTargetLang] = useState<Locale>('en');
+  const [targetLang, setTargetLang] = useState<RewriteTarget>('en');
 
   useEffect(() => {
     const stored = window.localStorage.getItem(TARGET_LANG_STORAGE);
-    if (stored && (LOCALES as readonly string[]).includes(stored)) {
-      setTargetLang(stored as Locale);
+    if (stored && (REWRITE_TARGETS as readonly string[]).includes(stored)) {
+      setTargetLang(stored as RewriteTarget);
     }
   }, []);
 
@@ -87,7 +82,7 @@ export function TryClient() {
     };
   }, []);
 
-  function onTargetLangChange(value: Locale) {
+  function onTargetLangChange(value: RewriteTarget) {
     setTargetLang(value);
     window.localStorage.setItem(TARGET_LANG_STORAGE, value);
   }
@@ -110,7 +105,7 @@ export function TryClient() {
         <select
           id="try-target-lang"
           value={targetLang}
-          onChange={(e) => onTargetLangChange(e.currentTarget.value as Locale)}
+          onChange={(e) => onTargetLangChange(e.currentTarget.value as RewriteTarget)}
           style={{
             padding: '6px 10px',
             fontSize: 13,
@@ -120,9 +115,9 @@ export function TryClient() {
             fontFamily: 'inherit',
           }}
         >
-          {LOCALES.map((l) => (
+          {REWRITE_TARGETS.map((l) => (
             <option key={l} value={l}>
-              {LANG_LABELS[l]}
+              {REWRITE_TARGET_LABELS[l]}
             </option>
           ))}
         </select>

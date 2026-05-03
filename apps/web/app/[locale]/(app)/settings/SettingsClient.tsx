@@ -1,6 +1,7 @@
 'use client';
 
 import type { Locale, StoredLocale } from '@rewrite/shared';
+import { REWRITE_TARGET_LABELS, REWRITE_TARGETS } from '@rewrite/shared';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from '../../../../i18n/navigation.ts';
@@ -62,13 +63,7 @@ export function SettingsClient() {
 
   const langOptions: Array<{ value: string; label: string }> = [
     { value: 'auto', label: t('lang.autoFromPage') },
-    { value: 'en', label: 'English' },
-    { value: 'zh-CN', label: '简体中文 (Chinese, Simplified)' },
-    { value: 'ja', label: '日本語 (Japanese)' },
-    { value: 'ko', label: '한국어 (Korean)' },
-    { value: 'es', label: 'Español (Spanish)' },
-    { value: 'fr', label: 'Français (French)' },
-    { value: 'de', label: 'Deutsch (German)' },
+    ...REWRITE_TARGETS.map((code) => ({ value: code, label: REWRITE_TARGET_LABELS[code] })),
   ];
 
   useEffect(() => {

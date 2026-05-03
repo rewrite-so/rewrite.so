@@ -28,6 +28,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   渲染（`useFormatter`）。BYOK confirm dialog、subscription status、quota tier
   标签、plan toggle、checkout button 等全部本地化。ja/ko/es/fr/de 由 LLM 起草，
   待母语者 review。
+- 改写目标语言下拉从 8 项扩到 22 项 —— 新增 `zh-TW` / `pt` / `it` / `ru` / `ar`
+  / `hi` / `nl` / `pl` / `tr` / `vi` / `id` / `th` / `sv` / `da` / `he`，
+  覆盖 OECD + 主要新兴市场。`packages/shared` 新增 `REWRITE_TARGETS` /
+  `REWRITE_TARGET_LABELS` 作为单一来源，`/settings` 和 `/try` 两个下拉同步消费。
+  注意：UI locale（界面语言）仍是 7 个，与改写目标语言完全独立。
 
 ### Added
 - **i18n** — 7 UI locales (`en` / `zh-CN` / `ja` / `ko` / `es` / `fr` / `de`) covering
