@@ -19,7 +19,10 @@ const RECIPIENT: EmailRecipient = {
 
 const CTX = { webOrigin: 'https://rewrite.so' };
 
-const TEMPLATES: Array<{ name: string; build: (r: EmailRecipient, c: typeof CTX, l: Locale) => EmailTemplate }> = [
+const TEMPLATES: Array<{
+  name: string;
+  build: (r: EmailRecipient, c: typeof CTX, l: Locale) => EmailTemplate;
+}> = [
   { name: 'welcome', build: welcomeEmail },
   { name: 'day1', build: day1Email },
   { name: 'day7', build: day7Email },
