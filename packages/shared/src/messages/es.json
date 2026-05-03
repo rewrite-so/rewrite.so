@@ -151,23 +151,23 @@
   },
   "home": {
     "hero": {
-      "eyebrow": "Código abierto · Apache 2.0 · Sin tracking",
-      "h1Line1": "Reescritura con IA",
-      "h1Line2": "que no almacena tu texto.",
-      "subHeadline": "Stop overthinking every message.",
-      "polyglot": "Any language in. Any language out.",
-      "intro": "Pulsa <kbd>Shift</kbd> dos veces en cualquier campo de entrada web. Tres reescrituras de IA se generan en paralelo. Pulsa <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> para aceptar. Las entradas y salidas <strong>nunca se escriben en disco</strong> — verificable en el código fuente.",
+      "eyebrow": "Cualquier campo de entrada · Código abierto",
+      "h1Line1": "Escribe en bruto.",
+      "h1Line2": "Envía pulido.",
+      "subHeadline": "Deja de darle vueltas a cada mensaje.",
+      "polyglot": "Cualquier idioma entra. Cualquier idioma sale.",
+      "intro": "Pulsa <kbd>Shift</kbd> dos veces en cualquier campo de entrada. La IA te da tres maneras de decirlo. Elige una con <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> y envía.",
       "ctaPrimary": "Probar gratis →",
       "ctaSecondary": "⭐ Estrella en GitHub",
       "fineprint": "{count} reescrituras gratis al mes · Sin tarjeta · BYOK para uso ilimitado"
     },
     "scenarios": {
-      "h2": "Sound familiar?",
-      "pain1": "You retyped that Slack message 3 times before sending it.",
-      "pain2": "You opened ChatGPT in another tab to \"make it less harsh\".",
-      "pain3": "You translated each sentence in your head before typing.",
-      "pain4": "You re-read the same email 4 times before hitting send.",
-      "outro": "rewrite.so cuts the loop. ↓"
+      "h2": "¿Te suena familiar?",
+      "pain1": "Reescribiste ese mensaje de Slack 3 veces antes de enviarlo.",
+      "pain2": "Abriste ChatGPT en otra pestaña para \"hacerlo menos brusco\".",
+      "pain3": "Tradujiste cada frase en tu cabeza antes de escribirla.",
+      "pain4": "Releíste el mismo email 4 veces antes de pulsar enviar.",
+      "outro": "rewrite.so corta el bucle. ↓"
     },
     "privacy": {
       "eyebrow": "El contrato de privacidad",
@@ -189,11 +189,11 @@
       "stepLabel": "PASO {num}",
       "step1": {
         "title": "Doble Shift",
-        "body": "En 500ms, en cualquier campo enfocado de la página — input, textarea o contenteditable. Los campos PII (contraseña, CVV, OTP) están excluidos por código."
+        "body": "Pulsa <kbd>Shift</kbd> dos veces en 500ms. Los campos de contraseña / CVV / OTP se omiten automáticamente."
       },
       "step2": {
         "title": "3 estilos en paralelo",
-        "body": "Fiel, casual, formal — generados concurrentemente en una única respuesta SSE multiplexada. Primer token en pocos cientos de milisegundos."
+        "body": "Fiel, casual, formal — tres tonos a la vez. El primero aparece casi al instante."
       },
       "step3": {
         "title": "Pulsa para aceptar",
@@ -204,7 +204,7 @@
       "h2": "Hecho para gente que se preocupa por cómo funciona",
       "openSource": {
         "label": "CÓDIGO ABIERTO",
-        "title": "100% Apache 2.0",
+        "title": "Lee el código tú mismo",
         "body": "Auto-aloja, audita, bifurca. Las afirmaciones de privacidad arriba no son marketing — son código que puedes leer en <repo>github.com/rewrite-so/rewrite.so</repo>."
       },
       "byok": {

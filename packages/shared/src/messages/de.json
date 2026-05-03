@@ -151,23 +151,23 @@
   },
   "home": {
     "hero": {
-      "eyebrow": "Open Source · Apache 2.0 · Kein Tracking",
-      "h1Line1": "AI-Umschreibung,",
-      "h1Line2": "die deinen Text nicht speichert.",
-      "subHeadline": "Stop overthinking every message.",
-      "polyglot": "Any language in. Any language out.",
-      "intro": "Drücke <kbd>Shift</kbd> doppelt in einem beliebigen Web-Eingabefeld. Drei AI-Umschreibungen werden parallel gestreamt. Drücke <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> zum Akzeptieren. Eingaben und Ausgaben werden <strong>nie auf die Festplatte geschrieben</strong> — im Quellcode überprüfbar.",
+      "eyebrow": "Jedes Eingabefeld · Open Source",
+      "h1Line1": "Roh schreiben.",
+      "h1Line2": "Geschliffen senden.",
+      "subHeadline": "Hör auf, jede Nachricht zu zerdenken.",
+      "polyglot": "Beliebige Sprache rein. Beliebige Sprache raus.",
+      "intro": "Drücke <kbd>Shift</kbd> doppelt in einem beliebigen Eingabefeld. Die KI gibt dir drei Formulierungen. Wähle eine mit <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> und sende.",
       "ctaPrimary": "Kostenlos testen →",
       "ctaSecondary": "⭐ Star auf GitHub",
       "fineprint": "{count} kostenlose Umschreibungen/Monat · Keine Kreditkarte · BYOK für unbegrenzt"
     },
     "scenarios": {
-      "h2": "Sound familiar?",
-      "pain1": "You retyped that Slack message 3 times before sending it.",
-      "pain2": "You opened ChatGPT in another tab to \"make it less harsh\".",
-      "pain3": "You translated each sentence in your head before typing.",
-      "pain4": "You re-read the same email 4 times before hitting send.",
-      "outro": "rewrite.so cuts the loop. ↓"
+      "h2": "Kommt dir bekannt vor?",
+      "pain1": "Diese Slack-Nachricht hast du 3 Mal neu getippt, bevor du sie gesendet hast.",
+      "pain2": "Du hast ChatGPT im anderen Tab geöffnet, um „den Ton weicher zu machen\".",
+      "pain3": "Du hast jeden Satz im Kopf übersetzt, bevor du ihn getippt hast.",
+      "pain4": "Du hast dieselbe E-Mail 4 Mal gelesen, bevor du auf Senden gedrückt hast.",
+      "outro": "rewrite.so durchbricht die Schleife. ↓"
     },
     "privacy": {
       "eyebrow": "Der Datenschutzvertrag",
@@ -189,11 +189,11 @@
       "stepLabel": "SCHRITT {num}",
       "step1": {
         "title": "Doppel-Shift",
-        "body": "Innerhalb von 500ms, in jedem fokussierten Eingabefeld auf der Seite — input, textarea oder contenteditable. PII-Felder (Passwort, CVV, OTP) sind hart ausgeschlossen."
+        "body": "Drücke <kbd>Shift</kbd> innerhalb von 500ms zweimal. Passwort- / CVV- / OTP-Felder werden automatisch übersprungen."
       },
       "step2": {
         "title": "3 Stile parallel",
-        "body": "Treu, locker, formell — gleichzeitig in einer einzigen multiplexten SSE-Antwort generiert. Erstes Token in wenigen hundert Millisekunden."
+        "body": "Treu, locker, formell — drei Töne gleichzeitig. Der erste erscheint fast sofort."
       },
       "step3": {
         "title": "Drücken zum Akzeptieren",
@@ -204,7 +204,7 @@
       "h2": "Gebaut für Menschen, die wissen wollen, wie es funktioniert",
       "openSource": {
         "label": "OPEN SOURCE",
-        "title": "100% Apache 2.0",
+        "title": "Lies den Code selbst",
         "body": "Selbst hosten, prüfen, forken. Die obigen Datenschutz-Aussagen sind kein Marketing — es ist Code, den du auf <repo>github.com/rewrite-so/rewrite.so</repo> lesen kannst."
       },
       "byok": {

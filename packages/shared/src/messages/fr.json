@@ -151,23 +151,23 @@
   },
   "home": {
     "hero": {
-      "eyebrow": "Open source · Apache 2.0 · Sans tracking",
-      "h1Line1": "Réécriture IA",
-      "h1Line2": "qui ne stocke pas votre texte.",
-      "subHeadline": "Stop overthinking every message.",
-      "polyglot": "Any language in. Any language out.",
-      "intro": "Appuyez deux fois sur <kbd>Shift</kbd> dans n'importe quel champ de saisie web. Trois réécritures IA en streaming parallèle. Appuyez sur <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> pour accepter. Les entrées et sorties <strong>ne sont jamais écrites sur disque</strong> — vérifiable dans le code source.",
+      "eyebrow": "N'importe quel champ · Open source",
+      "h1Line1": "Écris brut.",
+      "h1Line2": "Envoie peaufiné.",
+      "subHeadline": "Arrête de cogiter sur chaque message.",
+      "polyglot": "N'importe quelle langue en entrée. N'importe quelle en sortie.",
+      "intro": "Appuyez deux fois sur <kbd>Shift</kbd> dans n'importe quel champ. L'IA vous propose trois manières de le dire. Choisissez avec <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> et envoyez.",
       "ctaPrimary": "Essai gratuit →",
       "ctaSecondary": "⭐ Star sur GitHub",
       "fineprint": "{count} réécritures gratuites/mois · Sans carte · BYOK pour utilisation illimitée"
     },
     "scenarios": {
-      "h2": "Sound familiar?",
-      "pain1": "You retyped that Slack message 3 times before sending it.",
-      "pain2": "You opened ChatGPT in another tab to \"make it less harsh\".",
-      "pain3": "You translated each sentence in your head before typing.",
-      "pain4": "You re-read the same email 4 times before hitting send.",
-      "outro": "rewrite.so cuts the loop. ↓"
+      "h2": "Ça vous parle ?",
+      "pain1": "Vous avez retapé ce message Slack 3 fois avant de l'envoyer.",
+      "pain2": "Vous avez ouvert ChatGPT dans un autre onglet pour « adoucir le ton ».",
+      "pain3": "Vous avez traduit chaque phrase dans votre tête avant de la taper.",
+      "pain4": "Vous avez relu le même email 4 fois avant d'appuyer sur envoyer.",
+      "outro": "rewrite.so coupe la boucle. ↓"
     },
     "privacy": {
       "eyebrow": "Le contrat de confidentialité",
@@ -189,11 +189,11 @@
       "stepLabel": "ÉTAPE {num}",
       "step1": {
         "title": "Double Shift",
-        "body": "Dans les 500ms, dans n'importe quel champ focalisé sur la page — input, textarea ou contenteditable. Les champs PII (mot de passe, CVV, OTP) sont exclus en dur."
+        "body": "Appuyez deux fois sur <kbd>Shift</kbd> en 500ms. Les champs mot de passe / CVV / OTP sont automatiquement ignorés."
       },
       "step2": {
         "title": "3 styles, en parallèle",
-        "body": "Fidèle, décontracté, formel — générés simultanément dans une seule réponse SSE multiplexée. Premier token en quelques centaines de millisecondes."
+        "body": "Fidèle, décontracté, formel — trois tons à la fois. Le premier apparaît presque instantanément."
       },
       "step3": {
         "title": "Pressez pour accepter",
@@ -204,7 +204,7 @@
       "h2": "Conçu pour les gens qui se soucient du fonctionnement",
       "openSource": {
         "label": "OPEN SOURCE",
-        "title": "100% Apache 2.0",
+        "title": "Lisez le code vous-même",
         "body": "Auto-hébergez, auditez, forkez. Les affirmations de confidentialité ci-dessus ne sont pas du marketing — c'est du code que vous pouvez lire sur <repo>github.com/rewrite-so/rewrite.so</repo>."
       },
       "byok": {
