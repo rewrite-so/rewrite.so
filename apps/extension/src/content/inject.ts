@@ -28,7 +28,11 @@ async function bootstrap(): Promise<void> {
     uiLocale: resolveUiLocale(p),
     installId,
     loginUrl: `${WEB_BASE}/login`,
-    onOpenSettings: () => chrome.runtime.openOptionsPage(),
+    // content script 不能直接调 chrome.runtime.openOptionsPage()（API 不存在 in isolated world）
+    // 走 sendMessage → background SW 代为打开
+    onOpenSettings: () => {
+      chrome.runtime.sendMessage({ type: 'open-options' });
+    },
   });
 
   let handle = mount(buildOpts(prefs));

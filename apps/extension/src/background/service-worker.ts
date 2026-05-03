@@ -7,6 +7,15 @@ chrome.runtime.onInstalled.addListener((details) => {
   }
 });
 
+// content script 不能直接调 chrome.runtime.openOptionsPage()（仅 background / 扩展页面可用）
+// 所以浮窗齿轮通过 sendMessage 让 background 代为打开
+chrome.runtime.onMessage.addListener((msg: unknown, _sender, _sendResponse) => {
+  if (msg && typeof msg === 'object' && (msg as { type?: string }).type === 'open-options') {
+    chrome.runtime.openOptionsPage();
+  }
+  // 不返回 true：这个消息不需要异步响应
+});
+
 chrome.runtime.onConnect.addListener((port) => {
   console.info('[rewrite.so/bg] port connect', port.name, 'sender:', port.sender?.url);
   if (port.name !== PORT_NAME_REWRITE) return;
