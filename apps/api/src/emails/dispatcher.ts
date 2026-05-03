@@ -12,8 +12,12 @@
  * Welcome email is also sent eagerly on signup (see better-auth hook in
  * lib/auth.ts) — this cron is the safety net for any signups whose hook
  * failed.
+ *
+ * i18n: SELECT joins user_settings to read ui_locale; 'auto' or NULL → 'en'.
+ *   Each template is locale-aware (see emails/templates.ts).
  */
 
+import { LOCALES, type Locale } from '@rewrite/shared';
 import { Resend } from 'resend';
 import { log } from '../lib/log.ts';
 import type { Bindings } from '../types.ts';
@@ -33,8 +37,8 @@ interface Stage {
   minAgeMs: number;
   /** Column on user_email_state that gets stamped after a successful send. */
   column: 'welcome_sent_at' | 'd1_sent_at' | 'd7_sent_at' | 'd14_sent_at' | 'd30_sent_at';
-  /** Template builder. */
-  build: (r: EmailRecipient, ctx: { webOrigin: string }) => EmailTemplate;
+  /** Template builder. Receives the user's resolved UI locale. */
+  build: (r: EmailRecipient, ctx: { webOrigin: string }, locale: Locale) => EmailTemplate;
   label: string;
 }
 
@@ -60,6 +64,12 @@ interface UserRow {
   id: string;
   email: string;
   name: string | null;
+  ui_locale: string | null;
+}
+
+function resolveEmailLocale(stored: string | null | undefined): Locale {
+  if (!stored || stored === 'auto') return 'en';
+  return (LOCALES as readonly string[]).includes(stored) ? (stored as Locale) : 'en';
 }
 
 /**
@@ -100,12 +110,14 @@ async function processStage(
   // Find users old enough whose row in user_email_state either doesn't exist
   // or has NULL for this stage's column. LEFT JOIN handles both cases.
   // unsubscribed_at IS NOT NULL → skip (per CAN-SPAM, unsubscribe stops
-  // marketing immediately).
+  // marketing immediately). user_settings 也 LEFT JOIN 取 ui_locale，没行
+  // 时 us.ui_locale 为 NULL，由 resolveEmailLocale 兜底 'en'。
   const rows = await db
     .prepare(
-      `SELECT u.id, u.email, u.name
+      `SELECT u.id, u.email, u.name, us.ui_locale
          FROM users u
-         LEFT JOIN user_email_state s ON s.user_id = u.id
+         LEFT JOIN user_email_state s  ON s.user_id  = u.id
+         LEFT JOIN user_settings    us ON us.user_id = u.id
         WHERE u.created_at <= ?
           AND (s.${stage.column} IS NULL)
           AND (s.unsubscribed_at IS NULL)
@@ -120,9 +132,11 @@ async function processStage(
   for (const u of rows.results) {
     try {
       const token = await makeUnsubscribeToken(u.id, secret);
+      const locale = resolveEmailLocale(u.ui_locale);
       const tpl = stage.build(
         { email: u.email, name: u.name, userId: u.id, unsubscribeToken: token },
         ctx,
+        locale,
       );
       await resend.emails.send({
         from,
@@ -148,7 +162,7 @@ async function processStage(
         .bind(u.id, now, now, now)
         .run();
       sent++;
-      log.info('email.sent', { stage: stage.label, userId: u.id });
+      log.info('email.sent', { stage: stage.label, userId: u.id, locale });
     } catch (err) {
       log.error('email.send_failed', { stage: stage.label, userId: u.id, err });
       // continue with next user — one failure shouldn't block the queue.
@@ -160,6 +174,9 @@ async function processStage(
 /**
  * Eagerly send the welcome email — called from the better-auth signup hook.
  * Best-effort: if it fails, the daily cron will pick it up.
+ *
+ * 注册 hook 紧跟 INSERT user_settings，所以这里可以 SELECT 查 ui_locale；
+ * 缺行兜底 'en'（不会发生但防御性写）。
  */
 export async function sendWelcomeNow(
   env: Bindings,
@@ -171,10 +188,18 @@ export async function sendWelcomeNow(
   const fromAddr = env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
   const from = `rewrite.so <${fromAddr}>`;
   try {
+    const settingsRow = await env.DB.prepare(
+      'SELECT ui_locale FROM user_settings WHERE user_id = ?',
+    )
+      .bind(user.id)
+      .first<{ ui_locale: string | null }>();
+    const locale = resolveEmailLocale(settingsRow?.ui_locale ?? null);
+
     const token = await makeUnsubscribeToken(user.id, env.BETTER_AUTH_SECRET);
     const tpl = welcomeEmail(
       { email: user.email, name: user.name, userId: user.id, unsubscribeToken: token },
       ctx,
+      locale,
     );
     await resend.emails.send({
       from,
@@ -197,7 +222,7 @@ export async function sendWelcomeNow(
     )
       .bind(user.id, now, now, now)
       .run();
-    log.info('email.sent', { stage: 'welcome', userId: user.id, eager: true });
+    log.info('email.sent', { stage: 'welcome', userId: user.id, eager: true, locale });
   } catch (err) {
     log.warn('email.welcome_eager_failed', { userId: user.id, err });
     // safety net: daily cron will retry.
