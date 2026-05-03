@@ -44,6 +44,74 @@
       "done": "✓ Du bist von den Onboarding-E-Mails abgemeldet. Schade, dass wir dir nichts mehr schicken können.",
       "errorPrefix": "Abmelden fehlgeschlagen: ",
       "tryAgain": "Erneut versuchen"
+    },
+    "pricing": {
+      "h1": "Preise",
+      "intro": "Ein kostenloses Kontingent für gelegentliche Nutzung. Ein Pro-Tarif für tägliche Schreiber. Keine versteckten Kosten.",
+      "free": {
+        "title": "Free",
+        "period": "für immer",
+        "feat1": "{count} Umschreibungen / Monat für angemeldete Nutzer",
+        "feat2": "{count} Umschreibungen / Monat für anonyme Web-Besucher",
+        "feat3": "{count} Umschreibungen / Monat für nicht angemeldete Erweiterungs-Nutzer",
+        "feat4": "Alle 3 Stile: treu / locker / formell",
+        "feat5": "Auto-Erkennung der Seitensprache; feste Zielsprache in Einstellungen wählbar",
+        "feat6": "Keine Kreditkarte erforderlich",
+        "cta": "Kostenlos testen"
+      },
+      "pro": {
+        "title": "Pro",
+        "period": "/ Monat",
+        "subPrice": "oder ${yearlyMonthly} / Monat jährlich abgerechnet (${yearlyTotal} / Jahr, spare {savings}%)",
+        "feat1": "{count, number} Umschreibungen / Monat",
+        "feat2": "BYOK: bring deinen eigenen OpenAI-kompatiblen Schlüssel für unbegrenzte Nutzung",
+        "feat3": "Priorisierter E-Mail-Support",
+        "feat4": "Jederzeit kündbar; Rückerstattung innerhalb von 14 Tagen",
+        "cta": "Pro holen →"
+      },
+      "faq": {
+        "h2": "FAQ",
+        "q1": "Was bedeutet „Umschreibung\" hier?",
+        "a1": "Jedes Mal, wenn du rewrite.so auslöst (Doppel-Shift in einem Eingabefeld), wird eine Anfrage an das Modell gesendet und drei Stilvarianten kommen per Streaming zurück. Das zählt als eine Umschreibung gegen dein Kontingent.",
+        "q2": "Speichert ihr den Text, den ich umschreibe?",
+        "a2": "Nein. Eingaben und Ausgaben durchlaufen das System, werden aber nie persistiert — weder in Anwendungslogs, noch in Fehler-Reportern, noch in Analytics. Siehe unsere <privacy>Datenschutzerklärung</privacy> für Details.",
+        "q3": "Was ist BYOK?",
+        "a3": "Pro-Nutzer können eine eigene OpenAI-kompatible Base URL, Modell und API-Schlüssel konfigurieren. Wenn aktiviert, geht dein Text direkt zu deinem gewählten Provider (du zahlst sie, nicht uns), und die Umschreibungen zählen nicht gegen dein Monatskontingent — nur kurzfristige Missbrauchslimits bleiben.",
+        "q4": "Was passiert, wenn ich mein Kontingent überschreite?",
+        "a4": "Die nächste Anfrage gibt 429 mit klarer „quota exceeded\"-Meldung zurück. Kontingente werden am ersten Tag jedes Monats um 00:00 UTC zurückgesetzt. Du kannst jederzeit upgraden oder BYOK einrichten.",
+        "q5": "Kann ich kündigen?",
+        "a5": "Ja, jederzeit, aus <settings>deinen Einstellungen</settings> über das „Manage subscription\"-Portal. Du behältst den Pro-Zugang bis zum Ende des aktuellen Abrechnungszeitraums. Rückerstattung innerhalb von 14 Tagen nach erster Belastung — siehe <refund>Rückerstattungsrichtlinie</refund>.",
+        "q6": "Wer wickelt die Zahlung ab?",
+        "a6": "<creem>Creem</creem> ist unser Merchant of Record. Sie verarbeiten Zahlungen, Steuern und Rückerstattungen in unserem Auftrag. Deine Kartendaten berühren niemals unsere Server."
+      }
+    },
+    "contact": {
+      "h1": "Kontakt",
+      "intro": "Wir sind ein kleines Team. E-Mail ist der schnellste Weg uns zu erreichen; wir antworten normalerweise innerhalb von 1–2 Werktagen.",
+      "subjectPrefix": "mit Betreff",
+      "card1": {
+        "heading": "Support, Vertrieb & alles andere",
+        "body": "Einrichtungshilfe, Kontowiederherstellung, Funktionsanfragen, Partnerschaft."
+      },
+      "card2": {
+        "heading": "Abrechnung und Rückerstattungen",
+        "subjectValue": "Billing",
+        "body": "Rückerstattungen innerhalb von 14 Tagen ohne Rückfragen. Siehe unsere <refund>Rückerstattungsrichtlinie</refund>."
+      },
+      "card3": {
+        "heading": "Datenschutz und Datenanfragen",
+        "subjectValue": "Privacy",
+        "body": "Kontolöschung, Datenexport, DSGVO-Anfragen. Siehe unsere <privacy>Datenschutzerklärung</privacy>."
+      },
+      "card4": {
+        "heading": "Sicherheits-Offenlegung",
+        "subjectValue": "Security",
+        "body": "Bitte gib uns ein angemessenes Zeitfenster zur Behebung vor öffentlicher Offenlegung."
+      },
+      "card5": {
+        "heading": "Quellcode und Issues",
+        "body": "Bug-Reports und Funktionsdiskussionen leben in GitHub Issues."
+      }
     }
   },
   "nav": {

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import type { ReactNode } from 'react';
 
 export async function generateMetadata({
   params,
@@ -11,75 +12,81 @@ export async function generateMetadata({
   return { title: t('title'), description: t('description') };
 }
 
-export default function ContactPage() {
+export default async function ContactPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations('page.contact');
+
+  const mail = (subject?: string) =>
+    subject ? (
+      <>
+        <a href="mailto:hello@rewrite.so">hello@rewrite.so</a> {t('subjectPrefix')}{' '}
+        <code>{subject}</code>
+      </>
+    ) : (
+      <a href="mailto:hello@rewrite.so">hello@rewrite.so</a>
+    );
+
   return (
     <article>
-      <h1 style={{ fontSize: 32, fontWeight: 700, margin: 0 }}>Contact</h1>
-      <p style={{ marginTop: 16, color: '#555' }}>
-        We&apos;re a small team. Email is the fastest way to reach us; we typically reply within 1–2
-        business days.
-      </p>
+      <h1 style={{ fontSize: 32, fontWeight: 700, margin: 0 }}>{t('h1')}</h1>
+      <p style={{ marginTop: 16, color: '#555' }}>{t('intro')}</p>
 
       <div style={{ marginTop: 32, display: 'grid', gap: 16 }}>
         <Card
-          heading="Support, sales & everything else"
+          heading={t('card1.heading')}
           body={
             <>
-              <a href="mailto:hello@rewrite.so">hello@rewrite.so</a>
+              {mail()}
+              <br />
+              <span style={{ color: '#888', fontSize: 13 }}>{t('card1.body')}</span>
+            </>
+          }
+        />
+
+        <Card
+          heading={t('card2.heading')}
+          body={
+            <>
+              {mail(t('card2.subjectValue'))}
               <br />
               <span style={{ color: '#888', fontSize: 13 }}>
-                Setup help, account recovery, feature requests, partnership.
+                {t.rich('card2.body', {
+                  refund: (chunks) => <a href="/refund">{chunks}</a>,
+                })}
               </span>
             </>
           }
         />
 
         <Card
-          heading="Billing & refunds"
+          heading={t('card3.heading')}
           body={
             <>
-              <a href="mailto:hello@rewrite.so">hello@rewrite.so</a> with subject{' '}
-              <code>Billing</code>
+              {mail(t('card3.subjectValue'))}
               <br />
               <span style={{ color: '#888', fontSize: 13 }}>
-                Refunds within 14 days are no-questions-asked. See our{' '}
-                <a href="/refund">Refund Policy</a>.
+                {t.rich('card3.body', {
+                  privacy: (chunks) => <a href="/privacy">{chunks}</a>,
+                })}
               </span>
             </>
           }
         />
 
         <Card
-          heading="Privacy & data requests"
+          heading={t('card4.heading')}
           body={
             <>
-              <a href="mailto:hello@rewrite.so">hello@rewrite.so</a> with subject{' '}
-              <code>Privacy</code>
+              {mail(t('card4.subjectValue'))}
               <br />
-              <span style={{ color: '#888', fontSize: 13 }}>
-                Account deletion, data export, GDPR requests. See our{' '}
-                <a href="/privacy">Privacy Policy</a>.
-              </span>
+              <span style={{ color: '#888', fontSize: 13 }}>{t('card4.body')}</span>
             </>
           }
         />
 
         <Card
-          heading="Security disclosure"
-          body={
-            <>
-              <a href="mailto:hello@rewrite.so">hello@rewrite.so</a> with subject{' '}
-              <code>Security</code>
-              <br />
-              <span style={{ color: '#888', fontSize: 13 }}>
-                Please give us a reasonable window to fix issues before public disclosure.
-              </span>
-            </>
-          }
-        />
-
-        <Card
-          heading="Source & issues"
+          heading={t('card5.heading')}
           body={
             <>
               <a
@@ -90,9 +97,7 @@ export default function ContactPage() {
                 github.com/rewrite-so/rewrite.so
               </a>
               <br />
-              <span style={{ color: '#888', fontSize: 13 }}>
-                Bug reports and feature discussions live in GitHub Issues.
-              </span>
+              <span style={{ color: '#888', fontSize: 13 }}>{t('card5.body')}</span>
             </>
           }
         />
@@ -101,7 +106,7 @@ export default function ContactPage() {
   );
 }
 
-function Card({ heading, body }: { heading: string; body: React.ReactNode }) {
+function Card({ heading, body }: { heading: string; body: ReactNode }) {
   return (
     <div
       style={{

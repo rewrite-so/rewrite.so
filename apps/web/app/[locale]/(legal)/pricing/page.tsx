@@ -1,7 +1,7 @@
 import { PRO_PRICE, QUOTA } from '@rewrite/shared';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 export async function generateMetadata({
   params,
@@ -13,13 +13,15 @@ export async function generateMetadata({
   return { title: t('title'), description: t('description') };
 }
 
-export default function PricingPage() {
+export default async function PricingPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations('page.pricing');
+
   return (
     <article>
-      <h1 style={{ fontSize: 32, fontWeight: 700, margin: 0 }}>Pricing</h1>
-      <p style={{ color: '#555', marginTop: 12, fontSize: 16 }}>
-        One free tier for occasional use. One Pro tier for daily writers. No surprise fees.
-      </p>
+      <h1 style={{ fontSize: 32, fontWeight: 700, margin: 0 }}>{t('h1')}</h1>
+      <p style={{ color: '#555', marginTop: 12, fontSize: 16 }}>{t('intro')}</p>
 
       <div
         style={{
@@ -30,86 +32,67 @@ export default function PricingPage() {
         }}
       >
         <PricingCard
-          title="Free"
+          title={t('free.title')}
           price="$0"
-          period="forever"
+          period={t('free.period')}
           features={[
-            `${QUOTA.loggedInFree} rewrites / month for signed-in users`,
-            `${QUOTA.anonymousIp} rewrites / month for anonymous web visitors`,
-            `${QUOTA.anonymousInstall} rewrites / month for unsigned extension users`,
-            'All 3 styles: faithful / casual / formal',
-            'Auto-detect page language; pick a fixed target language in settings',
-            'No card required',
+            t('free.feat1', { count: QUOTA.loggedInFree }),
+            t('free.feat2', { count: QUOTA.anonymousIp }),
+            t('free.feat3', { count: QUOTA.anonymousInstall }),
+            t('free.feat4'),
+            t('free.feat5'),
+            t('free.feat6'),
           ]}
-          cta={{ label: 'Try it free', href: '/try' }}
+          cta={{ label: t('free.cta'), href: '/try' }}
         />
 
         <PricingCard
-          title="Pro"
+          title={t('pro.title')}
           highlight
           price={`$${PRO_PRICE.monthly}`}
-          period="/ month"
-          subPrice={`or $${PRO_PRICE.yearlyMonthly} / month billed annually ($${PRO_PRICE.yearlyTotal} / year, save ${PRO_PRICE.yearlySavingsPercent}%)`}
+          period={t('pro.period')}
+          subPrice={t('pro.subPrice', {
+            yearlyMonthly: PRO_PRICE.yearlyMonthly,
+            yearlyTotal: PRO_PRICE.yearlyTotal,
+            savings: PRO_PRICE.yearlySavingsPercent,
+          })}
           features={[
-            `${QUOTA.pro.toLocaleString()} rewrites / month`,
-            'BYOK: bring your own OpenAI-compatible key for unlimited usage',
-            'Priority email support',
-            'Cancel anytime; refund within 14 days',
+            t('pro.feat1', { count: QUOTA.pro }),
+            t('pro.feat2'),
+            t('pro.feat3'),
+            t('pro.feat4'),
           ]}
-          cta={{ label: 'Get Pro →', href: '/billing' }}
+          cta={{ label: t('pro.cta'), href: '/billing' }}
         />
       </div>
 
-      <h2 style={H2}>FAQ</h2>
+      <h2 style={H2}>{t('faq.h2')}</h2>
 
+      <Faq q={t('faq.q1')} a={t('faq.a1')} />
       <Faq
-        q="What does &ldquo;rewrite&rdquo; mean here?"
-        a="Each time you trigger rewrite.so (double-tap Shift in any input), one request is sent to the model and three style variants stream back. That counts as one rewrite against your quota."
+        q={t('faq.q2')}
+        a={t.rich('faq.a2', {
+          privacy: (chunks) => <a href="/privacy">{chunks}</a>,
+        })}
       />
-
+      <Faq q={t('faq.q3')} a={t('faq.a3')} />
+      <Faq q={t('faq.q4')} a={t('faq.a4')} />
       <Faq
-        q="Do you store the text I rewrite?"
-        a={
-          <>
-            No. Inputs and outputs pass through but are never persisted — not in application logs,
-            not in error reporters, not in analytics. See our <a href="/privacy">Privacy Policy</a>{' '}
-            for details.
-          </>
-        }
+        q={t('faq.q5')}
+        a={t.rich('faq.a5', {
+          settings: (chunks) => <Link href="/settings">{chunks}</Link>,
+          refund: (chunks) => <a href="/refund">{chunks}</a>,
+        })}
       />
-
       <Faq
-        q="What is BYOK?"
-        a="Pro users can configure a custom OpenAI-compatible base URL, model, and API key. When enabled, your text goes directly to your chosen provider (you pay them, not us), and the rewrites do not count against your monthly quota — only short-term abuse limits remain."
-      />
-
-      <Faq
-        q="What happens if I exceed my quota?"
-        a="The next request returns a 429 with a clear &lsquo;quota exceeded&rsquo; message. Quotas reset at 00:00 UTC on the first day of each month. You can upgrade or set up BYOK at any time."
-      />
-
-      <Faq
-        q="Can I cancel?"
-        a={
-          <>
-            Yes, anytime, from <Link href="/settings">your settings</Link> via the &ldquo;Manage
-            subscription&rdquo; portal. You keep Pro access until the end of the current billing
-            period. Refund within 14 days of first charge — see <a href="/refund">Refund Policy</a>.
-          </>
-        }
-      />
-
-      <Faq
-        q="Who handles the payment?"
-        a={
-          <>
+        q={t('faq.q6')}
+        a={t.rich('faq.a6', {
+          creem: (chunks) => (
             <a href="https://creem.io" target="_blank" rel="noopener noreferrer">
-              Creem
-            </a>{' '}
-            is our Merchant of Record. They process payments, taxes, and refunds on our behalf. Your
-            card details never touch our servers.
-          </>
-        }
+              {chunks}
+            </a>
+          ),
+        })}
       />
     </article>
   );

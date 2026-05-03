@@ -44,6 +44,74 @@
       "done": "✓ Vous êtes désabonné des emails d'accueil. Désolé de ne plus pouvoir vous écrire.",
       "errorPrefix": "Échec du désabonnement : ",
       "tryAgain": "Réessayer"
+    },
+    "pricing": {
+      "h1": "Tarifs",
+      "intro": "Un palier gratuit pour un usage occasionnel. Un palier Pro pour les rédacteurs quotidiens. Pas de frais cachés.",
+      "free": {
+        "title": "Free",
+        "period": "pour toujours",
+        "feat1": "{count} réécritures / mois pour les utilisateurs connectés",
+        "feat2": "{count} réécritures / mois pour les visiteurs web anonymes",
+        "feat3": "{count} réécritures / mois pour les utilisateurs d'extension non connectés",
+        "feat4": "Les 3 styles : fidèle / décontracté / formel",
+        "feat5": "Détection auto de la langue de la page ; choisir une langue cible fixe dans les paramètres",
+        "feat6": "Pas de carte requise",
+        "cta": "Essai gratuit"
+      },
+      "pro": {
+        "title": "Pro",
+        "period": "/ mois",
+        "subPrice": "ou ${yearlyMonthly} / mois facturé annuellement (${yearlyTotal} / an, économisez {savings}%)",
+        "feat1": "{count, number} réécritures / mois",
+        "feat2": "BYOK : apportez votre propre clé compatible OpenAI pour un usage illimité",
+        "feat3": "Support email prioritaire",
+        "feat4": "Annulez à tout moment ; remboursement sous 14 jours",
+        "cta": "Passer à Pro →"
+      },
+      "faq": {
+        "h2": "FAQ",
+        "q1": "Que signifie « réécriture » ici ?",
+        "a1": "Chaque fois que vous déclenchez rewrite.so (double Shift dans n'importe quel champ), une requête est envoyée au modèle et trois variantes de style sont retournées en streaming. Cela compte comme une réécriture sur votre quota.",
+        "q2": "Stockez-vous le texte que je réécris ?",
+        "a2": "Non. Les entrées et sorties passent mais ne sont jamais persistées — ni dans les logs d'application, ni dans les rapporteurs d'erreurs, ni dans les analytiques. Voir notre <privacy>Politique de confidentialité</privacy> pour les détails.",
+        "q3": "Qu'est-ce que BYOK ?",
+        "a3": "Les utilisateurs Pro peuvent configurer leur propre base URL, modèle et clé API compatibles OpenAI. Quand activé, votre texte va directement chez votre fournisseur (vous les payez, pas nous), et les réécritures ne comptent pas dans votre quota mensuel — seules les limites anti-abus à court terme restent.",
+        "q4": "Que se passe-t-il si je dépasse mon quota ?",
+        "a4": "La requête suivante renvoie 429 avec un message clair « quota exceeded ». Les quotas se réinitialisent à 00:00 UTC le premier jour de chaque mois. Vous pouvez upgrader ou configurer BYOK à tout moment.",
+        "q5": "Puis-je annuler ?",
+        "a5": "Oui, à tout moment, depuis <settings>vos paramètres</settings> via le portail « Manage subscription ». Vous gardez l'accès Pro jusqu'à la fin de la période de facturation en cours. Remboursement dans les 14 jours suivant le premier débit — voir <refund>Politique de remboursement</refund>.",
+        "q6": "Qui gère le paiement ?",
+        "a6": "<creem>Creem</creem> est notre Merchant of Record. Ils traitent les paiements, taxes et remboursements pour notre compte. Les détails de votre carte ne touchent jamais nos serveurs."
+      }
+    },
+    "contact": {
+      "h1": "Contact",
+      "intro": "Nous sommes une petite équipe. L'email est le moyen le plus rapide de nous joindre ; nous répondons généralement sous 1 à 2 jours ouvrés.",
+      "subjectPrefix": "avec l'objet",
+      "card1": {
+        "heading": "Support, ventes et tout le reste",
+        "body": "Aide à l'installation, récupération de compte, demandes de fonctionnalités, partenariat."
+      },
+      "card2": {
+        "heading": "Facturation et remboursements",
+        "subjectValue": "Billing",
+        "body": "Remboursements sous 14 jours sans questions. Voir notre <refund>Politique de remboursement</refund>."
+      },
+      "card3": {
+        "heading": "Confidentialité et demandes de données",
+        "subjectValue": "Privacy",
+        "body": "Suppression de compte, export de données, demandes RGPD. Voir notre <privacy>Politique de confidentialité</privacy>."
+      },
+      "card4": {
+        "heading": "Divulgation de sécurité",
+        "subjectValue": "Security",
+        "body": "Veuillez nous donner un délai raisonnable pour corriger avant divulgation publique."
+      },
+      "card5": {
+        "heading": "Source et issues",
+        "body": "Les rapports de bugs et discussions de fonctionnalités vivent dans GitHub Issues."
+      }
     }
   },
   "nav": {

@@ -44,6 +44,74 @@
       "done": "✓ 你已成功退订 onboarding 邮件。很抱歉不能再继续给你写信了。",
       "errorPrefix": "退订失败：",
       "tryAgain": "重试"
+    },
+    "pricing": {
+      "h1": "定价",
+      "intro": "一个免费档供偶尔用；一个 Pro 档供每天写作的人。没有意外收费。",
+      "free": {
+        "title": "Free",
+        "period": "永久",
+        "feat1": "登录用户每月 {count} 次改写",
+        "feat2": "匿名网页访客每月 {count} 次",
+        "feat3": "未登录扩展用户每月 {count} 次",
+        "feat4": "全部 3 种风格：贴近原文 / 口语 / 正式",
+        "feat5": "自动检测页面语言；可在设置中固定目标语言",
+        "feat6": "无需信用卡",
+        "cta": "免费试用"
+      },
+      "pro": {
+        "title": "Pro",
+        "period": "/ 月",
+        "subPrice": "或年付 ${yearlyMonthly}/月（${yearlyTotal}/年，省 {savings}%）",
+        "feat1": "每月 {count, number} 次改写",
+        "feat2": "BYOK：填自己的 OpenAI 兼容 key，无限改写",
+        "feat3": "优先邮件支持",
+        "feat4": "随时取消；14 天内可退款",
+        "cta": "升级 Pro →"
+      },
+      "faq": {
+        "h2": "常见问题",
+        "q1": "「改写」具体指什么？",
+        "a1": "每次触发 rewrite.so（在输入框双击 Shift），后端发一次请求给模型，三种风格的候选并行流式返回。算作 1 次改写计入配额。",
+        "q2": "你们会存储我改写的文本吗？",
+        "a2": "不存。原文和改写结果只在 worker 中过一次就丢弃 —— 不进应用日志、不进错误监控、不进分析。详见 <privacy>隐私政策</privacy>。",
+        "q3": "BYOK 是什么？",
+        "a3": "Pro 用户可配置自己的 OpenAI 兼容 base URL、model 与 API key。开启后改写直达你的 provider（你付钱给他们，不是我们），不计入月配额——只剩短期反爆刷限制。",
+        "q4": "超过配额会怎样？",
+        "a4": "下一次请求会返回 429 + 明确的「配额超限」错误。配额于每月 1 日 UTC 00:00 重置。可随时升级或配置 BYOK。",
+        "q5": "可以取消吗？",
+        "a5": "可以，随时。在 <settings>设置</settings> 里点「Manage subscription」入口管理。Pro 权益保留至当前账期末。首次扣款 14 天内可退款，详见 <refund>退款政策</refund>。",
+        "q6": "支付由谁处理？",
+        "a6": "<creem>Creem</creem> 是我们的 Merchant of Record，代我们处理支付、税务与退款。你的卡片信息从不经过我们的服务器。"
+      }
+    },
+    "contact": {
+      "h1": "联系我们",
+      "intro": "我们是一支小团队。邮件是最快的联系方式，通常 1-2 个工作日内回复。",
+      "subjectPrefix": "邮件主题",
+      "card1": {
+        "heading": "支持、销售与其它一切",
+        "body": "上手帮助、账号找回、功能建议、合作意向。"
+      },
+      "card2": {
+        "heading": "账单与退款",
+        "subjectValue": "Billing",
+        "body": "14 天内退款无需理由。详见 <refund>退款政策</refund>。"
+      },
+      "card3": {
+        "heading": "隐私与数据请求",
+        "subjectValue": "Privacy",
+        "body": "账号注销、数据导出、GDPR 请求。详见 <privacy>隐私政策</privacy>。"
+      },
+      "card4": {
+        "heading": "安全漏洞披露",
+        "subjectValue": "Security",
+        "body": "请给我们合理的修复窗口再公开披露。"
+      },
+      "card5": {
+        "heading": "源码与 Issues",
+        "body": "Bug 报告与功能讨论都在 GitHub Issues。"
+      }
     }
   },
   "nav": {

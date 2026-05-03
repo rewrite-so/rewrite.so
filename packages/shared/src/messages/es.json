@@ -44,6 +44,74 @@
       "done": "✓ Te has dado de baja de los emails de bienvenida. Lamentamos que dejes de oír de nosotros.",
       "errorPrefix": "Error al darse de baja: ",
       "tryAgain": "Reintentar"
+    },
+    "pricing": {
+      "h1": "Precios",
+      "intro": "Un plan gratuito para uso ocasional. Un plan Pro para escritores diarios. Sin tarifas sorpresa.",
+      "free": {
+        "title": "Free",
+        "period": "para siempre",
+        "feat1": "{count} reescrituras / mes para usuarios registrados",
+        "feat2": "{count} reescrituras / mes para visitantes web anónimos",
+        "feat3": "{count} reescrituras / mes para usuarios de la extensión sin registrar",
+        "feat4": "Los 3 estilos: fiel / casual / formal",
+        "feat5": "Auto-detección de idioma de página; elige idioma fijo en configuración",
+        "feat6": "Sin tarjeta requerida",
+        "cta": "Probar gratis"
+      },
+      "pro": {
+        "title": "Pro",
+        "period": "/ mes",
+        "subPrice": "o ${yearlyMonthly} / mes facturado anualmente (${yearlyTotal} / año, ahorra {savings}%)",
+        "feat1": "{count, number} reescrituras / mes",
+        "feat2": "BYOK: trae tu propia clave compatible con OpenAI para uso ilimitado",
+        "feat3": "Soporte por email prioritario",
+        "feat4": "Cancela cuando quieras; reembolso dentro de 14 días",
+        "cta": "Obtener Pro →"
+      },
+      "faq": {
+        "h2": "FAQ",
+        "q1": "¿Qué significa \"reescritura\" aquí?",
+        "a1": "Cada vez que activas rewrite.so (doble Shift en cualquier campo), se envía una solicitud al modelo y tres variantes de estilo regresan en streaming. Eso cuenta como una reescritura contra tu cuota.",
+        "q2": "¿Almacenan el texto que reescribo?",
+        "a2": "No. Las entradas y salidas pasan por el sistema pero nunca se persisten — ni en logs de aplicación, ni en reportadores de errores, ni en analíticas. Consulta nuestra <privacy>Política de privacidad</privacy> para más detalles.",
+        "q3": "¿Qué es BYOK?",
+        "a3": "Los usuarios Pro pueden configurar su propia base URL, modelo y clave API compatible con OpenAI. Cuando está habilitado, tu texto va directamente a tu proveedor elegido (les pagas a ellos, no a nosotros), y las reescrituras no cuentan contra tu cuota mensual — solo permanecen los límites a corto plazo contra abuso.",
+        "q4": "¿Qué pasa si excedo mi cuota?",
+        "a4": "La próxima solicitud devuelve 429 con un mensaje claro de \"quota exceeded\". Las cuotas se reinician a las 00:00 UTC del primer día de cada mes. Puedes actualizar o configurar BYOK en cualquier momento.",
+        "q5": "¿Puedo cancelar?",
+        "a5": "Sí, en cualquier momento, desde <settings>tu configuración</settings> a través del portal \"Manage subscription\". Mantienes el acceso Pro hasta el final del período de facturación actual. Reembolso dentro de los 14 días del primer cargo — consulta la <refund>Política de reembolso</refund>.",
+        "q6": "¿Quién maneja el pago?",
+        "a6": "<creem>Creem</creem> es nuestro Merchant of Record. Procesan pagos, impuestos y reembolsos en nuestro nombre. Los detalles de tu tarjeta nunca tocan nuestros servidores."
+      }
+    },
+    "contact": {
+      "h1": "Contacto",
+      "intro": "Somos un equipo pequeño. El email es la forma más rápida de contactarnos; típicamente respondemos en 1–2 días hábiles.",
+      "subjectPrefix": "con asunto",
+      "card1": {
+        "heading": "Soporte, ventas y todo lo demás",
+        "body": "Ayuda con la configuración, recuperación de cuenta, solicitudes de funciones, asociación."
+      },
+      "card2": {
+        "heading": "Facturación y reembolsos",
+        "subjectValue": "Billing",
+        "body": "Reembolsos dentro de 14 días sin preguntas. Consulta nuestra <refund>Política de reembolso</refund>."
+      },
+      "card3": {
+        "heading": "Privacidad y solicitudes de datos",
+        "subjectValue": "Privacy",
+        "body": "Eliminación de cuenta, exportación de datos, solicitudes GDPR. Consulta nuestra <privacy>Política de privacidad</privacy>."
+      },
+      "card4": {
+        "heading": "Divulgación de seguridad",
+        "subjectValue": "Security",
+        "body": "Por favor danos un margen razonable para arreglar problemas antes de la divulgación pública."
+      },
+      "card5": {
+        "heading": "Código fuente y issues",
+        "body": "Reportes de errores y discusiones de funciones viven en GitHub Issues."
+      }
     }
   },
   "nav": {

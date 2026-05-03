@@ -44,6 +44,74 @@
       "done": "✓ You're unsubscribed from onboarding emails. We're sorry to see you stop hearing from us.",
       "errorPrefix": "Unsubscribe failed: ",
       "tryAgain": "Try again"
+    },
+    "pricing": {
+      "h1": "Pricing",
+      "intro": "One free tier for occasional use. One Pro tier for daily writers. No surprise fees.",
+      "free": {
+        "title": "Free",
+        "period": "forever",
+        "feat1": "{count} rewrites / month for signed-in users",
+        "feat2": "{count} rewrites / month for anonymous web visitors",
+        "feat3": "{count} rewrites / month for unsigned extension users",
+        "feat4": "All 3 styles: faithful / casual / formal",
+        "feat5": "Auto-detect page language; pick a fixed target language in settings",
+        "feat6": "No card required",
+        "cta": "Try it free"
+      },
+      "pro": {
+        "title": "Pro",
+        "period": "/ month",
+        "subPrice": "or ${yearlyMonthly} / month billed annually (${yearlyTotal} / year, save {savings}%)",
+        "feat1": "{count, number} rewrites / month",
+        "feat2": "BYOK: bring your own OpenAI-compatible key for unlimited usage",
+        "feat3": "Priority email support",
+        "feat4": "Cancel anytime; refund within 14 days",
+        "cta": "Get Pro →"
+      },
+      "faq": {
+        "h2": "FAQ",
+        "q1": "What does \"rewrite\" mean here?",
+        "a1": "Each time you trigger rewrite.so (double-tap Shift in any input), one request is sent to the model and three style variants stream back. That counts as one rewrite against your quota.",
+        "q2": "Do you store the text I rewrite?",
+        "a2": "No. Inputs and outputs pass through but are never persisted — not in application logs, not in error reporters, not in analytics. See our <privacy>Privacy Policy</privacy> for details.",
+        "q3": "What is BYOK?",
+        "a3": "Pro users can configure a custom OpenAI-compatible base URL, model, and API key. When enabled, your text goes directly to your chosen provider (you pay them, not us), and the rewrites do not count against your monthly quota — only short-term abuse limits remain.",
+        "q4": "What happens if I exceed my quota?",
+        "a4": "The next request returns a 429 with a clear \"quota exceeded\" message. Quotas reset at 00:00 UTC on the first day of each month. You can upgrade or set up BYOK at any time.",
+        "q5": "Can I cancel?",
+        "a5": "Yes, anytime, from <settings>your settings</settings> via the \"Manage subscription\" portal. You keep Pro access until the end of the current billing period. Refund within 14 days of first charge — see <refund>Refund Policy</refund>.",
+        "q6": "Who handles the payment?",
+        "a6": "<creem>Creem</creem> is our Merchant of Record. They process payments, taxes, and refunds on our behalf. Your card details never touch our servers."
+      }
+    },
+    "contact": {
+      "h1": "Contact",
+      "intro": "We're a small team. Email is the fastest way to reach us; we typically reply within 1–2 business days.",
+      "subjectPrefix": "with subject",
+      "card1": {
+        "heading": "Support, sales & everything else",
+        "body": "Setup help, account recovery, feature requests, partnership."
+      },
+      "card2": {
+        "heading": "Billing & refunds",
+        "subjectValue": "Billing",
+        "body": "Refunds within 14 days are no-questions-asked. See our <refund>Refund Policy</refund>."
+      },
+      "card3": {
+        "heading": "Privacy & data requests",
+        "subjectValue": "Privacy",
+        "body": "Account deletion, data export, GDPR requests. See our <privacy>Privacy Policy</privacy>."
+      },
+      "card4": {
+        "heading": "Security disclosure",
+        "subjectValue": "Security",
+        "body": "Please give us a reasonable window to fix issues before public disclosure."
+      },
+      "card5": {
+        "heading": "Source & issues",
+        "body": "Bug reports and feature discussions live in GitHub Issues."
+      }
     }
   },
   "nav": {
