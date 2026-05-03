@@ -530,7 +530,8 @@
   "core": {
     "regen": "Régénérer",
     "retry": "Réessayer",
-    "shortcuts": "{accept} choisir · {regen} regénérer · {cancel} fermer"
+    "shortcuts": "{accept} choisir · {regen} regénérer · {cancel} fermer",
+    "openSettings": "Ouvrir les paramètres"
   },
   "state": {
     "thinking": "Réflexion en cours…"

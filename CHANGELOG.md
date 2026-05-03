@@ -43,6 +43,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   sanitize 抽到 `lib/sanitize-target-lang.ts` 单独模块 + 14 条单元测试覆盖；
   GET /v1/me/settings 读路径加 lazy sanitize 兜底老脏数据；customHelp
   文案 7 locale 同步告知"特殊字符会被过滤"。
+- 浮窗体验二轮打磨（用户反馈）：
+  - 删除卡片副标题（"贴近原文 · 保留你原话的语气"等）—— 减少视觉拥挤；副标题对老用户冗余
+  - 浮层右上角加 panel-header：始终显示 target lang chip + 齿轮 ⚙ 设置入口
+    - chip 显示当前 target（短码 EN/ZH-CN 大写，自定义长文本截 11 字符 + …，hover 看完整）
+    - 齿轮点击调 `MountOptions.onOpenSettings`：扩展端 → `chrome.runtime.openOptionsPage()`，
+      web 端 → `window.open('/settings')`
+  - 删除"zh → en"双语种 badge（用户反馈：始终显示当前 target 更直接）
+  - 视觉打磨：panel padding 6→8、box-shadow 弱化、card-action 间距加大
 - 浮窗体验包（5 项打磨）：
   - 风格 label 加副标题 —— `贴近原文 · 保留你原话的语气` / `口语 · 日常对话风` /
     `正式 · 商务书面感`，新用户一眼就明白 3 风格差别（`STYLE_SUBLABEL` × 7 locale）

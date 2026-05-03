@@ -8,7 +8,7 @@ import {
 import { isUsableEditable } from './editable/detect.ts';
 import { readEditable } from './editable/read.ts';
 import { replaceEditable } from './editable/write.ts';
-import { detectTargetLang, scriptHeuristic } from './lang/detect.ts';
+import { detectTargetLang } from './lang/detect.ts';
 import type { RewriteApiClient } from './transport/api-client.ts';
 import { attachDoubleShift } from './trigger/double-shift.ts';
 import { createCandidates } from './ui/candidates.ts';
@@ -32,6 +32,8 @@ export interface MountOptions {
   onInstallClick?: () => void;
   /** 错误时显示登录 CTA 的目标 URL（如 web: '/login'，扩展: 'https://rewrite.so/login'） */
   loginUrl?: string;
+  /** 浮层右上角齿轮点击时调用 —— 扩展传 chrome.runtime.openOptionsPage，web 传 跳 /settings */
+  onOpenSettings?: () => void;
   onError?: (e: Error) => void;
 }
 
@@ -94,6 +96,7 @@ export function mount(opts: MountOptions): MountHandle {
       void regenerateOne(style);
     },
     ...(opts.onInstallClick ? { onInstallClick: opts.onInstallClick } : {}),
+    ...(opts.onOpenSettings ? { onOpenSettings: opts.onOpenSettings } : {}),
   });
 
   const onFocusIn = (ev: Event) => {
@@ -137,8 +140,7 @@ export function mount(opts: MountOptions): MountHandle {
         if (ac.signal.aborted) break;
         switch (ev.event) {
           case 'meta':
-            // 跨语言场景在浮层右上角显示 "zh → en"（仅当 source≠target）
-            panel.setLangDetected(ev.data.langDetected);
+            // langDetected 已在 panel header chip 显示（用客户端 detectTargetLang 的结果），无需更新
             break;
           case 'delta':
             panel.appendDelta(ev.data.style, ev.data.text);
@@ -197,14 +199,13 @@ export function mount(opts: MountOptions): MountHandle {
       ...(opts.installId ? { installId: opts.installId } : {}),
     };
 
-    // 客户端 source 检测：仅用于浮层右上角"zh → en"展示，与 API 服务端目标语言独立
-    const sourceLang = scriptHeuristic(read.text);
-
     const ac = new AbortController();
     const panel = candidates.open({
       target,
       locale: uiLocale,
-      sourceLang,
+      // 客户端 detect 出的 target lang（chip 显示用）—— 服务端可能用账号偏好覆盖，
+      // 但 chip 上显示客户端这个就够用：用户点齿轮去 settings 改即可
+      targetLang,
       ...(opts.showInstallHook ? { showInstallHook: opts.showInstallHook } : {}),
       ...(opts.loginUrl ? { loginUrl: opts.loginUrl } : {}),
     });

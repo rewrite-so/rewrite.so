@@ -85,8 +85,8 @@ export const SHADOW_STYLES = `
   color: light-dark(#1f1f1f, #f5f5f5);
   border: 1px solid light-dark(rgba(0,0,0,0.08), rgba(255,255,255,0.1));
   border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
-  padding: 6px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  padding: 8px;
   z-index: 2147483647;
   pointer-events: auto;
   display: flex;
@@ -94,20 +94,50 @@ export const SHADOW_STYLES = `
   gap: 2px;
 }
 
-.lang-badge {
-  position: absolute;
-  top: 8px;
-  right: 10px;
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 2px 4px 6px;
+}
+
+.target-chip {
   font-size: 10px;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.04em;
-  padding: 2px 7px;
+  padding: 2px 8px;
   border-radius: 4px;
   background: light-dark(rgba(0,0,0,0.05), rgba(255,255,255,0.08));
-  color: light-dark(rgba(0,0,0,0.55), rgba(255,255,255,0.55));
+  color: light-dark(rgba(0,0,0,0.6), rgba(255,255,255,0.6));
   pointer-events: none;
-  text-transform: uppercase;
   font-feature-settings: "tnum";
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settings-btn {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  color: light-dark(rgba(0,0,0,0.45), rgba(255,255,255,0.45));
+  font-family: inherit;
+  padding: 0;
+  transition: background 120ms ease, color 120ms ease;
+}
+.settings-btn:hover {
+  background: light-dark(rgba(0,0,0,0.06), rgba(255,255,255,0.10));
+  color: light-dark(#1f1f22, #f5f5f5);
 }
 
 .card {
@@ -137,8 +167,8 @@ export const SHADOW_STYLES = `
 
 .card-action {
   position: absolute;
-  right: 8px;
-  bottom: 6px;
+  right: 10px;
+  bottom: 8px;
   border: none;
   background: transparent;
   font-family: inherit;
@@ -224,15 +254,10 @@ export const SHADOW_STYLES = `
 
 .label {
   font-size: 11px;
-  color: light-dark(rgba(0,0,0,0.5), rgba(255,255,255,0.5));
-  letter-spacing: 0.02em;
-}
-.label-main {
   font-weight: 600;
-  color: light-dark(rgba(0,0,0,0.7), rgba(255,255,255,0.7));
-}
-.label-sub {
-  font-weight: 400;
+  color: light-dark(rgba(0,0,0,0.55), rgba(255,255,255,0.55));
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .text {

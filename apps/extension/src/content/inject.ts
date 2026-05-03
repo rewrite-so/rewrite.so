@@ -28,6 +28,7 @@ async function bootstrap(): Promise<void> {
     uiLocale: resolveUiLocale(p),
     installId,
     loginUrl: `${WEB_BASE}/login`,
+    onOpenSettings: () => chrome.runtime.openOptionsPage(),
   });
 
   let handle = mount(buildOpts(prefs));

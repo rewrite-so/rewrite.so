@@ -55,6 +55,9 @@ export function TryClient() {
         // Phase 5 接 Chrome Web Store 链接
         window.open('https://github.com/rewrite-so/rewrite.so', '_blank');
       },
+      onOpenSettings: () => {
+        window.open('/settings', '_blank');
+      },
       onError: (err) => {
         console.warn('[rewrite.so]', err);
       },

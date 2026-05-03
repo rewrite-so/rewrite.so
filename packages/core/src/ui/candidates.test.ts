@@ -14,21 +14,32 @@ function setup() {
   const onCancel = vi.fn();
   const onInstallClick = vi.fn();
   const onRegenerate = vi.fn();
+  const onOpenSettings = vi.fn();
   const factory = createCandidates(root, {
     onSelect,
     onCancel,
     onInstallClick,
     onRegenerate,
+    onOpenSettings,
   });
   const target = document.createElement('textarea');
   document.body.appendChild(target);
-  return { root, target, factory, onSelect, onCancel, onInstallClick, onRegenerate };
+  return {
+    root,
+    target,
+    factory,
+    onSelect,
+    onCancel,
+    onInstallClick,
+    onRegenerate,
+    onOpenSettings,
+  };
 }
 
 describe('createCandidates', () => {
   it('renders 3 cards in fixed order on open', () => {
     const { factory, target, root } = setup();
-    factory.open({ target, locale: 'zh-CN' });
+    factory.open({ target, locale: 'zh-CN', targetLang: 'en' });
     const cards = root.querySelectorAll('.card');
     expect(cards.length).toBe(3);
     expect((cards[0] as HTMLElement).dataset.style).toBe('faithful');
@@ -38,14 +49,14 @@ describe('createCandidates', () => {
 
   it('initial state shows skeletons (no text yet)', () => {
     const { factory, target, root } = setup();
-    factory.open({ target, locale: 'zh-CN' });
+    factory.open({ target, locale: 'zh-CN', targetLang: 'en' });
     const skeletons = root.querySelectorAll('.skeleton');
     expect(skeletons.length).toBeGreaterThan(0);
   });
 
   it('appendDelta builds text incrementally', () => {
     const { factory, target, root } = setup();
-    const handle = factory.open({ target, locale: 'zh-CN' });
+    const handle = factory.open({ target, locale: 'zh-CN', targetLang: 'en' });
     handle.appendDelta('faithful', '今天');
     handle.appendDelta('faithful', '天气');
     const card = root.querySelector('.card[data-style="faithful"] .text');
@@ -54,7 +65,7 @@ describe('createCandidates', () => {
 
   it('setDone replaces with final text', () => {
     const { factory, target, root } = setup();
-    const handle = factory.open({ target, locale: 'zh-CN' });
+    const handle = factory.open({ target, locale: 'zh-CN', targetLang: 'en' });
     handle.setDone('casual', '今儿天气不错');
     const card = root.querySelector('.card[data-style="casual"] .text');
     expect(card?.textContent).toBe('今儿天气不错');
@@ -62,7 +73,7 @@ describe('createCandidates', () => {
 
   it('setError marks card as error and shows message', () => {
     const { factory, target, root } = setup();
-    const handle = factory.open({ target, locale: 'zh-CN' });
+    const handle = factory.open({ target, locale: 'zh-CN', targetLang: 'en' });
     handle.setError('formal', 'upstream_timeout');
     const card = root.querySelector('.card[data-style="formal"]');
     expect(card?.classList.contains('error')).toBe(true);
@@ -71,7 +82,7 @@ describe('createCandidates', () => {
 
   it('digit key 1 triggers onSelect for faithful', () => {
     const { factory, target, onSelect } = setup();
-    const handle = factory.open({ target, locale: 'en' });
+    const handle = factory.open({ target, locale: 'en', targetLang: 'en' });
     handle.setDone('faithful', 'Hello.');
     window.dispatchEvent(new KeyboardEvent('keydown', { key: '1' }));
     expect(onSelect).toHaveBeenCalledWith('faithful', 'Hello.');
@@ -79,7 +90,7 @@ describe('createCandidates', () => {
 
   it('digit key 2 triggers onSelect for casual', () => {
     const { factory, target, onSelect } = setup();
-    const handle = factory.open({ target, locale: 'en' });
+    const handle = factory.open({ target, locale: 'en', targetLang: 'en' });
     handle.appendDelta('casual', 'Hey there');
     window.dispatchEvent(new KeyboardEvent('keydown', { key: '2' }));
     expect(onSelect).toHaveBeenCalledWith('casual', 'Hey there');
@@ -87,21 +98,21 @@ describe('createCandidates', () => {
 
   it('digit key on pending (no text yet) does nothing', () => {
     const { factory, target, onSelect } = setup();
-    factory.open({ target, locale: 'en' });
+    factory.open({ target, locale: 'en', targetLang: 'en' });
     window.dispatchEvent(new KeyboardEvent('keydown', { key: '3' }));
     expect(onSelect).not.toHaveBeenCalled();
   });
 
   it('Escape triggers onCancel', () => {
     const { factory, target, onCancel } = setup();
-    factory.open({ target, locale: 'en' });
+    factory.open({ target, locale: 'en', targetLang: 'en' });
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 
   it('close removes panel + listeners', () => {
     const { factory, target, root, onCancel } = setup();
-    const handle = factory.open({ target, locale: 'en' });
+    const handle = factory.open({ target, locale: 'en', targetLang: 'en' });
     handle.close();
     expect(root.querySelector('.panel')).toBeNull();
     // 关闭后键盘事件不应再触发 callback
@@ -111,7 +122,7 @@ describe('createCandidates', () => {
 
   it('showInstallHook adds CTA in footer', () => {
     const { factory, target, root } = setup();
-    factory.open({ target, locale: 'zh-CN', showInstallHook: true });
+    factory.open({ target, locale: 'zh-CN', targetLang: 'en', showInstallHook: true });
     const footer = root.querySelector('.footer');
     expect(footer).not.toBeNull();
     expect(footer?.textContent).toContain('安装扩展');
@@ -119,7 +130,7 @@ describe('createCandidates', () => {
 
   it('install link click triggers onInstallClick', () => {
     const { factory, target, root, onInstallClick } = setup();
-    factory.open({ target, locale: 'en', showInstallHook: true });
+    factory.open({ target, locale: 'en', targetLang: 'en', showInstallHook: true });
     const link = root.querySelector('.footer a') as HTMLAnchorElement;
     link.click();
     expect(onInstallClick).toHaveBeenCalledTimes(1);
@@ -129,7 +140,7 @@ describe('createCandidates', () => {
 
   it('action button is hidden in pending state', () => {
     const { factory, target, root } = setup();
-    factory.open({ target, locale: 'en' });
+    factory.open({ target, locale: 'en', targetLang: 'en' });
     const action = root.querySelector(
       '.card[data-style="faithful"] .card-action',
     ) as HTMLButtonElement;
@@ -139,7 +150,7 @@ describe('createCandidates', () => {
 
   it('action button shows spinner during streaming', () => {
     const { factory, target, root } = setup();
-    const handle = factory.open({ target, locale: 'en' });
+    const handle = factory.open({ target, locale: 'en', targetLang: 'en' });
     handle.appendDelta('casual', 'Hey');
     const action = root.querySelector(
       '.card[data-style="casual"] .card-action',
@@ -150,7 +161,7 @@ describe('createCandidates', () => {
 
   it('action button shows ↻ regen when card is done; click invokes onRegenerate', () => {
     const { factory, target, root, onRegenerate } = setup();
-    const handle = factory.open({ target, locale: 'en' });
+    const handle = factory.open({ target, locale: 'en', targetLang: 'en' });
     handle.setDone('faithful', 'Hello.');
     const action = root.querySelector(
       '.card[data-style="faithful"] .card-action',
@@ -164,7 +175,7 @@ describe('createCandidates', () => {
 
   it('error card shows Retry button; click invokes onRegenerate', () => {
     const { factory, target, root, onRegenerate } = setup();
-    const handle = factory.open({ target, locale: 'en' });
+    const handle = factory.open({ target, locale: 'en', targetLang: 'en' });
     handle.setError('formal', 'upstream_timeout');
     const action = root.querySelector(
       '.card[data-style="formal"] .card-action',
@@ -177,7 +188,7 @@ describe('createCandidates', () => {
 
   it('clicking action button does NOT trigger onSelect', () => {
     const { factory, target, root, onSelect, onRegenerate } = setup();
-    const handle = factory.open({ target, locale: 'en' });
+    const handle = factory.open({ target, locale: 'en', targetLang: 'en' });
     handle.setDone('casual', 'Hey there');
     const action = root.querySelector(
       '.card[data-style="casual"] .card-action',
@@ -189,7 +200,7 @@ describe('createCandidates', () => {
 
   it('resetCard puts done card into regenerating state (preserves old text)', () => {
     const { factory, target, root } = setup();
-    const handle = factory.open({ target, locale: 'en' });
+    const handle = factory.open({ target, locale: 'en', targetLang: 'en' });
     handle.setDone('formal', 'Greetings.');
     expect(root.querySelector('.card[data-style="formal"] .text')?.textContent).toBe('Greetings.');
 
@@ -206,7 +217,7 @@ describe('createCandidates', () => {
 
   it('resetCard on error card removes .error, adds .regenerating', () => {
     const { factory, target, root } = setup();
-    const handle = factory.open({ target, locale: 'en' });
+    const handle = factory.open({ target, locale: 'en', targetLang: 'en' });
     handle.setError('faithful', 'upstream_timeout');
     const card = root.querySelector('.card[data-style="faithful"]') as HTMLElement;
     expect(card.classList.contains('error')).toBe(true);
@@ -221,7 +232,7 @@ describe('createCandidates', () => {
 
   it('first appendDelta after resetCard clears old text + removes .regenerating', () => {
     const { factory, target, root } = setup();
-    const handle = factory.open({ target, locale: 'en' });
+    const handle = factory.open({ target, locale: 'en', targetLang: 'en' });
     handle.setDone('casual', 'Hey there.');
     handle.resetCard('casual');
     expect(root.querySelector('.card[data-style="casual"] .text')?.textContent).toBe('Hey there.');
@@ -230,5 +241,51 @@ describe('createCandidates', () => {
     const card = root.querySelector('.card[data-style="casual"]') as HTMLElement;
     expect(card.classList.contains('regenerating')).toBe(false);
     expect(card.querySelector('.text')?.textContent).toBe('Hi');
+  });
+
+  // ===== target chip + settings =====
+
+  it('target chip shows uppercase BCP-47 short code', () => {
+    const { factory, target, root } = setup();
+    factory.open({ target, locale: 'en', targetLang: 'en' });
+    const chip = root.querySelector('.target-chip');
+    expect(chip?.textContent).toBe('EN');
+  });
+
+  it('target chip shows custom natural-language target verbatim (with truncation)', () => {
+    const { factory, target, root } = setup();
+    factory.open({ target, locale: 'en', targetLang: 'Portuguese (Brazilian)' });
+    const chip = root.querySelector('.target-chip') as HTMLElement;
+    expect(chip.textContent).toBe('Portuguese …'); // first 11 chars + ellipsis
+    expect(chip.title).toBe('Portuguese (Brazilian)'); // hover 看完整
+  });
+
+  it('target chip shows "auto" lowercase when target is auto', () => {
+    const { factory, target, root } = setup();
+    factory.open({ target, locale: 'en', targetLang: 'auto' });
+    const chip = root.querySelector('.target-chip');
+    expect(chip?.textContent).toBe('auto');
+  });
+
+  it('settings button click invokes onOpenSettings', () => {
+    const { factory, target, root, onOpenSettings } = setup();
+    factory.open({ target, locale: 'en', targetLang: 'en' });
+    const btn = root.querySelector('.settings-btn') as HTMLButtonElement;
+    expect(btn).not.toBeNull();
+    btn.click();
+    expect(onOpenSettings).toHaveBeenCalledTimes(1);
+  });
+
+  it('settings button is omitted when onOpenSettings callback not provided', () => {
+    const { root: shadowRoot } = createShadowRoot('open');
+    // 不传 onOpenSettings
+    const factory = createCandidates(shadowRoot, {
+      onSelect: vi.fn(),
+      onCancel: vi.fn(),
+    });
+    const target = document.createElement('textarea');
+    document.body.appendChild(target);
+    factory.open({ target, locale: 'en', targetLang: 'en' });
+    expect(shadowRoot.querySelector('.settings-btn')).toBeNull();
   });
 });

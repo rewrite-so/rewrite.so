@@ -530,7 +530,8 @@
   "core": {
     "regen": "重新生成",
     "retry": "重试",
-    "shortcuts": "{accept} 选用 · {regen} 重生成 · {cancel} 关闭"
+    "shortcuts": "{accept} 选用 · {regen} 重生成 · {cancel} 关闭",
+    "openSettings": "打开设置"
   },
   "state": {
     "thinking": "思考中…"

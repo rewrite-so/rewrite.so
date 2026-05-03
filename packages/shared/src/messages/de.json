@@ -530,7 +530,8 @@
   "core": {
     "regen": "Neu generieren",
     "retry": "Erneut versuchen",
-    "shortcuts": "{accept} wählen · {regen} regenerieren · {cancel} schließen"
+    "shortcuts": "{accept} wählen · {regen} regenerieren · {cancel} schließen",
+    "openSettings": "Einstellungen öffnen"
   },
   "state": {
     "thinking": "Denkt nach…"

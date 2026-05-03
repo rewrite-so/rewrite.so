@@ -530,7 +530,8 @@
   "core": {
     "regen": "Regenerar",
     "retry": "Reintentar",
-    "shortcuts": "{accept} aceptar · {regen} regenerar · {cancel} cerrar"
+    "shortcuts": "{accept} aceptar · {regen} regenerar · {cancel} cerrar",
+    "openSettings": "Abrir ajustes"
   },
   "state": {
     "thinking": "Pensando…"

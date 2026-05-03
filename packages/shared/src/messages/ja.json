@@ -530,7 +530,8 @@
   "core": {
     "regen": "再生成",
     "retry": "再試行",
-    "shortcuts": "{accept} 採用 · {regen} 再生成 · {cancel} キャンセル"
+    "shortcuts": "{accept} 採用 · {regen} 再生成 · {cancel} キャンセル",
+    "openSettings": "設定を開く"
   },
   "state": {
     "thinking": "考えています…"

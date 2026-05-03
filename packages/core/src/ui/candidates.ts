@@ -1,11 +1,4 @@
-import {
-  ALL_STYLES,
-  type Locale,
-  STYLE_LABEL,
-  STYLE_SUBLABEL,
-  type Style,
-  t,
-} from '@rewrite/shared';
+import { ALL_STYLES, type Locale, STYLE_LABEL, type Style, t } from '@rewrite/shared';
 
 type ActionMode = 'hidden' | 'streaming' | 'regen' | 'retry';
 
@@ -47,6 +40,8 @@ export interface CandidatesCallbacks {
   onInstallClick?: () => void;
   /** 用户点击单卡 ↻/Retry → 该 style 重新生成 */
   onRegenerate?: (style: Style) => void;
+  /** 用户点击右上角齿轮 → 打开设置（扩展 options 或 web /settings） */
+  onOpenSettings?: () => void;
 }
 
 export interface CandidatesHandle {
@@ -55,8 +50,6 @@ export interface CandidatesHandle {
   setError(style: Style, code: string): void;
   /** 把单卡复位回 pending（skeleton），用于 regen 启动时清空 */
   resetCard(style: Style): void;
-  /** SSE meta 事件来到时设置目标语言；与 OpenOptions.sourceLang 比较，跨语言时显示"zh → en"小字 */
-  setLangDetected(target: string): void;
   /** 整体错误：替换整个浮层为单一错误卡片（含 CTA 链接，按 code 决定文案） */
   setGlobalError(code: string, detail?: Record<string, unknown>): void;
   close(): void;
@@ -65,12 +58,21 @@ export interface CandidatesHandle {
 export interface OpenOptions {
   target: HTMLElement;
   locale: Locale;
+  /** 当前目标语言（chip 显示用）；服务端最终决定的 targetLang 字符串 */
+  targetLang: string;
   /** web 模式下 true，浮层底部显示"安装扩展"链接 */
   showInstallHook?: boolean;
   /** 登录引导 URL（错误状态显示登录 CTA 时跳转） */
   loginUrl?: string;
-  /** 源文本检测到的语言（如 "zh"/"en"），用于浮层右上角显示 "zh → en" */
-  sourceLang?: string;
+}
+
+/** 把 targetLang 转成 chip 文字：短码大写、长自定义文本截短 */
+function targetChipText(target: string): string {
+  if (!target || target === 'auto') return 'auto';
+  // 短 BCP-47 code（≤5 字符且不含空格）：大写显示
+  if (target.length <= 5 && !/\s/.test(target)) return target.toUpperCase();
+  // 自定义自然语言（"Portuguese (Brazilian)" / "粤语"）：保持原样，过长截短
+  return target.length > 12 ? `${target.slice(0, 11)}…` : target;
 }
 
 export function createCandidates(
@@ -96,11 +98,35 @@ function openPanel(
   panel.setAttribute('role', 'listbox');
   panel.setAttribute('aria-label', 'rewrite candidates');
 
-  // 语言徽章（默认隐藏，meta event 来后若 source≠target 才显示）
-  const langBadge = document.createElement('div');
-  langBadge.className = 'lang-badge';
-  langBadge.style.display = 'none';
-  panel.appendChild(langBadge);
+  // 顶部 header：target lang chip + settings 齿轮
+  const header = document.createElement('div');
+  header.className = 'panel-header';
+
+  const targetChip = document.createElement('div');
+  targetChip.className = 'target-chip';
+  targetChip.textContent = targetChipText(opts.targetLang);
+  // 自定义长文本时 hover 显示完整
+  if (opts.targetLang && opts.targetLang.length > 12) {
+    targetChip.title = opts.targetLang;
+  }
+  header.appendChild(targetChip);
+
+  if (callbacks.onOpenSettings) {
+    const settingsBtn = document.createElement('button');
+    settingsBtn.type = 'button';
+    settingsBtn.className = 'settings-btn';
+    settingsBtn.setAttribute('aria-label', t('core.openSettings', opts.locale));
+    settingsBtn.title = t('core.openSettings', opts.locale);
+    // 简洁齿轮图形（CSS-styled span，不依赖外部 svg / font）
+    settingsBtn.textContent = '⚙';
+    settingsBtn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      callbacks.onOpenSettings?.();
+    });
+    header.appendChild(settingsBtn);
+  }
+
+  panel.appendChild(header);
 
   const cards: Map<
     Style,
@@ -159,14 +185,7 @@ function openPanel(
 
     const label = document.createElement('div');
     label.className = 'label';
-    const labelMain = document.createElement('span');
-    labelMain.className = 'label-main';
-    labelMain.textContent = STYLE_LABEL[style][opts.locale];
-    const labelSub = document.createElement('span');
-    labelSub.className = 'label-sub';
-    labelSub.textContent = ` · ${STYLE_SUBLABEL[style][opts.locale]}`;
-    label.appendChild(labelMain);
-    label.appendChild(labelSub);
+    label.textContent = STYLE_LABEL[style][opts.locale];
 
     const textEl = document.createElement('div');
     textEl.className = 'text';
@@ -338,17 +357,6 @@ function openPanel(
       entry.root.classList.remove('error');
       entry.root.classList.add('regenerating');
       setActionMode(entry.actionEl, 'streaming');
-    },
-    setLangDetected(target) {
-      if (closed) return;
-      const source = opts.sourceLang;
-      if (!source || !target) return;
-      // 比较"language family"——主标签 prefix（zh-CN 与 zh-TW 都视为 zh）
-      const srcFam = source.toLowerCase().split('-')[0];
-      const tgtFam = target.toLowerCase().split('-')[0];
-      if (!srcFam || !tgtFam || srcFam === tgtFam) return;
-      langBadge.textContent = `${srcFam} → ${tgtFam}`;
-      langBadge.style.display = '';
     },
     setGlobalError(code, detail) {
       if (closed) return;
