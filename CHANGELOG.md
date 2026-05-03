@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Landing 重新定位** — Hero 从「隐私不存储」改为「随手写，自信发」（outcome-led），
+  五层金字塔：eyebrow / H1 / sub-h1（泛化痛点 "Stop overthinking every message"）/
+  polyglot pill（"Any language in. Any language out."）/ intro。
+- 新增「Sound familiar?」痛点-场景 section（Hero 后、How it works 前），4 行具体场景
+  让用户对号入座（重打 Slack / 切到 ChatGPT 标签页 / 脑内翻译 / 反复读邮件）。
+- Privacy Spotlight 保留但下移到 Features 之后（不再领跑 narrative，仍是 trust block）。
+- Features 按"用户读到时的第一感"重排：keyboard / crossLang / byok / pii / stack /
+  openSource（PII 移到 STACK 之前——直接价值优先）。
+- How it works step 1/2 body 去 DOM / SSE 机制词；
+  openSource feature title 从 "100% Apache 2.0" 改为 "Read the code yourself"。
+- 新文案 7 locale 全部本地化（ja/ko/es/fr/de 由 LLM 翻译，待母语用户 review）。
+
 ### Added
 - **i18n** — 7 UI locales (`en` / `zh-CN` / `ja` / `ko` / `es` / `fr` / `de`) covering
   marketing pages, app pages (try / login / settings / unsubscribe), the in-page
