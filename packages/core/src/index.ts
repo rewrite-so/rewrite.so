@@ -59,6 +59,9 @@ export function mount(opts: MountOptions): MountHandle {
   const dot = createDot(root, uiLocale);
 
   let activeEditable: HTMLElement | null = null;
+  // 浮层打开期间锁定的 target editable —— 即使输入框失焦或被切换，浮层关闭前
+  // 都用这个引用做 onSelect 的目标。activeEditable 仍跟踪 focus 用于 dot 显示。
+  let lockedEditable: HTMLElement | null = null;
   // 多个 in-flight 请求并存：首发 3-style + 任意数量的单卡 regen
   // Esc / onSelect / unmount 时全部 abort + clear
   const inflightAborts = new Set<AbortController>();
@@ -78,11 +81,23 @@ export function mount(opts: MountOptions): MountHandle {
 
   const candidates = createCandidates(root, {
     onSelect: (style, finalText) => {
-      if (!activeEditable) return;
-      const range = readEditable(activeEditable).hasSelection ? 'selection' : 'all';
-      replaceEditable(activeEditable, finalText, range);
+      // 用浮层打开时锁定的 editable，避免被中途 focus 切换影响
+      const target = lockedEditable;
+      if (!target) return;
+      // 如果焦点已离开 target（少见，例如用户 Cmd+Tab 切走），先 focus 回来
+      // —— contenteditable 框架（Lexical/Slate/ProseMirror）通常要求目标 focused
+      if (document.activeElement !== target) {
+        try {
+          target.focus({ preventScroll: true });
+        } catch {
+          /* 老浏览器无 preventScroll，忽略 */
+        }
+      }
+      const range = readEditable(target).hasSelection ? 'selection' : 'all';
+      replaceEditable(target, finalText, range);
       currentPanel?.close();
       currentPanel = null;
+      lockedEditable = null;
       abortAllInflight();
       // 标识 style 已使用（暂留分析用）
       void style;
@@ -90,6 +105,7 @@ export function mount(opts: MountOptions): MountHandle {
     onCancel: () => {
       currentPanel?.close();
       currentPanel = null;
+      lockedEditable = null;
       abortAllInflight();
     },
     onRegenerate: (style) => {
@@ -176,6 +192,8 @@ export function mount(opts: MountOptions): MountHandle {
     currentPanel?.close();
 
     const target = activeEditable;
+    // 锁定 target —— 浮层期间 onSelect 一直用它，不受 focus 切换影响
+    lockedEditable = target;
     const read = readEditable(target);
     if (!read.text.trim()) return;
 
@@ -258,6 +276,7 @@ export function mount(opts: MountOptions): MountHandle {
       document.removeEventListener('focusout', onFocusOut, { capture: true });
       abortAllInflight();
       currentPanel?.close();
+      lockedEditable = null;
       dot.destroy();
     },
   };

@@ -91,6 +91,12 @@
 
 - **content script 不要引入 React/Vue 等框架**：`packages/core` 浮层 UI 用纯 vanilla DOM，bundle gzip < 30KB。扩展自己的 popup/options 才用 Preact。
 - **React 受控 input 替换值**：不能 `el.value = x`，必须用 `Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set` 调 prototype setter，否则 React 不感知。
+- **浮层 button mousedown 必须 preventDefault**：浮层内任何 `<button>`（齿轮 / ↻ / Retry）
+  mousedown 默认会把焦点从原输入框转移到 button，触发输入框 focusout → activeEditable
+  变 null → onSelect 静默失败 / contenteditable 拒绝写入。`packages/core/src/ui/candidates.ts`
+  panel 容器统一 `mousedown preventDefault`（不阻止 click 触发）。同时 mount() 用
+  `lockedEditable` 锁定浮层期间的 target，即使焦点真丢了也能 `.focus()` 回来。
+  新增 button 时不需要单独处理，panel 容器级 listener 已覆盖。
 - **contenteditable 替换**：先 `dispatchEvent(InputEvent('beforeinput', { inputType: 'insertReplacementText', data }))`，被框架（ProseMirror/Lexical/Slate）preventDefault 后我们就不要再写 DOM；否则降级到 `document.execCommand('insertText')`（已废弃但唯一保留 undo 栈）。
 - **chrome.storage 所有 key 带 `_v: 1`**：方便将来跨版本兼容时新字段读旧值。MVP 不写迁移层但保留版本字段习惯。
 

@@ -43,6 +43,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   sanitize 抽到 `lib/sanitize-target-lang.ts` 单独模块 + 14 条单元测试覆盖；
   GET /v1/me/settings 读路径加 lazy sanitize 兜底老脏数据；customHelp
   文案 7 locale 同步告知"特殊字符会被过滤"。
+- 修浮窗交互失效 bug —— 鼠标点卡片 / 齿轮 / ↻ Retry 都无反应：
+  - 根因：浮层内 `<button>` 元素（齿轮 / ↻ / Retry）mousedown 时浏览器把焦点
+    从输入框转移到 button → 输入框 focusout → activeEditable 变 null →
+    onSelect 静默 return。contenteditable 框架（Lexical/Slate/ProseMirror）
+    在已失焦时拒绝 replaceEditable 也加重表现。
+  - 修法 A：panel 容器加 mousedown preventDefault —— 阻止 focus 转移
+    （floating-ui / Tippy 标准做法）；click handler 仍正常触发
+  - 修法 B：mount() 加 lockedEditable 在浮层期间锁定 target editable，
+    onSelect 时如发现焦点已离开则 .focus() 回去再 replaceEditable
 - 浮窗体验二轮打磨（用户反馈）：
   - 删除卡片副标题（"贴近原文 · 保留你原话的语气"等）—— 减少视觉拥挤；副标题对老用户冗余
   - 浮层右上角加 panel-header：始终显示 target lang chip + 齿轮 ⚙ 设置入口

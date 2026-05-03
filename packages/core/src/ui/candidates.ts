@@ -98,6 +98,15 @@ function openPanel(
   panel.setAttribute('role', 'listbox');
   panel.setAttribute('aria-label', 'rewrite candidates');
 
+  // 防 focus 转移：用户在浮层 mousedown 任何 button/div 时，浏览器默认会把焦点
+  // 从输入框转到 button —— 触发输入框 focusout，导致 activeEditable=null，后续
+  // onSelect 静默失败、replaceEditable 在已失焦的 contenteditable 上写入失败。
+  // 标准做法（floating-ui / popper / Tippy）：panel 容器 mousedown preventDefault。
+  // click 仍然正常触发（preventDefault 只阻止 focus 转移，不阻止 click event）。
+  panel.addEventListener('mousedown', (ev) => {
+    ev.preventDefault();
+  });
+
   // 顶部 header：target lang chip + settings 齿轮
   const header = document.createElement('div');
   header.className = 'panel-header';
