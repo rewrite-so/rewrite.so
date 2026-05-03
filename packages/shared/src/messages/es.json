@@ -154,10 +154,20 @@
       "eyebrow": "Código abierto · Apache 2.0 · Sin tracking",
       "h1Line1": "Reescritura con IA",
       "h1Line2": "que no almacena tu texto.",
+      "subHeadline": "Stop overthinking every message.",
+      "polyglot": "Any language in. Any language out.",
       "intro": "Pulsa <kbd>Shift</kbd> dos veces en cualquier campo de entrada web. Tres reescrituras de IA se generan en paralelo. Pulsa <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> para aceptar. Las entradas y salidas <strong>nunca se escriben en disco</strong> — verificable en el código fuente.",
       "ctaPrimary": "Probar gratis →",
       "ctaSecondary": "⭐ Estrella en GitHub",
       "fineprint": "{count} reescrituras gratis al mes · Sin tarjeta · BYOK para uso ilimitado"
+    },
+    "scenarios": {
+      "h2": "Sound familiar?",
+      "pain1": "You retyped that Slack message 3 times before sending it.",
+      "pain2": "You opened ChatGPT in another tab to \"make it less harsh\".",
+      "pain3": "You translated each sentence in your head before typing.",
+      "pain4": "You re-read the same email 4 times before hitting send.",
+      "outro": "rewrite.so cuts the loop. ↓"
     },
     "privacy": {
       "eyebrow": "El contrato de privacidad",

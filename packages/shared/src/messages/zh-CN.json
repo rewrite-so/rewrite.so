@@ -151,13 +151,23 @@
   },
   "home": {
     "hero": {
-      "eyebrow": "开源 · Apache 2.0 · 不追踪",
-      "h1Line1": "AI 改写",
-      "h1Line2": "不存你的文本",
-      "intro": "在任意网页输入框双击 <kbd>Shift</kbd>。3 个 AI 改写候选并行流式生成。按 <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> 采纳。原文与输出<strong>从不写入磁盘</strong>——源码可验证。",
+      "eyebrow": "任意输入框 · 开源",
+      "h1Line1": "随手写，",
+      "h1Line2": "自信发。",
+      "subHeadline": "别再为一句话反复纠结。",
+      "polyglot": "任意语言进，任意语言出。",
+      "intro": "在任意网页输入框双击 <kbd>Shift</kbd>。AI 当场给你三种说法，按 <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> 选一个直接发。",
       "ctaPrimary": "免费试用 →",
       "ctaSecondary": "⭐ Star on GitHub",
       "fineprint": "每月 {count} 次免费 · 无需信用卡 · BYOK 无限改写"
+    },
+    "scenarios": {
+      "h2": "这些场景你眼熟吗？",
+      "pain1": "那条 Slack 消息你重新打了三遍才发出去。",
+      "pain2": "为了\"语气别太硬\"，你打开了另一个 ChatGPT 标签页。",
+      "pain3": "你在脑子里把每句话先翻译一遍才敲下来。",
+      "pain4": "同一封邮件你按\"发送\"前读了四遍。",
+      "outro": "rewrite.so 把这个循环去掉。 ↓"
     },
     "privacy": {
       "eyebrow": "隐私契约",
@@ -179,11 +189,11 @@
       "stepLabel": "步骤 {num}",
       "step1": {
         "title": "双击 Shift",
-        "body": "500ms 内，在页面任意聚焦的输入框 —— input / textarea / contenteditable。密码、CVV、OTP 等 PII 字段硬排除。"
+        "body": "500ms 内连按两下 <kbd>Shift</kbd>。密码 / CVV / OTP 等敏感字段会自动跳过。"
       },
       "step2": {
         "title": "3 风格并行",
-        "body": "贴近原文 / 口语 / 正式 —— 单条多路 SSE 响应中并发生成，首 token 几百毫秒到达。"
+        "body": "贴近原文 / 口语 / 正式 —— 三种语气同时给你。几乎立刻就能看到第一种。"
       },
       "step3": {
         "title": "按键采纳",
@@ -194,7 +204,7 @@
       "h2": "为关心实现细节的人打造",
       "openSource": {
         "label": "开源",
-        "title": "100% Apache 2.0",
+        "title": "代码全公开，自己可读",
         "body": "可自部署、可审计、可 fork。上面的隐私声明不是营销话术——是你能在 <repo>github.com/rewrite-so/rewrite.so</repo> 读到的代码。"
       },
       "byok": {

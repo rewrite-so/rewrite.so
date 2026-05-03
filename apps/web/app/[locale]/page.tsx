@@ -52,10 +52,37 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               <br />
               {t('hero.h1Line2')}
             </h1>
+            <p
+              style={{
+                marginTop: 14,
+                color: '#222',
+                fontSize: '1.25rem',
+                fontWeight: 500,
+                maxWidth: 560,
+                lineHeight: 1.4,
+              }}
+            >
+              {t('hero.subHeadline')}
+            </p>
+            <div style={{ marginTop: 12 }}>
+              <span
+                style={{
+                  display: 'inline-block',
+                  padding: '4px 12px',
+                  background: '#f4f4f5',
+                  border: '1px solid #e4e4e7',
+                  borderRadius: 999,
+                  fontSize: '0.85rem',
+                  color: '#555',
+                  fontWeight: 500,
+                }}
+              >
+                🌐 {t('hero.polyglot')}
+              </span>
+            </div>
             <p style={{ marginTop: 20, color: '#444', fontSize: '1.05rem', maxWidth: 560 }}>
               {t.rich('hero.intro', {
                 kbd: (chunks) => <Kbd>{chunks}</Kbd>,
-                strong: (chunks) => <strong>{chunks}</strong>,
               })}
             </p>
 
@@ -96,7 +123,137 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </div>
       </section>
 
-      {/* ===== Privacy spotlight ===== */}
+      {/* ===== Sound familiar? (痛点-场景，新增) ===== */}
+      <section style={{ maxWidth: 720, margin: '0 auto', padding: '64px 24px 32px' }}>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: 600, margin: 0, marginBottom: 24 }}>
+          {t('scenarios.h2')}
+        </h2>
+        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 14 }}>
+          {(['pain1', 'pain2', 'pain3', 'pain4'] as const).map((k) => (
+            <li
+              key={k}
+              style={{
+                fontSize: '1.05rem',
+                color: '#333',
+                lineHeight: 1.7,
+                paddingLeft: 24,
+                position: 'relative',
+              }}
+            >
+              <span style={{ position: 'absolute', left: 0, color: '#888' }}>→</span>
+              {t(`scenarios.${k}`)}
+            </li>
+          ))}
+        </ul>
+        <p style={{ marginTop: 28, color: '#666', fontSize: 14 }}>{t('scenarios.outro')}</p>
+      </section>
+
+      {/* ===== How it works ===== */}
+      <section style={section}>
+        <h2 style={h2}>{t('howItWorks.h2')}</h2>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gap: 20,
+          }}
+        >
+          <Step
+            stepLabel={t('howItWorks.stepLabel', { num: '1' })}
+            visual={
+              <span style={{ display: 'inline-flex', gap: 6 }}>
+                <Kbd large>Shift</Kbd>
+                <Kbd large>Shift</Kbd>
+              </span>
+            }
+            title={t('howItWorks.step1.title')}
+            body={t('howItWorks.step1.body')}
+          />
+          <Step
+            stepLabel={t('howItWorks.stepLabel', { num: '2' })}
+            visual={
+              <code
+                style={{
+                  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+                  fontSize: 12,
+                  color: '#666',
+                  background: '#fafafa',
+                  padding: '6px 10px',
+                  borderRadius: 6,
+                  border: '1px solid #eee',
+                  display: 'inline-block',
+                }}
+              >
+                3 SSE streams
+              </code>
+            }
+            title={t('howItWorks.step2.title')}
+            body={t('howItWorks.step2.body')}
+          />
+          <Step
+            stepLabel={t('howItWorks.stepLabel', { num: '3' })}
+            visual={
+              <span style={{ display: 'inline-flex', gap: 6 }}>
+                <Kbd large>1</Kbd>
+                <Kbd large>2</Kbd>
+                <Kbd large>3</Kbd>
+              </span>
+            }
+            title={t('howItWorks.step3.title')}
+            body={t('howItWorks.step3.body')}
+          />
+        </div>
+      </section>
+
+      {/* ===== Features ===== */}
+      <section style={section}>
+        <h2 style={h2}>{t('features.h2')}</h2>
+        <div style={grid2}>
+          <Feature
+            label={t('features.keyboard.label')}
+            title={t('features.keyboard.title')}
+            body={t('features.keyboard.body')}
+          />
+          <Feature
+            label={t('features.crossLang.label')}
+            title={t('features.crossLang.title')}
+            body={t('features.crossLang.body')}
+          />
+          <Feature
+            label={t('features.byok.label')}
+            title={t('features.byok.title')}
+            body={t('features.byok.body')}
+          />
+          <Feature
+            label={t('features.pii.label')}
+            title={t('features.pii.title')}
+            body={t('features.pii.body')}
+          />
+          <Feature
+            label={t('features.stack.label')}
+            title={t('features.stack.title')}
+            body={t('features.stack.body')}
+          />
+          <Feature
+            label={t('features.openSource.label')}
+            title={t('features.openSource.title')}
+            body={t.rich('features.openSource.body', {
+              repo: (chunks) => (
+                <a
+                  href="https://github.com/rewrite-so/rewrite.so"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={linkDark}
+                >
+                  {chunks}
+                </a>
+              ),
+            })}
+          />
+        </div>
+      </section>
+
+      {/* ===== Privacy spotlight (从 hero 后下移到此处) ===== */}
       <section
         style={{
           background: '#0a0a0a',
@@ -197,111 +354,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               {t('privacy.redacted.apiKey')}
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* ===== How it works ===== */}
-      <section style={section}>
-        <h2 style={h2}>{t('howItWorks.h2')}</h2>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-            gap: 20,
-          }}
-        >
-          <Step
-            stepLabel={t('howItWorks.stepLabel', { num: '1' })}
-            visual={
-              <span style={{ display: 'inline-flex', gap: 6 }}>
-                <Kbd large>Shift</Kbd>
-                <Kbd large>Shift</Kbd>
-              </span>
-            }
-            title={t('howItWorks.step1.title')}
-            body={t('howItWorks.step1.body')}
-          />
-          <Step
-            stepLabel={t('howItWorks.stepLabel', { num: '2' })}
-            visual={
-              <code
-                style={{
-                  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
-                  fontSize: 12,
-                  color: '#666',
-                  background: '#fafafa',
-                  padding: '6px 10px',
-                  borderRadius: 6,
-                  border: '1px solid #eee',
-                  display: 'inline-block',
-                }}
-              >
-                3 SSE streams
-              </code>
-            }
-            title={t('howItWorks.step2.title')}
-            body={t('howItWorks.step2.body')}
-          />
-          <Step
-            stepLabel={t('howItWorks.stepLabel', { num: '3' })}
-            visual={
-              <span style={{ display: 'inline-flex', gap: 6 }}>
-                <Kbd large>1</Kbd>
-                <Kbd large>2</Kbd>
-                <Kbd large>3</Kbd>
-              </span>
-            }
-            title={t('howItWorks.step3.title')}
-            body={t('howItWorks.step3.body')}
-          />
-        </div>
-      </section>
-
-      {/* ===== Features ===== */}
-      <section style={section}>
-        <h2 style={h2}>{t('features.h2')}</h2>
-        <div style={grid2}>
-          <Feature
-            label={t('features.openSource.label')}
-            title={t('features.openSource.title')}
-            body={t.rich('features.openSource.body', {
-              repo: (chunks) => (
-                <a
-                  href="https://github.com/rewrite-so/rewrite.so"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={linkDark}
-                >
-                  {chunks}
-                </a>
-              ),
-            })}
-          />
-          <Feature
-            label={t('features.byok.label')}
-            title={t('features.byok.title')}
-            body={t('features.byok.body')}
-          />
-          <Feature
-            label={t('features.pii.label')}
-            title={t('features.pii.title')}
-            body={t('features.pii.body')}
-          />
-          <Feature
-            label={t('features.stack.label')}
-            title={t('features.stack.title')}
-            body={t('features.stack.body')}
-          />
-          <Feature
-            label={t('features.crossLang.label')}
-            title={t('features.crossLang.title')}
-            body={t('features.crossLang.body')}
-          />
-          <Feature
-            label={t('features.keyboard.label')}
-            title={t('features.keyboard.title')}
-            body={t('features.keyboard.body')}
-          />
         </div>
       </section>
 

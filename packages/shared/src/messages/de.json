@@ -154,10 +154,20 @@
       "eyebrow": "Open Source · Apache 2.0 · Kein Tracking",
       "h1Line1": "AI-Umschreibung,",
       "h1Line2": "die deinen Text nicht speichert.",
+      "subHeadline": "Stop overthinking every message.",
+      "polyglot": "Any language in. Any language out.",
       "intro": "Drücke <kbd>Shift</kbd> doppelt in einem beliebigen Web-Eingabefeld. Drei AI-Umschreibungen werden parallel gestreamt. Drücke <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> zum Akzeptieren. Eingaben und Ausgaben werden <strong>nie auf die Festplatte geschrieben</strong> — im Quellcode überprüfbar.",
       "ctaPrimary": "Kostenlos testen →",
       "ctaSecondary": "⭐ Star auf GitHub",
       "fineprint": "{count} kostenlose Umschreibungen/Monat · Keine Kreditkarte · BYOK für unbegrenzt"
+    },
+    "scenarios": {
+      "h2": "Sound familiar?",
+      "pain1": "You retyped that Slack message 3 times before sending it.",
+      "pain2": "You opened ChatGPT in another tab to \"make it less harsh\".",
+      "pain3": "You translated each sentence in your head before typing.",
+      "pain4": "You re-read the same email 4 times before hitting send.",
+      "outro": "rewrite.so cuts the loop. ↓"
     },
     "privacy": {
       "eyebrow": "Der Datenschutzvertrag",

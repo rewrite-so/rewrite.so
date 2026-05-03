@@ -151,13 +151,23 @@
   },
   "home": {
     "hero": {
-      "eyebrow": "Open source · Apache 2.0 · No tracking",
-      "h1Line1": "AI rewriting",
-      "h1Line2": "that doesn't store your text.",
-      "intro": "Double-tap <kbd>Shift</kbd> in any web input box. Three AI rewrites stream in parallel. Press <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> to accept. Inputs and outputs are <strong>never written to disk</strong> — verifiable in the source.",
+      "eyebrow": "Works in any input. Open source.",
+      "h1Line1": "Write rough.",
+      "h1Line2": "Send polished.",
+      "subHeadline": "Stop overthinking every message.",
+      "polyglot": "Any language in. Any language out.",
+      "intro": "Double-tap <kbd>Shift</kbd> in any input box. AI gives you three ways to say it. Pick one with <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> and send.",
       "ctaPrimary": "Try it free →",
       "ctaSecondary": "⭐ Star on GitHub",
       "fineprint": "{count} free rewrites/month · No card · Bring your own API key for unlimited"
+    },
+    "scenarios": {
+      "h2": "Sound familiar?",
+      "pain1": "You retyped that Slack message 3 times before sending it.",
+      "pain2": "You opened ChatGPT in another tab to \"make it less harsh\".",
+      "pain3": "You translated each sentence in your head before typing.",
+      "pain4": "You re-read the same email 4 times before hitting send.",
+      "outro": "rewrite.so cuts the loop. ↓"
     },
     "privacy": {
       "eyebrow": "The privacy contract",
@@ -179,11 +189,11 @@
       "stepLabel": "STEP {num}",
       "step1": {
         "title": "Double-tap Shift",
-        "body": "Within 500ms, in any focused input on the page — input, textarea, or contenteditable. PII fields (password, CVV, OTP) are hard-excluded."
+        "body": "Press <kbd>Shift</kbd> twice within 500ms. Password / CVV / OTP fields are skipped automatically."
       },
       "step2": {
         "title": "3 styles, parallel",
-        "body": "Faithful, casual, formal — generated concurrently in a single multiplexed SSE response. First token in a few hundred milliseconds."
+        "body": "Faithful, casual, formal — three tones at once. The first one shows up almost instantly."
       },
       "step3": {
         "title": "Press to accept",
@@ -194,7 +204,7 @@
       "h2": "Built for people who care about how it works",
       "openSource": {
         "label": "OPEN SOURCE",
-        "title": "100% Apache 2.0",
+        "title": "Read the code yourself",
         "body": "Self-host, audit, fork. The privacy claims above aren't marketing — they're code you can read at <repo>github.com/rewrite-so/rewrite.so</repo>."
       },
       "byok": {

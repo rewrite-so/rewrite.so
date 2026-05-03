@@ -154,10 +154,20 @@
       "eyebrow": "オープンソース · Apache 2.0 · 追跡なし",
       "h1Line1": "AI 書き換え、",
       "h1Line2": "あなたのテキストを保存しません。",
+      "subHeadline": "Stop overthinking every message.",
+      "polyglot": "Any language in. Any language out.",
       "intro": "ウェブの入力欄で <kbd>Shift</kbd> をダブルタップ。3 つの AI 書き換えが並行ストリーミングで生成。<kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> で採用。入力と出力は<strong>ディスクに書き込まれません</strong> — ソースコードで検証可能。",
       "ctaPrimary": "無料で試す →",
       "ctaSecondary": "⭐ GitHub で Star",
       "fineprint": "月 {count} 回まで無料 · カード不要 · BYOK で無制限"
+    },
+    "scenarios": {
+      "h2": "Sound familiar?",
+      "pain1": "You retyped that Slack message 3 times before sending it.",
+      "pain2": "You opened ChatGPT in another tab to \"make it less harsh\".",
+      "pain3": "You translated each sentence in your head before typing.",
+      "pain4": "You re-read the same email 4 times before hitting send.",
+      "outro": "rewrite.so cuts the loop. ↓"
     },
     "privacy": {
       "eyebrow": "プライバシー契約",
