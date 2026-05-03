@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - How it works step 1/2 body 去 DOM / SSE 机制词；
   openSource feature title 从 "100% Apache 2.0" 改为 "Read the code yourself"。
 - 新文案 7 locale 全部本地化（ja/ko/es/fr/de 由 LLM 翻译，待母语用户 review）。
+- （补丁）「Sound familiar?」section 从 3 块扩为 5 块：增加 intro / bridge 过渡段
+  + 4 行使用场景（外语学习 / 客户回信 / 公开发言 / 高焦虑沟通），重写 outro
+  为"一个手势，三种打磨好的说法"，让 narrative 从"诊断（→ 灰）"过渡到"建议
+  （✓ 绿）"再下接 How it works，治掉之前 hero → 痛点列表的突兀感。
 
 ### Added
 - **i18n** — 7 UI locales (`en` / `zh-CN` / `ja` / `ko` / `es` / `fr` / `de`) covering

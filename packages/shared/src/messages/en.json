@@ -163,11 +163,17 @@
     },
     "scenarios": {
       "h2": "Sound familiar?",
+      "intro": "Getting the wording right takes more mental space than it should. Most of it goes to:",
       "pain1": "You retyped that Slack message 3 times before sending it.",
       "pain2": "You opened ChatGPT in another tab to \"make it less harsh\".",
       "pain3": "You translated each sentence in your head before typing.",
       "pain4": "You re-read the same email 4 times before hitting send.",
-      "outro": "rewrite.so cuts the loop. ↓"
+      "bridge": "This is what rewrite.so was built for:",
+      "useCase1": "Writing in a language that isn't your first — learning, working, talking to overseas teammates.",
+      "useCase2": "Customer or client replies when the tone has to be just right.",
+      "useCase3": "Public posts — tweets, Reddit / HN comments, GitHub issues, PR descriptions.",
+      "useCase4": "Cold emails, apologies, hard conversations — places where one wrong word costs you.",
+      "outro": "One keystroke. Three polished options. ↓"
     },
     "privacy": {
       "eyebrow": "The privacy contract",

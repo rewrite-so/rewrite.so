@@ -123,11 +123,26 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </div>
       </section>
 
-      {/* ===== Sound familiar? (痛点-场景，新增) ===== */}
+      {/* ===== Sound familiar? — 痛点 → 场景 ===== */}
       <section style={{ maxWidth: 720, margin: '0 auto', padding: '64px 24px 32px' }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 600, margin: 0, marginBottom: 24 }}>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: 600, margin: 0, marginBottom: 16 }}>
           {t('scenarios.h2')}
         </h2>
+
+        {/* intro 过渡段 */}
+        <p
+          style={{
+            color: '#555',
+            fontSize: '1rem',
+            lineHeight: 1.6,
+            margin: 0,
+            marginBottom: 20,
+          }}
+        >
+          {t('scenarios.intro')}
+        </p>
+
+        {/* pain bullets（→ 灰，诊断语气） */}
         <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 14 }}>
           {(['pain1', 'pain2', 'pain3', 'pain4'] as const).map((k) => (
             <li
@@ -145,6 +160,42 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             </li>
           ))}
         </ul>
+
+        {/* bridge 过渡段（"诊断 → 建议" 转折点） */}
+        <p
+          style={{
+            color: '#222',
+            fontSize: '1rem',
+            lineHeight: 1.6,
+            fontWeight: 500,
+            margin: 0,
+            marginTop: 32,
+            marginBottom: 20,
+          }}
+        >
+          {t('scenarios.bridge')}
+        </p>
+
+        {/* use case bullets（✓ 绿 + 加粗，建议 / 正向） */}
+        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 14 }}>
+          {(['useCase1', 'useCase2', 'useCase3', 'useCase4'] as const).map((k) => (
+            <li
+              key={k}
+              style={{
+                fontSize: '1.05rem',
+                color: '#222',
+                fontWeight: 500,
+                lineHeight: 1.7,
+                paddingLeft: 24,
+                position: 'relative',
+              }}
+            >
+              <span style={{ position: 'absolute', left: 0, color: '#16a34a' }}>✓</span>
+              {t(`scenarios.${k}`)}
+            </li>
+          ))}
+        </ul>
+
         <p style={{ marginTop: 28, color: '#666', fontSize: 14 }}>{t('scenarios.outro')}</p>
       </section>
 

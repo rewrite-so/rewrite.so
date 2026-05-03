@@ -163,11 +163,17 @@
     },
     "scenarios": {
       "h2": "¿Te suena familiar?",
+      "intro": "Encontrar la palabra justa consume más energía mental de la que debería. La mayoría se va en estos momentos:",
       "pain1": "Reescribiste ese mensaje de Slack 3 veces antes de enviarlo.",
       "pain2": "Abriste ChatGPT en otra pestaña para \"hacerlo menos brusco\".",
       "pain3": "Tradujiste cada frase en tu cabeza antes de escribirla.",
       "pain4": "Releíste el mismo email 4 veces antes de pulsar enviar.",
-      "outro": "rewrite.so corta el bucle. ↓"
+      "bridge": "Para esto exactamente fue creado rewrite.so:",
+      "useCase1": "Escribir en un idioma que no es el tuyo — aprendizaje, trabajo, hablar con compañeros o clientes en el extranjero.",
+      "useCase2": "Responder a clientes o socios cuando el tono tiene que ser justo el adecuado.",
+      "useCase3": "Publicaciones públicas — tuits, comentarios en Reddit / HN, issues de GitHub, descripciones de PR.",
+      "useCase4": "Emails fríos, disculpas, conversaciones difíciles — donde una palabra mal puesta cuesta caro.",
+      "outro": "Una pulsación. Tres opciones pulidas. ↓"
     },
     "privacy": {
       "eyebrow": "El contrato de privacidad",

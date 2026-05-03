@@ -163,11 +163,17 @@
     },
     "scenarios": {
       "h2": "Kommt dir bekannt vor?",
+      "intro": "Den richtigen Tonfall zu finden kostet mehr mentale Kapazität als nötig. Das Meiste geht drauf für:",
       "pain1": "Diese Slack-Nachricht hast du 3 Mal neu getippt, bevor du sie gesendet hast.",
       "pain2": "Du hast ChatGPT im anderen Tab geöffnet, um „den Ton weicher zu machen\".",
       "pain3": "Du hast jeden Satz im Kopf übersetzt, bevor du ihn getippt hast.",
       "pain4": "Du hast dieselbe E-Mail 4 Mal gelesen, bevor du auf Senden gedrückt hast.",
-      "outro": "rewrite.so durchbricht die Schleife. ↓"
+      "bridge": "Genau dafür wurde rewrite.so gebaut:",
+      "useCase1": "In einer Sprache schreiben, die nicht deine erste ist — Lernen, Beruf, Austausch mit Kollegen oder Kunden im Ausland.",
+      "useCase2": "Antworten an Kunden oder Geschäftspartner, wenn der Ton genau stimmen muss.",
+      "useCase3": "Öffentliche Posts — Tweets, Reddit-/HN-Kommentare, GitHub Issues, PR-Beschreibungen.",
+      "useCase4": "Kaltakquise-Mails, Entschuldigungen, schwierige Gespräche — wo ein falsches Wort dich teuer kommt.",
+      "outro": "Ein Tastendruck. Drei polierte Optionen. ↓"
     },
     "privacy": {
       "eyebrow": "Der Datenschutzvertrag",
