@@ -156,7 +156,9 @@ export function mount(opts: MountOptions): MountHandle {
         if (ac.signal.aborted) break;
         switch (ev.event) {
           case 'meta':
-            // langDetected 已在 panel header chip 显示（用客户端 detectTargetLang 的结果），无需更新
+            // 服务端权威 echo —— 登录用户的 DB 偏好优先于客户端 chrome.storage cache；
+            // chip 跟服务端走，避免 cache 与 DB 不一致时显示错误的 target lang
+            panel.setLangDetected(ev.data.langDetected);
             break;
           case 'delta':
             panel.appendDelta(ev.data.style, ev.data.text);

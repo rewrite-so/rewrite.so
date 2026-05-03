@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   完全相同的 4 keys × 7 locale 现在归一到 `core.lang.*` 一份。SettingsClient 加
   `useTranslations('core.lang')` 副 hook，extension Settings.tsx 用全路径 `t('core.lang.X')`。
   净 -28 字符串（删 56，加 28）。
+- 浮窗 target chip 跟服务端 meta event 走（DB 是 SoT）—— 客户端 chrome.storage cache
+  与 DB user_settings.target_lang 短暂不一致时，chip 收到 SSE meta event 后立即
+  跳到服务端实际值，避免"chip 显示 EN 但改写出日文"的视觉错位。客户端 detect
+  的本地预测仍作 fallback（meta 来之前显示，~150ms 后被服务端 echo 覆盖）。
 - 扩展 ↔ web 偏好跨端同步 —— 用户在 web `/settings` 改 targetLang/uiLocale 现在能
   同步到扩展 chrome.storage，反之亦然：
   - `extension/lib/storage.ts` 加 `fetchCloudPrefs / patchCloudPrefs` helpers；

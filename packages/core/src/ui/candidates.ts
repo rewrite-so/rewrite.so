@@ -67,6 +67,12 @@ export interface CandidatesHandle {
   setError(style: Style, code: string): void;
   /** 把单卡复位回 pending（skeleton），用于 regen 启动时清空 */
   resetCard(style: Style): void;
+  /**
+   * SSE meta 事件来到时调用，更新右上角 chip 为服务端实际用的语言。
+   * 服务端 langDetected = DB 偏好（登录用户）or req.lang（匿名）—— 是真实改写用的值，
+   * 比客户端 opts.targetLang（chrome.storage cache）更权威。
+   */
+  setLangDetected(target: string): void;
   /** 整体错误：替换整个浮层为单一错误卡片（含 CTA 链接，按 code 决定文案） */
   setGlobalError(code: string, detail?: Record<string, unknown>): void;
   close(): void;
@@ -399,6 +405,17 @@ function openPanel(
       entry.root.classList.remove('error');
       entry.root.classList.add('regenerating');
       setActionMode(entry.actionEl, 'streaming');
+    },
+    setLangDetected(target) {
+      if (closed || !target) return;
+      // 服务端 echo 实际用的语言（登录用户 = DB 偏好 / 匿名 = req.lang / auto 兜底为 en）
+      // 与客户端预测的 chip 文字大多数相同；不同时短暂跳一次，让用户看到真实值
+      targetChip.textContent = targetChipText(target);
+      if (target.length > 12) {
+        targetChip.title = target;
+      } else {
+        targetChip.removeAttribute('title');
+      }
     },
     setGlobalError(code, detail) {
       if (closed) return;
