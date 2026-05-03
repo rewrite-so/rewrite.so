@@ -43,6 +43,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   sanitize 抽到 `lib/sanitize-target-lang.ts` 单独模块 + 14 条单元测试覆盖；
   GET /v1/me/settings 读路径加 lazy sanitize 兜底老脏数据；customHelp
   文案 7 locale 同步告知"特殊字符会被过滤"。
+- 浮窗体验包（5 项打磨）：
+  - 风格 label 加副标题 —— `贴近原文 · 保留你原话的语气` / `口语 · 日常对话风` /
+    `正式 · 商务书面感`，新用户一眼就明白 3 风格差别（`STYLE_SUBLABEL` × 7 locale）
+  - regen 时保留旧内容 + opacity 0.45 + spinner 覆盖；首个 delta 来才清空——
+    避免"啪一下消失"焦虑（resetCard 改"软重置"语义）
+  - 首次使用底部 hint："1/2/3 accept · ↻ regen · Esc cancel" × 7 locale；
+    localStorage 计数显示前 3 次后隐藏
+  - 浮层右上角跨语言徽章 "zh → en"（仅 source ≠ target 时显示，使用 SSE meta event
+    的 langDetected 字段，原"暂不渲染"注释解除）
+  - **prompt 区分选区改写**：`buildMessages` 在 `hasSelection=true + context` 时
+    走 SELECTION/CONTEXT 双区块强约束，明确 "DO NOT rewrite context, output ONLY
+    the rewritten selection"。长邮件选段改写场景质量提升。CLAUDE.md 标注此处修改
+    须人工 sample 验证
 - 浮窗每张卡加 ↻ Regenerate / Retry 入口 — done 状态点击重生成单卡，error
   状态点 Retry 重试。`RewriteRequestSchema.styles` 放宽到 `min(1).max(3)` 支持
   单 style 请求。每次 regen 算 1 次配额（与首发口径一致）。`mount()` 的

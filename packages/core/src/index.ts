@@ -8,7 +8,7 @@ import {
 import { isUsableEditable } from './editable/detect.ts';
 import { readEditable } from './editable/read.ts';
 import { replaceEditable } from './editable/write.ts';
-import { detectTargetLang } from './lang/detect.ts';
+import { detectTargetLang, scriptHeuristic } from './lang/detect.ts';
 import type { RewriteApiClient } from './transport/api-client.ts';
 import { attachDoubleShift } from './trigger/double-shift.ts';
 import { createCandidates } from './ui/candidates.ts';
@@ -137,7 +137,8 @@ export function mount(opts: MountOptions): MountHandle {
         if (ac.signal.aborted) break;
         switch (ev.event) {
           case 'meta':
-            // langDetected 等可用于浮层右上角显示，MVP 暂不渲染
+            // 跨语言场景在浮层右上角显示 "zh → en"（仅当 source≠target）
+            panel.setLangDetected(ev.data.langDetected);
             break;
           case 'delta':
             panel.appendDelta(ev.data.style, ev.data.text);
@@ -196,10 +197,14 @@ export function mount(opts: MountOptions): MountHandle {
       ...(opts.installId ? { installId: opts.installId } : {}),
     };
 
+    // 客户端 source 检测：仅用于浮层右上角"zh → en"展示，与 API 服务端目标语言独立
+    const sourceLang = scriptHeuristic(read.text);
+
     const ac = new AbortController();
     const panel = candidates.open({
       target,
       locale: uiLocale,
+      sourceLang,
       ...(opts.showInstallHook ? { showInstallHook: opts.showInstallHook } : {}),
       ...(opts.loginUrl ? { loginUrl: opts.loginUrl } : {}),
     });

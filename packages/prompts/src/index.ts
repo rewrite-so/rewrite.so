@@ -26,18 +26,32 @@ export interface ChatMessage {
  * 设计要点：
  * - 三引号包裹 user 文本，降低 prompt injection 风险
  * - context 单独标注，明确告诉模型不要改写它
- * - hasSelection 当前不改变 prompt（设计决策，见 prompts.test.ts）
+ * - **hasSelection=true 时**：用 SELECTION/CONTEXT 双区块格式，明确告诉模型
+ *   "只输出选中那段的改写，CONTEXT 仅供语气/对象判断不要改进输出"。
+ *   解决用户在长文本里选段改写时，LLM 过度参考 context 导致输出脱离选中段落的问题。
  */
 export function buildMessages(opts: BuildMessagesOptions): ChatMessage[] {
   const system = buildSystemPrompt(opts.style, opts.targetLang);
 
   const userParts: string[] = [];
-  if (opts.context?.trim()) {
+  if (opts.hasSelection && opts.context?.trim()) {
+    // 选区改写 + 有上下文：双区块强约束
+    userParts.push(
+      `Surrounding context (DO NOT rewrite this; only use to judge tone, audience, formality):\n"""${opts.context}"""\n`,
+    );
+    userParts.push(
+      `Selection to rewrite (output ONLY the rewritten selection — no preamble, no surrounding context, just the replacement for this exact text):\n"""${opts.text}"""`,
+    );
+  } else if (opts.context?.trim()) {
+    // 全文改写但带 context（边界情况，read.ts 通常不产生）
     userParts.push(
       `Context (do not rewrite this, only use to disambiguate):\n"""${opts.context}"""\n`,
     );
+    userParts.push(`Text to rewrite:\n"""${opts.text}"""`);
+  } else {
+    // 全文改写，无 context
+    userParts.push(`Text to rewrite:\n"""${opts.text}"""`);
   }
-  userParts.push(`Text to rewrite:\n"""${opts.text}"""`);
 
   return [
     { role: 'system', content: system },

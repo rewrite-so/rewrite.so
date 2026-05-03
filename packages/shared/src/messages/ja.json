@@ -529,7 +529,8 @@
   },
   "core": {
     "regen": "再生成",
-    "retry": "再試行"
+    "retry": "再試行",
+    "shortcuts": "{accept} 採用 · {regen} 再生成 · {cancel} キャンセル"
   },
   "state": {
     "thinking": "考えています…"

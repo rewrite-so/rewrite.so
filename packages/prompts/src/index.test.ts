@@ -68,7 +68,7 @@ describe('buildMessages', () => {
     expect(msgs[1]?.content).toContain('"""hello world"""');
   });
 
-  it('includes context block when context provided', () => {
+  it('selection mode (hasSelection=true + context) uses SELECTION/CONTEXT structure', () => {
     const msgs = buildMessages({
       style: 'casual',
       targetLang: 'en',
@@ -76,9 +76,28 @@ describe('buildMessages', () => {
       context: 'surrounding paragraph',
       hasSelection: true,
     });
-    expect(msgs[1]?.content).toContain('Context');
-    expect(msgs[1]?.content).toContain('"""surrounding paragraph"""');
-    expect(msgs[1]?.content).toContain('do not rewrite this');
+    const content = msgs[1]?.content ?? '';
+    expect(content).toContain('Surrounding context');
+    expect(content).toContain('"""surrounding paragraph"""');
+    expect(content).toMatch(/DO NOT rewrite/i);
+    expect(content).toContain('Selection to rewrite');
+    expect(content).toMatch(/output ONLY/i);
+    expect(content).toContain('"""this"""');
+  });
+
+  it('full-text mode (hasSelection=false) does NOT use SELECTION wording even with context', () => {
+    const msgs = buildMessages({
+      style: 'casual',
+      targetLang: 'en',
+      text: 'this',
+      context: 'around',
+      hasSelection: false,
+    });
+    const content = msgs[1]?.content ?? '';
+    expect(content).toContain('Context');
+    expect(content).toContain('"""around"""');
+    expect(content).toContain('Text to rewrite');
+    expect(content).not.toMatch(/Selection to rewrite/);
   });
 
   it('omits context block when context absent or whitespace', () => {
@@ -95,10 +114,51 @@ describe('buildMessages', () => {
     expect(b[1]?.content).not.toContain('Context');
   });
 
-  it('hasSelection does NOT affect prompt body (MVP decision)', () => {
-    const a = buildMessages({ style: 'casual', targetLang: 'en', text: 'x', hasSelection: false });
-    const b = buildMessages({ style: 'casual', targetLang: 'en', text: 'x', hasSelection: true });
-    expect(a).toEqual(b);
+  it('hasSelection=true without context falls back to plain "Text to rewrite"', () => {
+    // 边界：选区改写但 context 为空（罕见，read.ts 一般会带上）—— 不应假装有
+    // SELECTION 结构而漏 context；走最简 path
+    const msgs = buildMessages({
+      style: 'casual',
+      targetLang: 'en',
+      text: 'x',
+      hasSelection: true,
+    });
+    expect(msgs[1]?.content).toContain('Text to rewrite');
+    expect(msgs[1]?.content).not.toContain('Selection to rewrite');
+  });
+
+  it('hasSelection differentiates prompt only when context is present', () => {
+    // 有 context：两条 prompt 应该不同
+    const withCtxNoSel = buildMessages({
+      style: 'casual',
+      targetLang: 'en',
+      text: 'x',
+      context: 'ctx',
+      hasSelection: false,
+    });
+    const withCtxSel = buildMessages({
+      style: 'casual',
+      targetLang: 'en',
+      text: 'x',
+      context: 'ctx',
+      hasSelection: true,
+    });
+    expect(withCtxNoSel).not.toEqual(withCtxSel);
+
+    // 无 context：两条 prompt 一样（都走 "Text to rewrite" 简单 path）
+    const noCtxNoSel = buildMessages({
+      style: 'casual',
+      targetLang: 'en',
+      text: 'x',
+      hasSelection: false,
+    });
+    const noCtxSel = buildMessages({
+      style: 'casual',
+      targetLang: 'en',
+      text: 'x',
+      hasSelection: true,
+    });
+    expect(noCtxNoSel).toEqual(noCtxSel);
   });
 
   it('preserves verbatim items per spec (URLs, mentions, hashtags, code)', () => {

@@ -94,6 +94,22 @@ export const SHADOW_STYLES = `
   gap: 2px;
 }
 
+.lang-badge {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: light-dark(rgba(0,0,0,0.05), rgba(255,255,255,0.08));
+  color: light-dark(rgba(0,0,0,0.55), rgba(255,255,255,0.55));
+  pointer-events: none;
+  text-transform: uppercase;
+  font-feature-settings: "tnum";
+}
+
 .card {
   display: flex;
   align-items: stretch;
@@ -109,6 +125,14 @@ export const SHADOW_STYLES = `
 }
 .card.error {
   opacity: 0.85;
+}
+.card.regenerating {
+  /* regen 期间整张卡变暗 + 旧文本保留，等首个 delta 来才清空 */
+  opacity: 0.45;
+  transition: opacity 200ms ease;
+}
+.card.regenerating .text {
+  color: light-dark(rgba(0,0,0,0.4), rgba(255,255,255,0.4));
 }
 
 .card-action {
@@ -203,6 +227,13 @@ export const SHADOW_STYLES = `
   color: light-dark(rgba(0,0,0,0.5), rgba(255,255,255,0.5));
   letter-spacing: 0.02em;
 }
+.label-main {
+  font-weight: 600;
+  color: light-dark(rgba(0,0,0,0.7), rgba(255,255,255,0.7));
+}
+.label-sub {
+  font-weight: 400;
+}
 
 .text {
   font-size: 14px;
@@ -230,6 +261,15 @@ export const SHADOW_STYLES = `
 @keyframes shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+.shortcut-hint {
+  padding: 6px 12px 4px;
+  font-size: 11px;
+  color: light-dark(rgba(0,0,0,0.42), rgba(255,255,255,0.42));
+  text-align: center;
+  font-feature-settings: "tnum";
+  letter-spacing: 0.01em;
 }
 
 .footer {

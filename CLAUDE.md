@@ -6,6 +6,10 @@
 ## 产品契约（不可静默更改）
 
 - **3 风格契约**：固定为 `faithful / casual / formal`（中文标签：贴近原文 / 口语 / 正式）。修改 `packages/prompts` 后必须人工 sample ≥5 组中/英输入，确认 3 种风格差异未塌陷。自动测试无法保证语义差异。
+- **选区改写 prompt 区分**：`buildMessages` 在 `hasSelection=true` 且有 context 时
+  走 SELECTION/CONTEXT 双区块结构（明确告诉 LLM "DO NOT rewrite context, output ONLY
+  the rewritten selection"）。修改这部分**同样必须人工 sample**：长文本选段改写场景
+  下 LLM 是否真的只输出选段、是否过度采纳 context 内容。
 - **触发去抖窗口 500ms**：误触和延迟的权衡值，不要随意调。
 - **候选数固定 3，不能加第 4 个**（产品决策）。
 - **regen 算 1 次配额**：浮窗每张卡的 ↻ Regenerate / Retry 触发独立 `POST /v1/rewrite styles=[N]`，

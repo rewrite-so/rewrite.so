@@ -529,7 +529,8 @@
   },
   "core": {
     "regen": "Neu generieren",
-    "retry": "Erneut versuchen"
+    "retry": "Erneut versuchen",
+    "shortcuts": "{accept} wählen · {regen} regenerieren · {cancel} schließen"
   },
   "state": {
     "thinking": "Denkt nach…"

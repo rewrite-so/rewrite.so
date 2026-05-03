@@ -1,6 +1,33 @@
-import { ALL_STYLES, type Locale, STYLE_LABEL, type Style, t } from '@rewrite/shared';
+import {
+  ALL_STYLES,
+  type Locale,
+  STYLE_LABEL,
+  STYLE_SUBLABEL,
+  type Style,
+  t,
+} from '@rewrite/shared';
 
 type ActionMode = 'hidden' | 'streaming' | 'regen' | 'retry';
+
+const SHORTCUT_HINT_STORAGE_KEY = '__rewrite_so_shortcuts_shown_v1';
+const SHORTCUT_HINT_MAX_SHOWS = 3;
+
+function shouldShowShortcutHint(): boolean {
+  try {
+    const n = Number(localStorage.getItem(SHORTCUT_HINT_STORAGE_KEY) ?? '0');
+    return Number.isFinite(n) && n < SHORTCUT_HINT_MAX_SHOWS;
+  } catch {
+    return false;
+  }
+}
+function markShortcutHintShown(): void {
+  try {
+    const n = Number(localStorage.getItem(SHORTCUT_HINT_STORAGE_KEY) ?? '0');
+    localStorage.setItem(SHORTCUT_HINT_STORAGE_KEY, String(Number.isFinite(n) ? n + 1 : 1));
+  } catch {
+    /* localStorage 不可用 */
+  }
+}
 
 export type CardState = 'pending' | 'streaming' | 'done' | 'error';
 
@@ -28,6 +55,8 @@ export interface CandidatesHandle {
   setError(style: Style, code: string): void;
   /** 把单卡复位回 pending（skeleton），用于 regen 启动时清空 */
   resetCard(style: Style): void;
+  /** SSE meta 事件来到时设置目标语言；与 OpenOptions.sourceLang 比较，跨语言时显示"zh → en"小字 */
+  setLangDetected(target: string): void;
   /** 整体错误：替换整个浮层为单一错误卡片（含 CTA 链接，按 code 决定文案） */
   setGlobalError(code: string, detail?: Record<string, unknown>): void;
   close(): void;
@@ -40,6 +69,8 @@ export interface OpenOptions {
   showInstallHook?: boolean;
   /** 登录引导 URL（错误状态显示登录 CTA 时跳转） */
   loginUrl?: string;
+  /** 源文本检测到的语言（如 "zh"/"en"），用于浮层右上角显示 "zh → en" */
+  sourceLang?: string;
 }
 
 export function createCandidates(
@@ -64,6 +95,12 @@ function openPanel(
   panel.className = 'panel';
   panel.setAttribute('role', 'listbox');
   panel.setAttribute('aria-label', 'rewrite candidates');
+
+  // 语言徽章（默认隐藏，meta event 来后若 source≠target 才显示）
+  const langBadge = document.createElement('div');
+  langBadge.className = 'lang-badge';
+  langBadge.style.display = 'none';
+  panel.appendChild(langBadge);
 
   const cards: Map<
     Style,
@@ -122,7 +159,14 @@ function openPanel(
 
     const label = document.createElement('div');
     label.className = 'label';
-    label.textContent = STYLE_LABEL[style][opts.locale];
+    const labelMain = document.createElement('span');
+    labelMain.className = 'label-main';
+    labelMain.textContent = STYLE_LABEL[style][opts.locale];
+    const labelSub = document.createElement('span');
+    labelSub.className = 'label-sub';
+    labelSub.textContent = ` · ${STYLE_SUBLABEL[style][opts.locale]}`;
+    label.appendChild(labelMain);
+    label.appendChild(labelSub);
 
     const textEl = document.createElement('div');
     textEl.className = 'text';
@@ -159,6 +203,18 @@ function openPanel(
       actionEl,
       data: { style, state: 'pending', text: '' },
     });
+  }
+
+  // 首次使用提示（前 3 次显示）—— 教用户 1/2/3 接受、↻ 重生成、Esc 取消
+  if (shouldShowShortcutHint()) {
+    const hint = document.createElement('div');
+    hint.className = 'shortcut-hint';
+    hint.textContent = t('core.shortcuts', opts.locale)
+      .replace('{accept}', '1/2/3')
+      .replace('{regen}', '↻')
+      .replace('{cancel}', 'Esc');
+    panel.appendChild(hint);
+    markShortcutHintShown();
   }
 
   // 底部 hook（仅 web 模式）
@@ -241,7 +297,9 @@ function openPanel(
       if (!entry || closed) return;
       if (entry.data.state === 'pending') {
         entry.data.state = 'streaming';
+        // 此时清空旧内容（首发的 skeleton 或 regen 保留的旧文本/错误信息）
         entry.textEl.innerHTML = '';
+        entry.root.classList.remove('regenerating');
         setActionMode(entry.actionEl, 'streaming');
       }
       entry.data.text += text;
@@ -271,12 +329,26 @@ function openPanel(
     resetCard(style) {
       const entry = cards.get(style);
       if (!entry || closed) return;
+      // 软重置：保留旧文本（done 时是好结果，error 时是错误信息），让用户视觉上
+      // 看到"旧内容变暗等待替换"而不是"啪一下消失"。首个 delta 来时
+      // appendDelta 会清空 textEl + 移除 .regenerating class
       entry.data.state = 'pending';
       entry.data.text = '';
       entry.data.errorCode = undefined;
       entry.root.classList.remove('error');
-      fillSkeleton(entry.textEl);
-      setActionMode(entry.actionEl, 'hidden');
+      entry.root.classList.add('regenerating');
+      setActionMode(entry.actionEl, 'streaming');
+    },
+    setLangDetected(target) {
+      if (closed) return;
+      const source = opts.sourceLang;
+      if (!source || !target) return;
+      // 比较"language family"——主标签 prefix（zh-CN 与 zh-TW 都视为 zh）
+      const srcFam = source.toLowerCase().split('-')[0];
+      const tgtFam = target.toLowerCase().split('-')[0];
+      if (!srcFam || !tgtFam || srcFam === tgtFam) return;
+      langBadge.textContent = `${srcFam} → ${tgtFam}`;
+      langBadge.style.display = '';
     },
     setGlobalError(code, detail) {
       if (closed) return;

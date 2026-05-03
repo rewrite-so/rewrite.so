@@ -187,7 +187,7 @@ describe('createCandidates', () => {
     expect(onSelect).not.toHaveBeenCalled();
   });
 
-  it('resetCard clears done card back to pending skeleton', () => {
+  it('resetCard puts done card into regenerating state (preserves old text)', () => {
     const { factory, target, root } = setup();
     const handle = factory.open({ target, locale: 'en' });
     handle.setDone('formal', 'Greetings.');
@@ -196,26 +196,39 @@ describe('createCandidates', () => {
     handle.resetCard('formal');
     const card = root.querySelector('.card[data-style="formal"]') as HTMLElement;
     expect(card.classList.contains('error')).toBe(false);
-    // skeleton 节点重新出现
-    expect(card.querySelectorAll('.skeleton').length).toBeGreaterThan(0);
-    // action 又隐藏
+    expect(card.classList.contains('regenerating')).toBe(true);
+    // 旧文本保留（视觉连贯：不立即"啪"地消失）
+    expect(card.querySelector('.text')?.textContent).toBe('Greetings.');
+    // action button 显示 spinner
     const action = card.querySelector('.card-action') as HTMLButtonElement;
-    expect(action.style.display).toBe('none');
+    expect(action.classList.contains('card-action-streaming')).toBe(true);
   });
 
-  it('resetCard on error card removes .error class and Retry button', () => {
+  it('resetCard on error card removes .error, adds .regenerating', () => {
     const { factory, target, root } = setup();
     const handle = factory.open({ target, locale: 'en' });
     handle.setError('faithful', 'upstream_timeout');
-    expect(root.querySelector('.card[data-style="faithful"]')?.classList.contains('error')).toBe(
-      true,
-    );
+    const card = root.querySelector('.card[data-style="faithful"]') as HTMLElement;
+    expect(card.classList.contains('error')).toBe(true);
 
     handle.resetCard('faithful');
-    const card = root.querySelector('.card[data-style="faithful"]') as HTMLElement;
     expect(card.classList.contains('error')).toBe(false);
+    expect(card.classList.contains('regenerating')).toBe(true);
     const action = card.querySelector('.card-action') as HTMLButtonElement;
     expect(action.classList.contains('card-action-retry')).toBe(false);
-    expect(action.style.display).toBe('none');
+    expect(action.classList.contains('card-action-streaming')).toBe(true);
+  });
+
+  it('first appendDelta after resetCard clears old text + removes .regenerating', () => {
+    const { factory, target, root } = setup();
+    const handle = factory.open({ target, locale: 'en' });
+    handle.setDone('casual', 'Hey there.');
+    handle.resetCard('casual');
+    expect(root.querySelector('.card[data-style="casual"] .text')?.textContent).toBe('Hey there.');
+
+    handle.appendDelta('casual', 'Hi');
+    const card = root.querySelector('.card[data-style="casual"]') as HTMLElement;
+    expect(card.classList.contains('regenerating')).toBe(false);
+    expect(card.querySelector('.text')?.textContent).toBe('Hi');
   });
 });

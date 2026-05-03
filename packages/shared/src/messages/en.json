@@ -529,7 +529,8 @@
   },
   "core": {
     "regen": "Regenerate",
-    "retry": "Retry"
+    "retry": "Retry",
+    "shortcuts": "{accept} accept · {regen} regen · {cancel} cancel"
   },
   "state": {
     "thinking": "Thinking…"

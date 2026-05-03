@@ -529,7 +529,8 @@
   },
   "core": {
     "regen": "Regenerar",
-    "retry": "Reintentar"
+    "retry": "Reintentar",
+    "shortcuts": "{accept} aceptar · {regen} regenerar · {cancel} cerrar"
   },
   "state": {
     "thinking": "Pensando…"

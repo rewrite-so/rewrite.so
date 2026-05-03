@@ -529,7 +529,8 @@
   },
   "core": {
     "regen": "다시 생성",
-    "retry": "다시 시도"
+    "retry": "다시 시도",
+    "shortcuts": "{accept} 선택 · {regen} 재생성 · {cancel} 닫기"
   },
   "state": {
     "thinking": "생각 중…"
