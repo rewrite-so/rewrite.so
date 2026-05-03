@@ -178,6 +178,61 @@ describe('POST /v1/rewrite', () => {
     expect(res.status).toBe(400);
   });
 
+  it('single-style request fans out only one upstream stream', async () => {
+    let upstreamCallCount = 0;
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {
+      upstreamCallCount++;
+      return makeUpstreamSSE('regenerated');
+    });
+
+    const res = await app.request(
+      '/v1/rewrite',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          text: 'hi',
+          hasSelection: false,
+          lang: 'en',
+          styles: ['casual'],
+        }),
+      },
+      MOCK_ENV,
+    );
+
+    expect(res.status).toBe(200);
+    if (!res.body) throw new Error('expected body');
+    const events: SSEEvent[] = [];
+    for await (const ev of parseSSEStream(res.body)) events.push(ev);
+
+    expect(upstreamCallCount).toBe(1);
+    const dones = events.filter((e) => e.event === 'done');
+    expect(dones).toHaveLength(1);
+    expect((dones[0] as { data: { style: string } }).data.style).toBe('casual');
+    // meta event 的 streams 字段也应该只列单 style
+    const meta = events[0] as { event: 'meta'; data: { streams: string[] } };
+    expect(meta.event).toBe('meta');
+    expect(meta.data.streams).toEqual(['casual']);
+  });
+
+  it('rejects empty styles array (min 1)', async () => {
+    const res = await app.request(
+      '/v1/rewrite',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          text: 'hi',
+          hasSelection: false,
+          lang: 'en',
+          styles: [],
+        }),
+      },
+      MOCK_ENV,
+    );
+    expect(res.status).toBe(400);
+  });
+
   it('one upstream fails, the other two still complete', async () => {
     let n = 0;
     vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {

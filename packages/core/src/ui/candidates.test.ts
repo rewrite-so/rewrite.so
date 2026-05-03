@@ -13,10 +13,16 @@ function setup() {
   const onSelect = vi.fn();
   const onCancel = vi.fn();
   const onInstallClick = vi.fn();
-  const factory = createCandidates(root, { onSelect, onCancel, onInstallClick });
+  const onRegenerate = vi.fn();
+  const factory = createCandidates(root, {
+    onSelect,
+    onCancel,
+    onInstallClick,
+    onRegenerate,
+  });
   const target = document.createElement('textarea');
   document.body.appendChild(target);
-  return { root, target, factory, onSelect, onCancel, onInstallClick };
+  return { root, target, factory, onSelect, onCancel, onInstallClick, onRegenerate };
 }
 
 describe('createCandidates', () => {
@@ -117,5 +123,99 @@ describe('createCandidates', () => {
     const link = root.querySelector('.footer a') as HTMLAnchorElement;
     link.click();
     expect(onInstallClick).toHaveBeenCalledTimes(1);
+  });
+
+  // ===== regenerate / retry =====
+
+  it('action button is hidden in pending state', () => {
+    const { factory, target, root } = setup();
+    factory.open({ target, locale: 'en' });
+    const action = root.querySelector(
+      '.card[data-style="faithful"] .card-action',
+    ) as HTMLButtonElement;
+    expect(action).not.toBeNull();
+    expect(action.style.display).toBe('none');
+  });
+
+  it('action button shows spinner during streaming', () => {
+    const { factory, target, root } = setup();
+    const handle = factory.open({ target, locale: 'en' });
+    handle.appendDelta('casual', 'Hey');
+    const action = root.querySelector(
+      '.card[data-style="casual"] .card-action',
+    ) as HTMLButtonElement;
+    expect(action.classList.contains('card-action-streaming')).toBe(true);
+    expect(action.getAttribute('aria-disabled')).toBe('true');
+  });
+
+  it('action button shows ↻ regen when card is done; click invokes onRegenerate', () => {
+    const { factory, target, root, onRegenerate } = setup();
+    const handle = factory.open({ target, locale: 'en' });
+    handle.setDone('faithful', 'Hello.');
+    const action = root.querySelector(
+      '.card[data-style="faithful"] .card-action',
+    ) as HTMLButtonElement;
+    expect(action.classList.contains('card-action-regen')).toBe(true);
+    expect(action.textContent).toBe('↻');
+    expect(action.getAttribute('aria-disabled')).toBe('false');
+    action.click();
+    expect(onRegenerate).toHaveBeenCalledWith('faithful');
+  });
+
+  it('error card shows Retry button; click invokes onRegenerate', () => {
+    const { factory, target, root, onRegenerate } = setup();
+    const handle = factory.open({ target, locale: 'en' });
+    handle.setError('formal', 'upstream_timeout');
+    const action = root.querySelector(
+      '.card[data-style="formal"] .card-action',
+    ) as HTMLButtonElement;
+    expect(action.classList.contains('card-action-retry')).toBe(true);
+    expect(action.textContent?.toLowerCase()).toBe('retry');
+    action.click();
+    expect(onRegenerate).toHaveBeenCalledWith('formal');
+  });
+
+  it('clicking action button does NOT trigger onSelect', () => {
+    const { factory, target, root, onSelect, onRegenerate } = setup();
+    const handle = factory.open({ target, locale: 'en' });
+    handle.setDone('casual', 'Hey there');
+    const action = root.querySelector(
+      '.card[data-style="casual"] .card-action',
+    ) as HTMLButtonElement;
+    action.click();
+    expect(onRegenerate).toHaveBeenCalledWith('casual');
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
+  it('resetCard clears done card back to pending skeleton', () => {
+    const { factory, target, root } = setup();
+    const handle = factory.open({ target, locale: 'en' });
+    handle.setDone('formal', 'Greetings.');
+    expect(root.querySelector('.card[data-style="formal"] .text')?.textContent).toBe('Greetings.');
+
+    handle.resetCard('formal');
+    const card = root.querySelector('.card[data-style="formal"]') as HTMLElement;
+    expect(card.classList.contains('error')).toBe(false);
+    // skeleton 节点重新出现
+    expect(card.querySelectorAll('.skeleton').length).toBeGreaterThan(0);
+    // action 又隐藏
+    const action = card.querySelector('.card-action') as HTMLButtonElement;
+    expect(action.style.display).toBe('none');
+  });
+
+  it('resetCard on error card removes .error class and Retry button', () => {
+    const { factory, target, root } = setup();
+    const handle = factory.open({ target, locale: 'en' });
+    handle.setError('faithful', 'upstream_timeout');
+    expect(root.querySelector('.card[data-style="faithful"]')?.classList.contains('error')).toBe(
+      true,
+    );
+
+    handle.resetCard('faithful');
+    const card = root.querySelector('.card[data-style="faithful"]') as HTMLElement;
+    expect(card.classList.contains('error')).toBe(false);
+    const action = card.querySelector('.card-action') as HTMLButtonElement;
+    expect(action.classList.contains('card-action-retry')).toBe(false);
+    expect(action.style.display).toBe('none');
   });
 });

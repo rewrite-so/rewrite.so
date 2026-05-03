@@ -1,5 +1,7 @@
 import { ALL_STYLES, type Locale, STYLE_LABEL, type Style, t } from '@rewrite/shared';
 
+type ActionMode = 'hidden' | 'streaming' | 'regen' | 'retry';
+
 export type CardState = 'pending' | 'streaming' | 'done' | 'error';
 
 export interface CardData {
@@ -16,12 +18,16 @@ export interface CandidatesCallbacks {
   onCancel: () => void;
   /** 用户点击"安装扩展"hook（仅 web 模式有效，可选） */
   onInstallClick?: () => void;
+  /** 用户点击单卡 ↻/Retry → 该 style 重新生成 */
+  onRegenerate?: (style: Style) => void;
 }
 
 export interface CandidatesHandle {
   appendDelta(style: Style, text: string): void;
   setDone(style: Style, finalText: string): void;
   setError(style: Style, code: string): void;
+  /** 把单卡复位回 pending（skeleton），用于 regen 启动时清空 */
+  resetCard(style: Style): void;
   /** 整体错误：替换整个浮层为单一错误卡片（含 CTA 链接，按 code 决定文案） */
   setGlobalError(code: string, detail?: Record<string, unknown>): void;
   close(): void;
@@ -59,7 +65,46 @@ function openPanel(
   panel.setAttribute('role', 'listbox');
   panel.setAttribute('aria-label', 'rewrite candidates');
 
-  const cards: Map<Style, { root: HTMLElement; textEl: HTMLElement; data: CardData }> = new Map();
+  const cards: Map<
+    Style,
+    { root: HTMLElement; textEl: HTMLElement; actionEl: HTMLButtonElement; data: CardData }
+  > = new Map();
+
+  function fillSkeleton(textEl: HTMLElement) {
+    textEl.innerHTML = '';
+    const sk1 = document.createElement('div');
+    sk1.className = 'skeleton medium';
+    const sk2 = document.createElement('div');
+    sk2.className = 'skeleton short';
+    sk2.style.marginTop = '6px';
+    textEl.appendChild(sk1);
+    textEl.appendChild(sk2);
+  }
+
+  function setActionMode(actionEl: HTMLButtonElement, mode: ActionMode) {
+    actionEl.className = `card-action card-action-${mode}`;
+    if (mode === 'hidden') {
+      actionEl.style.display = 'none';
+      actionEl.setAttribute('aria-disabled', 'true');
+      return;
+    }
+    actionEl.style.display = '';
+    if (mode === 'streaming') {
+      actionEl.innerHTML = '<span class="card-action-spinner" aria-hidden="true"></span>';
+      actionEl.setAttribute('aria-disabled', 'true');
+      actionEl.title = '';
+    } else if (mode === 'regen') {
+      actionEl.textContent = '↻';
+      actionEl.setAttribute('aria-disabled', 'false');
+      actionEl.title = t('core.regen', opts.locale);
+      actionEl.setAttribute('aria-label', t('core.regen', opts.locale));
+    } else if (mode === 'retry') {
+      actionEl.textContent = t('core.retry', opts.locale);
+      actionEl.setAttribute('aria-disabled', 'false');
+      actionEl.title = '';
+      actionEl.setAttribute('aria-label', t('core.retry', opts.locale));
+    }
+  }
 
   for (let i = 0; i < ALL_STYLES.length; i++) {
     const style = ALL_STYLES[i] as Style;
@@ -81,29 +126,39 @@ function openPanel(
 
     const textEl = document.createElement('div');
     textEl.className = 'text';
-    // 初始 skeleton
-    const sk1 = document.createElement('div');
-    sk1.className = 'skeleton medium';
-    const sk2 = document.createElement('div');
-    sk2.className = 'skeleton short';
-    sk2.style.marginTop = '6px';
-    textEl.appendChild(sk1);
-    textEl.appendChild(sk2);
+    fillSkeleton(textEl);
+
+    const actionEl = document.createElement('button');
+    actionEl.type = 'button';
+    setActionMode(actionEl, 'hidden');
+    actionEl.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      if (actionEl.getAttribute('aria-disabled') === 'true') return;
+      callbacks.onRegenerate?.(style);
+    });
 
     body.appendChild(label);
     body.appendChild(textEl);
     card.appendChild(kbd);
     card.appendChild(body);
+    card.appendChild(actionEl);
     panel.appendChild(card);
 
-    card.addEventListener('click', () => {
+    card.addEventListener('click', (ev) => {
+      // 点击 action button 不触发 onSelect
+      if (ev.target === actionEl || actionEl.contains(ev.target as Node)) return;
       const data = cards.get(style)?.data;
       if (data && (data.state === 'done' || data.state === 'streaming')) {
         callbacks.onSelect(style, data.text);
       }
     });
 
-    cards.set(style, { root: card, textEl, data: { style, state: 'pending', text: '' } });
+    cards.set(style, {
+      root: card,
+      textEl,
+      actionEl,
+      data: { style, state: 'pending', text: '' },
+    });
   }
 
   // 底部 hook（仅 web 模式）
@@ -187,6 +242,7 @@ function openPanel(
       if (entry.data.state === 'pending') {
         entry.data.state = 'streaming';
         entry.textEl.innerHTML = '';
+        setActionMode(entry.actionEl, 'streaming');
       }
       entry.data.text += text;
       entry.textEl.textContent = entry.data.text;
@@ -197,6 +253,7 @@ function openPanel(
       entry.data.state = 'done';
       entry.data.text = finalText;
       entry.textEl.textContent = finalText;
+      setActionMode(entry.actionEl, 'regen');
     },
     setError(style, code) {
       const entry = cards.get(style);
@@ -209,6 +266,17 @@ function openPanel(
       span.className = 'text dim';
       span.textContent = errorMessage(code, opts.locale);
       entry.textEl.appendChild(span);
+      setActionMode(entry.actionEl, 'retry');
+    },
+    resetCard(style) {
+      const entry = cards.get(style);
+      if (!entry || closed) return;
+      entry.data.state = 'pending';
+      entry.data.text = '';
+      entry.data.errorCode = undefined;
+      entry.root.classList.remove('error');
+      fillSkeleton(entry.textEl);
+      setActionMode(entry.actionEl, 'hidden');
     },
     setGlobalError(code, detail) {
       if (closed) return;

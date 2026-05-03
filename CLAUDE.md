@@ -8,6 +8,10 @@
 - **3 风格契约**：固定为 `faithful / casual / formal`（中文标签：贴近原文 / 口语 / 正式）。修改 `packages/prompts` 后必须人工 sample ≥5 组中/英输入，确认 3 种风格差异未塌陷。自动测试无法保证语义差异。
 - **触发去抖窗口 500ms**：误触和延迟的权衡值，不要随意调。
 - **候选数固定 3，不能加第 4 个**（产品决策）。
+- **regen 算 1 次配额**：浮窗每张卡的 ↻ Regenerate / Retry 触发独立 `POST /v1/rewrite styles=[N]`，
+  与首发请求按相同口径扣月配额（`apps/api/src/routes/rewrite.ts` 的 `checkAndIncrement`）。
+  不要给 regen 加"重试不计费"豁免——每次都是真实 LLM cost，且会被滥用为无限调。
+  API contract `RewriteRequestSchema.styles` 因此放宽到 `min(1).max(3)`。
 - **不加自定义 prompt 输入框**（产品决策；BYOK 仅替换 endpoint，不让用户改 prompt）。
 - **自定义 targetLang 例外**：`/settings` 允许任意自然语言描述（"粤语" / "British English" /
   "Shakespearean"），通过 `lib/sanitize-target-lang.ts` 注入到 prompt。这是有意松绑——

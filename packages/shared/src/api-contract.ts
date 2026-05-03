@@ -12,7 +12,11 @@ export const RewriteRequestSchema = z.object({
   hasSelection: z.boolean(),
   /** BCP-47 或 'auto' */
   lang: z.string(),
-  styles: z.array(z.enum(ALL_STYLES as readonly [string, ...string[]])).length(3),
+  // 单卡 regen 时只发该 style；首发 = 3 风格；min(1) 防误传空数组
+  styles: z
+    .array(z.enum(ALL_STYLES as readonly [string, ...string[]]))
+    .min(1)
+    .max(3),
   /** 扩展安装 ID（匿名维度） */
   installId: z.string().min(1).max(64).optional(),
   /** 网页体验页 Turnstile token，扩展端不必填 */

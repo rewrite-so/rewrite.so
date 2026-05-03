@@ -43,6 +43,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   sanitize 抽到 `lib/sanitize-target-lang.ts` 单独模块 + 14 条单元测试覆盖；
   GET /v1/me/settings 读路径加 lazy sanitize 兜底老脏数据；customHelp
   文案 7 locale 同步告知"特殊字符会被过滤"。
+- 浮窗每张卡加 ↻ Regenerate / Retry 入口 — done 状态点击重生成单卡，error
+  状态点 Retry 重试。`RewriteRequestSchema.styles` 放宽到 `min(1).max(3)` 支持
+  单 style 请求。每次 regen 算 1 次配额（与首发口径一致）。`mount()` 的
+  AbortController 拆为 `inflightAborts: Set<AbortController>`，per-request 独立
+  abort，Esc / unmount / onSelect 仍 abort 全部。streaming 中按钮显示 spinner
+  禁用（不允许同卡重叠 regen）。
 - 修复扩展与 /try 双 mount 撞车 — 扩展 manifest 拆为两个 content script：
   rewrite.so 自家域只跑 `sentinel.ts`（document_start 给 `<html>` 设 data-attr），
   inject.ts 走 `<all_urls>` 但 exclude rewrite.so / localhost:3000。

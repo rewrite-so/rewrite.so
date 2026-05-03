@@ -57,8 +57,22 @@ export function mount(opts: MountOptions): MountHandle {
   const dot = createDot(root, uiLocale);
 
   let activeEditable: HTMLElement | null = null;
-  let currentAbort: AbortController | null = null;
+  // 多个 in-flight 请求并存：首发 3-style + 任意数量的单卡 regen
+  // Esc / onSelect / unmount 时全部 abort + clear
+  const inflightAborts = new Set<AbortController>();
   let currentPanel: ReturnType<ReturnType<typeof createCandidates>['open']> | null = null;
+  // 缓存首发请求的 lang / context / hasSelection，给后续 regen 复用
+  let lastRequestContext: {
+    text: string;
+    hasSelection: boolean;
+    lang: string;
+    context?: string;
+  } | null = null;
+
+  function abortAllInflight() {
+    for (const ac of inflightAborts) ac.abort();
+    inflightAborts.clear();
+  }
 
   const candidates = createCandidates(root, {
     onSelect: (style, finalText) => {
@@ -67,16 +81,17 @@ export function mount(opts: MountOptions): MountHandle {
       replaceEditable(activeEditable, finalText, range);
       currentPanel?.close();
       currentPanel = null;
-      currentAbort?.abort();
-      currentAbort = null;
+      abortAllInflight();
       // 标识 style 已使用（暂留分析用）
       void style;
     },
     onCancel: () => {
       currentPanel?.close();
       currentPanel = null;
-      currentAbort?.abort();
-      currentAbort = null;
+      abortAllInflight();
+    },
+    onRegenerate: (style) => {
+      void regenerateOne(style);
     },
     ...(opts.onInstallClick ? { onInstallClick: opts.onInstallClick } : {}),
   });
@@ -104,42 +119,18 @@ export function mount(opts: MountOptions): MountHandle {
   document.addEventListener('focusin', onFocusIn, { capture: true });
   document.addEventListener('focusout', onFocusOut, { capture: true });
 
-  const handleTrigger = async () => {
-    if (!activeEditable || !isUsableEditable(activeEditable)) return;
-
-    // 取消上一次未完成的请求 + 关闭已开浮层（重新生成）
-    currentAbort?.abort();
-    currentPanel?.close();
-
-    const target = activeEditable;
-    const read = readEditable(target);
-    if (!read.text.trim()) return;
-
-    const targetLang = detectTargetLang({
-      userPref: userPrefLang,
-      el: target,
-      sampleText: read.text.slice(0, 200),
-    });
-
-    const req: RewriteRequest = {
-      text: read.text,
-      hasSelection: read.hasSelection,
-      lang: targetLang,
-      styles: [...ALL_STYLES],
-      ...(read.context ? { context: read.context } : {}),
-      ...(opts.installId ? { installId: opts.installId } : {}),
-    };
-
-    const ac = new AbortController();
-    currentAbort = ac;
-    const panel = candidates.open({
-      target,
-      locale: uiLocale,
-      ...(opts.showInstallHook ? { showInstallHook: opts.showInstallHook } : {}),
-      ...(opts.loginUrl ? { loginUrl: opts.loginUrl } : {}),
-    });
-    currentPanel = panel;
-
+  /**
+   * 跑一次 rewrite（首发 3-style 或单卡 regen 都走这里）。
+   * 错误处理策略由 onError 回调决定：首发整路 fail → setGlobalError；
+   * 单卡 regen 整路 fail → setError(style)。
+   */
+  async function runRewrite(
+    req: RewriteRequest,
+    ac: AbortController,
+    panel: NonNullable<typeof currentPanel>,
+    onFatal: (code: string, detail?: Record<string, unknown>) => void,
+  ): Promise<void> {
+    inflightAborts.add(ac);
     try {
       const stream = await opts.apiClient.rewrite(req, ac.signal);
       for await (const ev of parseSSEStream(stream)) {
@@ -167,10 +158,73 @@ export function mount(opts: MountOptions): MountHandle {
       if ((err as Error).name === 'AbortError') return; // 用户取消
       // ApiError（HTTP 4xx/5xx）解析 detailObj 拿到 error code
       const code = extractErrorCode(err);
-      panel.setGlobalError(code, extractErrorDetail(err));
+      onFatal(code, extractErrorDetail(err));
       opts.onError?.(err as Error);
+    } finally {
+      inflightAborts.delete(ac);
     }
+  }
+
+  const handleTrigger = async () => {
+    if (!activeEditable || !isUsableEditable(activeEditable)) return;
+
+    // 触发新一次：取消所有 in-flight + 关闭旧浮层
+    abortAllInflight();
+    currentPanel?.close();
+
+    const target = activeEditable;
+    const read = readEditable(target);
+    if (!read.text.trim()) return;
+
+    const targetLang = detectTargetLang({
+      userPref: userPrefLang,
+      el: target,
+      sampleText: read.text.slice(0, 200),
+    });
+
+    // 缓存请求上下文，给后续 regen 复用
+    lastRequestContext = {
+      text: read.text,
+      hasSelection: read.hasSelection,
+      lang: targetLang,
+      ...(read.context ? { context: read.context } : {}),
+    };
+
+    const req: RewriteRequest = {
+      ...lastRequestContext,
+      styles: [...ALL_STYLES],
+      ...(opts.installId ? { installId: opts.installId } : {}),
+    };
+
+    const ac = new AbortController();
+    const panel = candidates.open({
+      target,
+      locale: uiLocale,
+      ...(opts.showInstallHook ? { showInstallHook: opts.showInstallHook } : {}),
+      ...(opts.loginUrl ? { loginUrl: opts.loginUrl } : {}),
+    });
+    currentPanel = panel;
+
+    await runRewrite(req, ac, panel, (code, detail) => panel.setGlobalError(code, detail));
   };
+
+  /** 单卡 regenerate：仅 abort 当前 in-flight 中该 style 的（不影响其它）+ 重新单 style 请求 */
+  async function regenerateOne(style: Style): Promise<void> {
+    const panel = currentPanel;
+    if (!panel || !lastRequestContext) return;
+
+    panel.resetCard(style);
+
+    const req: RewriteRequest = {
+      ...lastRequestContext,
+      styles: [style],
+      ...(opts.installId ? { installId: opts.installId } : {}),
+    };
+
+    const ac = new AbortController();
+    // 单卡 fatal → setError（错误卡仍可 Retry），不影响其它卡
+    await runRewrite(req, ac, panel, (code) => panel.setError(style, code));
+  }
 
   function extractErrorCode(err: unknown): string {
     if (err && typeof err === 'object' && 'detailObj' in err) {
@@ -196,7 +250,7 @@ export function mount(opts: MountOptions): MountHandle {
       trigger.detach();
       document.removeEventListener('focusin', onFocusIn, { capture: true });
       document.removeEventListener('focusout', onFocusOut, { capture: true });
-      currentAbort?.abort();
+      abortAllInflight();
       currentPanel?.close();
       dot.destroy();
     },

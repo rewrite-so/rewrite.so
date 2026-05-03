@@ -102,12 +102,78 @@ export const SHADOW_STYLES = `
   border-radius: 8px;
   cursor: pointer;
   transition: background 80ms ease;
+  position: relative;
 }
 .card:hover, .card.focused {
   background: light-dark(rgba(0,0,0,0.04), rgba(255,255,255,0.06));
 }
 .card.error {
-  opacity: 0.6;
+  opacity: 0.85;
+}
+
+.card-action {
+  position: absolute;
+  right: 8px;
+  bottom: 6px;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.card-action[aria-disabled="true"] { cursor: default; }
+.card-action-regen {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  font-size: 13px;
+  line-height: 1;
+  color: light-dark(rgba(0,0,0,0.45), rgba(255,255,255,0.45));
+  opacity: 0.7;
+  transition: opacity 120ms ease, background 120ms ease, color 120ms ease;
+}
+.card-action-regen:hover {
+  opacity: 1;
+  background: light-dark(rgba(0,0,0,0.06), rgba(255,255,255,0.10));
+  color: light-dark(#1f1f22, #f5f5f5);
+}
+.card-action-retry {
+  height: 22px;
+  padding: 0 9px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  border: 1px solid light-dark(rgba(0,0,0,0.18), rgba(255,255,255,0.22));
+  color: light-dark(#1f1f22, #f5f5f5);
+  background: transparent;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+.card-action-retry:hover {
+  background: light-dark(rgba(0,0,0,0.06), rgba(255,255,255,0.10));
+  border-color: light-dark(rgba(0,0,0,0.32), rgba(255,255,255,0.32));
+}
+.card-action-streaming {
+  width: 18px;
+  height: 18px;
+}
+.card-action-spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1.5px solid light-dark(rgba(0,0,0,0.18), rgba(255,255,255,0.20));
+  border-top-color: light-dark(rgba(0,0,0,0.55), rgba(255,255,255,0.55));
+  animation: rs-spin 0.7s linear infinite;
+}
+@keyframes rs-spin {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card-action-spinner { animation: none; }
 }
 
 .kbd {
