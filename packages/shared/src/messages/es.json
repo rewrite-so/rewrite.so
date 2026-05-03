@@ -53,7 +53,9 @@
     "try": {
       "h1": "Probar",
       "intro": "Escribe algo en la caja de abajo y pulsa Shift dos veces para ver 3 reescrituras de estilo.",
-      "targetLangLabel": "Reescribir en"
+      "targetLangLabel": "Reescribir en",
+      "extensionTakeoverTitle": "Tu extensión instalada está manejando esta página",
+      "extensionTakeoverBody": "El cuadro de texto de abajo funciona igual: escribe y pulsa Shift dos veces. El idioma de reescritura y demás preferencias vienen del popup de la extensión (el desplegable de arriba está oculto)."
     },
     "unsubscribe": {
       "h1": "Darse de baja",

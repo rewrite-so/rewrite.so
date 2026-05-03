@@ -53,7 +53,9 @@
     "try": {
       "h1": "체험",
       "intro": "아래 상자에 무언가 입력하고, Shift를 두 번 눌러 3가지 스타일의 재작성을 확인하세요.",
-      "targetLangLabel": "재작성 언어"
+      "targetLangLabel": "재작성 언어",
+      "extensionTakeoverTitle": "설치된 확장이 이 페이지를 처리하고 있습니다",
+      "extensionTakeoverBody": "아래 텍스트 영역은 그대로 사용할 수 있어요 — 입력 후 Shift 두 번. 재작성 언어 등 설정은 확장 팝업에서 가져옵니다 (위 드롭다운은 숨겨졌어요)."
     },
     "unsubscribe": {
       "h1": "구독 취소",

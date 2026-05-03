@@ -43,6 +43,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   sanitize 抽到 `lib/sanitize-target-lang.ts` 单独模块 + 14 条单元测试覆盖；
   GET /v1/me/settings 读路径加 lazy sanitize 兜底老脏数据；customHelp
   文案 7 locale 同步告知"特殊字符会被过滤"。
+- 修复扩展与 /try 双 mount 撞车 — 扩展 manifest 拆为两个 content script：
+  rewrite.so 自家域只跑 `sentinel.ts`（document_start 给 `<html>` 设 data-attr），
+  inject.ts 走 `<all_urls>` 但 exclude rewrite.so / localhost:3000。
+  /try 的 TryClient 检测到扩展存在时跳过 mount + 隐藏 select + 顶部 banner
+  说明"扩展已接管，目标语言去扩展弹窗改"。修了双 keydown listener / 双配额扣减 /
+  双浮层重叠的 bug。
 
 ### Added
 - **i18n** — 7 UI locales (`en` / `zh-CN` / `ja` / `ko` / `es` / `fr` / `de`) covering

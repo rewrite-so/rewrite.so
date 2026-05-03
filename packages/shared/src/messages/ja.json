@@ -53,7 +53,9 @@
     "try": {
       "h1": "試す",
       "intro": "下のボックスに何か書いて、Shift をダブルタップで 3 スタイルの書き換えを見てください。",
-      "targetLangLabel": "書き換え先"
+      "targetLangLabel": "書き換え先",
+      "extensionTakeoverTitle": "インストール済みの拡張機能がこのページを引き継いでいます",
+      "extensionTakeoverBody": "下のテキストエリアはそのまま使えます — 入力して Shift をダブルタップしてください。書き換え先言語などの設定は拡張機能のポップアップから（上のドロップダウンは非表示になっています）。"
     },
     "unsubscribe": {
       "h1": "配信停止",

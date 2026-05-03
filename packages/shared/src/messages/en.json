@@ -53,7 +53,9 @@
     "try": {
       "h1": "Try it",
       "intro": "Write something in the box below, then double-tap Shift to see 3 style rewrites.",
-      "targetLangLabel": "Rewrite into"
+      "targetLangLabel": "Rewrite into",
+      "extensionTakeoverTitle": "Your installed extension is handling this page",
+      "extensionTakeoverBody": "The textarea below works the same — type something and double-tap Shift. Target language and other preferences come from the extension popup, not the dropdown above (which is hidden here)."
     },
     "unsubscribe": {
       "h1": "Unsubscribe",

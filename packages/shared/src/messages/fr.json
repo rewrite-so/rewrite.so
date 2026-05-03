@@ -53,7 +53,9 @@
     "try": {
       "h1": "Essayer",
       "intro": "Écrivez quelque chose dans la boîte ci-dessous, puis double-tapez Shift pour voir 3 réécritures de style.",
-      "targetLangLabel": "Réécrire en"
+      "targetLangLabel": "Réécrire en",
+      "extensionTakeoverTitle": "Ton extension installée gère cette page",
+      "extensionTakeoverBody": "Le champ de texte ci-dessous fonctionne pareil — écris et double-tape Shift. La langue de réécriture et autres préférences viennent du popup de l'extension (le menu déroulant ci-dessus est masqué)."
     },
     "unsubscribe": {
       "h1": "Désabonnement",
