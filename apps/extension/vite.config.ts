@@ -24,7 +24,11 @@ export default defineConfig({
   },
   build: {
     target: 'chrome120',
-    sourcemap: true,
+    // 'hidden' 仍生成 .map 文件，但不在 JS 末尾加 `//# sourceMappingURL=` 注释。
+    // CRXJS 用 IIFE 包装单行 content script 时，sourceMappingURL 注释会和 IIFE
+    // 闭合 `})()` 挤到同一行 —— `//` 把闭合也注释掉，引发 "Unexpected end of input"。
+    // 'hidden' 避开这个 bug。开发时如需调试可临时改回 true。
+    sourcemap: 'hidden',
     emptyOutDir: true,
   },
   server: {
