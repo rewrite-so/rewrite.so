@@ -94,9 +94,15 @@
 - **Creem test mode 走 `https://test-api.creem.io`，生产走 `https://api.creem.io`**：
   `creem.ts` 的 `creemBase(apiKey)` 按 key 前缀自动路由（`creem_test_*` → test，`creem_*` → live）。
   写错 base URL 会一律 401 invalid key（test key 在 live endpoint 上无效）。
-- **BYOK 仅 Pro 用户可配（在 PUT 路径校验）**：但 /v1/rewrite 在执行时只看 byok_keys 表是否有行，
-  不再二次校验订阅——避免订阅过期后用户的 BYOK 突然失效。订阅过期时若想强制回退，
-  应在 webhook subscription.expired 处理器里清掉 byok_keys。MVP 不做。
+- **BYOK 任何登录用户均可配**：`PUT /v1/me/byok` 仅校验 `session`，不再要求 Pro 订阅。
+  产品决策：BYOK 不再是 Pro 专属，Pro 的差异化是 hosted model（2000/月）+ 不用管 key
+  + Priority。`/v1/rewrite` 仍只看 byok_keys 表存在 —— Pro 订阅过期时 BYOK 仍生效
+  （避免突然失效）。反代滥用底线仍是 BYOK 用户走 100 req/min token bucket（不变）。
+- **BYOK 测试 endpoint** `POST /v1/me/byok/test`：用户保存前验证 baseUrl/model/apiKey
+  能否调通上游。**不存 DB**、**不写日志**、**不计配额**（key 是用户的，绝不落地）。
+  8s timeout，错误码映射：401→unauthorized / 403→forbidden / 404→model_not_found /
+  429→rate_limited / AbortError→timeout / 其它 throw→unreachable。仅登录用户可调
+  （防匿名滥用作 base URL 探测）。
 - **BYOK_MASTER_KEY 是 base64 编码的 32 字节 AES-GCM key**（`openssl rand -base64 32` 生成）。
   改 master key 会让所有 byok_keys 失效。`key_version` 字段保留给将来多 key 轮换用，MVP v=1。
 

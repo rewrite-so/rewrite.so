@@ -21,7 +21,7 @@
     },
     "pricing": {
       "title": "요금 — rewrite.so",
-      "description": "무료 등급 월 30회 재작성. Pro는 연간 $7.99/월로 월 2,000회 + BYOK 무제한."
+      "description": "무료 등급 월 30회 재작성 + BYOK 옵션. Pro는 연간 $7.99/월로 월 2,000회, 호스트 모델 사용, API 키 설정 불필요."
     },
     "contact": {
       "title": "문의 — rewrite.so",
@@ -76,6 +76,7 @@
         "feat4": "3가지 스타일 모두: 충실 / 캐주얼 / 격식",
         "feat5": "페이지 언어 자동 감지; 설정에서 고정 목표 언어 선택 가능",
         "feat6": "카드 불필요",
+        "feat7": "BYOK 옵션 — OpenAI 호환 키로 무제한 재작성",
         "cta": "무료 체험"
       },
       "pro": {
@@ -83,7 +84,7 @@
         "period": "/ 월 (연간 청구)",
         "subPrice": "연 ${yearlyTotal} (월 ${monthly}/월 대비 {savings}% 절약)",
         "feat1": "월 {count, number}회 재작성",
-        "feat2": "BYOK: 자신의 OpenAI 호환 키로 무제한 사용",
+        "feat2": "호스트 모델 — API 키 설정 불필요",
         "feat3": "우선 이메일 지원",
         "feat4": "언제든 취소 가능; 14일 이내 환불",
         "cta": "Pro로 업그레이드 →"
@@ -95,7 +96,7 @@
         "q2": "재작성한 텍스트를 저장하나요?",
         "a2": "아니요. 입력과 출력은 통과만 하고 절대 보존되지 않습니다 — 애플리케이션 로그, 에러 리포터, 분석 어디에도 저장되지 않습니다. 자세한 내용은 <privacy>개인정보 처리방침</privacy>을 참조하세요.",
         "q3": "BYOK는 무엇인가요?",
-        "a3": "Pro 사용자는 자체 OpenAI 호환 base URL, 모델, API 키를 구성할 수 있습니다. 활성화 시 텍스트는 선택한 제공업체로 직접 전송되며(비용은 제공업체에게, 우리에게가 아닌), 재작성은 월 할당량에 계산되지 않습니다 — 단기 남용 제한만 남습니다.",
+        "a3": "로그인한 모든 사용자는 자체 OpenAI 호환 base URL, 모델, API 키를 구성할 수 있습니다. 활성화 시 텍스트는 선택한 제공업체로 직접 전송되며(비용은 제공업체에게, 우리에게가 아닌), 재작성은 월 할당량에 계산되지 않습니다 — 단기 남용 제한만 남습니다. Pro의 가치는 호스트 모델(키 관리 불필요) + 월 2,000회 + 우선 지원입니다.",
         "q4": "할당량을 초과하면 어떻게 되나요?",
         "a4": "다음 요청은 429와 \"quota exceeded\" 메시지를 반환합니다. 할당량은 매월 1일 00:00 UTC에 재설정. 언제든 업그레이드하거나 BYOK를 설정할 수 있습니다.",
         "q5": "취소할 수 있나요?",
@@ -183,7 +184,19 @@
         "save": "저장",
         "saving": "저장 중…",
         "cancel": "취소",
-        "saveFailed": "저장 실패"
+        "saveFailed": "저장 실패",
+        "test": "연결 테스트",
+        "testing": "테스트 중…",
+        "testOk": "연결 성공 · {latencyMs, number}ms",
+        "testFailed": {
+          "unauthorized": "API 키 거부됨 (401). 키를 확인하세요.",
+          "forbidden": "Provider 가 접근을 거부함 (403).",
+          "model_not_found": "Model 을 찾을 수 없음. 모델 이름을 확인하세요.",
+          "rate_limited": "Provider 가 속도 제한 중 (429). 나중에 다시 시도하세요.",
+          "timeout": "8초 이내 응답 없음. base URL 을 확인하세요.",
+          "unreachable": "URL 에 연결할 수 없음. base URL / 네트워크를 확인하세요.",
+          "unknown": "테스트 실패. provider 응답을 확인하세요."
+        }
       },
       "signOut": {
         "btn": "로그아웃",
@@ -242,7 +255,7 @@
         "periodYearly": "/ 월 (연간 청구 ${total})",
         "feat1": "월 2,000회 재작성",
         "feat2": "3가지 스타일 동시 스트리밍",
-        "feat3": "BYOK = 무제한",
+        "feat3": "API 키 설정 불필요",
         "feat4": "우선 지원",
         "ctaSubscribed": "구독 중",
         "ctaRedirecting": "이동 중…",
@@ -387,7 +400,7 @@
         "price": "${monthly} / 월 (연간 청구)",
         "sub": "연 ${total} (월 ${monthlyAlt}/월 대비 {percent}% 절약)",
         "feat1": "월 {count, number}회 재작성",
-        "feat2": "BYOK = 무제한",
+        "feat2": "호스트 모델, 설정 불필요",
         "feat3": "우선 지원"
       },
       "ctaSeeFull": "전체 요금과 FAQ 보기 →"
@@ -483,7 +496,7 @@
       },
       "byok": {
         "title": "BYOK · 자신의 API 키 사용",
-        "placeholder": "Pro 기능, Phase 4에서 사용 가능. base_url / model / key 필드가 여기에 표시됩니다."
+        "placeholder": "rewrite.so/settings 에서 설정 →（폼은 거기에 있습니다）."
       },
       "langOption": {
         "auto": "페이지에서 자동 감지"

@@ -21,7 +21,7 @@
     },
     "pricing": {
       "title": "价格 — rewrite.so",
-      "description": "免费档每月 30 次改写。Pro 年付 $7.99/月，每月 2000 次 + BYOK 无限。"
+      "description": "免费档每月 30 次改写 + 可选 BYOK。Pro 年付 $7.99/月每月 2000 次改写，使用我们的托管 model，无需配 API key。"
     },
     "contact": {
       "title": "联系我们 — rewrite.so",
@@ -76,14 +76,15 @@
         "feat4": "全部 3 种风格：贴近原文 / 口语 / 正式",
         "feat5": "自动检测页面语言；可在设置中固定目标语言",
         "feat6": "无需信用卡",
+        "feat7": "BYOK 选项 — 自带 OpenAI 兼容 key 即可无限改写",
         "cta": "免费试用"
       },
       "pro": {
         "title": "Pro",
         "period": "/ 月（年付）",
         "subPrice": "年付总价 ${yearlyTotal}（vs 月付 ${monthly}/月，省 {savings}%）",
-        "feat1": "每月 {count, number} 次改写",
-        "feat2": "BYOK：填自己的 OpenAI 兼容 key，无限改写",
+        "feat1": "每月 {count, number} 次改写（用我们的 model）",
+        "feat2": "托管 model — 不用配 API key",
         "feat3": "优先邮件支持",
         "feat4": "随时取消；14 天内可退款",
         "cta": "升级 Pro →"
@@ -95,7 +96,7 @@
         "q2": "你们会存储我改写的文本吗？",
         "a2": "不存。原文和改写结果只在 worker 中过一次就丢弃 —— 不进应用日志、不进错误监控、不进分析。详见 <privacy>隐私政策</privacy>。",
         "q3": "BYOK 是什么？",
-        "a3": "Pro 用户可配置自己的 OpenAI 兼容 base URL、model 与 API key。开启后改写直达你的 provider（你付钱给他们，不是我们），不计入月配额——只剩短期反爆刷限制。",
+        "a3": "任何登录用户都能配置自己的 OpenAI 兼容 base URL、model 与 API key。开启后改写直达你的 provider（你付钱给他们，不是我们），不计入月配额——只剩短期反爆刷限制。Pro 的价值是托管 model（不用管 key）+ 每月 2000 次配额 + 优先支持。",
         "q4": "超过配额会怎样？",
         "a4": "下一次请求会返回 429 + 明确的「配额超限」错误。配额于每月 1 日 UTC 00:00 重置。可随时升级或配置 BYOK。",
         "q5": "可以取消吗？",
@@ -183,7 +184,19 @@
         "save": "保存",
         "saving": "保存中…",
         "cancel": "取消",
-        "saveFailed": "保存失败"
+        "saveFailed": "保存失败",
+        "test": "测试连接",
+        "testing": "测试中…",
+        "testOk": "已连通 · {latencyMs, number}ms",
+        "testFailed": {
+          "unauthorized": "API key 被拒（401）。请检查 key。",
+          "forbidden": "Provider 拒绝访问（403）。",
+          "model_not_found": "Model 不存在。请检查 model 名。",
+          "rate_limited": "Provider 限流中（429），稍后再试。",
+          "timeout": "8 秒内未响应，请检查 base URL。",
+          "unreachable": "URL 无法访问，请检查 base URL / 网络。",
+          "unknown": "测试失败，请查看 provider 响应。"
+        }
       },
       "signOut": {
         "btn": "退出登录",
@@ -242,7 +255,7 @@
         "periodYearly": "/ 月（按年付 ${total}）",
         "feat1": "每月 2,000 次改写",
         "feat2": "3 种风格并行流式",
-        "feat3": "BYOK = 无限",
+        "feat3": "不用配 API key",
         "feat4": "优先支持",
         "ctaSubscribed": "已订阅",
         "ctaRedirecting": "跳转中…",
@@ -387,7 +400,7 @@
         "price": "${monthly} / 月（年付）",
         "sub": "年付总价 ${total}（vs 月付 ${monthlyAlt}/月，省 {percent}%）",
         "feat1": "每月 {count, number} 次改写",
-        "feat2": "BYOK 无限",
+        "feat2": "托管 model，零配置",
         "feat3": "优先支持"
       },
       "ctaSeeFull": "查看完整定价与常见问题 →"
@@ -483,7 +496,7 @@
       },
       "byok": {
         "title": "BYOK · 自带 API key",
-        "placeholder": "Pro 功能，在 Phase 4 启用。届时此处会出现 base_url / model / key 字段。"
+        "placeholder": "请在 rewrite.so/settings 配置 →（那里有完整表单）。"
       },
       "langOption": {
         "auto": "自动检测页面语言"

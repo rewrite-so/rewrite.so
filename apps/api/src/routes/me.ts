@@ -249,12 +249,8 @@ meRoute.put('/v1/me/byok', async (c) => {
   const session = await auth.api.getSession({ headers: c.req.raw.headers });
   if (!session) return c.json({ error: 'unauthorized' }, 401);
 
-  // 仅 Pro 用户能用 BYOK（产品决策；MVP 没有"BYOK 不需要订阅"的免费档）
-  const tier = await resolveUserTier(c.env.DB, session.user.id);
-  if (tier !== 'pro') {
-    return c.json({ error: 'pro_required' }, 403);
-  }
-
+  // 任何登录用户均可配 BYOK（产品决策）；Pro 的差异化是 hosted model（2000/月）+
+  // 不用管 key + Priority，而非"是否能用 BYOK"
   let body: unknown;
   try {
     body = await c.req.json();
@@ -307,4 +303,72 @@ meRoute.delete('/v1/me/byok', async (c) => {
 
   await c.env.DB.prepare('DELETE FROM byok_keys WHERE user_id = ?').bind(session.user.id).run();
   return c.json({ configured: false });
+});
+
+/**
+ * POST /v1/me/byok/test
+ *
+ * 让用户在保存 BYOK 配置前先验证 baseUrl / model / apiKey 真的能调通。
+ * - **不存 DB**，只用提交的明文 key 发一次极小 chat completions 请求
+ * - 8s 超时（用户等不久；超时通常意味着 baseUrl 不可达）
+ * - 仅登录用户可调（防匿名滥用作 base URL 探测）
+ * - **不写日志、不计配额**：key 是用户的，不要让它落任何地方
+ */
+const ByokTestSchema = z
+  .object({
+    baseUrl: z.string().url().max(200),
+    model: z.string().min(1).max(100),
+    apiKey: z.string().min(8).max(500),
+  })
+  .strict();
+
+meRoute.post('/v1/me/byok/test', async (c) => {
+  const auth = createAuth(c.env);
+  const session = await auth.api.getSession({ headers: c.req.raw.headers });
+  if (!session) return c.json({ error: 'unauthorized' }, 401);
+
+  let body: unknown;
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ error: 'invalid_json' }, 400);
+  }
+  const parsed = ByokTestSchema.safeParse(body);
+  if (!parsed.success) {
+    return c.json({ error: 'invalid_input', detail: parsed.error.issues[0]?.message }, 400);
+  }
+  const { baseUrl, model, apiKey } = parsed.data;
+
+  const t0 = performance.now();
+  const ac = new AbortController();
+  const timer = setTimeout(() => ac.abort(), 8000);
+  try {
+    const res = await fetch(`${baseUrl.replace(/\/$/, '')}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model,
+        messages: [{ role: 'user', content: 'ping' }],
+        max_tokens: 5,
+        stream: false,
+      }),
+      signal: ac.signal,
+    });
+    clearTimeout(timer);
+    const latencyMs = Math.round(performance.now() - t0);
+
+    if (res.ok) return c.json({ ok: true, latencyMs });
+    if (res.status === 401) return c.json({ ok: false, error: 'unauthorized' });
+    if (res.status === 403) return c.json({ ok: false, error: 'forbidden' });
+    if (res.status === 404) return c.json({ ok: false, error: 'model_not_found' });
+    if (res.status === 429) return c.json({ ok: false, error: 'rate_limited' });
+    return c.json({ ok: false, error: `upstream_${res.status}` });
+  } catch (err) {
+    clearTimeout(timer);
+    if ((err as Error).name === 'AbortError') return c.json({ ok: false, error: 'timeout' });
+    return c.json({ ok: false, error: 'unreachable' });
+  }
 });

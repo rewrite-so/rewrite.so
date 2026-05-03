@@ -377,7 +377,7 @@ export function SettingsClient() {
 
       <SubscriptionSection me={me} />
 
-      {me.tier === 'pro' && <ByokSection byok={byok} onChange={setByok} onDelete={deleteByok} />}
+      <ByokSection byok={byok} onChange={setByok} onDelete={deleteByok} />
 
       <div style={{ marginTop: 24 }}>
         <button
@@ -498,6 +498,40 @@ function ByokSection({
   const [apiKey, setApiKey] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Test endpoint 状态机
+  const [testState, setTestState] = useState<
+    | { kind: 'idle' }
+    | { kind: 'testing' }
+    | { kind: 'ok'; latencyMs: number }
+    | { kind: 'failed'; code: string }
+  >({ kind: 'idle' });
+
+  // 字段变更时清掉旧测试结果（防止显示陈旧"已通过"误导用户）
+  function withTestReset<T>(setter: (v: T) => void) {
+    return (v: T) => {
+      setter(v);
+      setTestState((s) => (s.kind === 'idle' ? s : { kind: 'idle' }));
+    };
+  }
+
+  async function testByok() {
+    setTestState({ kind: 'testing' });
+    try {
+      const res = await fetch('/v1/me/byok/test', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ baseUrl, model, apiKey }),
+      });
+      const data = (await res.json()) as
+        | { ok: true; latencyMs: number }
+        | { ok: false; error: string };
+      if (data.ok) setTestState({ kind: 'ok', latencyMs: data.latencyMs });
+      else setTestState({ kind: 'failed', code: data.error ?? 'unknown' });
+    } catch {
+      setTestState({ kind: 'failed', code: 'unreachable' });
+    }
+  }
 
   async function save() {
     setError(null);
@@ -570,19 +604,24 @@ function ByokSection({
           <Field
             label={t('baseUrl')}
             value={baseUrl}
-            onChange={setBaseUrl}
+            onChange={withTestReset(setBaseUrl)}
             placeholder="https://api.openai.com/v1"
           />
-          <Field label={t('model')} value={model} onChange={setModel} placeholder="gpt-4o-mini" />
+          <Field
+            label={t('model')}
+            value={model}
+            onChange={withTestReset(setModel)}
+            placeholder="gpt-4o-mini"
+          />
           <Field
             label={t('apiKey')}
             value={apiKey}
-            onChange={setApiKey}
+            onChange={withTestReset(setApiKey)}
             placeholder="sk-..."
             type="password"
           />
           {error && <p style={{ color: '#dc2626', fontSize: 12, margin: '4px 0' }}>{error}</p>}
-          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+          <div style={{ display: 'flex', gap: 8, marginTop: 8, alignItems: 'center' }}>
             <button
               type="button"
               onClick={save}
@@ -600,6 +639,17 @@ function ByokSection({
             >
               {saving ? t('saving') : t('save')}
             </button>
+            <button
+              type="button"
+              onClick={testByok}
+              disabled={!baseUrl || !model || !apiKey || testState.kind === 'testing'}
+              style={{
+                ...btnSecondary,
+                opacity: !baseUrl || !model || !apiKey || testState.kind === 'testing' ? 0.5 : 1,
+              }}
+            >
+              {testState.kind === 'testing' ? t('testing') : t('test')}
+            </button>
             {editing && (
               <button
                 type="button"
@@ -611,6 +661,16 @@ function ByokSection({
               >
                 {t('cancel')}
               </button>
+            )}
+            {testState.kind === 'ok' && (
+              <span style={{ fontSize: 12, color: '#16a34a' }}>
+                ✓ {t('testOk', { latencyMs: testState.latencyMs })}
+              </span>
+            )}
+            {testState.kind === 'failed' && (
+              <span style={{ fontSize: 12, color: '#dc2626' }}>
+                ✗ {t(`testFailed.${testState.code}` as 'testFailed.unknown')}
+              </span>
             )}
           </div>
         </div>

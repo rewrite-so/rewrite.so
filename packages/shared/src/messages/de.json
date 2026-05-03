@@ -21,7 +21,7 @@
     },
     "pricing": {
       "title": "Preise — rewrite.so",
-      "description": "Kostenloses Kontingent 30 Umschreibungen/Monat. Pro für $7.99/Mon jährlich: 2.000/Monat + BYOK unbegrenzt."
+      "description": "Kostenloses Kontingent 30 Umschreibungen/Monat + BYOK-Option. Pro für $7.99/Mon jährlich: 2.000/Monat mit unserem gehosteten Modell, kein API-Schlüssel-Setup."
     },
     "contact": {
       "title": "Kontakt — rewrite.so",
@@ -76,6 +76,7 @@
         "feat4": "Alle 3 Stile: treu / locker / formell",
         "feat5": "Auto-Erkennung der Seitensprache; feste Zielsprache in Einstellungen wählbar",
         "feat6": "Keine Kreditkarte erforderlich",
+        "feat7": "BYOK-Option — bring deinen eigenen OpenAI-kompatiblen Schlüssel für unbegrenzte Umschreibungen",
         "cta": "Kostenlos testen"
       },
       "pro": {
@@ -83,7 +84,7 @@
         "period": "/ Monat (jährlich abgerechnet)",
         "subPrice": "${yearlyTotal} / Jahr (spare {savings}% vs ${monthly}/Mon. monatlich)",
         "feat1": "{count, number} Umschreibungen / Monat",
-        "feat2": "BYOK: bring deinen eigenen OpenAI-kompatiblen Schlüssel für unbegrenzte Nutzung",
+        "feat2": "Gehostetes Modell — kein API-Schlüssel-Setup nötig",
         "feat3": "Priorisierter E-Mail-Support",
         "feat4": "Jederzeit kündbar; Rückerstattung innerhalb von 14 Tagen",
         "cta": "Pro holen →"
@@ -95,7 +96,7 @@
         "q2": "Speichert ihr den Text, den ich umschreibe?",
         "a2": "Nein. Eingaben und Ausgaben durchlaufen das System, werden aber nie persistiert — weder in Anwendungslogs, noch in Fehler-Reportern, noch in Analytics. Siehe unsere <privacy>Datenschutzerklärung</privacy> für Details.",
         "q3": "Was ist BYOK?",
-        "a3": "Pro-Nutzer können eine eigene OpenAI-kompatible Base URL, Modell und API-Schlüssel konfigurieren. Wenn aktiviert, geht dein Text direkt zu deinem gewählten Provider (du zahlst sie, nicht uns), und die Umschreibungen zählen nicht gegen dein Monatskontingent — nur kurzfristige Missbrauchslimits bleiben.",
+        "a3": "Jeder angemeldete Nutzer kann eine eigene OpenAI-kompatible Base URL, Modell und API-Schlüssel konfigurieren. Wenn aktiviert, geht dein Text direkt zu deinem gewählten Provider (du zahlst sie, nicht uns), und die Umschreibungen zählen nicht gegen dein Monatskontingent — nur kurzfristige Missbrauchslimits bleiben. Pros Wert ist das gehostete Modell (kein Schlüssel zu verwalten) plus 2.000/Monat und Priority-Support.",
         "q4": "Was passiert, wenn ich mein Kontingent überschreite?",
         "a4": "Die nächste Anfrage gibt 429 mit klarer „quota exceeded\"-Meldung zurück. Kontingente werden am ersten Tag jedes Monats um 00:00 UTC zurückgesetzt. Du kannst jederzeit upgraden oder BYOK einrichten.",
         "q5": "Kann ich kündigen?",
@@ -183,7 +184,19 @@
         "save": "Speichern",
         "saving": "Speichert…",
         "cancel": "Abbrechen",
-        "saveFailed": "Speichern fehlgeschlagen"
+        "saveFailed": "Speichern fehlgeschlagen",
+        "test": "Verbindung testen",
+        "testing": "Teste…",
+        "testOk": "Verbunden · {latencyMs, number}ms",
+        "testFailed": {
+          "unauthorized": "API-Schlüssel abgelehnt (401). Schlüssel prüfen.",
+          "forbidden": "Provider verweigert Zugriff (403).",
+          "model_not_found": "Modell nicht gefunden. Modellname prüfen.",
+          "rate_limited": "Provider drosselt (429). Später erneut versuchen.",
+          "timeout": "Keine Antwort innerhalb 8 s. Base URL prüfen.",
+          "unreachable": "URL nicht erreichbar. Base URL / Netzwerk prüfen.",
+          "unknown": "Test fehlgeschlagen. Provider-Antwort prüfen."
+        }
       },
       "signOut": {
         "btn": "Abmelden",
@@ -242,7 +255,7 @@
         "periodYearly": "/ Monat (jährlich ${total} abgerechnet)",
         "feat1": "2.000 Umschreibungen / Monat",
         "feat2": "3 Stile parallel gestreamt",
-        "feat3": "BYOK = unbegrenzt",
+        "feat3": "Kein API-Schlüssel-Setup nötig",
         "feat4": "Priority-Support",
         "ctaSubscribed": "Abonniert",
         "ctaRedirecting": "Wird weitergeleitet…",
@@ -387,7 +400,7 @@
         "price": "${monthly} / Mon. (jährlich abgerechnet)",
         "sub": "${total} / Jahr (spare {percent}% vs ${monthlyAlt}/Mon. monatlich)",
         "feat1": "{count, number} Umschreibungen / Monat",
-        "feat2": "BYOK = unbegrenzt",
+        "feat2": "Gehostetes Modell, ohne Setup",
         "feat3": "Priorisierter Support"
       },
       "ctaSeeFull": "Vollständige Preise & FAQ →"
@@ -483,7 +496,7 @@
       },
       "byok": {
         "title": "BYOK · Eigenen API-Schlüssel verwenden",
-        "placeholder": "Pro-Funktion, verfügbar in Phase 4. Hier erscheinen base_url / model / key Felder."
+        "placeholder": "Auf rewrite.so/settings konfigurieren → (das Formular ist dort)."
       },
       "langOption": {
         "auto": "Automatisch von Seite erkennen"

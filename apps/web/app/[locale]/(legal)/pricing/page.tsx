@@ -42,6 +42,7 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
             t('free.feat4'),
             t('free.feat5'),
             t('free.feat6'),
+            t('free.feat7'),
           ]}
           cta={{ label: t('free.cta'), href: '/try' }}
         />

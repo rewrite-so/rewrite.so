@@ -21,7 +21,7 @@
     },
     "pricing": {
       "title": "Pricing — rewrite.so",
-      "description": "Free tier with 30 monthly rewrites. Pro at $7.99/mo annually for 2,000/month plus BYOK for unlimited."
+      "description": "Free tier with 30 monthly rewrites + BYOK option. Pro at $7.99/mo annually for 2,000/month with our hosted model — no API key setup needed."
     },
     "contact": {
       "title": "Contact — rewrite.so",
@@ -76,14 +76,15 @@
         "feat4": "All 3 styles: faithful / casual / formal",
         "feat5": "Auto-detect page language; pick a fixed target language in settings",
         "feat6": "No card required",
+        "feat7": "BYOK option — bring your own OpenAI-compatible key for unlimited rewrites",
         "cta": "Try it free"
       },
       "pro": {
         "title": "Pro",
         "period": "/ mo, billed annually",
         "subPrice": "${yearlyTotal} / year (save {savings}% vs ${monthly}/mo monthly)",
-        "feat1": "{count, number} rewrites / month",
-        "feat2": "BYOK: bring your own OpenAI-compatible key for unlimited usage",
+        "feat1": "{count, number} rewrites / month with our model",
+        "feat2": "No API key setup needed",
         "feat3": "Priority email support",
         "feat4": "Cancel anytime; refund within 14 days",
         "cta": "Get Pro →"
@@ -95,7 +96,7 @@
         "q2": "Do you store the text I rewrite?",
         "a2": "No. Inputs and outputs pass through but are never persisted — not in application logs, not in error reporters, not in analytics. See our <privacy>Privacy Policy</privacy> for details.",
         "q3": "What is BYOK?",
-        "a3": "Pro users can configure a custom OpenAI-compatible base URL, model, and API key. When enabled, your text goes directly to your chosen provider (you pay them, not us), and the rewrites do not count against your monthly quota — only short-term abuse limits remain.",
+        "a3": "Any signed-in user can configure a custom OpenAI-compatible base URL, model, and API key. When enabled, your text goes directly to your chosen provider (you pay them, not us), and the rewrites do not count against your monthly quota — only short-term abuse limits remain. Pro's value is the hosted model (no key to manage) plus 2,000/month and priority support.",
         "q4": "What happens if I exceed my quota?",
         "a4": "The next request returns a 429 with a clear \"quota exceeded\" message. Quotas reset at 00:00 UTC on the first day of each month. You can upgrade or set up BYOK at any time.",
         "q5": "Can I cancel?",
@@ -183,7 +184,19 @@
         "save": "Save",
         "saving": "Saving…",
         "cancel": "Cancel",
-        "saveFailed": "Save failed"
+        "saveFailed": "Save failed",
+        "test": "Test connection",
+        "testing": "Testing…",
+        "testOk": "Connected · {latencyMs, number}ms",
+        "testFailed": {
+          "unauthorized": "API key rejected (401). Check the key.",
+          "forbidden": "Provider denied access (403).",
+          "model_not_found": "Model not found. Check the model name.",
+          "rate_limited": "Provider rate-limited (429). Try later.",
+          "timeout": "Timed out after 8s. Check the base URL.",
+          "unreachable": "Couldn't reach the URL. Check base URL / network.",
+          "unknown": "Test failed. See provider response."
+        }
       },
       "signOut": {
         "btn": "Sign out",
@@ -240,9 +253,9 @@
         "title": "Pro",
         "periodMonthly": "/ month",
         "periodYearly": "/ month (billed annually ${total})",
-        "feat1": "2,000 rewrites / month",
+        "feat1": "2,000 rewrites / month with our model",
         "feat2": "All 3 streaming styles",
-        "feat3": "BYOK = unlimited",
+        "feat3": "No API key setup needed",
         "feat4": "Priority support",
         "ctaSubscribed": "Subscribed",
         "ctaRedirecting": "Redirecting…",
@@ -387,7 +400,7 @@
         "price": "${monthly} / mo, billed annually",
         "sub": "${total} / year (save {percent}% vs ${monthlyAlt}/mo monthly)",
         "feat1": "{count, number} rewrites / month",
-        "feat2": "BYOK = unlimited",
+        "feat2": "Hosted model, no setup",
         "feat3": "Priority support"
       },
       "ctaSeeFull": "See full pricing & FAQ →"
@@ -483,7 +496,7 @@
       },
       "byok": {
         "title": "BYOK · Bring your own API key",
-        "placeholder": "Pro feature, available in Phase 4. Will show base_url / model / key fields here."
+        "placeholder": "Configure on rewrite.so/settings → (form available there)."
       },
       "langOption": {
         "auto": "Auto-detect from page"

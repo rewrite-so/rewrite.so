@@ -21,7 +21,7 @@
     },
     "pricing": {
       "title": "Precios — rewrite.so",
-      "description": "Plan gratuito con 30 reescrituras al mes. Pro a $7.99/mes anual: 2.000/mes más BYOK ilimitado."
+      "description": "Plan gratuito con 30 reescrituras al mes + opción BYOK. Pro a $7.99/mes anual: 2.000/mes con nuestro modelo, sin configuración de API key."
     },
     "contact": {
       "title": "Contacto — rewrite.so",
@@ -76,6 +76,7 @@
         "feat4": "Los 3 estilos: fiel / casual / formal",
         "feat5": "Auto-detección de idioma de página; elige idioma fijo en configuración",
         "feat6": "Sin tarjeta requerida",
+        "feat7": "Opción BYOK — trae tu propia clave OpenAI-compatible para reescrituras ilimitadas",
         "cta": "Probar gratis"
       },
       "pro": {
@@ -83,7 +84,7 @@
         "period": "/ mes (facturación anual)",
         "subPrice": "${yearlyTotal} / año (ahorra {savings}% vs ${monthly}/mes mensual)",
         "feat1": "{count, number} reescrituras / mes",
-        "feat2": "BYOK: trae tu propia clave compatible con OpenAI para uso ilimitado",
+        "feat2": "Modelo gestionado — sin configurar API key",
         "feat3": "Soporte por email prioritario",
         "feat4": "Cancela cuando quieras; reembolso dentro de 14 días",
         "cta": "Obtener Pro →"
@@ -95,7 +96,7 @@
         "q2": "¿Almacenan el texto que reescribo?",
         "a2": "No. Las entradas y salidas pasan por el sistema pero nunca se persisten — ni en logs de aplicación, ni en reportadores de errores, ni en analíticas. Consulta nuestra <privacy>Política de privacidad</privacy> para más detalles.",
         "q3": "¿Qué es BYOK?",
-        "a3": "Los usuarios Pro pueden configurar su propia base URL, modelo y clave API compatible con OpenAI. Cuando está habilitado, tu texto va directamente a tu proveedor elegido (les pagas a ellos, no a nosotros), y las reescrituras no cuentan contra tu cuota mensual — solo permanecen los límites a corto plazo contra abuso.",
+        "a3": "Cualquier usuario registrado puede configurar su propia base URL, modelo y clave API compatible con OpenAI. Cuando está habilitado, tu texto va directamente a tu proveedor elegido (les pagas a ellos, no a nosotros), y las reescrituras no cuentan contra tu cuota mensual — solo permanecen los límites a corto plazo contra abuso. El valor de Pro es el modelo gestionado (sin clave que administrar) más 2.000/mes y soporte prioritario.",
         "q4": "¿Qué pasa si excedo mi cuota?",
         "a4": "La próxima solicitud devuelve 429 con un mensaje claro de \"quota exceeded\". Las cuotas se reinician a las 00:00 UTC del primer día de cada mes. Puedes actualizar o configurar BYOK en cualquier momento.",
         "q5": "¿Puedo cancelar?",
@@ -183,7 +184,19 @@
         "save": "Guardar",
         "saving": "Guardando…",
         "cancel": "Cancelar",
-        "saveFailed": "No se pudo guardar"
+        "saveFailed": "No se pudo guardar",
+        "test": "Probar conexión",
+        "testing": "Probando…",
+        "testOk": "Conectado · {latencyMs, number}ms",
+        "testFailed": {
+          "unauthorized": "Clave API rechazada (401). Verifica la clave.",
+          "forbidden": "Proveedor denegó el acceso (403).",
+          "model_not_found": "Modelo no encontrado. Verifica el nombre.",
+          "rate_limited": "Proveedor con rate limit (429). Inténtalo después.",
+          "timeout": "Sin respuesta en 8s. Verifica la base URL.",
+          "unreachable": "No se pudo alcanzar la URL. Verifica base URL / red.",
+          "unknown": "Prueba falló. Revisa la respuesta del proveedor."
+        }
       },
       "signOut": {
         "btn": "Cerrar sesión",
@@ -242,7 +255,7 @@
         "periodYearly": "/ mes (facturado anualmente ${total})",
         "feat1": "2.000 reescrituras / mes",
         "feat2": "3 estilos en streaming",
-        "feat3": "BYOK = ilimitado",
+        "feat3": "Sin configurar API key",
         "feat4": "Soporte prioritario",
         "ctaSubscribed": "Suscrito",
         "ctaRedirecting": "Redirigiendo…",
@@ -387,7 +400,7 @@
         "price": "${monthly} / mes, facturación anual",
         "sub": "${total} / año (ahorra {percent}% vs ${monthlyAlt}/mes mensual)",
         "feat1": "{count, number} reescrituras / mes",
-        "feat2": "BYOK = ilimitado",
+        "feat2": "Modelo gestionado, sin configurar",
         "feat3": "Soporte prioritario"
       },
       "ctaSeeFull": "Ver precios completos y FAQ →"
@@ -483,7 +496,7 @@
       },
       "byok": {
         "title": "BYOK · Trae tu propia clave API",
-        "placeholder": "Función Pro, disponible en la Fase 4. Aquí aparecerán los campos base_url / model / key."
+        "placeholder": "Configúralo en rewrite.so/settings → (el formulario está allí)."
       },
       "langOption": {
         "auto": "Auto-detectar desde la página"

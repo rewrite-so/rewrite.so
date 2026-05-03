@@ -327,8 +327,8 @@ const DAY7: Record<Locale, Day7Strings> = {
       "One week in. If you've been hitting the monthly quota, here's the path that scales: <strong>BYOK</strong> (Bring Your Own Key).",
     body: "You plug in your own OpenAI-compatible API key (OpenAI, DeepSeek, Anthropic-compat proxies, your self-hosted vLLM, etc.). Rewrites then go directly to your provider and <strong>don't count against the rewrite.so quota</strong>. You pay your provider, not us.",
     pricing:
-      'BYOK is a Pro feature ($7.99/mo billed annually). After upgrading, set it up in /settings.',
-    cta: 'See Pro plans →',
+      "BYOK is available to anyone signed in — no Pro subscription required. Set it up in /settings, with a Test button to verify before saving. (Pro's value is the hosted model: 2,000/month with no API key to manage, plus priority support.)",
+    cta: 'Configure BYOK →',
     faq: 'Read the FAQ',
   },
   'zh-CN': {
@@ -336,8 +336,9 @@ const DAY7: Record<Locale, Day7Strings> = {
     intro:
       '已经一周了。如果你撞到了月配额上限，这是真正能扩容的路径：<strong>BYOK</strong>（自带 API key）。',
     body: '填入你自己的 OpenAI 兼容 API key（OpenAI、DeepSeek、Anthropic 兼容代理、自部署 vLLM 等）。改写直达你的 provider，<strong>不计入 rewrite.so 配额</strong>。你付钱给 provider，不付给我们。',
-    pricing: 'BYOK 是 Pro 功能（年付 $7.99/月）。升级后在 /settings 配置。',
-    cta: '查看 Pro 套餐 →',
+    pricing:
+      'BYOK 对所有登录用户开放，不需要 Pro 订阅。在 /settings 里配置，保存前可以点 Test 验证连通性。（Pro 的价值是托管 model：每月 2000 次，不用管 key，外加优先支持。）',
+    cta: '配置 BYOK →',
     faq: '查看 FAQ',
   },
   ja: {
@@ -345,8 +346,9 @@ const DAY7: Record<Locale, Day7Strings> = {
     intro:
       '1 週間経ちました。月間クォータの上限に達している場合、スケールする道があります: <strong>BYOK</strong>（自分のキーを使う）。',
     body: '自分の OpenAI 互換 API キー（OpenAI、DeepSeek、Anthropic 互換プロキシ、自前 vLLM 等）を入力します。書き換えは直接プロバイダーに送られ、<strong>rewrite.so のクォータには加算されません</strong>。料金はプロバイダーへ。',
-    pricing: 'BYOK は Pro 機能（年額 $7.99/月）。アップグレード後 /settings で設定。',
-    cta: 'Pro プランを見る →',
+    pricing:
+      'BYOK はログイン済みのすべてのユーザーが利用可能 — Pro 加入不要。/settings で設定でき、保存前に Test ボタンで接続を検証できます。（Pro の価値はホスト型モデル：月 2,000 回、キー管理不要、優先サポート付き。）',
+    cta: 'BYOK を設定 →',
     faq: 'FAQ を読む',
   },
   ko: {
@@ -354,8 +356,9 @@ const DAY7: Record<Locale, Day7Strings> = {
     intro:
       '일주일이 지났습니다. 월간 할당량 한도에 도달했다면, 확장 가능한 경로가 있습니다: <strong>BYOK</strong>(자신의 키 사용).',
     body: '자신의 OpenAI 호환 API 키(OpenAI, DeepSeek, Anthropic 호환 프록시, 자체 호스팅 vLLM 등)를 연결합니다. 재작성은 직접 제공업체로 전송되며 <strong>rewrite.so 할당량에 포함되지 않습니다</strong>. 비용은 제공업체에게.',
-    pricing: 'BYOK는 Pro 기능(연 $7.99/월). 업그레이드 후 /settings에서 설정.',
-    cta: 'Pro 요금제 보기 →',
+    pricing:
+      'BYOK는 로그인한 모든 사용자에게 제공됩니다 — Pro 구독 불필요. /settings에서 설정하며, 저장 전 Test 버튼으로 연결을 확인할 수 있습니다. (Pro의 가치는 호스트 모델: 월 2,000회, 키 관리 불필요, 우선 지원.)',
+    cta: 'BYOK 설정 →',
     faq: 'FAQ 읽기',
   },
   es: {
@@ -364,8 +367,8 @@ const DAY7: Record<Locale, Day7Strings> = {
       'Una semana después. Si has alcanzado la cuota mensual, este es el camino que escala: <strong>BYOK</strong> (trae tu propia clave).',
     body: 'Conectas tu propia clave API compatible con OpenAI (OpenAI, DeepSeek, proxies compatibles con Anthropic, tu vLLM autoalojado, etc.). Las reescrituras van directamente a tu proveedor y <strong>no cuentan contra la cuota de rewrite.so</strong>. Pagas a tu proveedor, no a nosotros.',
     pricing:
-      'BYOK es una función Pro ($7.99/mes facturado anualmente). Tras actualizar, configúralo en /settings.',
-    cta: 'Ver planes Pro →',
+      'BYOK está disponible para cualquier usuario registrado — sin necesidad de Pro. Configúralo en /settings, con un botón Test para verificar antes de guardar. (El valor de Pro es el modelo gestionado: 2.000/mes sin clave que administrar, más soporte prioritario.)',
+    cta: 'Configurar BYOK →',
     faq: 'Leer FAQ',
   },
   fr: {
@@ -374,8 +377,8 @@ const DAY7: Record<Locale, Day7Strings> = {
       'Une semaine déjà. Si vous atteignez le quota mensuel, voici la voie qui scale : <strong>BYOK</strong> (apportez votre propre clé).',
     body: 'Branchez votre propre clé API compatible OpenAI (OpenAI, DeepSeek, proxies compatibles Anthropic, votre vLLM auto-hébergé, etc.). Les réécritures vont directement chez votre fournisseur et <strong>ne comptent pas dans le quota rewrite.so</strong>. Vous payez votre fournisseur, pas nous.',
     pricing:
-      'BYOK est une fonctionnalité Pro (7.99 $/mois facturé annuellement). Après mise à niveau, configurez dans /settings.',
-    cta: 'Voir les forfaits Pro →',
+      "BYOK est disponible pour tout utilisateur connecté — pas d'abonnement Pro requis. Configurez-le dans /settings, avec un bouton Test pour vérifier avant d'enregistrer. (La valeur de Pro : le modèle hébergé : 2 000/mois sans clé à gérer, plus support prioritaire.)",
+    cta: 'Configurer BYOK →',
     faq: 'Lire la FAQ',
   },
   de: {
@@ -384,8 +387,8 @@ const DAY7: Record<Locale, Day7Strings> = {
       'Eine Woche ist vorbei. Wenn du das Monatskontingent erreicht hast, hier ist der skalierbare Weg: <strong>BYOK</strong> (Bring Your Own Key).',
     body: 'Du steckst deinen eigenen OpenAI-kompatiblen API-Schlüssel ein (OpenAI, DeepSeek, Anthropic-kompatible Proxies, dein selbst-gehostetes vLLM usw.). Umschreibungen gehen direkt zu deinem Provider und <strong>zählen nicht gegen das rewrite.so-Kontingent</strong>. Du zahlst deinen Provider, nicht uns.',
     pricing:
-      'BYOK ist eine Pro-Funktion ($7.99/Monat jährlich abgerechnet). Nach Upgrade in /settings einrichten.',
-    cta: 'Pro-Pläne ansehen →',
+      'BYOK ist für alle angemeldeten Nutzer verfügbar — kein Pro-Abo erforderlich. In /settings einrichten, mit Test-Button zum Überprüfen vor dem Speichern. (Pros Wert ist das gehostete Modell: 2.000/Monat ohne Schlüsselverwaltung, plus Priority-Support.)',
+    cta: 'BYOK konfigurieren →',
     faq: 'FAQ lesen',
   },
 };
@@ -432,7 +435,8 @@ const DAY14: Record<Locale, Day14Strings> = {
     subject: 'Two weeks of rewrite.so — what would unlock more value?',
     intro:
       "You've been using rewrite.so for two weeks. Honest question: what's holding you back from upgrading to Pro?",
-    bullet1: "If it's the monthly cap, Pro gives you 2,000/month plus BYOK for unlimited.",
+    bullet1:
+      "If it's the monthly cap, Pro gives you 2,000/month with our hosted model. Or sign in for free + BYOK with your own API key — also unlimited.",
     bullet2: "If it's a missing feature, please reply and tell me what — I read every email.",
     bullet3:
       "If you don't actually use it that much, that's fine too. Free tier stays free, no pressure.",
@@ -442,7 +446,8 @@ const DAY14: Record<Locale, Day14Strings> = {
   'zh-CN': {
     subject: '使用 rewrite.so 两周了 —— 还差什么能让你升级？',
     intro: '你已经用了 rewrite.so 两周。直接问：什么让你没升级 Pro？',
-    bullet1: '是月配额？Pro 是 2000/月，加 BYOK 无限。',
+    bullet1:
+      '是月配额？Pro 是 2000/月使用我们的托管 model。或者登录后用 BYOK 自带 key 也能无限改写（免费）。',
     bullet2: '差某个功能？请回信告诉我 —— 每封邮件我都会看。',
     bullet3: '其实没怎么用？也没关系。免费档永远免费，没压力。',
     cta: '升级到 Pro →',
@@ -452,7 +457,8 @@ const DAY14: Record<Locale, Day14Strings> = {
     subject: 'rewrite.so 2 週間 — 何があれば価値を解き放てますか？',
     intro:
       'rewrite.so をお使いいただいて 2 週間です。率直な質問: Pro へのアップグレードを妨げているものは何ですか？',
-    bullet1: '月間上限が問題なら、Pro は 2,000/月 + BYOK で無制限。',
+    bullet1:
+      '月間上限が問題なら、Pro はホスト型モデルで 2,000/月。またはログイン + 自分のキーで BYOK も無制限（無料）。',
     bullet2: '機能が足りないなら、返信で教えてください — すべてのメールに目を通しています。',
     bullet3: 'それほど使っていない場合も大丈夫。無料プランは無料のまま、プレッシャーなし。',
     cta: 'Pro にアップグレード →',
@@ -461,7 +467,8 @@ const DAY14: Record<Locale, Day14Strings> = {
   ko: {
     subject: 'rewrite.so 2주 — 무엇이 더 큰 가치를 열까요?',
     intro: 'rewrite.so를 2주간 사용하셨습니다. 솔직한 질문: Pro 업그레이드를 막는 것은 무엇인가요?',
-    bullet1: '월간 한도가 문제라면, Pro는 2,000/월 + BYOK 무제한.',
+    bullet1:
+      '월간 한도가 문제라면, Pro는 호스트 모델로 2,000/월. 또는 로그인 후 자신의 키로 BYOK도 무제한(무료).',
     bullet2: '부족한 기능이 있다면 회신으로 알려주세요 — 모든 메일을 읽습니다.',
     bullet3: '사실 많이 사용하지 않는다면 그것도 괜찮습니다. 무료 등급은 무료로 유지, 부담 없음.',
     cta: 'Pro로 업그레이드 →',
@@ -471,7 +478,8 @@ const DAY14: Record<Locale, Day14Strings> = {
     subject: 'Dos semanas de rewrite.so — ¿qué desbloquearía más valor?',
     intro:
       'Llevas dos semanas usando rewrite.so. Pregunta honesta: ¿qué te frena para pasar a Pro?',
-    bullet1: 'Si es el límite mensual, Pro te da 2.000/mes más BYOK para ilimitado.',
+    bullet1:
+      'Si es el límite mensual, Pro te da 2.000/mes con nuestro modelo gestionado. O regístrate gratis + BYOK con tu propia clave para ilimitado.',
     bullet2: 'Si falta una función, responde y dime cuál — leo cada email.',
     bullet3:
       'Si en realidad no lo usas mucho, también está bien. La capa gratuita sigue gratis, sin presión.',
@@ -482,7 +490,8 @@ const DAY14: Record<Locale, Day14Strings> = {
     subject: "Deux semaines de rewrite.so — qu'est-ce qui débloquerait plus de valeur ?",
     intro:
       "Vous utilisez rewrite.so depuis deux semaines. Question honnête : qu'est-ce qui vous empêche de passer à Pro ?",
-    bullet1: "Si c'est le plafond mensuel, Pro vous donne 2 000/mois plus BYOK illimité.",
+    bullet1:
+      "Si c'est le plafond mensuel, Pro vous donne 2 000/mois avec notre modèle hébergé. Ou inscrivez-vous gratuitement + BYOK avec votre propre clé pour illimité.",
     bullet2:
       "Si c'est une fonctionnalité manquante, répondez et dites-moi laquelle — je lis chaque email.",
     bullet3:
@@ -494,7 +503,8 @@ const DAY14: Record<Locale, Day14Strings> = {
     subject: 'Zwei Wochen rewrite.so — was würde mehr Wert freischalten?',
     intro:
       'Du nutzt rewrite.so seit zwei Wochen. Ehrliche Frage: Was hält dich vom Pro-Upgrade ab?',
-    bullet1: 'Ist es das Monatslimit? Pro gibt dir 2.000/Monat plus BYOK für unbegrenzt.',
+    bullet1:
+      'Ist es das Monatslimit? Pro gibt dir 2.000/Monat mit unserem gehosteten Modell. Oder melde dich kostenlos an + BYOK mit eigenem Key für unbegrenzt.',
     bullet2: 'Fehlt ein Feature? Antworte mir und sag was — ich lese jede E-Mail.',
     bullet3: 'Du nutzt es eigentlich nicht so viel? Auch okay. Free bleibt kostenlos, kein Druck.',
     cta: 'Auf Pro upgraden →',

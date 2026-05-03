@@ -13,6 +13,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   完全相同的 4 keys × 7 locale 现在归一到 `core.lang.*` 一份。SettingsClient 加
   `useTranslations('core.lang')` 副 hook，extension Settings.tsx 用全路径 `t('core.lang.X')`。
   净 -28 字符串（删 56，加 28）。
+- BYOK 解锁给所有登录用户 —— 不再是 Pro 专属：
+  - `PUT /v1/me/byok` 删除 tier 校验，登录即可配
+  - 商业划分调整为 Pro = hosted model（2000/月）+ Priority；Free + BYOK = 自带 key 无限
+  - 产品决策合理性：能配 BYOK 的人本来就是技术用户，他们 OpenAI key 在手要么直接用 ChatGPT
+    要么找别家工具——锁 Pro 反消费者。Cursor/Continue/Raycast 都是登录即 BYOK
+- BYOK Test 按钮 + `POST /v1/me/byok/test` endpoint —— 保存前验证连通性：
+  - 8s 超时；错误码：unauthorized/forbidden/model_not_found/rate_limited/timeout/unreachable
+  - 不存 DB / 不写日志 / 不计配额（key 是用户的，绝不落地）
+  - Web UI BYOK 表单加 Test 按钮 + 4 状态机（idle/testing/ok/failed）；字段变更自动清掉
+    陈旧测试结果防误导
+- 文案 + 邮件 7 locale 同步更新：Pro 卡片改"hosted model, no setup"；Free 卡片加 feat7
+  "BYOK option"；FAQ Q3 描述"任何登录用户都可配"；扩展 byok placeholder 改为
+  "Configure on rewrite.so/settings"；邮件 Day 7 + Day 14 文案重写
+- 测试：新建 `apps/api/src/routes/me.test.ts` 覆盖 PUT/DELETE/POST 共 13 用例（mock fetch
+  + auth + crypto），api 总 196→209
 - 浮窗 target chip 跟服务端 meta event 走（DB 是 SoT）—— 客户端 chrome.storage cache
   与 DB user_settings.target_lang 短暂不一致时，chip 收到 SSE meta event 后立即
   跳到服务端实际值，避免"chip 显示 EN 但改写出日文"的视觉错位。客户端 detect
