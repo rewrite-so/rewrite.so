@@ -147,11 +147,7 @@
         "ui": "Idioma de la interfaz",
         "uiHelp": "Idioma del sitio. Independiente del idioma de reescritura de arriba.",
         "autoSystem": "Auto (seguir el sistema)",
-        "autoFromPage": "Detectar el idioma de la página",
-        "custom": "Personalizado…",
-        "customLabelFmt": "Personalizado: {value}",
-        "customPlaceholder": "p. ej., Portuguese (Brazilian), British English, español rioplatense",
-        "customHelp": "Cualquier idioma, dialecto o estilo. Se envía tal cual al modelo. Las comillas y caracteres de control se eliminan automáticamente."
+        "autoFromPage": "Detectar el idioma de la página"
       },
       "sub": {
         "label": "Suscripción",
@@ -490,11 +486,7 @@
         "placeholder": "Función Pro, disponible en la Fase 4. Aquí aparecerán los campos base_url / model / key."
       },
       "langOption": {
-        "auto": "Auto-detectar desde la página",
-        "custom": "Personalizado…",
-        "customLabelFmt": "Personalizado: {value}",
-        "customPlaceholder": "p. ej., Portuguese (Brazilian), British English, español rioplatense",
-        "customHelp": "Cualquier idioma, dialecto o estilo. Se envía tal cual al modelo. Las comillas y caracteres de control se eliminan automáticamente."
+        "auto": "Auto-detectar desde la página"
       }
     },
     "onboarding": {
@@ -534,7 +526,13 @@
     "retry": "Reintentar",
     "shortcuts": "{accept} aceptar · {regen} regenerar · {cancel} cerrar",
     "openSettings": "Abrir ajustes",
-    "dismiss": "Cerrar"
+    "dismiss": "Cerrar",
+    "lang": {
+      "custom": "Personalizado…",
+      "customLabelFmt": "Personalizado: {value}",
+      "customPlaceholder": "p. ej., Portuguese (Brazilian), British English, español rioplatense",
+      "customHelp": "Cualquier idioma, dialecto o estilo. Se envía tal cual al modelo. Las comillas y caracteres de control se eliminan automáticamente."
+    }
   },
   "state": {
     "thinking": "Pensando…"

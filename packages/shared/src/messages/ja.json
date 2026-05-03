@@ -147,11 +147,7 @@
         "ui": "UI 言語",
         "uiHelp": "サイトの表示言語。上の書き換え先言語とは別に設定できます。",
         "autoSystem": "自動（システムに合わせる）",
-        "autoFromPage": "ページの言語を自動検出",
-        "custom": "カスタム…",
-        "customLabelFmt": "カスタム：{value}",
-        "customPlaceholder": "例：Portuguese (Brazilian)、British English、関西弁",
-        "customHelp": "言語・方言・文体を自由記入。モデルにそのまま渡されます。引用符と制御文字は自動で除去されます。"
+        "autoFromPage": "ページの言語を自動検出"
       },
       "sub": {
         "label": "サブスクリプション",
@@ -490,11 +486,7 @@
         "placeholder": "Pro 機能、Phase 4 で利用可能。base_url / model / key フィールドがここに表示されます。"
       },
       "langOption": {
-        "auto": "ページから自動検出",
-        "custom": "カスタム…",
-        "customLabelFmt": "カスタム：{value}",
-        "customPlaceholder": "例：Portuguese (Brazilian)、British English、関西弁",
-        "customHelp": "言語・方言・文体を自由記入。モデルにそのまま渡されます。引用符と制御文字は自動で除去されます。"
+        "auto": "ページから自動検出"
       }
     },
     "onboarding": {
@@ -534,7 +526,13 @@
     "retry": "再試行",
     "shortcuts": "{accept} 採用 · {regen} 再生成 · {cancel} キャンセル",
     "openSettings": "設定を開く",
-    "dismiss": "閉じる"
+    "dismiss": "閉じる",
+    "lang": {
+      "custom": "カスタム…",
+      "customLabelFmt": "カスタム：{value}",
+      "customPlaceholder": "例：Portuguese (Brazilian)、British English、関西弁",
+      "customHelp": "言語・方言・文体を自由記入。モデルにそのまま渡されます。引用符と制御文字は自動で除去されます。"
+    }
   },
   "state": {
     "thinking": "考えています…"

@@ -43,6 +43,7 @@ const CUSTOM_SENTINEL = '__custom__';
 
 export function SettingsClient() {
   const t = useTranslations('page.settings');
+  const tLang = useTranslations('core.lang');
   const router = useRouter();
   const pathname = usePathname();
   const [me, setMe] = useState<UserInfo | null>(null);
@@ -88,8 +89,8 @@ export function SettingsClient() {
 
   const customOptionLabel =
     isStoredCustom && settings
-      ? t('lang.customLabelFmt', { value: settings.targetLang })
-      : t('lang.custom');
+      ? tLang('customLabelFmt', { value: settings.targetLang })
+      : tLang('custom');
   const langOptions: Array<{ value: string; label: string }> = [
     { value: 'auto', label: t('lang.autoFromPage') },
     ...REWRITE_TARGETS.map((code) => ({ value: code, label: REWRITE_TARGET_LABELS[code] })),
@@ -318,7 +319,7 @@ export function SettingsClient() {
                       e.currentTarget.blur();
                     }
                   }}
-                  placeholder={t('lang.customPlaceholder')}
+                  placeholder={tLang('customPlaceholder')}
                   maxLength={50}
                   disabled={savingLang}
                   style={{
@@ -332,7 +333,7 @@ export function SettingsClient() {
                   }}
                 />
                 <div style={{ fontSize: 12, color: '#888', marginTop: 4 }}>
-                  {t('lang.customHelp')}
+                  {tLang('customHelp')}
                 </div>
               </div>
             )}

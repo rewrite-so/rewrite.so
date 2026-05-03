@@ -147,11 +147,7 @@
         "ui": "Langue de l'interface",
         "uiHelp": "Langue du site. Indépendante de la langue de réécriture ci-dessus.",
         "autoSystem": "Auto (suivre le système)",
-        "autoFromPage": "Détecter la langue de la page",
-        "custom": "Personnalisé…",
-        "customLabelFmt": "Personnalisé : {value}",
-        "customPlaceholder": "ex. : Portuguese (Brazilian), British English, français québécois",
-        "customHelp": "N'importe quelle langue, dialecte ou style. Envoyé tel quel au modèle. Les guillemets et caractères de contrôle sont supprimés automatiquement."
+        "autoFromPage": "Détecter la langue de la page"
       },
       "sub": {
         "label": "Abonnement",
@@ -490,11 +486,7 @@
         "placeholder": "Fonctionnalité Pro, disponible en Phase 4. Les champs base_url / model / key s'afficheront ici."
       },
       "langOption": {
-        "auto": "Auto-détection depuis la page",
-        "custom": "Personnalisé…",
-        "customLabelFmt": "Personnalisé : {value}",
-        "customPlaceholder": "ex. : Portuguese (Brazilian), British English, français québécois",
-        "customHelp": "N'importe quelle langue, dialecte ou style. Envoyé tel quel au modèle. Les guillemets et caractères de contrôle sont supprimés automatiquement."
+        "auto": "Auto-détection depuis la page"
       }
     },
     "onboarding": {
@@ -534,7 +526,13 @@
     "retry": "Réessayer",
     "shortcuts": "{accept} choisir · {regen} regénérer · {cancel} fermer",
     "openSettings": "Ouvrir les paramètres",
-    "dismiss": "Fermer"
+    "dismiss": "Fermer",
+    "lang": {
+      "custom": "Personnalisé…",
+      "customLabelFmt": "Personnalisé : {value}",
+      "customPlaceholder": "ex. : Portuguese (Brazilian), British English, français québécois",
+      "customHelp": "N'importe quelle langue, dialecte ou style. Envoyé tel quel au modèle. Les guillemets et caractères de contrôle sont supprimés automatiquement."
+    }
   },
   "state": {
     "thinking": "Réflexion en cours…"

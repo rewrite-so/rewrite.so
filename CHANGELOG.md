@@ -8,12 +8,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- catalog 合并 `core.lang.{custom,customLabelFmt,customPlaceholder,customHelp}` ——
+  原来扩展 `ext.options.langOption.custom*` + web `page.settings.lang.custom*` 两套
+  完全相同的 4 keys × 7 locale 现在归一到 `core.lang.*` 一份。SettingsClient 加
+  `useTranslations('core.lang')` 副 hook，extension Settings.tsx 用全路径 `t('core.lang.X')`。
+  净 -28 字符串（删 56，加 28）。
+- 扩展 ↔ web 偏好跨端同步 —— 用户在 web `/settings` 改 targetLang/uiLocale 现在能
+  同步到扩展 chrome.storage，反之亦然：
+  - `extension/lib/storage.ts` 加 `fetchCloudPrefs / patchCloudPrefs` helpers；
+    `patchUserPrefs` 在写 chrome.storage 后 fail-soft 推送到 web `/v1/me/settings`
+  - `extension/background/service-worker.ts` 加 `me-settings:get / patch` message handlers
+    （content script 没 host_permissions 跨域 fetch）
+  - `extension/content/inject.ts` bootstrap 和 `extension/options/App.tsx` 启动都
+    先 `fetchCloudPrefs()` 拉云端覆盖本地 cache
+  - 已登录用户：web ↔ 扩展双向同步；未登录：401 静默忽略，仅本地有效
 - 浮窗 install hint 加 × 关闭按钮 —— 用户主动 dismiss 后 localStorage 记，不再
   显示。装扩展用户在 /try 不会反复看到「Install extension」。`core.dismiss` × 7 locale。
 - 扩展 Options + Onboarding 接入 22 个目标语言 + Custom 自定义 —— 删除两个文件里
   各自的 LANG_LABELS 7 项硬编码，改用 `packages/shared` 的 `REWRITE_TARGETS` /
   `REWRITE_TARGET_LABELS`。Settings.tsx 加 Custom 输入框（同 web /settings 的逻辑）；
-  Onboarding 简化只保留 22 预设（首次使用不暴露 Custom，新用户复杂度低）。
+  Onboarding 同步扩到 22 预设（不暴露 Custom，新用户复杂度低）。
   扩展 i18n 加 `ext.options.langOption.{custom,customLabelFmt,customPlaceholder,customHelp}`。
   注：扩展端偏好与 web `/settings` 仍各自独立（chrome.storage.local vs user_settings 表），
   跨端同步是单独的 follow-up。

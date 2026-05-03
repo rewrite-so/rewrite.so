@@ -46,8 +46,8 @@ export function Settings({ prefs, onUpdate }: Props) {
   }, [prefs.targetLang, isStoredCustom]);
 
   const customOptionLabel = isStoredCustom
-    ? t('ext.options.langOption.customLabelFmt').replace('{value}', prefs.targetLang)
-    : t('ext.options.langOption.custom');
+    ? t('core.lang.customLabelFmt').replace('{value}', prefs.targetLang)
+    : t('core.lang.custom');
 
   const langOptions = [
     { value: 'auto', label: t('ext.options.langOption.auto') },
@@ -119,11 +119,11 @@ export function Settings({ prefs, onUpdate }: Props) {
                     (e.target as HTMLInputElement).blur();
                   }
                 }}
-                placeholder={t('ext.options.langOption.customPlaceholder')}
+                placeholder={t('core.lang.customPlaceholder')}
                 maxLength={50}
                 style={{ ...selectStyle, width: '100%' }}
               />
-              <p style={hintStyle}>{t('ext.options.langOption.customHelp')}</p>
+              <p style={hintStyle}>{t('core.lang.customHelp')}</p>
             </div>
           )}
           <p style={hintStyle}>{t('ext.options.targetLang.hint')}</p>

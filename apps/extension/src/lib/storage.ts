@@ -59,7 +59,62 @@ export async function patchUserPrefs(patch: Partial<UserPrefs>): Promise<UserPre
   const current = await getUserPrefs();
   const next: UserPrefs = { ...current, ...patch, _v: 1 };
   await chrome.storage.local.set({ [STORAGE_KEY_PREFS]: next });
+  // 同步到 web /v1/me/settings —— 仅 targetLang / uiLocale 字段，且只有登录用户
+  // 才能 PATCH 成功（401 静默忽略，意味着用户未登录，prefs 仅本地有效）
+  if (patch.targetLang !== undefined || patch.uiLocale !== undefined) {
+    void patchCloudPrefs({
+      ...(patch.targetLang !== undefined ? { targetLang: patch.targetLang } : {}),
+      ...(patch.uiLocale !== undefined ? { uiLocale: patch.uiLocale } : {}),
+    });
+  }
   return next;
+}
+
+/**
+ * 从 web /v1/me/settings 拉偏好（通过 background SW，避免 content script 跨域）。
+ * 用户已登录返回 prefs 子集；未登录或网络错误返 null。
+ */
+export async function fetchCloudPrefs(): Promise<Pick<
+  UserPrefs,
+  'targetLang' | 'uiLocale'
+> | null> {
+  return new Promise((resolve) => {
+    try {
+      chrome.runtime.sendMessage(
+        { type: 'me-settings:get' },
+        (res: { ok?: boolean; data?: { targetLang: string; uiLocale: StoredLocale } }) => {
+          if (chrome.runtime.lastError || !res?.ok || !res.data) {
+            resolve(null);
+            return;
+          }
+          resolve({ targetLang: res.data.targetLang, uiLocale: res.data.uiLocale });
+        },
+      );
+    } catch {
+      resolve(null);
+    }
+  });
+}
+
+/**
+ * 推送偏好到 web（通过 background SW）。fail-soft：成功 / 失败均不抛异常，
+ * 调用方不阻塞 local 写入流程。
+ */
+export async function patchCloudPrefs(
+  patch: Partial<Pick<UserPrefs, 'targetLang' | 'uiLocale'>>,
+): Promise<boolean> {
+  return new Promise((resolve) => {
+    try {
+      chrome.runtime.sendMessage(
+        { type: 'me-settings:patch', body: patch },
+        (res: { ok?: boolean }) => {
+          resolve(!chrome.runtime.lastError && res?.ok === true);
+        },
+      );
+    } catch {
+      resolve(false);
+    }
+  });
 }
 
 /**

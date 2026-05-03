@@ -7,13 +7,51 @@ chrome.runtime.onInstalled.addListener((details) => {
   }
 });
 
-// content script 不能直接调 chrome.runtime.openOptionsPage()（仅 background / 扩展页面可用）
-// 所以浮窗齿轮通过 sendMessage 让 background 代为打开
-chrome.runtime.onMessage.addListener((msg: unknown, _sender, _sendResponse) => {
-  if (msg && typeof msg === 'object' && (msg as { type?: string }).type === 'open-options') {
+// content script / options 页面通过 sendMessage 让 background 代理：
+// - open-options：调 chrome.runtime.openOptionsPage()（content script 没这个 API）
+// - me-settings:get / patch：跨域 fetch /v1/me/settings（host_permissions 在 background）
+chrome.runtime.onMessage.addListener((rawMsg: unknown, _sender, sendResponse) => {
+  const msg = rawMsg as { type?: string; body?: unknown };
+
+  if (msg?.type === 'open-options') {
     chrome.runtime.openOptionsPage();
+    return false; // 同步处理，不需要 sendResponse
   }
-  // 不返回 true：这个消息不需要异步响应
+
+  if (msg?.type === 'me-settings:get') {
+    fetch(`${API_BASE}/v1/me/settings`, { credentials: 'include' })
+      .then(async (res) => {
+        if (!res.ok) {
+          sendResponse({ ok: false, error: `http_${res.status}` });
+          return;
+        }
+        const data = (await res.json()) as { targetLang: string; uiLocale: string };
+        sendResponse({ ok: true, data });
+      })
+      .catch((err) => sendResponse({ ok: false, error: (err as Error).message }));
+    return true; // 异步响应
+  }
+
+  if (msg?.type === 'me-settings:patch') {
+    fetch(`${API_BASE}/v1/me/settings`, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(msg.body ?? {}),
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          sendResponse({ ok: false, error: `http_${res.status}` });
+          return;
+        }
+        const data = (await res.json()) as { targetLang: string; uiLocale: string };
+        sendResponse({ ok: true, data });
+      })
+      .catch((err) => sendResponse({ ok: false, error: (err as Error).message }));
+    return true;
+  }
+
+  return false;
 });
 
 chrome.runtime.onConnect.addListener((port) => {

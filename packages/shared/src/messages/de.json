@@ -147,11 +147,7 @@
         "ui": "Sprache der Oberfläche",
         "uiHelp": "Sprache der Website. Unabhängig von der Zielsprache oben.",
         "autoSystem": "Auto (Systemeinstellung folgen)",
-        "autoFromPage": "Seitensprache automatisch erkennen",
-        "custom": "Eigener Wert…",
-        "customLabelFmt": "Eigener Wert: {value}",
-        "customPlaceholder": "z. B. Portuguese (Brazilian), British English, Schweizerdeutsch",
-        "customHelp": "Beliebige Sprache, Dialekt oder Stil. Geht direkt an das Modell. Anführungszeichen und Steuerzeichen werden automatisch entfernt."
+        "autoFromPage": "Seitensprache automatisch erkennen"
       },
       "sub": {
         "label": "Abonnement",
@@ -490,11 +486,7 @@
         "placeholder": "Pro-Funktion, verfügbar in Phase 4. Hier erscheinen base_url / model / key Felder."
       },
       "langOption": {
-        "auto": "Automatisch von Seite erkennen",
-        "custom": "Eigener Wert…",
-        "customLabelFmt": "Eigener Wert: {value}",
-        "customPlaceholder": "z. B. Portuguese (Brazilian), British English, Schweizerdeutsch",
-        "customHelp": "Beliebige Sprache, Dialekt oder Stil. Geht direkt an das Modell. Anführungszeichen und Steuerzeichen werden automatisch entfernt."
+        "auto": "Automatisch von Seite erkennen"
       }
     },
     "onboarding": {
@@ -534,7 +526,13 @@
     "retry": "Erneut versuchen",
     "shortcuts": "{accept} wählen · {regen} regenerieren · {cancel} schließen",
     "openSettings": "Einstellungen öffnen",
-    "dismiss": "Schließen"
+    "dismiss": "Schließen",
+    "lang": {
+      "custom": "Eigener Wert…",
+      "customLabelFmt": "Eigener Wert: {value}",
+      "customPlaceholder": "z. B. Portuguese (Brazilian), British English, Schweizerdeutsch",
+      "customHelp": "Beliebige Sprache, Dialekt oder Stil. Geht direkt an das Modell. Anführungszeichen und Steuerzeichen werden automatisch entfernt."
+    }
   },
   "state": {
     "thinking": "Denkt nach…"

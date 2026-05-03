@@ -79,6 +79,12 @@
 - **配额数字（10/5/30/2000）改动需重算成本**：当前售价（月付 $13.99 / 年付 $7.99/月，即 $95.88/年）下 Pro 跑满约 $4/月，留 $4-10 利润。匿名/扩展/登录免费档不应放宽至单用户成本超 $0.20/月。
 - **BYOK 用户走 token bucket（100 req/min 反代滥用底线）但不查月配额**：防止当作我们 SSE 的反代。
 - **installId 永不重置**：包括登录后；登录会做 `usage_monthly` 一次性 merge。
+- **扩展 prefs 跨端同步策略**：`patchUserPrefs(targetLang/uiLocale)` 写 chrome.storage
+  同时 fail-soft `void patchCloudPrefs(...)` PATCH `/v1/me/settings`（通过 background
+  SW 代理避开 content script CORS）。inject.ts bootstrap 和 options App.tsx 启动
+  都会先 `fetchCloudPrefs()` 拉云端覆盖本地 cache。已登录用户：web ↔ 扩展双向同步；
+  未登录：401 静默忽略，仅本地有效。**不要在扩展 chrome.storage 里加敏感字段**——
+  storage 镜像逻辑只针对 `targetLang` / `uiLocale` 子集。
 - **resolveUserTier 是订阅 → 配额档位的唯一入口**：`/v1/rewrite` 和 `/v1/me/usage` 都通过它查 subscriptions
   表决定 free/pro。`status` 为 `active|trialing|paused`，或 `canceled` 但 `current_period_end > now`，
   都返回 'pro'。其它（包括 `expired|past_due`）返回 'free'。webhook 状态机和这个查询逻辑必须一致。
