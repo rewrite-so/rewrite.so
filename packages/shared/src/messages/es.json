@@ -490,7 +490,11 @@
         "placeholder": "Función Pro, disponible en la Fase 4. Aquí aparecerán los campos base_url / model / key."
       },
       "langOption": {
-        "auto": "Auto-detectar desde la página"
+        "auto": "Auto-detectar desde la página",
+        "custom": "Personalizado…",
+        "customLabelFmt": "Personalizado: {value}",
+        "customPlaceholder": "p. ej., Portuguese (Brazilian), British English, español rioplatense",
+        "customHelp": "Cualquier idioma, dialecto o estilo. Se envía tal cual al modelo. Las comillas y caracteres de control se eliminan automáticamente."
       }
     },
     "onboarding": {
@@ -529,7 +533,8 @@
     "regen": "Regenerar",
     "retry": "Reintentar",
     "shortcuts": "{accept} aceptar · {regen} regenerar · {cancel} cerrar",
-    "openSettings": "Abrir ajustes"
+    "openSettings": "Abrir ajustes",
+    "dismiss": "Cerrar"
   },
   "state": {
     "thinking": "Pensando…"

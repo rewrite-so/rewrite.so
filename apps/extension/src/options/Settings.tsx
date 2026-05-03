@@ -1,5 +1,6 @@
-import { LOCALES } from '@rewrite/shared';
+import { LOCALES, REWRITE_TARGET_LABELS, REWRITE_TARGETS } from '@rewrite/shared';
 import type { ComponentChildren } from 'preact';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { useT } from '../lib/i18n.ts';
 import type { UserPrefs } from '../lib/storage.ts';
 
@@ -8,7 +9,8 @@ interface Props {
   onUpdate: (patch: Partial<UserPrefs>) => void;
 }
 
-const LANG_LABELS: Record<string, string> = {
+// UI locale 仍只有 7 个（与 web 一致）
+const UI_LOCALE_LABELS: Record<string, string> = {
   en: 'English',
   'zh-CN': '中文（简体）',
   ja: '日本語',
@@ -18,16 +20,71 @@ const LANG_LABELS: Record<string, string> = {
   de: 'Deutsch',
 };
 
+const PRESET_TARGETS: readonly string[] = ['auto', ...REWRITE_TARGETS];
+const CUSTOM_SENTINEL = '__custom__';
+
 export function Settings({ prefs, onUpdate }: Props) {
   const t = useT();
+  const isStoredCustom = !PRESET_TARGETS.includes(prefs.targetLang);
+  const [customDraft, setCustomDraft] = useState(isStoredCustom ? prefs.targetLang : '');
+  const [showCustomInput, setShowCustomInput] = useState(isStoredCustom);
+  const customInputRef = useRef<HTMLInputElement | null>(null);
+
+  // 切到 custom 时自动聚焦 input
+  useEffect(() => {
+    if (showCustomInput && !isStoredCustom) {
+      customInputRef.current?.focus();
+    }
+  }, [showCustomInput, isStoredCustom]);
+
+  // prefs 外部更新时同步 draft
+  useEffect(() => {
+    if (isStoredCustom) {
+      setCustomDraft(prefs.targetLang);
+      setShowCustomInput(true);
+    }
+  }, [prefs.targetLang, isStoredCustom]);
+
+  const customOptionLabel = isStoredCustom
+    ? t('ext.options.langOption.customLabelFmt').replace('{value}', prefs.targetLang)
+    : t('ext.options.langOption.custom');
+
   const langOptions = [
     { value: 'auto', label: t('ext.options.langOption.auto') },
-    ...LOCALES.map((l) => ({ value: l, label: LANG_LABELS[l] ?? l })),
+    ...REWRITE_TARGETS.map((code) => ({
+      value: code,
+      label: REWRITE_TARGET_LABELS[code],
+    })),
+    { value: CUSTOM_SENTINEL, label: customOptionLabel },
   ];
   const uiLocaleOptions = [
     { value: 'auto', label: t('ext.options.uiLocale.auto') },
-    ...LOCALES.map((l) => ({ value: l, label: LANG_LABELS[l] ?? l })),
+    ...LOCALES.map((l) => ({ value: l, label: UI_LOCALE_LABELS[l] ?? l })),
   ];
+
+  function handleLangChange(value: string) {
+    if (value === CUSTOM_SENTINEL) {
+      setShowCustomInput(true);
+      return;
+    }
+    setShowCustomInput(false);
+    setCustomDraft('');
+    onUpdate({ targetLang: value });
+  }
+
+  function commitCustom() {
+    const trimmed = customDraft.trim();
+    if (trimmed.length === 0) {
+      if (!isStoredCustom) {
+        setShowCustomInput(false);
+        setCustomDraft('');
+      }
+      return;
+    }
+    if (trimmed === prefs.targetLang) return;
+    onUpdate({ targetLang: trimmed });
+  }
+
   return (
     <main style={pageStyle}>
       <div style={shellStyle}>
@@ -38,8 +95,8 @@ export function Settings({ prefs, onUpdate }: Props) {
 
         <Section title={t('ext.options.targetLang.title')}>
           <select
-            value={prefs.targetLang}
-            onChange={(e) => onUpdate({ targetLang: (e.target as HTMLSelectElement).value })}
+            value={showCustomInput || isStoredCustom ? CUSTOM_SENTINEL : prefs.targetLang}
+            onChange={(e) => handleLangChange((e.target as HTMLSelectElement).value)}
             style={selectStyle}
           >
             {langOptions.map((o) => (
@@ -48,6 +105,27 @@ export function Settings({ prefs, onUpdate }: Props) {
               </option>
             ))}
           </select>
+          {showCustomInput && (
+            <div style={{ marginTop: 12 }}>
+              <input
+                ref={customInputRef}
+                type="text"
+                value={customDraft}
+                onInput={(e) => setCustomDraft((e.target as HTMLInputElement).value)}
+                onBlur={commitCustom}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    (e.target as HTMLInputElement).blur();
+                  }
+                }}
+                placeholder={t('ext.options.langOption.customPlaceholder')}
+                maxLength={50}
+                style={{ ...selectStyle, width: '100%' }}
+              />
+              <p style={hintStyle}>{t('ext.options.langOption.customHelp')}</p>
+            </div>
+          )}
           <p style={hintStyle}>{t('ext.options.targetLang.hint')}</p>
         </Section>
 

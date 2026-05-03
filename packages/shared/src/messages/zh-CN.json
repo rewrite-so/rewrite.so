@@ -490,7 +490,11 @@
         "placeholder": "Pro 功能，在 Phase 4 启用。届时此处会出现 base_url / model / key 字段。"
       },
       "langOption": {
-        "auto": "自动检测页面语言"
+        "auto": "自动检测页面语言",
+        "custom": "自定义…",
+        "customLabelFmt": "自定义：{value}",
+        "customPlaceholder": "比如：Portuguese (Brazilian)、British English、粤语",
+        "customHelp": "任意语言、方言或风格描述，会直接传给模型。引号和控制字符会被自动过滤。"
       }
     },
     "onboarding": {
@@ -529,7 +533,8 @@
     "regen": "重新生成",
     "retry": "重试",
     "shortcuts": "{accept} 选用 · {regen} 重生成 · {cancel} 关闭",
-    "openSettings": "打开设置"
+    "openSettings": "打开设置",
+    "dismiss": "关闭"
   },
   "state": {
     "thinking": "思考中…"

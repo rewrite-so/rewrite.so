@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- 浮窗 install hint 加 × 关闭按钮 —— 用户主动 dismiss 后 localStorage 记，不再
+  显示。装扩展用户在 /try 不会反复看到「Install extension」。`core.dismiss` × 7 locale。
+- 扩展 Options + Onboarding 接入 22 个目标语言 + Custom 自定义 —— 删除两个文件里
+  各自的 LANG_LABELS 7 项硬编码，改用 `packages/shared` 的 `REWRITE_TARGETS` /
+  `REWRITE_TARGET_LABELS`。Settings.tsx 加 Custom 输入框（同 web /settings 的逻辑）；
+  Onboarding 简化只保留 22 预设（首次使用不暴露 Custom，新用户复杂度低）。
+  扩展 i18n 加 `ext.options.langOption.{custom,customLabelFmt,customPlaceholder,customHelp}`。
+  注：扩展端偏好与 web `/settings` 仍各自独立（chrome.storage.local vs user_settings 表），
+  跨端同步是单独的 follow-up。
 - **Landing 重新定位** — Hero 从「隐私不存储」改为「随手写，自信发」（outcome-led），
   五层金字塔：eyebrow / H1 / sub-h1（泛化痛点 "Stop overthinking every message"）/
   polyglot pill（"Any language in. Any language out."）/ intro。
@@ -48,7 +57,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 扩展 manifest 的 inject.ts 用 `<all_urls>` + `exclude_matches` 排除 rewrite.so / *.rewrite.so / localhost:3000
   - TryClient 移除 extensionDetected 检测 + banner UI（永远走自己的 mount）
   - 删除 page.try.extensionTakeoverTitle / extensionTakeoverBody × 7 locale = 14 字符串
-  - 修了 /try "This page couldn't load" 错误（扩展 inject 在 OpenNext SSR 边界引发的渲染冲突）
+  - 顺带修了 /try "This page couldn't load" 错误（根因未单独定位，简化方案后症状消失，
+    可能与扩展 inject 注入 rewrite.so 自身页面有关）
   - 历史曲折 524a3af → f2c8534 → bd6e032 → 最终回到最简方案
   - /try 是给"还没装扩展的人"的演示页；装了扩展的人本来就不需要去演示
 - 修浮窗交互失效 bug —— 鼠标点卡片 / 齿轮 / ↻ Retry 都无反应：

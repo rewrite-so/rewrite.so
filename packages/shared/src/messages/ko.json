@@ -490,7 +490,11 @@
         "placeholder": "Pro 기능, Phase 4에서 사용 가능. base_url / model / key 필드가 여기에 표시됩니다."
       },
       "langOption": {
-        "auto": "페이지에서 자동 감지"
+        "auto": "페이지에서 자동 감지",
+        "custom": "사용자 지정…",
+        "customLabelFmt": "사용자 지정: {value}",
+        "customPlaceholder": "예: Portuguese (Brazilian), British English, 부산 사투리",
+        "customHelp": "언어 / 방언 / 문체 자유 입력. 모델에 그대로 전달됩니다. 따옴표 및 제어 문자는 자동으로 제거됩니다."
       }
     },
     "onboarding": {
@@ -529,7 +533,8 @@
     "regen": "다시 생성",
     "retry": "다시 시도",
     "shortcuts": "{accept} 선택 · {regen} 재생성 · {cancel} 닫기",
-    "openSettings": "설정 열기"
+    "openSettings": "설정 열기",
+    "dismiss": "닫기"
   },
   "state": {
     "thinking": "생각 중…"

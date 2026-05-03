@@ -490,7 +490,11 @@
         "placeholder": "Pro 機能、Phase 4 で利用可能。base_url / model / key フィールドがここに表示されます。"
       },
       "langOption": {
-        "auto": "ページから自動検出"
+        "auto": "ページから自動検出",
+        "custom": "カスタム…",
+        "customLabelFmt": "カスタム：{value}",
+        "customPlaceholder": "例：Portuguese (Brazilian)、British English、関西弁",
+        "customHelp": "言語・方言・文体を自由記入。モデルにそのまま渡されます。引用符と制御文字は自動で除去されます。"
       }
     },
     "onboarding": {
@@ -529,7 +533,8 @@
     "regen": "再生成",
     "retry": "再試行",
     "shortcuts": "{accept} 採用 · {regen} 再生成 · {cancel} キャンセル",
-    "openSettings": "設定を開く"
+    "openSettings": "設定を開く",
+    "dismiss": "閉じる"
   },
   "state": {
     "thinking": "考えています…"

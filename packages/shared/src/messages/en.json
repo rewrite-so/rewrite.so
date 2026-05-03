@@ -490,7 +490,11 @@
         "placeholder": "Pro feature, available in Phase 4. Will show base_url / model / key fields here."
       },
       "langOption": {
-        "auto": "Auto-detect from page"
+        "auto": "Auto-detect from page",
+        "custom": "Custom…",
+        "customLabelFmt": "Custom: {value}",
+        "customPlaceholder": "e.g., Portuguese (Brazilian), British English, 粤语",
+        "customHelp": "Any language, dialect, or style description. Sent directly to the model. Quotes and control characters are stripped."
       }
     },
     "onboarding": {
@@ -529,7 +533,8 @@
     "regen": "Regenerate",
     "retry": "Retry",
     "shortcuts": "{accept} accept · {regen} regen · {cancel} cancel",
-    "openSettings": "Open settings"
+    "openSettings": "Open settings",
+    "dismiss": "Dismiss"
   },
   "state": {
     "thinking": "Thinking…"

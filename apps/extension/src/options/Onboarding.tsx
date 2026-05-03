@@ -1,5 +1,5 @@
 import { attachDoubleShift } from '@rewrite/core';
-import { LOCALES } from '@rewrite/shared';
+import { REWRITE_TARGET_LABELS, REWRITE_TARGETS } from '@rewrite/shared';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { useT } from '../lib/i18n.ts';
 import type { UserPrefs } from '../lib/storage.ts';
@@ -10,16 +10,6 @@ interface Props {
   onComplete: (patch: Partial<UserPrefs>) => void;
 }
 
-const LANG_LABELS: Record<string, string> = {
-  en: 'English',
-  'zh-CN': '中文（简体）',
-  ja: '日本語',
-  ko: '한국어',
-  es: 'Español',
-  fr: 'Français',
-  de: 'Deutsch',
-};
-
 export function Onboarding({ onComplete }: Props) {
   const t = useT();
   const [step, setStep] = useState<Step>(1);
@@ -27,9 +17,14 @@ export function Onboarding({ onComplete }: Props) {
   const [triggered, setTriggered] = useState(false);
   const taRef = useRef<HTMLTextAreaElement | null>(null);
 
+  // onboarding 简化：22 个预设；不暴露 Custom 入口（用户首次使用时不应该被复杂选项压住，
+  // 完整 22 + Custom 在 Settings 里）
   const langOptions = [
     { value: 'auto', label: t('ext.options.langOption.auto') },
-    ...LOCALES.map((l) => ({ value: l, label: LANG_LABELS[l] ?? l })),
+    ...REWRITE_TARGETS.map((code) => ({
+      value: code,
+      label: REWRITE_TARGET_LABELS[code],
+    })),
   ];
 
   // 第一步进入时聚焦 textarea

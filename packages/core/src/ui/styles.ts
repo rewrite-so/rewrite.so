@@ -313,6 +313,29 @@ export const SHADOW_STYLES = `
   cursor: pointer;
 }
 
+.footer-dismiss {
+  margin-left: auto;
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  color: light-dark(rgba(0,0,0,0.35), rgba(255,255,255,0.35));
+  font-family: inherit;
+  padding: 0;
+  transition: background 120ms ease, color 120ms ease;
+}
+.footer-dismiss:hover {
+  background: light-dark(rgba(0,0,0,0.06), rgba(255,255,255,0.10));
+  color: light-dark(#1f1f22, #f5f5f5);
+}
+
 .panel.global-error {
   padding: 18px 20px;
 }

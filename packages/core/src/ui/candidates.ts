@@ -5,6 +5,23 @@ type ActionMode = 'hidden' | 'streaming' | 'regen' | 'retry';
 const SHORTCUT_HINT_STORAGE_KEY = '__rewrite_so_shortcuts_shown_v1';
 const SHORTCUT_HINT_MAX_SHOWS = 3;
 
+const INSTALL_HINT_DISMISSED_KEY = '__rewrite_so_install_hint_dismissed_v1';
+
+function shouldShowInstallHint(): boolean {
+  try {
+    return localStorage.getItem(INSTALL_HINT_DISMISSED_KEY) !== '1';
+  } catch {
+    return true;
+  }
+}
+function markInstallHintDismissed(): void {
+  try {
+    localStorage.setItem(INSTALL_HINT_DISMISSED_KEY, '1');
+  } catch {
+    /* localStorage 不可用 */
+  }
+}
+
 function shouldShowShortcutHint(): boolean {
   try {
     const n = Number(localStorage.getItem(SHORTCUT_HINT_STORAGE_KEY) ?? '0');
@@ -245,8 +262,8 @@ function openPanel(
     markShortcutHintShown();
   }
 
-  // 底部 hook（仅 web 模式）
-  if (opts.showInstallHook) {
+  // 底部 hook（仅 web 模式 + 用户没主动 dismiss 过）
+  if (opts.showInstallHook && shouldShowInstallHint()) {
     const footer = document.createElement('div');
     footer.className = 'footer';
     const note = document.createElement('span');
@@ -257,8 +274,24 @@ function openPanel(
       e.preventDefault();
       callbacks.onInstallClick?.();
     });
+
+    // 关闭按钮：装扩展用户访问 /try 不应反复看到 install hint
+    const dismissBtn = document.createElement('button');
+    dismissBtn.type = 'button';
+    dismissBtn.className = 'footer-dismiss';
+    dismissBtn.textContent = '×';
+    dismissBtn.setAttribute('aria-label', t('core.dismiss', opts.locale));
+    dismissBtn.title = t('core.dismiss', opts.locale);
+    dismissBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      markInstallHintDismissed();
+      footer.remove();
+    });
+
     footer.appendChild(note);
     footer.appendChild(link);
+    footer.appendChild(dismissBtn);
     panel.appendChild(footer);
   }
 
