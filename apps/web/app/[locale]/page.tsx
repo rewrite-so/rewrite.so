@@ -123,80 +123,116 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </div>
       </section>
 
-      {/* ===== Sound familiar? — 痛点 → 场景 ===== */}
-      <section style={{ maxWidth: 720, margin: '0 auto', padding: '64px 24px 32px' }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 600, margin: 0, marginBottom: 16 }}>
+      {/* ===== Sound familiar? — 痛点卡 → 场景卡（双卡片对比布局） ===== */}
+      <section style={{ maxWidth: 800, margin: '0 auto', padding: '72px 24px 48px' }}>
+        <h2
+          style={{
+            fontSize: '1.875rem',
+            fontWeight: 700,
+            margin: 0,
+            marginBottom: 14,
+            letterSpacing: '-0.01em',
+          }}
+        >
           {t('scenarios.h2')}
         </h2>
 
-        {/* intro 过渡段 */}
+        {/* intro 过渡段：把 hero "自信发" 上扬情绪过渡到"承认这事确实费心" */}
         <p
           style={{
             color: '#555',
             fontSize: '1rem',
-            lineHeight: 1.6,
+            lineHeight: 1.65,
             margin: 0,
-            marginBottom: 20,
+            marginBottom: 32,
+            maxWidth: 640,
           }}
         >
           {t('scenarios.intro')}
         </p>
 
-        {/* pain bullets（→ 灰，诊断语气） */}
-        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 14 }}>
-          {(['pain1', 'pain2', 'pain3', 'pain4'] as const).map((k) => (
-            <li
-              key={k}
-              style={{
-                fontSize: '1.05rem',
-                color: '#333',
-                lineHeight: 1.7,
-                paddingLeft: 24,
-                position: 'relative',
-              }}
-            >
-              <span style={{ position: 'absolute', left: 0, color: '#888' }}>→</span>
-              {t(`scenarios.${k}`)}
-            </li>
-          ))}
-        </ul>
+        {/* Pain card — 灰底，"诊断"语气 */}
+        <div
+          style={{
+            padding: '24px 28px',
+            background: '#fafafa',
+            border: '1px solid #e4e4e7',
+            borderRadius: 14,
+          }}
+        >
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 12 }}>
+            {(['pain1', 'pain2', 'pain3', 'pain4'] as const).map((k) => (
+              <li
+                key={k}
+                style={{
+                  fontSize: '0.975rem',
+                  color: '#444',
+                  lineHeight: 1.6,
+                  paddingLeft: 22,
+                  position: 'relative',
+                }}
+              >
+                <span style={{ position: 'absolute', left: 0, color: '#999' }}>→</span>
+                {t(`scenarios.${k}`)}
+              </li>
+            ))}
+          </ul>
+        </div>
 
-        {/* bridge 过渡段（"诊断 → 建议" 转折点） */}
+        {/* Bridge — 两卡之间的转折，加粗收紧视觉节奏 */}
         <p
           style={{
-            color: '#222',
-            fontSize: '1rem',
-            lineHeight: 1.6,
-            fontWeight: 500,
+            color: '#16a34a',
+            fontSize: '0.95rem',
+            fontWeight: 600,
+            letterSpacing: '0.01em',
             margin: 0,
-            marginTop: 32,
-            marginBottom: 20,
+            marginTop: 28,
+            marginBottom: 14,
           }}
         >
           {t('scenarios.bridge')}
         </p>
 
-        {/* use case bullets（✓ 绿 + 加粗，建议 / 正向） */}
-        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 14 }}>
-          {(['useCase1', 'useCase2', 'useCase3', 'useCase4'] as const).map((k) => (
-            <li
-              key={k}
-              style={{
-                fontSize: '1.05rem',
-                color: '#222',
-                fontWeight: 500,
-                lineHeight: 1.7,
-                paddingLeft: 24,
-                position: 'relative',
-              }}
-            >
-              <span style={{ position: 'absolute', left: 0, color: '#16a34a' }}>✓</span>
-              {t(`scenarios.${k}`)}
-            </li>
-          ))}
-        </ul>
+        {/* Use case card — 浅绿底，"建议"正向 */}
+        <div
+          style={{
+            padding: '24px 28px',
+            background: '#f0fdf4',
+            border: '1px solid #bbf7d0',
+            borderRadius: 14,
+          }}
+        >
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 12 }}>
+            {(['useCase1', 'useCase2', 'useCase3', 'useCase4'] as const).map((k) => (
+              <li
+                key={k}
+                style={{
+                  fontSize: '0.975rem',
+                  color: '#222',
+                  fontWeight: 500,
+                  lineHeight: 1.6,
+                  paddingLeft: 22,
+                  position: 'relative',
+                }}
+              >
+                <span style={{ position: 'absolute', left: 0, color: '#16a34a' }}>✓</span>
+                {t(`scenarios.${k}`)}
+              </li>
+            ))}
+          </ul>
+        </div>
 
-        <p style={{ marginTop: 28, color: '#666', fontSize: 14 }}>{t('scenarios.outro')}</p>
+        <p
+          style={{
+            marginTop: 32,
+            color: '#666',
+            fontSize: 14,
+            textAlign: 'center',
+          }}
+        >
+          {t('scenarios.outro')}
+        </p>
       </section>
 
       {/* ===== How it works ===== */}
