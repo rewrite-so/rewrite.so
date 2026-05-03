@@ -266,8 +266,8 @@
       },
       "pro": {
         "title": "Pro",
-        "price": "${monthly} / 月",
-        "sub": "年額 ${total}（月額 ${monthlyAlt}/月 vs {percent}% 節約）",
+        "price": "${monthly} / 月（年払い）",
+        "sub": "年額 ${total}（月払い ${monthlyAlt}/月 と比べて {percent}% 節約）",
         "feat1": "月 {count, number} 回の書き換え",
         "feat2": "BYOK = 無制限",
         "feat3": "優先サポート"

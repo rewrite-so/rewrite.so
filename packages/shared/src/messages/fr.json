@@ -266,8 +266,8 @@
       },
       "pro": {
         "title": "Pro",
-        "price": "${monthly} / mois",
-        "sub": "Facturé annuellement ${total} (économisez {percent}% vs ${monthlyAlt}/mois mensuel)",
+        "price": "${monthly} / mois, facturation annuelle",
+        "sub": "${total} / an (économisez {percent}% vs ${monthlyAlt}/mois mensuel)",
         "feat1": "{count, number} réécritures / mois",
         "feat2": "BYOK = illimité",
         "feat3": "Support prioritaire"

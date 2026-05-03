@@ -266,8 +266,8 @@
       },
       "pro": {
         "title": "Pro",
-        "price": "${monthly} / 월",
-        "sub": "연간 ${total} 청구 (월 ${monthlyAlt}/월 대비 {percent}% 절약)",
+        "price": "${monthly} / 월 (연간 청구)",
+        "sub": "연 ${total} (월 ${monthlyAlt}/월 대비 {percent}% 절약)",
         "feat1": "월 {count, number}회 재작성",
         "feat2": "BYOK = 무제한",
         "feat3": "우선 지원"

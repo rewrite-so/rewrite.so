@@ -266,8 +266,8 @@
       },
       "pro": {
         "title": "Pro",
-        "price": "${monthly} / Mon",
-        "sub": "Jährlich abgerechnet ${total} (spare {percent}% vs ${monthlyAlt}/Mon monatlich)",
+        "price": "${monthly} / Mon. (jährlich abgerechnet)",
+        "sub": "${total} / Jahr (spare {percent}% vs ${monthlyAlt}/Mon. monatlich)",
         "feat1": "{count, number} Umschreibungen / Monat",
         "feat2": "BYOK = unbegrenzt",
         "feat3": "Priorisierter Support"

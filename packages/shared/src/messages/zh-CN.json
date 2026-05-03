@@ -266,7 +266,7 @@
       },
       "pro": {
         "title": "Pro",
-        "price": "${monthly} / 月",
+        "price": "${monthly} / 月（年付）",
         "sub": "年付总价 ${total}（vs 月付 ${monthlyAlt}/月，省 {percent}%）",
         "feat1": "每月 {count, number} 次改写",
         "feat2": "BYOK 无限",

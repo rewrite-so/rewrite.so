@@ -266,8 +266,8 @@
       },
       "pro": {
         "title": "Pro",
-        "price": "${monthly} / mo",
-        "sub": "Billed annually ${total} (save {percent}% vs ${monthlyAlt}/mo monthly)",
+        "price": "${monthly} / mo, billed annually",
+        "sub": "${total} / year (save {percent}% vs ${monthlyAlt}/mo monthly)",
         "feat1": "{count, number} rewrites / month",
         "feat2": "BYOK = unlimited",
         "feat3": "Priority support"
