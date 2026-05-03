@@ -1,4 +1,6 @@
+import { LOCALES } from '@rewrite/shared';
 import type { ComponentChildren } from 'preact';
+import { useT } from '../lib/i18n.ts';
 import type { UserPrefs } from '../lib/storage.ts';
 
 interface Props {
@@ -6,51 +8,50 @@ interface Props {
   onUpdate: (patch: Partial<UserPrefs>) => void;
 }
 
-const LANG_OPTIONS: Array<{ value: string; label: string }> = [
-  { value: 'auto', label: '自动检测页面语言' },
-  { value: 'en', label: 'English' },
-  { value: 'zh-CN', label: '中文（简体）' },
-  { value: 'ja', label: '日本語' },
-  { value: 'ko', label: '한국어' },
-  { value: 'es', label: 'Español' },
-  { value: 'fr', label: 'Français' },
-  { value: 'de', label: 'Deutsch' },
-];
-
-const UI_LOCALE_OPTIONS: Array<{ value: UserPrefs['uiLocale']; label: string }> = [
-  { value: 'auto', label: '跟随浏览器语言' },
-  { value: 'zh-CN', label: '中文' },
-  { value: 'en', label: 'English' },
-];
+const LANG_LABELS: Record<string, string> = {
+  en: 'English',
+  'zh-CN': '中文（简体）',
+  ja: '日本語',
+  ko: '한국어',
+  es: 'Español',
+  fr: 'Français',
+  de: 'Deutsch',
+};
 
 export function Settings({ prefs, onUpdate }: Props) {
+  const t = useT();
+  const langOptions = [
+    { value: 'auto', label: t('ext.options.langOption.auto') },
+    ...LOCALES.map((l) => ({ value: l, label: LANG_LABELS[l] ?? l })),
+  ];
+  const uiLocaleOptions = [
+    { value: 'auto', label: t('ext.options.uiLocale.auto') },
+    ...LOCALES.map((l) => ({ value: l, label: LANG_LABELS[l] ?? l })),
+  ];
   return (
     <main style={pageStyle}>
       <div style={shellStyle}>
         <header style={{ marginBottom: 24 }}>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700 }}>设置</h1>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700 }}>{t('ext.options.title')}</h1>
           <p style={{ margin: '4px 0 0', color: '#666', fontSize: 13 }}>rewrite.so</p>
         </header>
 
-        <Section title="目标语言">
+        <Section title={t('ext.options.targetLang.title')}>
           <select
             value={prefs.targetLang}
             onChange={(e) => onUpdate({ targetLang: (e.target as HTMLSelectElement).value })}
             style={selectStyle}
           >
-            {LANG_OPTIONS.map((o) => (
+            {langOptions.map((o) => (
               <option key={o.value} value={o.value}>
                 {o.label}
               </option>
             ))}
           </select>
-          <p style={hintStyle}>
-            "自动检测页面语言"会根据当前网站推断目标语言。例如在英文网站输入中文 → 自动翻成英文 3
-            风格。
-          </p>
+          <p style={hintStyle}>{t('ext.options.targetLang.hint')}</p>
         </Section>
 
-        <Section title="界面语言">
+        <Section title={t('ext.options.uiLocale.title')}>
           <select
             value={prefs.uiLocale}
             onChange={(e) =>
@@ -58,7 +59,7 @@ export function Settings({ prefs, onUpdate }: Props) {
             }
             style={selectStyle}
           >
-            {UI_LOCALE_OPTIONS.map((o) => (
+            {uiLocaleOptions.map((o) => (
               <option key={o.value} value={o.value}>
                 {o.label}
               </option>
@@ -66,22 +67,20 @@ export function Settings({ prefs, onUpdate }: Props) {
           </select>
         </Section>
 
-        <Section title="启用双击 Shift">
+        <Section title={t('ext.options.trigger.title')}>
           <label style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <input
               type="checkbox"
               checked={prefs.triggerEnabled}
               onChange={(e) => onUpdate({ triggerEnabled: (e.target as HTMLInputElement).checked })}
             />
-            <span>在输入框启用快捷键触发</span>
+            <span>{t('ext.options.trigger.label')}</span>
           </label>
-          <p style={hintStyle}>关闭后小点不再显示，双击 Shift 也不会触发。</p>
+          <p style={hintStyle}>{t('ext.options.trigger.hint')}</p>
         </Section>
 
-        <Section title="BYOK · 自带 API key">
-          <p style={hintStyle}>
-            Pro 功能，在 Phase 4 启用。届时此处会出现 base_url / model / key 字段。
-          </p>
+        <Section title={t('ext.options.byok.title')}>
+          <p style={hintStyle}>{t('ext.options.byok.placeholder')}</p>
         </Section>
       </div>
     </main>

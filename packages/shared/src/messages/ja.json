@@ -176,6 +176,71 @@
       "accepted": "→ 採用、入力欄が置換されました"
     }
   },
+  "ext": {
+    "popup": {
+      "tagline": "どの入力欄でも Shift Shift をダブルタップ。",
+      "usageError": "クォータの読み込みに失敗しました:",
+      "loading": "読み込み中…",
+      "remainingThisMonth": "今月の残り",
+      "resetsOn": "{date} にリセット",
+      "tier": {
+        "anonymous": "匿名",
+        "anonymous_install": "未ログイン",
+        "free": "無料",
+        "pro": "Pro"
+      },
+      "settings": "設定",
+      "myAccount": "マイアカウント",
+      "signIn": "ログイン"
+    },
+    "options": {
+      "title": "設定",
+      "targetLang": {
+        "title": "目標言語",
+        "hint": "「ページから自動検出」は現在のサイトから目標言語を推定します。例: 英語サイトで中国語を入力 → 書き換えを英語に翻訳します。"
+      },
+      "uiLocale": {
+        "title": "UI 言語",
+        "auto": "ブラウザの言語に従う"
+      },
+      "trigger": {
+        "title": "Shift Shift トリガーを有効化",
+        "label": "入力欄でキーボードショートカットを有効にする",
+        "hint": "オフにするとドットは非表示になり、Shift ダブルタップも作動しません。"
+      },
+      "byok": {
+        "title": "BYOK · 自分の API キーを使う",
+        "placeholder": "Pro 機能、Phase 4 で利用可能。base_url / model / key フィールドがここに表示されます。"
+      },
+      "langOption": {
+        "auto": "ページから自動検出"
+      }
+    },
+    "onboarding": {
+      "header": "rewrite.so へようこそ",
+      "step1": {
+        "title": "Shift をダブルタップしてみよう",
+        "body": "下の入力欄に何か書いて、Shift を 2 回押してください。書き換えのトリガーはこのジェスチャーだけです。",
+        "placeholder": "Shift を 2 回押してみてください…",
+        "success": "✓ 起動成功！準備中…",
+        "hint": "（500ms 以内；長押ししない）"
+      },
+      "step2": {
+        "title": "目標言語を設定",
+        "body": "書き換え結果は目標言語で出力されます。「ページから自動検出」が大半の人に最適 — 英語サイトで中国語を入力すると、書き換えは自動的に英語に翻訳されます。",
+        "next": "次へ"
+      },
+      "step3": {
+        "title": "準備完了",
+        "body": "ウェブの入力欄をフォーカスすると、右下に小さなドットが表示されます。Shift をダブルタップで書き換え。試してみてください：",
+        "example1": "Twitter / X の投稿欄",
+        "example2": "Reddit / Hacker News のコメント",
+        "example3": "Slack / Discord のウェブ版",
+        "example4": "メール本文（Outlook web など）",
+        "done": "完了"
+      }
+    }
+  },
   "hint": {
     "doubleShift": "Shift Shift で書き換え",
     "tryOnAnyInput": "拡張機能をインストールして、どのサイトでも使えます"

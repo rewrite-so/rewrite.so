@@ -176,6 +176,71 @@
       "accepted": "→ accepted, input replaced"
     }
   },
+  "ext": {
+    "popup": {
+      "tagline": "Double-tap Shift Shift in any input.",
+      "usageError": "Failed to load quota:",
+      "loading": "Loading…",
+      "remainingThisMonth": "remaining this month",
+      "resetsOn": "Resets {date}",
+      "tier": {
+        "anonymous": "Anonymous",
+        "anonymous_install": "Not signed in",
+        "free": "Free",
+        "pro": "Pro"
+      },
+      "settings": "Settings",
+      "myAccount": "My account",
+      "signIn": "Sign in"
+    },
+    "options": {
+      "title": "Settings",
+      "targetLang": {
+        "title": "Target language",
+        "hint": "\"Auto-detect from page\" infers the target from the current site. e.g. typing Chinese on an English site → translates the rewrites to English."
+      },
+      "uiLocale": {
+        "title": "UI language",
+        "auto": "Follow browser language"
+      },
+      "trigger": {
+        "title": "Enable Shift Shift trigger",
+        "label": "Enable keyboard shortcut in input fields",
+        "hint": "When off, the dot is hidden and double-Shift won't trigger."
+      },
+      "byok": {
+        "title": "BYOK · Bring your own API key",
+        "placeholder": "Pro feature, available in Phase 4. Will show base_url / model / key fields here."
+      },
+      "langOption": {
+        "auto": "Auto-detect from page"
+      }
+    },
+    "onboarding": {
+      "header": "Welcome to rewrite.so",
+      "step1": {
+        "title": "Try double-tapping Shift",
+        "body": "Type something below, then double-tap Shift. This is the only gesture you need.",
+        "placeholder": "Try double-tapping Shift…",
+        "success": "✓ Triggered! Getting ready…",
+        "hint": "(within 500ms; don't hold)"
+      },
+      "step2": {
+        "title": "Set the target language",
+        "body": "Rewrites are output in the target language. \"Auto-detect from page\" works for most people — typing Chinese on an English site auto-translates the rewrite to English.",
+        "next": "Next"
+      },
+      "step3": {
+        "title": "Ready",
+        "body": "When you focus any web input, a tiny dot appears bottom-right. Double-tap Shift to rewrite. Try it on:",
+        "example1": "Twitter / X compose",
+        "example2": "Reddit / Hacker News comments",
+        "example3": "Slack / Discord web",
+        "example4": "Email body (Outlook web, etc.)",
+        "done": "Done"
+      }
+    }
+  },
   "hint": {
     "doubleShift": "Press Shift Shift to rewrite",
     "tryOnAnyInput": "Install the extension to use it on any site"

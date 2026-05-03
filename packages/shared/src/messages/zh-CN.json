@@ -176,6 +176,71 @@
       "accepted": "→ 已采纳，输入框被替换"
     }
   },
+  "ext": {
+    "popup": {
+      "tagline": "在任何输入框双击 Shift Shift。",
+      "usageError": "无法加载配额：",
+      "loading": "加载中…",
+      "remainingThisMonth": "本月剩余",
+      "resetsOn": "{date} 重置",
+      "tier": {
+        "anonymous": "匿名",
+        "anonymous_install": "未登录",
+        "free": "免费",
+        "pro": "Pro"
+      },
+      "settings": "设置",
+      "myAccount": "我的",
+      "signIn": "登录"
+    },
+    "options": {
+      "title": "设置",
+      "targetLang": {
+        "title": "目标语言",
+        "hint": "\"自动检测页面语言\"会根据当前网站推断目标语言。例如在英文网站输入中文 → 自动翻成英文 3 风格。"
+      },
+      "uiLocale": {
+        "title": "界面语言",
+        "auto": "跟随浏览器语言"
+      },
+      "trigger": {
+        "title": "启用双击 Shift",
+        "label": "在输入框启用快捷键触发",
+        "hint": "关闭后小点不再显示，双击 Shift 也不会触发。"
+      },
+      "byok": {
+        "title": "BYOK · 自带 API key",
+        "placeholder": "Pro 功能，在 Phase 4 启用。届时此处会出现 base_url / model / key 字段。"
+      },
+      "langOption": {
+        "auto": "自动检测页面语言"
+      }
+    },
+    "onboarding": {
+      "header": "欢迎使用 rewrite.so",
+      "step1": {
+        "title": "试一下双击 Shift",
+        "body": "在下面输入框写点东西，然后按两下 Shift。这是触发改写的唯一手势。",
+        "placeholder": "试着按两下 Shift…",
+        "success": "✓ 触发成功！准备好了…",
+        "hint": "（双击间隔 ≤ 500ms；不要按住）"
+      },
+      "step2": {
+        "title": "设置目标语言",
+        "body": "改写结果会输出为目标语言。\"自动检测页面语言\"适合大多数人——例如你在英文网站打中文，会自动翻成英文 3 风格。",
+        "next": "下一步"
+      },
+      "step3": {
+        "title": "就绪",
+        "body": "在任何网页输入框聚焦后，右下角会出现一个小点。双击 Shift 即可改写。试试看：",
+        "example1": "Twitter / 推文输入框",
+        "example2": "知乎 / Reddit 评论框",
+        "example3": "Slack / Discord 网页消息框",
+        "example4": "邮件正文（Outlook web 等）",
+        "done": "完成"
+      }
+    }
+  },
   "hint": {
     "doubleShift": "按 Shift Shift 即可改写",
     "tryOnAnyInput": "安装扩展，在任何网站都能用"

@@ -176,6 +176,71 @@
       "accepted": "→ akzeptiert, Eingabe ersetzt"
     }
   },
+  "ext": {
+    "popup": {
+      "tagline": "Doppel-Shift Shift in jedem Eingabefeld.",
+      "usageError": "Kontingent konnte nicht geladen werden:",
+      "loading": "Lädt…",
+      "remainingThisMonth": "verbleibend diesen Monat",
+      "resetsOn": "Zurücksetzung am {date}",
+      "tier": {
+        "anonymous": "Anonym",
+        "anonymous_install": "Nicht angemeldet",
+        "free": "Free",
+        "pro": "Pro"
+      },
+      "settings": "Einstellungen",
+      "myAccount": "Mein Konto",
+      "signIn": "Anmelden"
+    },
+    "options": {
+      "title": "Einstellungen",
+      "targetLang": {
+        "title": "Zielsprache",
+        "hint": "„Automatisch von Seite erkennen\" leitet das Ziel von der aktuellen Seite ab. z. B. Chinesisch auf einer englischen Seite tippen → Umschreibungen werden ins Englische übersetzt."
+      },
+      "uiLocale": {
+        "title": "UI-Sprache",
+        "auto": "Browser-Sprache folgen"
+      },
+      "trigger": {
+        "title": "Shift Shift-Trigger aktivieren",
+        "label": "Tastenkürzel in Eingabefeldern aktivieren",
+        "hint": "Wenn aus, wird der Punkt ausgeblendet und Doppel-Shift löst nicht aus."
+      },
+      "byok": {
+        "title": "BYOK · Eigenen API-Schlüssel verwenden",
+        "placeholder": "Pro-Funktion, verfügbar in Phase 4. Hier erscheinen base_url / model / key Felder."
+      },
+      "langOption": {
+        "auto": "Automatisch von Seite erkennen"
+      }
+    },
+    "onboarding": {
+      "header": "Willkommen bei rewrite.so",
+      "step1": {
+        "title": "Probiere Doppel-Shift",
+        "body": "Tippe etwas in das Feld unten, dann drücke Shift zweimal. Das ist die einzige Geste, die du brauchst.",
+        "placeholder": "Versuche Shift zweimal zu drücken…",
+        "success": "✓ Ausgelöst! Bereite vor…",
+        "hint": "(innerhalb 500ms; nicht halten)"
+      },
+      "step2": {
+        "title": "Zielsprache festlegen",
+        "body": "Umschreibungen werden in der Zielsprache ausgegeben. „Automatisch von Seite erkennen\" passt für die meisten — Chinesisch auf einer englischen Seite tippen übersetzt die Umschreibung automatisch ins Englische.",
+        "next": "Weiter"
+      },
+      "step3": {
+        "title": "Bereit",
+        "body": "Wenn du ein Web-Eingabefeld fokussierst, erscheint unten rechts ein kleiner Punkt. Doppel-Shift zum Umschreiben. Probier's auf:",
+        "example1": "Twitter / X Verfassen",
+        "example2": "Reddit / Hacker News Kommentare",
+        "example3": "Slack / Discord Web",
+        "example4": "E-Mail-Text (Outlook web etc.)",
+        "done": "Fertig"
+      }
+    }
+  },
   "hint": {
     "doubleShift": "Shift Shift drücken zum Umschreiben",
     "tryOnAnyInput": "Installiere die Erweiterung, um sie auf jeder Seite zu nutzen"

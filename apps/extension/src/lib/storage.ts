@@ -1,3 +1,5 @@
+import type { StoredLocale } from '@rewrite/shared';
+
 /**
  * chrome.storage 封装。
  *
@@ -13,8 +15,8 @@ export interface UserPrefs {
   _v: 1;
   /** 'auto' = 自动检测页面语言；其它为固定 BCP-47 */
   targetLang: string;
-  /** 'auto' = 跟随 navigator.language；'zh-CN' / 'en' 强制 */
-  uiLocale: 'zh-CN' | 'en' | 'auto';
+  /** 'auto' = 跟随 navigator.language；具体 locale 强制 */
+  uiLocale: StoredLocale;
   /** 是否启用双击 Shift 触发；用户可在 options 关掉 */
   triggerEnabled: boolean;
   /** onboarding 完成与否 */

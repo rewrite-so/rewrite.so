@@ -176,6 +176,71 @@
       "accepted": "→ accepté, champ remplacé"
     }
   },
+  "ext": {
+    "popup": {
+      "tagline": "Double Shift Shift dans n'importe quel champ de saisie.",
+      "usageError": "Échec du chargement du quota :",
+      "loading": "Chargement…",
+      "remainingThisMonth": "restantes ce mois-ci",
+      "resetsOn": "Réinitialisation le {date}",
+      "tier": {
+        "anonymous": "Anonyme",
+        "anonymous_install": "Non connecté",
+        "free": "Gratuit",
+        "pro": "Pro"
+      },
+      "settings": "Paramètres",
+      "myAccount": "Mon compte",
+      "signIn": "Se connecter"
+    },
+    "options": {
+      "title": "Paramètres",
+      "targetLang": {
+        "title": "Langue cible",
+        "hint": "« Auto-détection depuis la page » déduit la cible depuis le site actuel. p. ex. taper en chinois sur un site anglais → traduit les réécritures en anglais."
+      },
+      "uiLocale": {
+        "title": "Langue de l'interface",
+        "auto": "Suivre la langue du navigateur"
+      },
+      "trigger": {
+        "title": "Activer le déclencheur Shift Shift",
+        "label": "Activer le raccourci clavier dans les champs de saisie",
+        "hint": "Désactivé, le point est masqué et le double Shift ne se déclenche pas."
+      },
+      "byok": {
+        "title": "BYOK · Apportez votre propre clé API",
+        "placeholder": "Fonctionnalité Pro, disponible en Phase 4. Les champs base_url / model / key s'afficheront ici."
+      },
+      "langOption": {
+        "auto": "Auto-détection depuis la page"
+      }
+    },
+    "onboarding": {
+      "header": "Bienvenue sur rewrite.so",
+      "step1": {
+        "title": "Essayez le double Shift",
+        "body": "Écrivez quelque chose dans le champ ci-dessous, puis appuyez deux fois sur Shift. C'est le seul geste dont vous avez besoin.",
+        "placeholder": "Essayez d'appuyer deux fois sur Shift…",
+        "success": "✓ Déclenché ! Préparation…",
+        "hint": "(dans 500ms ; ne maintenez pas)"
+      },
+      "step2": {
+        "title": "Définissez la langue cible",
+        "body": "Les réécritures sont produites dans la langue cible. « Auto-détection depuis la page » convient à la plupart — écrire en chinois sur un site anglais traduit automatiquement la réécriture en anglais.",
+        "next": "Suivant"
+      },
+      "step3": {
+        "title": "Prêt",
+        "body": "Quand vous focalisez un champ web, un petit point apparaît en bas à droite. Double Shift pour réécrire. Essayez sur :",
+        "example1": "Composition Twitter / X",
+        "example2": "Commentaires Reddit / Hacker News",
+        "example3": "Slack / Discord web",
+        "example4": "Corps d'email (Outlook web, etc.)",
+        "done": "Terminé"
+      }
+    }
+  },
   "hint": {
     "doubleShift": "Appuyez sur Shift Shift pour réécrire",
     "tryOnAnyInput": "Installez l'extension pour l'utiliser sur n'importe quel site"

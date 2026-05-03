@@ -176,6 +176,71 @@
       "accepted": "→ 채택됨, 입력란 대체됨"
     }
   },
+  "ext": {
+    "popup": {
+      "tagline": "어떤 입력란에서든 Shift Shift을 두 번 누르세요.",
+      "usageError": "할당량 로딩 실패:",
+      "loading": "로딩 중…",
+      "remainingThisMonth": "이번 달 남은 횟수",
+      "resetsOn": "{date} 재설정",
+      "tier": {
+        "anonymous": "익명",
+        "anonymous_install": "미로그인",
+        "free": "무료",
+        "pro": "Pro"
+      },
+      "settings": "설정",
+      "myAccount": "내 계정",
+      "signIn": "로그인"
+    },
+    "options": {
+      "title": "설정",
+      "targetLang": {
+        "title": "목표 언어",
+        "hint": "\"페이지에서 자동 감지\"는 현재 사이트로부터 목표 언어를 추론합니다. 예: 영어 사이트에서 중국어 입력 → 재작성을 영어로 번역합니다."
+      },
+      "uiLocale": {
+        "title": "UI 언어",
+        "auto": "브라우저 언어 따르기"
+      },
+      "trigger": {
+        "title": "Shift Shift 트리거 활성화",
+        "label": "입력란에서 키보드 단축키 활성화",
+        "hint": "끄면 점이 숨겨지고 Shift 두 번도 작동하지 않습니다."
+      },
+      "byok": {
+        "title": "BYOK · 자신의 API 키 사용",
+        "placeholder": "Pro 기능, Phase 4에서 사용 가능. base_url / model / key 필드가 여기에 표시됩니다."
+      },
+      "langOption": {
+        "auto": "페이지에서 자동 감지"
+      }
+    },
+    "onboarding": {
+      "header": "rewrite.so에 오신 것을 환영합니다",
+      "step1": {
+        "title": "Shift 두 번 누르기 시도",
+        "body": "아래 입력란에 무언가 입력하고, Shift를 두 번 누르세요. 재작성을 트리거하는 유일한 제스처입니다.",
+        "placeholder": "Shift를 두 번 눌러보세요…",
+        "success": "✓ 작동 성공! 준비 중…",
+        "hint": "(500ms 이내; 길게 누르지 마세요)"
+      },
+      "step2": {
+        "title": "목표 언어 설정",
+        "body": "재작성은 목표 언어로 출력됩니다. \"페이지에서 자동 감지\"가 대부분의 사람에게 적합합니다 — 영어 사이트에서 중국어를 입력하면 재작성이 영어로 자동 번역됩니다.",
+        "next": "다음"
+      },
+      "step3": {
+        "title": "준비 완료",
+        "body": "웹 입력란을 포커스하면 오른쪽 하단에 작은 점이 나타납니다. Shift 두 번으로 다시 쓰기. 시도해보세요:",
+        "example1": "Twitter / X 작성란",
+        "example2": "Reddit / Hacker News 댓글",
+        "example3": "Slack / Discord 웹",
+        "example4": "이메일 본문 (Outlook web 등)",
+        "done": "완료"
+      }
+    }
+  },
   "hint": {
     "doubleShift": "Shift Shift을 눌러 다시 쓰기",
     "tryOnAnyInput": "확장 프로그램을 설치하면 어떤 사이트에서도 사용할 수 있습니다"

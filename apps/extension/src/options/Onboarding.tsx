@@ -1,5 +1,7 @@
 import { attachDoubleShift } from '@rewrite/core';
+import { LOCALES } from '@rewrite/shared';
 import { useEffect, useRef, useState } from 'preact/hooks';
+import { useT } from '../lib/i18n.ts';
 import type { UserPrefs } from '../lib/storage.ts';
 
 type Step = 1 | 2 | 3;
@@ -8,24 +10,29 @@ interface Props {
   onComplete: (patch: Partial<UserPrefs>) => void;
 }
 
-const LANG_OPTIONS: Array<{ value: string; label: string }> = [
-  { value: 'auto', label: '自动检测页面语言（推荐）' },
-  { value: 'en', label: 'English' },
-  { value: 'zh-CN', label: '中文（简体）' },
-  { value: 'ja', label: '日本語' },
-  { value: 'ko', label: '한국어' },
-  { value: 'es', label: 'Español' },
-  { value: 'fr', label: 'Français' },
-  { value: 'de', label: 'Deutsch' },
-];
+const LANG_LABELS: Record<string, string> = {
+  en: 'English',
+  'zh-CN': '中文（简体）',
+  ja: '日本語',
+  ko: '한국어',
+  es: 'Español',
+  fr: 'Français',
+  de: 'Deutsch',
+};
 
 export function Onboarding({ onComplete }: Props) {
+  const t = useT();
   const [step, setStep] = useState<Step>(1);
   const [targetLang, setTargetLang] = useState('auto');
   const [triggered, setTriggered] = useState(false);
   const taRef = useRef<HTMLTextAreaElement | null>(null);
 
-  // 第一步进入时聚焦 textarea（替代 autoFocus 属性）
+  const langOptions = [
+    { value: 'auto', label: t('ext.options.langOption.auto') },
+    ...LOCALES.map((l) => ({ value: l, label: LANG_LABELS[l] ?? l })),
+  ];
+
+  // 第一步进入时聚焦 textarea
   useEffect(() => {
     if (step === 1) taRef.current?.focus();
   }, [step]);
@@ -46,32 +53,29 @@ export function Onboarding({ onComplete }: Props) {
     <main style={pageStyle}>
       <div style={shellStyle}>
         <header style={{ marginBottom: 24 }}>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700 }}>欢迎使用 rewrite.so</h1>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700 }}>{t('ext.onboarding.header')}</h1>
           <Stepper current={step} />
         </header>
 
         {step === 1 && (
           <section>
-            <h2 style={h2Style}>试一下双击 Shift</h2>
-            <p style={pStyle}>
-              在下面的输入框写点东西，然后按两下 <kbd style={kbdStyle}>Shift</kbd>
-              。这是触发改写的唯一手势。
-            </p>
+            <h2 style={h2Style}>{t('ext.onboarding.step1.title')}</h2>
+            <p style={pStyle}>{t('ext.onboarding.step1.body')}</p>
             <textarea
               ref={taRef}
               defaultValue="hi can u tell me when is the meeting tmr"
-              placeholder="试着按两下 Shift…"
+              placeholder={t('ext.onboarding.step1.placeholder')}
               style={taStyle}
             />
             <div style={hintStyle}>
               {triggered ? (
-                <span style={{ color: '#22c55e' }}>✓ 触发成功！准备好了…</span>
+                <span style={{ color: '#22c55e' }}>{t('ext.onboarding.step1.success')}</span>
               ) : (
                 <>
                   <kbd style={kbdStyle}>Shift</kbd>
                   <kbd style={kbdStyle}>Shift</kbd>
                   <span style={{ color: '#888', marginLeft: 6 }}>
-                    （双击间隔 ≤ 500ms；不要按住）
+                    {t('ext.onboarding.step1.hint')}
                   </span>
                 </>
               )}
@@ -81,17 +85,14 @@ export function Onboarding({ onComplete }: Props) {
 
         {step === 2 && (
           <section>
-            <h2 style={h2Style}>设置目标语言</h2>
-            <p style={pStyle}>
-              改写结果会输出为目标语言。"自动检测页面语言"适合大多数人——例如你在英文网站打中文，会自动翻成英文
-              3 风格。
-            </p>
+            <h2 style={h2Style}>{t('ext.onboarding.step2.title')}</h2>
+            <p style={pStyle}>{t('ext.onboarding.step2.body')}</p>
             <select
               value={targetLang}
               onChange={(e) => setTargetLang((e.target as HTMLSelectElement).value)}
               style={selectStyle}
             >
-              {LANG_OPTIONS.map((o) => (
+              {langOptions.map((o) => (
                 <option key={o.value} value={o.value}>
                   {o.label}
                 </option>
@@ -99,7 +100,7 @@ export function Onboarding({ onComplete }: Props) {
             </select>
             <div style={{ marginTop: 24, display: 'flex', gap: 12 }}>
               <button type="button" style={primaryBtnStyle} onClick={() => setStep(3)}>
-                下一步
+                {t('ext.onboarding.step2.next')}
               </button>
             </div>
           </section>
@@ -107,22 +108,20 @@ export function Onboarding({ onComplete }: Props) {
 
         {step === 3 && (
           <section>
-            <h2 style={h2Style}>就绪</h2>
-            <p style={pStyle}>
-              在任何网页输入框聚焦后，右下角会出现一个小点。双击 Shift 即可改写。试试看：
-            </p>
+            <h2 style={h2Style}>{t('ext.onboarding.step3.title')}</h2>
+            <p style={pStyle}>{t('ext.onboarding.step3.body')}</p>
             <ul style={{ margin: '8px 0 24px', color: '#444', paddingLeft: 20 }}>
-              <li>Twitter / 推文输入框</li>
-              <li>知乎 / Reddit 评论框</li>
-              <li>Slack / Discord 网页消息框</li>
-              <li>邮件正文（Outlook web 等）</li>
+              <li>{t('ext.onboarding.step3.example1')}</li>
+              <li>{t('ext.onboarding.step3.example2')}</li>
+              <li>{t('ext.onboarding.step3.example3')}</li>
+              <li>{t('ext.onboarding.step3.example4')}</li>
             </ul>
             <button
               type="button"
               style={primaryBtnStyle}
               onClick={() => onComplete({ targetLang })}
             >
-              完成
+              {t('ext.onboarding.step3.done')}
             </button>
           </section>
         )}

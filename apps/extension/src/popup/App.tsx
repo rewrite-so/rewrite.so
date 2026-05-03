@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'preact/hooks';
 import { API_BASE, WEB_BASE } from '../lib/config.ts';
+import { useT, useUiLocale } from '../lib/i18n.ts';
 import { getOrCreateInstallId } from '../lib/storage.ts';
 
 interface Usage {
@@ -10,14 +11,8 @@ interface Usage {
   tier: 'anonymous' | 'anonymous_install' | 'free' | 'pro';
 }
 
-const TIER_LABEL: Record<Usage['tier'], string> = {
-  anonymous: '匿名',
-  anonymous_install: '未登录',
-  free: '免费',
-  pro: 'Pro',
-};
-
 export function App() {
+  const t = useT();
   const [usage, setUsage] = useState<Usage | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -45,31 +40,33 @@ export function App() {
     <div style={{ width: 280, padding: 16, fontFamily: 'system-ui, sans-serif' }}>
       <header style={{ marginBottom: 12 }}>
         <h2 style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>rewrite.so</h2>
-        <p style={{ margin: '4px 0 0', fontSize: 12, color: '#666' }}>
-          在任何输入框双击 <kbd style={kbdStyle}>Shift</kbd> <kbd style={kbdStyle}>Shift</kbd>。
-        </p>
+        <p style={{ margin: '4px 0 0', fontSize: 12, color: '#666' }}>{t('ext.popup.tagline')}</p>
       </header>
 
       <div style={cardStyle}>
         {error ? (
-          <div style={{ fontSize: 12, color: '#dc2626' }}>无法加载配额：{error}</div>
+          <div style={{ fontSize: 12, color: '#dc2626' }}>
+            {t('ext.popup.usageError')} {error}
+          </div>
         ) : usage ? (
           <UsageDisplay usage={usage} />
         ) : (
-          <div style={{ fontSize: 12, color: '#888' }}>加载中…</div>
+          <div style={{ fontSize: 12, color: '#888' }}>{t('ext.popup.loading')}</div>
         )}
       </div>
 
       <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
         <button type="button" style={btnStyle} onClick={() => chrome.runtime.openOptionsPage()}>
-          设置
+          {t('ext.popup.settings')}
         </button>
         <button
           type="button"
           style={btnPrimaryStyle}
           onClick={() => chrome.tabs.create({ url: `${WEB_BASE}/login` })}
         >
-          {usage?.tier === 'free' || usage?.tier === 'pro' ? '我的' : '登录'}
+          {usage?.tier === 'free' || usage?.tier === 'pro'
+            ? t('ext.popup.myAccount')
+            : t('ext.popup.signIn')}
         </button>
       </div>
     </div>
@@ -77,8 +74,10 @@ export function App() {
 }
 
 function UsageDisplay({ usage }: { usage: Usage }) {
+  const t = useT();
+  const locale = useUiLocale();
   const reset = new Date(usage.resetAt);
-  const resetLabel = reset.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' });
+  const resetLabel = reset.toLocaleDateString(locale, { month: 'long', day: 'numeric' });
   const isLow = usage.remaining <= Math.max(1, Math.floor(usage.limit * 0.2));
   const totalLabel = Number.isFinite(usage.limit) ? usage.limit : '∞';
   return (
@@ -91,8 +90,8 @@ function UsageDisplay({ usage }: { usage: Usage }) {
           marginBottom: 6,
         }}
       >
-        <span style={{ fontSize: 11, color: '#888' }}>本月剩余</span>
-        <span style={{ fontSize: 11, color: '#888' }}>{TIER_LABEL[usage.tier]}</span>
+        <span style={{ fontSize: 11, color: '#888' }}>{t('ext.popup.remainingThisMonth')}</span>
+        <span style={{ fontSize: 11, color: '#888' }}>{t(`ext.popup.tier.${usage.tier}`)}</span>
       </div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
         <span style={{ fontSize: 22, fontWeight: 600, color: isLow ? '#dc2626' : '#111' }}>
@@ -100,20 +99,13 @@ function UsageDisplay({ usage }: { usage: Usage }) {
         </span>
         <span style={{ fontSize: 12, color: '#888' }}>/ {totalLabel}</span>
       </div>
-      <div style={{ marginTop: 6, fontSize: 11, color: '#999' }}>{resetLabel} 重置</div>
+      <div style={{ marginTop: 6, fontSize: 11, color: '#999' }}>
+        {t('ext.popup.resetsOn').replace('{date}', resetLabel)}
+      </div>
     </>
   );
 }
 
-const kbdStyle = {
-  display: 'inline-block',
-  padding: '0 4px',
-  border: '1px solid #d4d4d8',
-  borderRadius: 3,
-  fontSize: 10,
-  fontFamily: 'inherit',
-  background: '#fff',
-};
 const cardStyle = {
   padding: '10px 12px',
   border: '1px solid #e4e4e7',
