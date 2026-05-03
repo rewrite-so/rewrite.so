@@ -284,7 +284,7 @@
       "anyInput": "cualquier campo de entrada",
       "youTyped": "# Escribiste:",
       "streams": "→ 3 streams iniciados, ~200ms primer token",
-      "accepted": "→ aceptado, entrada reemplazada",
+      "accepted": "→ reemplazado en el campo",
       "selectHint": "Haz clic en una reescritura o pulsa 1 / 2 / 3",
       "label": {
         "faithful": "Fiel",

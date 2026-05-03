@@ -183,17 +183,17 @@
     },
     "scenarios": {
       "h2": "这些场景你眼熟吗？",
-      "bridge": "这正是 rewrite.so 真正派上用场的地方",
+      "bridge": "rewrite.so 就是为这些时刻做的：",
       "useCase1": "用非母语写作——学习中、工作中、跟海外同事或客户沟通的时候。",
       "useCase2": "给客户、合作方回信，语气需要刚刚好的场景。",
       "useCase3": "公开发言——推文、Reddit / HN 评论、GitHub Issues、PR 描述。",
-      "useCase4": "冷邮件、道歉、难开口的对话——一个词用错就尴尬的时刻。"
+      "useCase4": "陌生人开场、道歉、难开口的话——一个词用错就尴尬的时刻。"
     },
     "privacy": {
-      "eyebrow": "隐私契约",
+      "eyebrow": "关于隐私",
       "h2": "你的文本永不存储。就这么简单。",
-      "body": "不存数据库。不进日志。不上报错监控。不入分析。改写文本仅在 worker 处理一次后立即丢弃。我们刻意不接入第三方 APM（Sentry、Datadog 等）——因为它们默认会抓 request body。这不是承诺——这是架构本身，源码完全开放给你审计。",
-      "shortBody": "日志只允许记录 length / lang / style / userId / 错误码。原文和改写结果在所有链路里都被排除。",
+      "body": "不存数据库。不进日志。不上报错监控。不入分析。改写文本仅在 worker 处理一次后立即丢弃。我们刻意不接入第三方 APM（Sentry、Datadog 等）——因为它们默认会记录请求内容。这不是承诺——这是架构本身，源码完全开放给你审计。",
+      "shortBody": "日志只允许记录 length / lang / style / userId / 错误码。原文和改写结果一律不写日志。",
       "linkDoc": "阅读技术隐私文档 →",
       "linkSource": "查看 rewrite handler 源码 →",
       "logTitle": "# 会记录的",
@@ -206,7 +206,7 @@
       }
     },
     "howItWorks": {
-      "h2": "工作流程",
+      "h2": "怎么用",
       "stepLabel": "步骤 {num}",
       "step1": {
         "title": "双击 Shift",
@@ -222,7 +222,7 @@
       }
     },
     "features": {
-      "h2": "为关心实现细节的人打造",
+      "h2": "在意细节的人会喜欢",
       "openSource": {
         "label": "开源",
         "title": "代码全公开，自己可读",
@@ -282,9 +282,9 @@
     },
     "demo": {
       "anyInput": "任意输入框",
-      "youTyped": "# 你输入了：",
-      "streams": "→ 3 路流式开始，首 token 约 200ms",
-      "accepted": "→ 已采纳，输入框被替换",
+      "youTyped": "# 你写的：",
+      "streams": "→ 3 路并行开始出字，约 200ms",
+      "accepted": "→ 已替换到输入框",
       "selectHint": "点击一个改写，或按 1 / 2 / 3",
       "label": {
         "faithful": "贴近原文",
