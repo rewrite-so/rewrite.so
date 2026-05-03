@@ -1,6 +1,7 @@
 'use client';
 
 import { PRO_PRICE } from '@rewrite/shared';
+import { useFormatter, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
 type Plan = 'monthly' | 'yearly';
@@ -17,6 +18,8 @@ interface MeResponse {
 }
 
 export function BillingClient() {
+  const t = useTranslations('page.billing');
+  const format = useFormatter();
   const [me, setMe] = useState<MeResponse | null>(null);
   const [plan, setPlan] = useState<Plan>('yearly');
   const [loading, setLoading] = useState(false);
@@ -49,12 +52,12 @@ export function BillingClient() {
       }
       const data = (await res.json()) as { url?: string; error?: string };
       if (!res.ok || !data.url) {
-        setError(data.error ?? 'Failed to create checkout');
+        setError(data.error ?? t('error.checkoutFailed'));
         return;
       }
       location.href = data.url;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Network error');
+      setError(err instanceof Error ? err.message : t('error.networkError'));
     } finally {
       setLoading(false);
     }
@@ -68,7 +71,7 @@ export function BillingClient() {
       if (data.url) {
         location.href = data.url;
       } else {
-        setError(data.error ?? 'Failed to open portal');
+        setError(data.error ?? t('error.portalFailed'));
       }
     } finally {
       setLoading(false);
@@ -76,10 +79,19 @@ export function BillingClient() {
   }
 
   if (!me) {
-    return <p style={{ marginTop: 32, color: '#888' }}>Loading…</p>;
+    return <p style={{ marginTop: 32, color: '#888' }}>{t('loading')}</p>;
   }
 
   const subscribed = me.subscription !== null && me.tier === 'pro';
+  const subscribedDate = me.subscription
+    ? format.dateTime(new Date(me.subscription.currentPeriodEnd), {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    : '-';
+  const subscribedPlanLabel =
+    me.subscription?.plan === 'yearly' ? t('subscribed.planAnnual') : t('subscribed.planMonthly');
 
   return (
     <section style={{ marginTop: 32 }}>
@@ -95,11 +107,8 @@ export function BillingClient() {
             marginBottom: 24,
           }}
         >
-          You’re on Pro ({me.subscription?.plan === 'yearly' ? 'Annual' : 'Monthly'}). Period ends:{' '}
-          {me.subscription
-            ? new Date(me.subscription.currentPeriodEnd).toLocaleDateString('en-US')
-            : '-'}
-          {me.subscription?.cancelAtPeriodEnd && ' (will cancel at period end)'}
+          {t('subscribed.line', { plan: subscribedPlanLabel, date: subscribedDate })}
+          {me.subscription?.cancelAtPeriodEnd && t('subscribed.willCancel')}
           <button
             type="button"
             onClick={openPortal}
@@ -115,7 +124,7 @@ export function BillingClient() {
               cursor: 'pointer',
             }}
           >
-            Manage subscription
+            {t('subscribed.manage')}
           </button>
         </div>
       )}
@@ -131,10 +140,10 @@ export function BillingClient() {
         }}
       >
         <ToggleBtn active={plan === 'monthly'} onClick={() => setPlan('monthly')}>
-          Monthly
+          {t('toggle.monthly')}
         </ToggleBtn>
         <ToggleBtn active={plan === 'yearly'} onClick={() => setPlan('yearly')}>
-          Annual
+          {t('toggle.annual')}
           <span
             style={{
               marginLeft: 6,
@@ -146,7 +155,7 @@ export function BillingClient() {
               fontWeight: 600,
             }}
           >
-            save {PRO_PRICE.yearlySavingsPercent}%
+            {t('toggle.save', { percent: PRO_PRICE.yearlySavingsPercent })}
           </span>
         </ToggleBtn>
       </div>
@@ -154,44 +163,42 @@ export function BillingClient() {
       {/* plan cards */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
         <PlanCard
-          title="Free"
+          title={t('free.title')}
           price="$0"
           period=""
-          features={[
-            '30 rewrites / month',
-            'All 3 streaming styles',
-            'Auto language detection',
-            'Privacy first — inputs never stored',
-          ]}
-          cta={subscribed ? 'Lower tier' : me.user ? 'Current tier' : 'Use free'}
+          features={[t('free.feat1'), t('free.feat2'), t('free.feat3'), t('free.feat4')]}
+          cta={subscribed ? t('free.ctaLower') : me.user ? t('free.ctaCurrent') : t('free.ctaUse')}
           disabled
         />
         <PlanCard
-          title="Pro"
+          title={t('pro.title')}
           price={plan === 'monthly' ? `$${PRO_PRICE.monthly}` : `$${PRO_PRICE.yearlyMonthly}`}
           period={
-            plan === 'monthly' ? '/ month' : `/ month (billed annually $${PRO_PRICE.yearlyTotal})`
+            plan === 'monthly'
+              ? t('pro.periodMonthly')
+              : t('pro.periodYearly', { total: PRO_PRICE.yearlyTotal })
           }
-          features={[
-            '2,000 rewrites / month',
-            'All 3 streaming styles',
-            'BYOK = unlimited',
-            'Priority support',
-          ]}
+          features={[t('pro.feat1'), t('pro.feat2'), t('pro.feat3'), t('pro.feat4')]}
           highlight
           cta={
             subscribed
-              ? 'Subscribed'
+              ? t('pro.ctaSubscribed')
               : loading
-                ? 'Redirecting…'
-                : `Subscribe to Pro ${plan === 'monthly' ? 'Monthly' : 'Annual'}`
+                ? t('pro.ctaRedirecting')
+                : plan === 'monthly'
+                  ? t('pro.ctaMonthly')
+                  : t('pro.ctaAnnual')
           }
           onClick={() => !subscribed && checkout(plan)}
           disabled={subscribed || loading}
         />
       </div>
 
-      {error && <p style={{ color: '#dc2626', fontSize: 13, marginTop: 16 }}>Error: {error}</p>}
+      {error && (
+        <p style={{ color: '#dc2626', fontSize: 13, marginTop: 16 }}>
+          {t('error.prefix')}: {error}
+        </p>
+      )}
     </section>
   );
 }

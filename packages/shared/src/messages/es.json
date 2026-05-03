@@ -131,6 +131,124 @@
         "heading": "Código fuente y issues",
         "body": "Reportes de errores y discusiones de funciones viven en GitHub Issues."
       }
+    },
+    "settings": {
+      "h1": "Ajustes",
+      "loading": "Cargando…",
+      "notSignedIn": "No has iniciado sesión.",
+      "signIn": "Iniciar sesión →",
+      "field": {
+        "email": "Correo",
+        "name": "Nombre"
+      },
+      "lang": {
+        "target": "Idioma de reescritura",
+        "targetHelp": "Las reescrituras se generan en este idioma. Si tu entrada está en otro, se traduce automáticamente.",
+        "ui": "Idioma de la interfaz",
+        "uiHelp": "Idioma del sitio. Independiente del idioma de reescritura de arriba.",
+        "autoSystem": "Auto (seguir el sistema)",
+        "autoFromPage": "Detectar el idioma de la página"
+      },
+      "sub": {
+        "label": "Suscripción",
+        "statusLabel": "Estado",
+        "freeShort": "Free ({count, number} reescrituras / mes)",
+        "upgrade": "Pasar a Pro →",
+        "plan": {
+          "monthly": "Pro Mensual",
+          "annual": "Pro Anual"
+        },
+        "status": {
+          "active": "Activa",
+          "trialing": "En prueba",
+          "paused": "Pausada",
+          "canceled": "Cancelada (válida hasta el fin del período)",
+          "pastDue": "Pago vencido",
+          "expired": "Expirada"
+        },
+        "endsOn": "Termina el",
+        "nextRenewal": "Próxima renovación",
+        "manage": "Gestionar suscripción / facturas",
+        "redirecting": "Redirigiendo…"
+      },
+      "byok": {
+        "title": "BYOK (usa tu propia API key)",
+        "intro": "Conecta tu propio endpoint y key compatibles con OpenAI. Las reescrituras van directo a tu provider y <strong>no cuentan en la cuota de {limit, number} / mes</strong>. Tu key se guarda cifrada con AES-GCM y nunca se escribe en logs.",
+        "baseUrl": "Base URL",
+        "model": "Model",
+        "apiKey": "API Key",
+        "edit": "Editar",
+        "delete": "Eliminar",
+        "deleteConfirm": "¿Eliminar la configuración BYOK? Las reescrituras volverán al upstream por defecto y volverán a contar contra tu cuota mensual.",
+        "save": "Guardar",
+        "saving": "Guardando…",
+        "cancel": "Cancelar",
+        "saveFailed": "No se pudo guardar"
+      },
+      "signOut": {
+        "btn": "Cerrar sesión",
+        "signing": "Cerrando sesión…"
+      },
+      "quota": {
+        "tier": {
+          "anonymous": "Anónimo (por IP)",
+          "anonymousInstall": "Extensión (sin sesión)",
+          "free": "Free",
+          "pro": "Pro"
+        },
+        "tierLabel": "Plan",
+        "thisMonth": "Este mes",
+        "resetsOn": "Se reinicia el",
+        "unlimited": "Sin límite",
+        "usedFmt": "{used, number} / {limit, number} (quedan {remaining, number})",
+        "resetSuffix": "00:00 UTC"
+      }
+    },
+    "billing": {
+      "h1": "Pasar a Pro",
+      "intro": "2.000 reescrituras IA al mes. 3 estilos en streaming paralelo. BYOK (usa tu propia API key) libera el uso ilimitado.",
+      "loading": "Cargando…",
+      "error": {
+        "networkError": "Error de red",
+        "checkoutFailed": "No se pudo crear el checkout",
+        "portalFailed": "No se pudo abrir el portal",
+        "prefix": "Error"
+      },
+      "subscribed": {
+        "line": "Estás en Pro ({plan}). Termina el: {date}",
+        "willCancel": " (se cancelará al final del período)",
+        "manage": "Gestionar suscripción",
+        "planMonthly": "Mensual",
+        "planAnnual": "Anual"
+      },
+      "toggle": {
+        "monthly": "Mensual",
+        "annual": "Anual",
+        "save": "ahorra {percent}%"
+      },
+      "free": {
+        "title": "Free",
+        "feat1": "30 reescrituras / mes",
+        "feat2": "3 estilos en streaming",
+        "feat3": "Detección automática de idioma",
+        "feat4": "Privacidad primero — las entradas nunca se guardan",
+        "ctaLower": "Plan inferior",
+        "ctaCurrent": "Plan actual",
+        "ctaUse": "Usar Free"
+      },
+      "pro": {
+        "title": "Pro",
+        "periodMonthly": "/ mes",
+        "periodYearly": "/ mes (facturado anualmente ${total})",
+        "feat1": "2.000 reescrituras / mes",
+        "feat2": "3 estilos en streaming",
+        "feat3": "BYOK = ilimitado",
+        "feat4": "Soporte prioritario",
+        "ctaSubscribed": "Suscrito",
+        "ctaRedirecting": "Redirigiendo…",
+        "ctaMonthly": "Suscribirse a Pro Mensual",
+        "ctaAnnual": "Suscribirse a Pro Anual"
+      }
     }
   },
   "nav": {

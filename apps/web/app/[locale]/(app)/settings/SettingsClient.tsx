@@ -1,6 +1,7 @@
 'use client';
 
 import type { Locale, StoredLocale } from '@rewrite/shared';
+import { useFormatter, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from '../../../../i18n/navigation.ts';
 
@@ -28,17 +29,6 @@ interface UserSettings {
   uiLocale: StoredLocale;
 }
 
-const UI_LOCALE_OPTIONS: Array<{ value: StoredLocale; label: string }> = [
-  { value: 'auto', label: 'Auto (use system)' },
-  { value: 'en', label: 'English' },
-  { value: 'zh-CN', label: '简体中文' },
-  { value: 'ja', label: '日本語' },
-  { value: 'ko', label: '한국어' },
-  { value: 'es', label: 'Español' },
-  { value: 'fr', label: 'Français' },
-  { value: 'de', label: 'Deutsch' },
-];
-
 interface ByokConfig {
   configured: boolean;
   baseUrl?: string;
@@ -47,18 +37,8 @@ interface ByokConfig {
   updatedAt?: string;
 }
 
-const LANG_OPTIONS: Array<{ value: string; label: string }> = [
-  { value: 'auto', label: 'Auto-detect from page' },
-  { value: 'en', label: 'English' },
-  { value: 'zh-CN', label: '简体中文 (Chinese, Simplified)' },
-  { value: 'ja', label: '日本語 (Japanese)' },
-  { value: 'ko', label: '한국어 (Korean)' },
-  { value: 'es', label: 'Español (Spanish)' },
-  { value: 'fr', label: 'Français (French)' },
-  { value: 'de', label: 'Deutsch (German)' },
-];
-
 export function SettingsClient() {
+  const t = useTranslations('page.settings');
   const router = useRouter();
   const pathname = usePathname();
   const [me, setMe] = useState<UserInfo | null>(null);
@@ -68,6 +48,28 @@ export function SettingsClient() {
   const [savingLang, setSavingLang] = useState(false);
   const [savingUiLocale, setSavingUiLocale] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+
+  const uiLocaleOptions: Array<{ value: StoredLocale; label: string }> = [
+    { value: 'auto', label: t('lang.autoSystem') },
+    { value: 'en', label: 'English' },
+    { value: 'zh-CN', label: '简体中文' },
+    { value: 'ja', label: '日本語' },
+    { value: 'ko', label: '한국어' },
+    { value: 'es', label: 'Español' },
+    { value: 'fr', label: 'Français' },
+    { value: 'de', label: 'Deutsch' },
+  ];
+
+  const langOptions: Array<{ value: string; label: string }> = [
+    { value: 'auto', label: t('lang.autoFromPage') },
+    { value: 'en', label: 'English' },
+    { value: 'zh-CN', label: '简体中文 (Chinese, Simplified)' },
+    { value: 'ja', label: '日本語 (Japanese)' },
+    { value: 'ko', label: '한국어 (Korean)' },
+    { value: 'es', label: 'Español (Spanish)' },
+    { value: 'fr', label: 'Français (French)' },
+    { value: 'de', label: 'Deutsch (German)' },
+  ];
 
   useEffect(() => {
     let cancelled = false;
@@ -101,11 +103,7 @@ export function SettingsClient() {
   }, []);
 
   async function deleteByok() {
-    if (
-      !confirm(
-        'Delete BYOK config? Rewrites will fall back to the default upstream and start counting against your monthly quota again.',
-      )
-    ) {
+    if (!confirm(t('byok.deleteConfirm'))) {
       return;
     }
     const res = await fetch('/v1/me/byok', { method: 'DELETE', credentials: 'include' });
@@ -165,13 +163,13 @@ export function SettingsClient() {
   }
 
   if (!me) {
-    return <p style={{ marginTop: 32, color: '#888' }}>Loading…</p>;
+    return <p style={{ marginTop: 32, color: '#888' }}>{t('loading')}</p>;
   }
 
   if (!me.user) {
     return (
       <section style={{ marginTop: 32 }}>
-        <p style={{ color: '#666', fontSize: 14, lineHeight: 1.55 }}>You’re not signed in.</p>
+        <p style={{ color: '#666', fontSize: 14, lineHeight: 1.55 }}>{t('notSignedIn')}</p>
         <a
           href="/login"
           style={{
@@ -186,7 +184,7 @@ export function SettingsClient() {
             fontWeight: 500,
           }}
         >
-          Sign in →
+          {t('signIn')}
         </a>
         {usage && (
           <div style={{ ...cardStyle, marginTop: 24 }}>
@@ -200,8 +198,8 @@ export function SettingsClient() {
   return (
     <section style={{ marginTop: 32 }}>
       <div style={cardStyle}>
-        <Row label="Email" value={me.user.email} />
-        {me.user.name && <Row label="Name" value={me.user.name} />}
+        <Row label={t('field.email')} value={me.user.email} />
+        {me.user.name && <Row label={t('field.name')} value={me.user.name} />}
       </div>
 
       {usage && (
@@ -222,10 +220,9 @@ export function SettingsClient() {
             }}
           >
             <div>
-              <div style={{ fontSize: 14, color: '#111' }}>Target language</div>
+              <div style={{ fontSize: 14, color: '#111' }}>{t('lang.target')}</div>
               <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>
-                Rewrites are produced in this language. If your input is in a different language,
-                it’s translated.
+                {t('lang.targetHelp')}
               </div>
             </div>
             <select
@@ -242,7 +239,7 @@ export function SettingsClient() {
                 minWidth: 180,
               }}
             >
-              {LANG_OPTIONS.map((o) => (
+              {langOptions.map((o) => (
                 <option key={o.value} value={o.value}>
                   {o.label}
                 </option>
@@ -259,10 +256,8 @@ export function SettingsClient() {
             }}
           >
             <div>
-              <div style={{ fontSize: 14, color: '#111' }}>UI language</div>
-              <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>
-                Interface language. Independent of the rewrite target language above.
-              </div>
+              <div style={{ fontSize: 14, color: '#111' }}>{t('lang.ui')}</div>
+              <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>{t('lang.uiHelp')}</div>
             </div>
             <select
               value={settings.uiLocale}
@@ -278,7 +273,7 @@ export function SettingsClient() {
                 minWidth: 180,
               }}
             >
-              {UI_LOCALE_OPTIONS.map((o) => (
+              {uiLocaleOptions.map((o) => (
                 <option key={o.value} value={o.value}>
                   {o.label}
                 </option>
@@ -307,7 +302,7 @@ export function SettingsClient() {
             cursor: 'pointer',
           }}
         >
-          {signingOut ? 'Signing out…' : 'Sign out'}
+          {signingOut ? t('signOut.signing') : t('signOut.btn')}
         </button>
       </div>
     </section>
@@ -315,6 +310,8 @@ export function SettingsClient() {
 }
 
 function SubscriptionSection({ me }: { me: UserInfo }) {
+  const t = useTranslations('page.settings.sub');
+  const format = useFormatter();
   const [loading, setLoading] = useState(false);
   async function openPortal() {
     setLoading(true);
@@ -328,16 +325,18 @@ function SubscriptionSection({ me }: { me: UserInfo }) {
   }
 
   if (me.tier === 'pro' && me.subscription) {
-    const periodEnd = new Date(me.subscription.currentPeriodEnd).toLocaleDateString('en-US');
+    const periodEnd = format.dateTime(new Date(me.subscription.currentPeriodEnd), {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+    const planLabel = me.subscription.plan === 'yearly' ? t('plan.annual') : t('plan.monthly');
     return (
       <div style={{ ...cardStyle, marginTop: 16 }}>
+        <Row label={t('label')} value={planLabel} />
+        <Row label={t('statusLabel')} value={statusLabel(t, me.subscription.status)} />
         <Row
-          label="Subscription"
-          value={`Pro ${me.subscription.plan === 'yearly' ? 'Annual' : 'Monthly'}`}
-        />
-        <Row label="Status" value={statusLabel(me.subscription.status)} />
-        <Row
-          label={me.subscription.cancelAtPeriodEnd ? 'Ends on' : 'Next renewal'}
+          label={me.subscription.cancelAtPeriodEnd ? t('endsOn') : t('nextRenewal')}
           value={periodEnd}
         />
         <div style={{ padding: '12px 0' }}>
@@ -355,7 +354,7 @@ function SubscriptionSection({ me }: { me: UserInfo }) {
               cursor: 'pointer',
             }}
           >
-            {loading ? 'Redirecting…' : 'Manage subscription / invoices'}
+            {loading ? t('redirecting') : t('manage')}
           </button>
         </div>
       </div>
@@ -363,7 +362,7 @@ function SubscriptionSection({ me }: { me: UserInfo }) {
   }
   return (
     <div style={{ ...cardStyle, marginTop: 16 }}>
-      <Row label="Subscription" value="Free (30 rewrites / month)" />
+      <Row label={t('label')} value={t('freeShort', { count: 30 })} />
       <div style={{ padding: '12px 0' }}>
         <a
           href="/billing"
@@ -378,30 +377,17 @@ function SubscriptionSection({ me }: { me: UserInfo }) {
             textDecoration: 'none',
           }}
         >
-          Upgrade to Pro →
+          {t('upgrade')}
         </a>
       </div>
     </div>
   );
 }
 
-function statusLabel(s: string): string {
-  switch (s) {
-    case 'active':
-      return 'Active';
-    case 'trialing':
-      return 'Trialing';
-    case 'paused':
-      return 'Paused';
-    case 'canceled':
-      return 'Canceled (ends at period end)';
-    case 'past_due':
-      return 'Past due';
-    case 'expired':
-      return 'Expired';
-    default:
-      return s;
-  }
+function statusLabel(t: ReturnType<typeof useTranslations>, s: string): string {
+  const known = ['active', 'trialing', 'paused', 'canceled', 'pastDue', 'expired'];
+  const key = s === 'past_due' ? 'pastDue' : s;
+  return known.includes(key) ? t(`status.${key}`) : s;
 }
 
 function ByokSection({
@@ -413,6 +399,7 @@ function ByokSection({
   onChange: (b: ByokConfig) => void;
   onDelete: () => void;
 }) {
+  const t = useTranslations('page.settings.byok');
   const [editing, setEditing] = useState(false);
   const [baseUrl, setBaseUrl] = useState('');
   const [model, setModel] = useState('');
@@ -432,7 +419,7 @@ function ByokSection({
       });
       const data = (await res.json()) as { configured?: boolean; error?: string; keyMask?: string };
       if (!res.ok) {
-        setError(data.error ?? 'Save failed');
+        setError(data.error ?? t('saveFailed'));
         return;
       }
       onChange({
@@ -457,31 +444,30 @@ function ByokSection({
           borderBottom: '1px solid #f0f0f0',
         }}
       >
-        <div style={{ fontSize: 14, color: '#111', fontWeight: 500 }}>
-          BYOK (Bring Your Own Key)
-        </div>
+        <div style={{ fontSize: 14, color: '#111', fontWeight: 500 }}>{t('title')}</div>
         <div style={{ fontSize: 12, color: '#888', marginTop: 2, lineHeight: 1.6 }}>
-          Plug in your own OpenAI-compatible endpoint and key. Rewrites go directly to your provider
-          and <strong style={{ color: '#111' }}>don’t count against the 2,000 / month quota</strong>
-          . Your key is stored AES-GCM encrypted and never written to logs.
+          {t.rich('intro', {
+            limit: 2000,
+            strong: (chunks) => <strong style={{ color: '#111' }}>{chunks}</strong>,
+          })}
         </div>
       </div>
 
       {byok?.configured && !editing && (
         <>
-          <Row label="Base URL" value={byok.baseUrl ?? '-'} />
-          <Row label="Model" value={byok.model ?? '-'} />
-          <Row label="API Key" value={`****${byok.keyMask ?? ''}`} />
+          <Row label={t('baseUrl')} value={byok.baseUrl ?? '-'} />
+          <Row label={t('model')} value={byok.model ?? '-'} />
+          <Row label={t('apiKey')} value={`****${byok.keyMask ?? ''}`} />
           <div style={{ padding: '12px 0', display: 'flex', gap: 8 }}>
             <button type="button" onClick={() => setEditing(true)} style={btnSecondary}>
-              Edit
+              {t('edit')}
             </button>
             <button
               type="button"
               onClick={onDelete}
               style={{ ...btnSecondary, color: '#dc2626', borderColor: '#fca5a5' }}
             >
-              Delete
+              {t('delete')}
             </button>
           </div>
         </>
@@ -490,14 +476,14 @@ function ByokSection({
       {(!byok?.configured || editing) && (
         <div style={{ padding: '12px 0' }}>
           <Field
-            label="Base URL"
+            label={t('baseUrl')}
             value={baseUrl}
             onChange={setBaseUrl}
             placeholder="https://api.openai.com/v1"
           />
-          <Field label="Model" value={model} onChange={setModel} placeholder="gpt-4o-mini" />
+          <Field label={t('model')} value={model} onChange={setModel} placeholder="gpt-4o-mini" />
           <Field
-            label="API Key"
+            label={t('apiKey')}
             value={apiKey}
             onChange={setApiKey}
             placeholder="sk-..."
@@ -520,7 +506,7 @@ function ByokSection({
                 opacity: !baseUrl || !model || !apiKey || saving ? 0.5 : 1,
               }}
             >
-              {saving ? 'Saving…' : 'Save'}
+              {saving ? t('saving') : t('save')}
             </button>
             {editing && (
               <button
@@ -531,7 +517,7 @@ function ByokSection({
                 }}
                 style={btnSecondary}
               >
-                Cancel
+                {t('cancel')}
               </button>
             )}
           </div>
@@ -589,26 +575,32 @@ const btnSecondary = {
 };
 
 function Quota({ usage }: { usage: Usage }) {
-  const tierLabel: Record<Usage['tier'], string> = {
-    anonymous: 'Anonymous (per IP)',
-    anonymous_install: 'Extension (unsigned)',
-    free: 'Free',
-    pro: 'Pro',
+  const t = useTranslations('page.settings.quota');
+  const format = useFormatter();
+  const tierKeyMap: Record<Usage['tier'], string> = {
+    anonymous: 'anonymous',
+    anonymous_install: 'anonymousInstall',
+    free: 'free',
+    pro: 'pro',
   };
   const reset = new Date(usage.resetAt);
-  const resetLabel = reset.toLocaleString('en-US', { month: 'long', day: 'numeric' });
+  const resetLabel = format.dateTime(reset, { month: 'long', day: 'numeric' });
   return (
     <>
-      <Row label="Tier" value={tierLabel[usage.tier]} />
+      <Row label={t('tierLabel')} value={t(`tier.${tierKeyMap[usage.tier]}`)} />
       <Row
-        label="This month"
+        label={t('thisMonth')}
         value={
           Number.isFinite(usage.limit)
-            ? `${usage.used} / ${usage.limit} (${usage.remaining} left)`
-            : 'Unlimited'
+            ? t('usedFmt', {
+                used: usage.used,
+                limit: usage.limit,
+                remaining: usage.remaining,
+              })
+            : t('unlimited')
         }
       />
-      <Row label="Resets on" value={`${resetLabel} 00:00 UTC`} />
+      <Row label={t('resetsOn')} value={`${resetLabel} ${t('resetSuffix')}`} />
     </>
   );
 }

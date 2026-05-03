@@ -23,6 +23,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   + 4 行使用场景（外语学习 / 客户回信 / 公开发言 / 高焦虑沟通），重写 outro
   为"一个手势，三种打磨好的说法"，让 narrative 从"诊断（→ 灰）"过渡到"建议
   （✓ 绿）"再下接 How it works，治掉之前 hero → 痛点列表的突兀感。
+- `/settings` + `/billing` 接入 next-intl，新增 `page.settings.*` + `page.billing.*`
+  共 86 keys × 7 locale（约 600 字符串）。日期格式从硬写 `'en-US'` 改为按当前 locale
+  渲染（`useFormatter`）。BYOK confirm dialog、subscription status、quota tier
+  标签、plan toggle、checkout button 等全部本地化。ja/ko/es/fr/de 由 LLM 起草，
+  待母语者 review。
 
 ### Added
 - **i18n** — 7 UI locales (`en` / `zh-CN` / `ja` / `ko` / `es` / `fr` / `de`) covering

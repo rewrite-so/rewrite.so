@@ -131,6 +131,124 @@
         "heading": "Quellcode und Issues",
         "body": "Bug-Reports und Funktionsdiskussionen leben in GitHub Issues."
       }
+    },
+    "settings": {
+      "h1": "Einstellungen",
+      "loading": "Lädt…",
+      "notSignedIn": "Du bist nicht angemeldet.",
+      "signIn": "Anmelden →",
+      "field": {
+        "email": "E-Mail",
+        "name": "Name"
+      },
+      "lang": {
+        "target": "Zielsprache fürs Umschreiben",
+        "targetHelp": "Umschreibungen werden in dieser Sprache erzeugt. Liegt deine Eingabe in einer anderen Sprache vor, wird sie übersetzt.",
+        "ui": "Sprache der Oberfläche",
+        "uiHelp": "Sprache der Website. Unabhängig von der Zielsprache oben.",
+        "autoSystem": "Auto (Systemeinstellung folgen)",
+        "autoFromPage": "Seitensprache automatisch erkennen"
+      },
+      "sub": {
+        "label": "Abonnement",
+        "statusLabel": "Status",
+        "freeShort": "Free ({count, number} Umschreibungen / Monat)",
+        "upgrade": "Auf Pro upgraden →",
+        "plan": {
+          "monthly": "Pro Monatlich",
+          "annual": "Pro Jährlich"
+        },
+        "status": {
+          "active": "Aktiv",
+          "trialing": "In Testphase",
+          "paused": "Pausiert",
+          "canceled": "Gekündigt (gültig bis Periodenende)",
+          "pastDue": "Zahlung überfällig",
+          "expired": "Abgelaufen"
+        },
+        "endsOn": "Endet am",
+        "nextRenewal": "Nächste Verlängerung",
+        "manage": "Abo verwalten / Rechnungen",
+        "redirecting": "Wird weitergeleitet…"
+      },
+      "byok": {
+        "title": "BYOK (eigener API-Key)",
+        "intro": "Hinterlege dein eigenes OpenAI-kompatibles Endpoint und Key. Umschreibungen gehen direkt zu deinem Provider und <strong>zählen nicht zum Kontingent von {limit, number} / Monat</strong>. Dein Key wird AES-GCM-verschlüsselt gespeichert und nie geloggt.",
+        "baseUrl": "Base URL",
+        "model": "Model",
+        "apiKey": "API Key",
+        "edit": "Bearbeiten",
+        "delete": "Löschen",
+        "deleteConfirm": "BYOK-Konfiguration löschen? Umschreibungen fallen wieder auf das Standard-Upstream zurück und zählen wieder zum Monatskontingent.",
+        "save": "Speichern",
+        "saving": "Speichert…",
+        "cancel": "Abbrechen",
+        "saveFailed": "Speichern fehlgeschlagen"
+      },
+      "signOut": {
+        "btn": "Abmelden",
+        "signing": "Abmeldung läuft…"
+      },
+      "quota": {
+        "tier": {
+          "anonymous": "Anonym (pro IP)",
+          "anonymousInstall": "Extension (nicht angemeldet)",
+          "free": "Free",
+          "pro": "Pro"
+        },
+        "tierLabel": "Tarif",
+        "thisMonth": "Dieser Monat",
+        "resetsOn": "Reset",
+        "unlimited": "Unbegrenzt",
+        "usedFmt": "{used, number} / {limit, number} ({remaining, number} übrig)",
+        "resetSuffix": "00:00 UTC"
+      }
+    },
+    "billing": {
+      "h1": "Auf Pro upgraden",
+      "intro": "2.000 KI-Umschreibungen pro Monat. 3 Stile parallel gestreamt. BYOK (eigener API-Key) schaltet unbegrenzte Nutzung frei.",
+      "loading": "Lädt…",
+      "error": {
+        "networkError": "Netzwerkfehler",
+        "checkoutFailed": "Checkout konnte nicht erstellt werden",
+        "portalFailed": "Portal konnte nicht geöffnet werden",
+        "prefix": "Fehler"
+      },
+      "subscribed": {
+        "line": "Du bist auf Pro ({plan}). Endet am: {date}",
+        "willCancel": " (wird zum Periodenende gekündigt)",
+        "manage": "Abo verwalten",
+        "planMonthly": "Monatlich",
+        "planAnnual": "Jährlich"
+      },
+      "toggle": {
+        "monthly": "Monatlich",
+        "annual": "Jährlich",
+        "save": "{percent}% sparen"
+      },
+      "free": {
+        "title": "Free",
+        "feat1": "30 Umschreibungen / Monat",
+        "feat2": "3 Stile parallel gestreamt",
+        "feat3": "Automatische Spracherkennung",
+        "feat4": "Privacy zuerst — Eingaben werden nie gespeichert",
+        "ctaLower": "Niedrigerer Tarif",
+        "ctaCurrent": "Aktueller Tarif",
+        "ctaUse": "Free nutzen"
+      },
+      "pro": {
+        "title": "Pro",
+        "periodMonthly": "/ Monat",
+        "periodYearly": "/ Monat (jährlich ${total} abgerechnet)",
+        "feat1": "2.000 Umschreibungen / Monat",
+        "feat2": "3 Stile parallel gestreamt",
+        "feat3": "BYOK = unbegrenzt",
+        "feat4": "Priority-Support",
+        "ctaSubscribed": "Abonniert",
+        "ctaRedirecting": "Wird weitergeleitet…",
+        "ctaMonthly": "Pro Monatlich abonnieren",
+        "ctaAnnual": "Pro Jährlich abonnieren"
+      }
     }
   },
   "nav": {

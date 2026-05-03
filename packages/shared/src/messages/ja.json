@@ -131,6 +131,124 @@
         "heading": "ソースコードと Issues",
         "body": "バグ報告と機能議論は GitHub Issues で。"
       }
+    },
+    "settings": {
+      "h1": "設定",
+      "loading": "読み込み中…",
+      "notSignedIn": "ログインしていません。",
+      "signIn": "ログイン →",
+      "field": {
+        "email": "メール",
+        "name": "名前"
+      },
+      "lang": {
+        "target": "書き換え先言語",
+        "targetHelp": "書き換え結果はこの言語になります。入力が別の言語なら、自動的に翻訳されます。",
+        "ui": "UI 言語",
+        "uiHelp": "サイトの表示言語。上の書き換え先言語とは別に設定できます。",
+        "autoSystem": "自動（システムに合わせる）",
+        "autoFromPage": "ページの言語を自動検出"
+      },
+      "sub": {
+        "label": "サブスクリプション",
+        "statusLabel": "ステータス",
+        "freeShort": "Free（毎月 {count, number} 回まで）",
+        "upgrade": "Pro にアップグレード →",
+        "plan": {
+          "monthly": "Pro 月額",
+          "annual": "Pro 年額"
+        },
+        "status": {
+          "active": "有効",
+          "trialing": "トライアル中",
+          "paused": "一時停止中",
+          "canceled": "キャンセル済み（期末まで利用可）",
+          "pastDue": "支払い遅延",
+          "expired": "期限切れ"
+        },
+        "endsOn": "終了日",
+        "nextRenewal": "次回更新",
+        "manage": "サブスク管理 / 請求書を見る",
+        "redirecting": "移動中…"
+      },
+      "byok": {
+        "title": "BYOK（自分の API キーを使う）",
+        "intro": "OpenAI 互換の endpoint と key を入力すると、書き換えは直接そのプロバイダーへ送信され、<strong>{limit, number} 回 / 月の上限にカウントされません</strong>。Key は AES-GCM で暗号化保存され、ログには一切残りません。",
+        "baseUrl": "Base URL",
+        "model": "Model",
+        "apiKey": "API Key",
+        "edit": "編集",
+        "delete": "削除",
+        "deleteConfirm": "BYOK 設定を削除しますか？書き換えは既定のアップストリームに戻り、月間上限のカウント対象になります。",
+        "save": "保存",
+        "saving": "保存中…",
+        "cancel": "キャンセル",
+        "saveFailed": "保存に失敗しました"
+      },
+      "signOut": {
+        "btn": "ログアウト",
+        "signing": "ログアウト中…"
+      },
+      "quota": {
+        "tier": {
+          "anonymous": "匿名（IP 単位）",
+          "anonymousInstall": "拡張機能（未ログイン）",
+          "free": "Free",
+          "pro": "Pro"
+        },
+        "tierLabel": "プラン",
+        "thisMonth": "今月の利用",
+        "resetsOn": "リセット",
+        "unlimited": "無制限",
+        "usedFmt": "{used, number} / {limit, number}（残り {remaining, number}）",
+        "resetSuffix": "00:00 UTC"
+      }
+    },
+    "billing": {
+      "h1": "Pro にアップグレード",
+      "intro": "毎月 2,000 回の AI 書き換え。3 スタイルを並行ストリーミング。BYOK（自分の API キー）で無制限に。",
+      "loading": "読み込み中…",
+      "error": {
+        "networkError": "ネットワークエラー",
+        "checkoutFailed": "決済セッションの作成に失敗しました",
+        "portalFailed": "管理画面を開けませんでした",
+        "prefix": "エラー"
+      },
+      "subscribed": {
+        "line": "Pro（{plan}）に加入中。期末日：{date}",
+        "willCancel": "（期末で解約）",
+        "manage": "サブスク管理",
+        "planMonthly": "月額",
+        "planAnnual": "年額"
+      },
+      "toggle": {
+        "monthly": "月額",
+        "annual": "年額",
+        "save": "{percent}% お得"
+      },
+      "free": {
+        "title": "Free",
+        "feat1": "毎月 30 回の書き換え",
+        "feat2": "3 スタイル並行ストリーミング",
+        "feat3": "言語の自動検出",
+        "feat4": "プライバシー優先 — 入力は保存されません",
+        "ctaLower": "下位プラン",
+        "ctaCurrent": "現在のプラン",
+        "ctaUse": "Free を使う"
+      },
+      "pro": {
+        "title": "Pro",
+        "periodMonthly": "/ 月",
+        "periodYearly": "/ 月（年額 ${total}）",
+        "feat1": "毎月 2,000 回の書き換え",
+        "feat2": "3 スタイル並行ストリーミング",
+        "feat3": "BYOK = 無制限",
+        "feat4": "優先サポート",
+        "ctaSubscribed": "加入済み",
+        "ctaRedirecting": "移動中…",
+        "ctaMonthly": "Pro 月額に加入",
+        "ctaAnnual": "Pro 年額に加入"
+      }
     }
   },
   "nav": {

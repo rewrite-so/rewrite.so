@@ -131,6 +131,124 @@
         "heading": "源码与 Issues",
         "body": "Bug 报告与功能讨论都在 GitHub Issues。"
       }
+    },
+    "settings": {
+      "h1": "我的",
+      "loading": "加载中…",
+      "notSignedIn": "你还没登录。",
+      "signIn": "去登录 →",
+      "field": {
+        "email": "邮箱",
+        "name": "昵称"
+      },
+      "lang": {
+        "target": "改写目标语言",
+        "targetHelp": "改写结果会用这个语言。如果输入是其它语言，会顺手翻译过来。",
+        "ui": "界面语言",
+        "uiHelp": "网站界面语言。和上面的改写目标语言互不相干。",
+        "autoSystem": "自动（跟随系统）",
+        "autoFromPage": "自动识别页面语言"
+      },
+      "sub": {
+        "label": "订阅",
+        "statusLabel": "状态",
+        "freeShort": "免费档（每月 {count, number} 次改写）",
+        "upgrade": "升级到 Pro →",
+        "plan": {
+          "monthly": "Pro 月付",
+          "annual": "Pro 年付"
+        },
+        "status": {
+          "active": "生效中",
+          "trialing": "试用中",
+          "paused": "已暂停",
+          "canceled": "已取消（用到当期结束）",
+          "pastDue": "逾期未付",
+          "expired": "已过期"
+        },
+        "endsOn": "到期日",
+        "nextRenewal": "下次续费",
+        "manage": "管理订阅 / 查看发票",
+        "redirecting": "跳转中…"
+      },
+      "byok": {
+        "title": "BYOK（自带 API key）",
+        "intro": "填入你自己的 OpenAI 兼容 endpoint 和 key。改写直达你的 provider，<strong>不计入 {limit, number}/月 配额</strong>。Key 用 AES-GCM 加密存储，永远不写日志。",
+        "baseUrl": "Base URL",
+        "model": "Model",
+        "apiKey": "API Key",
+        "edit": "编辑",
+        "delete": "删除",
+        "deleteConfirm": "确定删除 BYOK 配置吗？改写会回到默认上游，重新计入每月配额。",
+        "save": "保存",
+        "saving": "保存中…",
+        "cancel": "取消",
+        "saveFailed": "保存失败"
+      },
+      "signOut": {
+        "btn": "退出登录",
+        "signing": "退出中…"
+      },
+      "quota": {
+        "tier": {
+          "anonymous": "匿名（按 IP）",
+          "anonymousInstall": "扩展（未登录）",
+          "free": "Free",
+          "pro": "Pro"
+        },
+        "tierLabel": "档位",
+        "thisMonth": "本月",
+        "resetsOn": "重置时间",
+        "unlimited": "不限",
+        "usedFmt": "{used, number} / {limit, number}（剩 {remaining, number}）",
+        "resetSuffix": "00:00 UTC"
+      }
+    },
+    "billing": {
+      "h1": "升级到 Pro",
+      "intro": "每月 2,000 次 AI 改写。3 种风格并行流式输出。BYOK（自带 API key）解锁无限使用。",
+      "loading": "加载中…",
+      "error": {
+        "networkError": "网络错误",
+        "checkoutFailed": "创建结账会话失败",
+        "portalFailed": "打开管理面板失败",
+        "prefix": "错误"
+      },
+      "subscribed": {
+        "line": "你已订阅 Pro（{plan}）。当期到期：{date}",
+        "willCancel": "（到期后取消）",
+        "manage": "管理订阅",
+        "planMonthly": "月付",
+        "planAnnual": "年付"
+      },
+      "toggle": {
+        "monthly": "月付",
+        "annual": "年付",
+        "save": "省 {percent}%"
+      },
+      "free": {
+        "title": "Free",
+        "feat1": "每月 30 次改写",
+        "feat2": "3 种风格并行流式",
+        "feat3": "自动检测语言",
+        "feat4": "隐私优先——原文从不存储",
+        "ctaLower": "下调档位",
+        "ctaCurrent": "当前档位",
+        "ctaUse": "使用免费档"
+      },
+      "pro": {
+        "title": "Pro",
+        "periodMonthly": "/ 月",
+        "periodYearly": "/ 月（按年付 ${total}）",
+        "feat1": "每月 2,000 次改写",
+        "feat2": "3 种风格并行流式",
+        "feat3": "BYOK = 无限",
+        "feat4": "优先支持",
+        "ctaSubscribed": "已订阅",
+        "ctaRedirecting": "跳转中…",
+        "ctaMonthly": "订阅 Pro 月付",
+        "ctaAnnual": "订阅 Pro 年付"
+      }
     }
   },
   "nav": {

@@ -131,6 +131,124 @@
         "heading": "소스 및 Issues",
         "body": "버그 보고와 기능 토론은 GitHub Issues에서."
       }
+    },
+    "settings": {
+      "h1": "설정",
+      "loading": "불러오는 중…",
+      "notSignedIn": "로그인하지 않았습니다.",
+      "signIn": "로그인 →",
+      "field": {
+        "email": "이메일",
+        "name": "이름"
+      },
+      "lang": {
+        "target": "재작성 언어",
+        "targetHelp": "재작성 결과는 이 언어로 출력됩니다. 입력이 다른 언어면 자동으로 번역됩니다.",
+        "ui": "UI 언어",
+        "uiHelp": "사이트 표시 언어. 위의 재작성 언어와 별개로 설정할 수 있습니다.",
+        "autoSystem": "자동 (시스템 따라가기)",
+        "autoFromPage": "페이지 언어 자동 감지"
+      },
+      "sub": {
+        "label": "구독",
+        "statusLabel": "상태",
+        "freeShort": "Free (월 {count, number}회 재작성)",
+        "upgrade": "Pro 업그레이드 →",
+        "plan": {
+          "monthly": "Pro 월간",
+          "annual": "Pro 연간"
+        },
+        "status": {
+          "active": "활성",
+          "trialing": "체험 중",
+          "paused": "일시 중지됨",
+          "canceled": "취소됨 (기간 종료까지 이용 가능)",
+          "pastDue": "결제 연체",
+          "expired": "만료됨"
+        },
+        "endsOn": "종료일",
+        "nextRenewal": "다음 갱신",
+        "manage": "구독 관리 / 청구서 보기",
+        "redirecting": "이동 중…"
+      },
+      "byok": {
+        "title": "BYOK (자체 API 키 사용)",
+        "intro": "OpenAI 호환 endpoint와 key를 입력하면 재작성이 해당 provider로 직접 전송되며, <strong>월 {limit, number}회 한도에 포함되지 않습니다</strong>. Key는 AES-GCM 으로 암호화 저장되며 로그에 절대 기록되지 않습니다.",
+        "baseUrl": "Base URL",
+        "model": "Model",
+        "apiKey": "API Key",
+        "edit": "편집",
+        "delete": "삭제",
+        "deleteConfirm": "BYOK 설정을 삭제할까요? 재작성은 기본 upstream으로 돌아가며 월간 한도 카운트가 다시 시작됩니다.",
+        "save": "저장",
+        "saving": "저장 중…",
+        "cancel": "취소",
+        "saveFailed": "저장 실패"
+      },
+      "signOut": {
+        "btn": "로그아웃",
+        "signing": "로그아웃 중…"
+      },
+      "quota": {
+        "tier": {
+          "anonymous": "익명 (IP 단위)",
+          "anonymousInstall": "확장 (비로그인)",
+          "free": "Free",
+          "pro": "Pro"
+        },
+        "tierLabel": "등급",
+        "thisMonth": "이번 달",
+        "resetsOn": "재설정",
+        "unlimited": "무제한",
+        "usedFmt": "{used, number} / {limit, number} (남음 {remaining, number})",
+        "resetSuffix": "00:00 UTC"
+      }
+    },
+    "billing": {
+      "h1": "Pro 업그레이드",
+      "intro": "월 2,000회 AI 재작성. 3가지 스타일 동시 스트리밍. BYOK(자체 API 키)로 무제한.",
+      "loading": "불러오는 중…",
+      "error": {
+        "networkError": "네트워크 오류",
+        "checkoutFailed": "결제 세션을 만들지 못했습니다",
+        "portalFailed": "관리 포털을 열지 못했습니다",
+        "prefix": "오류"
+      },
+      "subscribed": {
+        "line": "Pro({plan}) 구독 중. 종료일: {date}",
+        "willCancel": " (기간 종료 시 해지)",
+        "manage": "구독 관리",
+        "planMonthly": "월간",
+        "planAnnual": "연간"
+      },
+      "toggle": {
+        "monthly": "월간",
+        "annual": "연간",
+        "save": "{percent}% 절약"
+      },
+      "free": {
+        "title": "Free",
+        "feat1": "월 30회 재작성",
+        "feat2": "3가지 스타일 동시 스트리밍",
+        "feat3": "언어 자동 감지",
+        "feat4": "프라이버시 우선 — 입력은 저장하지 않습니다",
+        "ctaLower": "하위 등급",
+        "ctaCurrent": "현재 등급",
+        "ctaUse": "Free 사용"
+      },
+      "pro": {
+        "title": "Pro",
+        "periodMonthly": "/ 월",
+        "periodYearly": "/ 월 (연간 청구 ${total})",
+        "feat1": "월 2,000회 재작성",
+        "feat2": "3가지 스타일 동시 스트리밍",
+        "feat3": "BYOK = 무제한",
+        "feat4": "우선 지원",
+        "ctaSubscribed": "구독 중",
+        "ctaRedirecting": "이동 중…",
+        "ctaMonthly": "Pro 월간 구독",
+        "ctaAnnual": "Pro 연간 구독"
+      }
     }
   },
   "nav": {

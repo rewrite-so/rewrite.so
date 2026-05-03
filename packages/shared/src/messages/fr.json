@@ -131,6 +131,124 @@
         "heading": "Source et issues",
         "body": "Les rapports de bugs et discussions de fonctionnalités vivent dans GitHub Issues."
       }
+    },
+    "settings": {
+      "h1": "Paramètres",
+      "loading": "Chargement…",
+      "notSignedIn": "Vous n'êtes pas connecté.",
+      "signIn": "Se connecter →",
+      "field": {
+        "email": "Email",
+        "name": "Nom"
+      },
+      "lang": {
+        "target": "Langue de réécriture",
+        "targetHelp": "Les réécritures sont produites dans cette langue. Si votre saisie est dans une autre, elle est traduite.",
+        "ui": "Langue de l'interface",
+        "uiHelp": "Langue du site. Indépendante de la langue de réécriture ci-dessus.",
+        "autoSystem": "Auto (suivre le système)",
+        "autoFromPage": "Détecter la langue de la page"
+      },
+      "sub": {
+        "label": "Abonnement",
+        "statusLabel": "Statut",
+        "freeShort": "Free ({count, number} réécritures / mois)",
+        "upgrade": "Passer à Pro →",
+        "plan": {
+          "monthly": "Pro Mensuel",
+          "annual": "Pro Annuel"
+        },
+        "status": {
+          "active": "Actif",
+          "trialing": "En essai",
+          "paused": "En pause",
+          "canceled": "Résilié (valable jusqu'à la fin de la période)",
+          "pastDue": "Paiement en retard",
+          "expired": "Expiré"
+        },
+        "endsOn": "Se termine le",
+        "nextRenewal": "Prochain renouvellement",
+        "manage": "Gérer l'abonnement / factures",
+        "redirecting": "Redirection…"
+      },
+      "byok": {
+        "title": "BYOK (utiliser sa propre clé API)",
+        "intro": "Branchez votre propre endpoint et clé compatibles OpenAI. Les réécritures partent directement vers votre provider et <strong>ne comptent pas dans le quota de {limit, number} / mois</strong>. Votre clé est stockée chiffrée AES-GCM et jamais écrite dans les logs.",
+        "baseUrl": "Base URL",
+        "model": "Model",
+        "apiKey": "API Key",
+        "edit": "Modifier",
+        "delete": "Supprimer",
+        "deleteConfirm": "Supprimer la configuration BYOK ? Les réécritures repasseront sur l'upstream par défaut et compteront à nouveau dans votre quota mensuel.",
+        "save": "Enregistrer",
+        "saving": "Enregistrement…",
+        "cancel": "Annuler",
+        "saveFailed": "Échec de l'enregistrement"
+      },
+      "signOut": {
+        "btn": "Se déconnecter",
+        "signing": "Déconnexion…"
+      },
+      "quota": {
+        "tier": {
+          "anonymous": "Anonyme (par IP)",
+          "anonymousInstall": "Extension (non connecté)",
+          "free": "Free",
+          "pro": "Pro"
+        },
+        "tierLabel": "Plan",
+        "thisMonth": "Ce mois",
+        "resetsOn": "Réinitialisation",
+        "unlimited": "Illimité",
+        "usedFmt": "{used, number} / {limit, number} (reste {remaining, number})",
+        "resetSuffix": "00:00 UTC"
+      }
+    },
+    "billing": {
+      "h1": "Passer à Pro",
+      "intro": "2 000 réécritures IA par mois. 3 styles en streaming parallèle. BYOK (utilisez votre propre clé API) débloque l'usage illimité.",
+      "loading": "Chargement…",
+      "error": {
+        "networkError": "Erreur réseau",
+        "checkoutFailed": "Impossible de créer le paiement",
+        "portalFailed": "Impossible d'ouvrir le portail",
+        "prefix": "Erreur"
+      },
+      "subscribed": {
+        "line": "Vous êtes en Pro ({plan}). Se termine le : {date}",
+        "willCancel": " (sera résilié à la fin de la période)",
+        "manage": "Gérer l'abonnement",
+        "planMonthly": "Mensuel",
+        "planAnnual": "Annuel"
+      },
+      "toggle": {
+        "monthly": "Mensuel",
+        "annual": "Annuel",
+        "save": "économisez {percent}%"
+      },
+      "free": {
+        "title": "Free",
+        "feat1": "30 réécritures / mois",
+        "feat2": "3 styles en streaming",
+        "feat3": "Détection automatique de la langue",
+        "feat4": "Confidentialité d'abord — les entrées ne sont jamais stockées",
+        "ctaLower": "Plan inférieur",
+        "ctaCurrent": "Plan actuel",
+        "ctaUse": "Utiliser Free"
+      },
+      "pro": {
+        "title": "Pro",
+        "periodMonthly": "/ mois",
+        "periodYearly": "/ mois (facturé annuellement ${total})",
+        "feat1": "2 000 réécritures / mois",
+        "feat2": "3 styles en streaming",
+        "feat3": "BYOK = illimité",
+        "feat4": "Support prioritaire",
+        "ctaSubscribed": "Abonné",
+        "ctaRedirecting": "Redirection…",
+        "ctaMonthly": "S'abonner à Pro Mensuel",
+        "ctaAnnual": "S'abonner à Pro Annuel"
+      }
     }
   },
   "nav": {

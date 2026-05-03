@@ -131,6 +131,124 @@
         "heading": "Source & issues",
         "body": "Bug reports and feature discussions live in GitHub Issues."
       }
+    },
+    "settings": {
+      "h1": "Settings",
+      "loading": "Loading…",
+      "notSignedIn": "You're not signed in.",
+      "signIn": "Sign in →",
+      "field": {
+        "email": "Email",
+        "name": "Name"
+      },
+      "lang": {
+        "target": "Target language",
+        "targetHelp": "Rewrites are produced in this language. If your input is in a different language, it's translated.",
+        "ui": "UI language",
+        "uiHelp": "Interface language. Independent of the rewrite target language above.",
+        "autoSystem": "Auto (use system)",
+        "autoFromPage": "Auto-detect from page"
+      },
+      "sub": {
+        "label": "Subscription",
+        "statusLabel": "Status",
+        "freeShort": "Free ({count, number} rewrites / month)",
+        "upgrade": "Upgrade to Pro →",
+        "plan": {
+          "monthly": "Pro Monthly",
+          "annual": "Pro Annual"
+        },
+        "status": {
+          "active": "Active",
+          "trialing": "Trialing",
+          "paused": "Paused",
+          "canceled": "Canceled (ends at period end)",
+          "pastDue": "Past due",
+          "expired": "Expired"
+        },
+        "endsOn": "Ends on",
+        "nextRenewal": "Next renewal",
+        "manage": "Manage subscription / invoices",
+        "redirecting": "Redirecting…"
+      },
+      "byok": {
+        "title": "BYOK (Bring Your Own Key)",
+        "intro": "Plug in your own OpenAI-compatible endpoint and key. Rewrites go directly to your provider and <strong>don't count against the {limit, number} / month quota</strong>. Your key is stored AES-GCM encrypted and never written to logs.",
+        "baseUrl": "Base URL",
+        "model": "Model",
+        "apiKey": "API Key",
+        "edit": "Edit",
+        "delete": "Delete",
+        "deleteConfirm": "Delete BYOK config? Rewrites will fall back to the default upstream and start counting against your monthly quota again.",
+        "save": "Save",
+        "saving": "Saving…",
+        "cancel": "Cancel",
+        "saveFailed": "Save failed"
+      },
+      "signOut": {
+        "btn": "Sign out",
+        "signing": "Signing out…"
+      },
+      "quota": {
+        "tier": {
+          "anonymous": "Anonymous (per IP)",
+          "anonymousInstall": "Extension (unsigned)",
+          "free": "Free",
+          "pro": "Pro"
+        },
+        "tierLabel": "Tier",
+        "thisMonth": "This month",
+        "resetsOn": "Resets on",
+        "unlimited": "Unlimited",
+        "usedFmt": "{used, number} / {limit, number} ({remaining, number} left)",
+        "resetSuffix": "00:00 UTC"
+      }
+    },
+    "billing": {
+      "h1": "Upgrade to Pro",
+      "intro": "2,000 AI rewrites per month. 3 styles streamed in parallel. BYOK (Bring Your Own Key) unlocks unlimited usage.",
+      "loading": "Loading…",
+      "error": {
+        "networkError": "Network error",
+        "checkoutFailed": "Failed to create checkout",
+        "portalFailed": "Failed to open portal",
+        "prefix": "Error"
+      },
+      "subscribed": {
+        "line": "You're on Pro ({plan}). Period ends: {date}",
+        "willCancel": " (will cancel at period end)",
+        "manage": "Manage subscription",
+        "planMonthly": "Monthly",
+        "planAnnual": "Annual"
+      },
+      "toggle": {
+        "monthly": "Monthly",
+        "annual": "Annual",
+        "save": "save {percent}%"
+      },
+      "free": {
+        "title": "Free",
+        "feat1": "30 rewrites / month",
+        "feat2": "All 3 streaming styles",
+        "feat3": "Auto language detection",
+        "feat4": "Privacy first — inputs never stored",
+        "ctaLower": "Lower tier",
+        "ctaCurrent": "Current tier",
+        "ctaUse": "Use free"
+      },
+      "pro": {
+        "title": "Pro",
+        "periodMonthly": "/ month",
+        "periodYearly": "/ month (billed annually ${total})",
+        "feat1": "2,000 rewrites / month",
+        "feat2": "All 3 streaming styles",
+        "feat3": "BYOK = unlimited",
+        "feat4": "Priority support",
+        "ctaSubscribed": "Subscribed",
+        "ctaRedirecting": "Redirecting…",
+        "ctaMonthly": "Subscribe to Pro Monthly",
+        "ctaAnnual": "Subscribe to Pro Annual"
+      }
     }
   },
   "nav": {
