@@ -52,7 +52,8 @@
     },
     "try": {
       "h1": "Try it",
-      "intro": "Write something in the box below, then double-tap Shift to see 3 style rewrites."
+      "intro": "Write something in the box below, then double-tap Shift to see 3 style rewrites.",
+      "targetLangLabel": "Rewrite into"
     },
     "unsubscribe": {
       "h1": "Unsubscribe",
@@ -65,7 +66,7 @@
     },
     "pricing": {
       "h1": "Pricing",
-      "intro": "One free tier for occasional use. One Pro tier for daily writers. No surprise fees.",
+      "intro": "Free for occasional rewriting. Pro for the writing that matters — non-native messages, customer replies, public posts, words you can't take back. No surprise fees.",
       "free": {
         "title": "Free",
         "period": "forever",
@@ -79,8 +80,8 @@
       },
       "pro": {
         "title": "Pro",
-        "period": "/ month",
-        "subPrice": "or ${yearlyMonthly} / month billed annually (${yearlyTotal} / year, save {savings}%)",
+        "period": "/ mo, billed annually",
+        "subPrice": "${yearlyTotal} / year (save {savings}% vs ${monthly}/mo monthly)",
         "feat1": "{count, number} rewrites / month",
         "feat2": "BYOK: bring your own OpenAI-compatible key for unlimited usage",
         "feat3": "Priority email support",
@@ -138,6 +139,7 @@
     "github": "GitHub",
     "signIn": "Sign in",
     "tryFree": "Try free",
+    "settings": "Settings",
     "languageSwitcher": "Language"
   },
   "footer": {

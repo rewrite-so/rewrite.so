@@ -52,7 +52,8 @@
     },
     "try": {
       "h1": "Testen",
-      "intro": "Schreibe etwas in das Feld unten und drücke Shift doppelt, um 3 Stil-Umschreibungen zu sehen."
+      "intro": "Schreibe etwas in das Feld unten und drücke Shift doppelt, um 3 Stil-Umschreibungen zu sehen.",
+      "targetLangLabel": "Umschreiben in"
     },
     "unsubscribe": {
       "h1": "Abmelden",
@@ -65,7 +66,7 @@
     },
     "pricing": {
       "h1": "Preise",
-      "intro": "Ein kostenloses Kontingent für gelegentliche Nutzung. Ein Pro-Tarif für tägliche Schreiber. Keine versteckten Kosten.",
+      "intro": "Kostenlos für gelegentliches Umschreiben. Pro für das Schreiben, das zählt — Nachrichten in einer Fremdsprache, Kundenantworten, öffentliche Posts, Worte, die du nicht zurücknehmen kannst. Keine versteckten Kosten.",
       "free": {
         "title": "Free",
         "period": "für immer",
@@ -79,8 +80,8 @@
       },
       "pro": {
         "title": "Pro",
-        "period": "/ Monat",
-        "subPrice": "oder ${yearlyMonthly} / Monat jährlich abgerechnet (${yearlyTotal} / Jahr, spare {savings}%)",
+        "period": "/ Monat (jährlich abgerechnet)",
+        "subPrice": "${yearlyTotal} / Jahr (spare {savings}% vs ${monthly}/Mon. monatlich)",
         "feat1": "{count, number} Umschreibungen / Monat",
         "feat2": "BYOK: bring deinen eigenen OpenAI-kompatiblen Schlüssel für unbegrenzte Nutzung",
         "feat3": "Priorisierter E-Mail-Support",
@@ -138,6 +139,7 @@
     "github": "GitHub",
     "signIn": "Anmelden",
     "tryFree": "Kostenlos testen",
+    "settings": "Mein Konto",
     "languageSwitcher": "Sprache"
   },
   "footer": {

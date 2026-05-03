@@ -52,7 +52,8 @@
     },
     "try": {
       "h1": "试用",
-      "intro": "在下面输入框写点什么，然后双击 Shift 看 3 种风格改写。"
+      "intro": "在下面输入框写点什么，然后双击 Shift 看 3 种风格改写。",
+      "targetLangLabel": "改写为"
     },
     "unsubscribe": {
       "h1": "退订",
@@ -65,7 +66,7 @@
     },
     "pricing": {
       "h1": "定价",
-      "intro": "一个免费档供偶尔用；一个 Pro 档供每天写作的人。没有意外收费。",
+      "intro": "免费档供偶尔用。Pro 档供真正在意的写作——非母语沟通、客户回信、公开发言、说出去就收不回的话。没有意外收费。",
       "free": {
         "title": "Free",
         "period": "永久",
@@ -79,8 +80,8 @@
       },
       "pro": {
         "title": "Pro",
-        "period": "/ 月",
-        "subPrice": "或年付 ${yearlyMonthly}/月（${yearlyTotal}/年，省 {savings}%）",
+        "period": "/ 月（年付）",
+        "subPrice": "年付总价 ${yearlyTotal}（vs 月付 ${monthly}/月，省 {savings}%）",
         "feat1": "每月 {count, number} 次改写",
         "feat2": "BYOK：填自己的 OpenAI 兼容 key，无限改写",
         "feat3": "优先邮件支持",
@@ -138,6 +139,7 @@
     "github": "GitHub",
     "signIn": "登录",
     "tryFree": "免费试用",
+    "settings": "我的",
     "languageSwitcher": "语言"
   },
   "footer": {

@@ -52,7 +52,8 @@
     },
     "try": {
       "h1": "Essayer",
-      "intro": "Écrivez quelque chose dans la boîte ci-dessous, puis double-tapez Shift pour voir 3 réécritures de style."
+      "intro": "Écrivez quelque chose dans la boîte ci-dessous, puis double-tapez Shift pour voir 3 réécritures de style.",
+      "targetLangLabel": "Réécrire en"
     },
     "unsubscribe": {
       "h1": "Désabonnement",
@@ -65,7 +66,7 @@
     },
     "pricing": {
       "h1": "Tarifs",
-      "intro": "Un palier gratuit pour un usage occasionnel. Un palier Pro pour les rédacteurs quotidiens. Pas de frais cachés.",
+      "intro": "Gratuit pour une réécriture occasionnelle. Pro pour l'écriture qui compte — messages dans une autre langue, réponses clients, publications publiques, mots qu'on ne peut pas retirer. Pas de frais cachés.",
       "free": {
         "title": "Free",
         "period": "pour toujours",
@@ -79,8 +80,8 @@
       },
       "pro": {
         "title": "Pro",
-        "period": "/ mois",
-        "subPrice": "ou ${yearlyMonthly} / mois facturé annuellement (${yearlyTotal} / an, économisez {savings}%)",
+        "period": "/ mois (facturation annuelle)",
+        "subPrice": "${yearlyTotal} / an (économisez {savings}% vs ${monthly}/mois mensuel)",
         "feat1": "{count, number} réécritures / mois",
         "feat2": "BYOK : apportez votre propre clé compatible OpenAI pour un usage illimité",
         "feat3": "Support email prioritaire",
@@ -138,6 +139,7 @@
     "github": "GitHub",
     "signIn": "Se connecter",
     "tryFree": "Essai gratuit",
+    "settings": "Mon compte",
     "languageSwitcher": "Langue"
   },
   "footer": {

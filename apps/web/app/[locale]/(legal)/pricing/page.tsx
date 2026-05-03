@@ -49,11 +49,13 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
         <PricingCard
           title={t('pro.title')}
           highlight
-          price={`$${PRO_PRICE.monthly}`}
+          /* 主推年付：主价格显示 yearlyMonthly($7.99)，period 标"/ mo, billed annually"；
+             月付选项作为 subPrice 一行小字。整个价格点的视觉重心倒过来了。 */
+          price={`$${PRO_PRICE.yearlyMonthly}`}
           period={t('pro.period')}
           subPrice={t('pro.subPrice', {
-            yearlyMonthly: PRO_PRICE.yearlyMonthly,
             yearlyTotal: PRO_PRICE.yearlyTotal,
+            monthly: PRO_PRICE.monthly,
             savings: PRO_PRICE.yearlySavingsPercent,
           })}
           features={[
@@ -142,6 +144,8 @@ function PricingCard({
       <Link
         href={cta.href}
         style={{
+          // boxSizing: border-box 让 width:100% + padding 不溢出卡片
+          boxSizing: 'border-box',
           width: '100%',
           padding: '10px 14px',
           background: highlight ? '#111' : '#f4f4f5',

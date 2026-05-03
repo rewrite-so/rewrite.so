@@ -1,4 +1,5 @@
-import { useTranslations } from 'next-intl';
+import { cookies } from 'next/headers';
+import { getTranslations } from 'next-intl/server';
 import { Link } from '../i18n/navigation.ts';
 import { LanguageSwitcher } from './LanguageSwitcher.tsx';
 
@@ -19,8 +20,44 @@ const NAV_LINK_PRIMARY = {
   fontWeight: 500,
 };
 
-export function TopNav() {
-  const t = useTranslations('nav');
+interface MeUser {
+  id: string;
+  email: string;
+  name?: string | null;
+}
+
+/**
+ * SSR 读 session：从 web 入站 cookie 转发到 api 的 /v1/me。
+ *
+ * - dev: web localhost:3000 → api localhost:8787，cookie 同 host 透传
+ * - prod: web rewrite.so → api api.rewrite.so，session cookie domain `.rewrite.so` 共享
+ *
+ * cache: 'no-store' 必填——session 不能被静态化。
+ * 失败时（cookie 不全 / 网络 / api 5xx）返 null，UI 退到匿名态——绝不阻塞渲染。
+ */
+async function getCurrentUser(): Promise<MeUser | null> {
+  try {
+    const cookieStore = await cookies();
+    const cookieHeader = cookieStore.toString();
+    if (!cookieHeader) return null;
+    const apiBase = process.env.API_BASE_URL ?? 'http://localhost:8787';
+    const res = await fetch(`${apiBase}/v1/me`, {
+      headers: { cookie: cookieHeader },
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as { user?: MeUser | null };
+    return data.user ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function TopNav() {
+  const t = await getTranslations('nav');
+  const user = await getCurrentUser();
+  const isAuthed = user !== null;
+
   return (
     <nav
       style={{
@@ -88,14 +125,22 @@ export function TopNav() {
           </a>
         </div>
 
-        {/* Right: language switcher + CTAs */}
+        {/* Right: language switcher + CTAs（按登录态分支） */}
         <LanguageSwitcher />
-        <Link href="/login" style={{ ...NAV_LINK, marginLeft: 4 }}>
-          {t('signIn')}
-        </Link>
-        <Link href="/try" style={{ ...NAV_LINK_PRIMARY, marginLeft: 8 }}>
-          {t('tryFree')}
-        </Link>
+        {isAuthed ? (
+          <Link href="/settings" style={{ ...NAV_LINK_PRIMARY, marginLeft: 8 }}>
+            {t('settings')}
+          </Link>
+        ) : (
+          <>
+            <Link href="/login" style={{ ...NAV_LINK, marginLeft: 4 }}>
+              {t('signIn')}
+            </Link>
+            <Link href="/try" style={{ ...NAV_LINK_PRIMARY, marginLeft: 8 }}>
+              {t('tryFree')}
+            </Link>
+          </>
+        )}
       </div>
     </nav>
   );

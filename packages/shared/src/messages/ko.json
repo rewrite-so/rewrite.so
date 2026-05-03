@@ -52,7 +52,8 @@
     },
     "try": {
       "h1": "체험",
-      "intro": "아래 상자에 무언가 입력하고, Shift를 두 번 눌러 3가지 스타일의 재작성을 확인하세요."
+      "intro": "아래 상자에 무언가 입력하고, Shift를 두 번 눌러 3가지 스타일의 재작성을 확인하세요.",
+      "targetLangLabel": "재작성 언어"
     },
     "unsubscribe": {
       "h1": "구독 취소",
@@ -65,7 +66,7 @@
     },
     "pricing": {
       "h1": "요금",
-      "intro": "가끔 사용하는 분을 위한 무료 등급, 매일 글을 쓰는 분을 위한 Pro 등급. 숨겨진 비용 없음.",
+      "intro": "가끔 쓰는 분께는 무료 등급. Pro는 정말 중요한 글쓰기를 위해 — 모국어가 아닌 메시지, 고객 회신, 공개 게시물, 되돌릴 수 없는 한마디. 숨겨진 비용 없음.",
       "free": {
         "title": "Free",
         "period": "영구",
@@ -79,8 +80,8 @@
       },
       "pro": {
         "title": "Pro",
-        "period": "/ 월",
-        "subPrice": "또는 연간 청구 시 월 ${yearlyMonthly} (연 ${yearlyTotal}, {savings}% 절약)",
+        "period": "/ 월 (연간 청구)",
+        "subPrice": "연 ${yearlyTotal} (월 ${monthly}/월 대비 {savings}% 절약)",
         "feat1": "월 {count, number}회 재작성",
         "feat2": "BYOK: 자신의 OpenAI 호환 키로 무제한 사용",
         "feat3": "우선 이메일 지원",
@@ -138,6 +139,7 @@
     "github": "GitHub",
     "signIn": "로그인",
     "tryFree": "무료 체험",
+    "settings": "내 계정",
     "languageSwitcher": "언어"
   },
   "footer": {

@@ -1,7 +1,7 @@
 'use client';
 
 import { createWebApiClient, mount } from '@rewrite/core';
-import type { Locale } from '@rewrite/shared';
+import { LOCALES, type Locale } from '@rewrite/shared';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 
@@ -9,11 +9,33 @@ import { useEffect, useRef, useState } from 'react';
 // 这样 better-auth session cookie 是 web origin 的，不需跨域
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? '';
 
+const TARGET_LANG_STORAGE = 'rewrite-so-try-target-lang-v1';
+
+const LANG_LABELS: Record<Locale, string> = {
+  en: 'English',
+  'zh-CN': '中文（简体）',
+  ja: '日本語',
+  ko: '한국어',
+  es: 'Español',
+  fr: 'Français',
+  de: 'Deutsch',
+};
+
 export function TryClient() {
   const locale = useLocale() as Locale;
   const t = useTranslations();
   const taRef = useRef<HTMLTextAreaElement | null>(null);
   const [hintVisible, setHintVisible] = useState(false);
+  // 试用页**始终默认英语**作为目标——不用 auto。
+  // 用户切换的偏好持久到 localStorage（仅影响 /try，不影响登录用户的 settings）。
+  const [targetLang, setTargetLang] = useState<Locale>('en');
+
+  useEffect(() => {
+    const stored = window.localStorage.getItem(TARGET_LANG_STORAGE);
+    if (stored && (LOCALES as readonly string[]).includes(stored)) {
+      setTargetLang(stored as Locale);
+    }
+  }, []);
 
   useEffect(() => {
     const apiClient = createWebApiClient({ apiBase: API_BASE });
@@ -22,6 +44,7 @@ export function TryClient() {
       apiClient,
       shadowMode: 'open',
       uiLocale: locale,
+      userPrefLang: targetLang,
       showInstallHook: true,
       loginUrl: '/login',
       onInstallClick: () => {
@@ -33,7 +56,7 @@ export function TryClient() {
       },
     });
     return () => handle.unmount();
-  }, [locale]);
+  }, [locale, targetLang]);
 
   useEffect(() => {
     // 首次访问 hint 兜底（输入框聚焦后显示，触发过一次后消失）
@@ -64,8 +87,46 @@ export function TryClient() {
     };
   }, []);
 
+  function onTargetLangChange(value: Locale) {
+    setTargetLang(value);
+    window.localStorage.setItem(TARGET_LANG_STORAGE, value);
+  }
+
   return (
     <div style={{ position: 'relative' }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          marginBottom: 12,
+          fontSize: 13,
+          color: '#555',
+        }}
+      >
+        <label htmlFor="try-target-lang" style={{ fontWeight: 500 }}>
+          {t('page.try.targetLangLabel')}
+        </label>
+        <select
+          id="try-target-lang"
+          value={targetLang}
+          onChange={(e) => onTargetLangChange(e.currentTarget.value as Locale)}
+          style={{
+            padding: '6px 10px',
+            fontSize: 13,
+            border: '1px solid #d4d4d8',
+            borderRadius: 6,
+            background: '#fff',
+            fontFamily: 'inherit',
+          }}
+        >
+          {LOCALES.map((l) => (
+            <option key={l} value={l}>
+              {LANG_LABELS[l]}
+            </option>
+          ))}
+        </select>
+      </div>
       <textarea
         ref={taRef}
         defaultValue="hi, can u tell me when is the meeting tmr? i need to prep some slide before that"

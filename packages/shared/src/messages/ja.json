@@ -52,7 +52,8 @@
     },
     "try": {
       "h1": "試す",
-      "intro": "下のボックスに何か書いて、Shift をダブルタップで 3 スタイルの書き換えを見てください。"
+      "intro": "下のボックスに何か書いて、Shift をダブルタップで 3 スタイルの書き換えを見てください。",
+      "targetLangLabel": "書き換え先"
     },
     "unsubscribe": {
       "h1": "配信停止",
@@ -65,7 +66,7 @@
     },
     "pricing": {
       "h1": "料金",
-      "intro": "ライトユーザー向けに無料プラン、毎日書く人向けに Pro プラン。隠れた手数料なし。",
+      "intro": "たまに使う方には無料プラン。Pro は本当に大事な書き物のため —— 母語以外でのやり取り、顧客への返信、公開投稿、取り返せない一言。隠れた手数料なし。",
       "free": {
         "title": "Free",
         "period": "ずっと",
@@ -79,8 +80,8 @@
       },
       "pro": {
         "title": "Pro",
-        "period": "/ 月",
-        "subPrice": "または年額 ${yearlyMonthly}/月（${yearlyTotal}/年、{savings}% 節約）",
+        "period": "/ 月（年払い）",
+        "subPrice": "年額 ${yearlyTotal}（月払い ${monthly}/月 と比べて {savings}% 節約）",
         "feat1": "月 {count, number} 回の書き換え",
         "feat2": "BYOK: 自分の OpenAI 互換キーで無制限",
         "feat3": "優先メールサポート",
@@ -138,6 +139,7 @@
     "github": "GitHub",
     "signIn": "ログイン",
     "tryFree": "無料で試す",
+    "settings": "マイページ",
     "languageSwitcher": "言語"
   },
   "footer": {

@@ -52,7 +52,8 @@
     },
     "try": {
       "h1": "Probar",
-      "intro": "Escribe algo en la caja de abajo y pulsa Shift dos veces para ver 3 reescrituras de estilo."
+      "intro": "Escribe algo en la caja de abajo y pulsa Shift dos veces para ver 3 reescrituras de estilo.",
+      "targetLangLabel": "Reescribir en"
     },
     "unsubscribe": {
       "h1": "Darse de baja",
@@ -65,7 +66,7 @@
     },
     "pricing": {
       "h1": "Precios",
-      "intro": "Un plan gratuito para uso ocasional. Un plan Pro para escritores diarios. Sin tarifas sorpresa.",
+      "intro": "Gratis para reescritura ocasional. Pro para la escritura que importa — mensajes en otro idioma, respuestas a clientes, publicaciones públicas, palabras que no puedes retirar. Sin tarifas sorpresa.",
       "free": {
         "title": "Free",
         "period": "para siempre",
@@ -79,8 +80,8 @@
       },
       "pro": {
         "title": "Pro",
-        "period": "/ mes",
-        "subPrice": "o ${yearlyMonthly} / mes facturado anualmente (${yearlyTotal} / año, ahorra {savings}%)",
+        "period": "/ mes (facturación anual)",
+        "subPrice": "${yearlyTotal} / año (ahorra {savings}% vs ${monthly}/mes mensual)",
         "feat1": "{count, number} reescrituras / mes",
         "feat2": "BYOK: trae tu propia clave compatible con OpenAI para uso ilimitado",
         "feat3": "Soporte por email prioritario",
@@ -138,6 +139,7 @@
     "github": "GitHub",
     "signIn": "Iniciar sesión",
     "tryFree": "Probar gratis",
+    "settings": "Mi cuenta",
     "languageSwitcher": "Idioma"
   },
   "footer": {
