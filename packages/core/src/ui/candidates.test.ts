@@ -267,6 +267,60 @@ describe('createCandidates', () => {
     expect(chip?.textContent).toBe('auto');
   });
 
+  it('setLangDetected updates chip text after server meta event', () => {
+    const { factory, target, root } = setup();
+    // 初始 'auto'（客户端预测） → 服务端 meta 解析为具体语言
+    const handle = factory.open({ target, locale: 'en', targetLang: 'auto' });
+    const chip = root.querySelector('.target-chip');
+    expect(chip?.textContent).toBe('auto');
+    handle.setLangDetected('ja');
+    expect(chip?.textContent).toBe('JA');
+  });
+
+  it('setLangDetected with long custom value sets title attribute', () => {
+    const { factory, target, root } = setup();
+    const handle = factory.open({ target, locale: 'en', targetLang: 'en' });
+    handle.setLangDetected('Portuguese (Brazilian)');
+    const chip = root.querySelector('.target-chip') as HTMLElement;
+    expect(chip.textContent).toBe('Portuguese …'); // 11 chars + …
+    expect(chip.title).toBe('Portuguese (Brazilian)');
+  });
+
+  it('setLangDetected with short code removes stale title', () => {
+    const { factory, target, root } = setup();
+    // 初始长 custom（带 title） → 服务端覆盖成短码 → title 应被清除
+    const handle = factory.open({
+      target,
+      locale: 'en',
+      targetLang: 'Portuguese (Brazilian)',
+    });
+    const chip = root.querySelector('.target-chip') as HTMLElement;
+    expect(chip.title).toBe('Portuguese (Brazilian)');
+    handle.setLangDetected('en');
+    expect(chip.textContent).toBe('EN');
+    expect(chip.hasAttribute('title')).toBe(false);
+  });
+
+  it('setLangDetected after close is noop', () => {
+    const { factory, target, root } = setup();
+    const handle = factory.open({ target, locale: 'en', targetLang: 'en' });
+    handle.close();
+    // close 后调用不应抛错
+    expect(() => handle.setLangDetected('ja')).not.toThrow();
+    // panel 已被移除，没有 chip 可断言；只验证函数 silent
+    expect(root.querySelector('.target-chip')).toBeNull();
+  });
+
+  it('setLangDetected ignores empty / undefined target', () => {
+    const { factory, target, root } = setup();
+    const handle = factory.open({ target, locale: 'en', targetLang: 'en' });
+    const chip = root.querySelector('.target-chip');
+    expect(chip?.textContent).toBe('EN');
+    handle.setLangDetected('');
+    // 空字符串不更新 chip
+    expect(chip?.textContent).toBe('EN');
+  });
+
   it('settings button click invokes onOpenSettings', () => {
     const { factory, target, root, onOpenSettings } = setup();
     factory.open({ target, locale: 'en', targetLang: 'en' });
