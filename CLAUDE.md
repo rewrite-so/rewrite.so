@@ -103,10 +103,21 @@
   没这步的话匿名用 5/5 → 注册 → 拿到全新 30/30，是绕匿名档的滥用通道。
 - **扩展 prefs 跨端同步策略**：`patchUserPrefs(targetLang/uiLocale)` 写 chrome.storage
   同时 fail-soft `void patchCloudPrefs(...)` PATCH `/v1/me/settings`（通过 background
-  SW 代理避开 content script CORS）。inject.ts bootstrap 和 options App.tsx 启动
-  都会先 `fetchCloudPrefs()` 拉云端覆盖本地 cache。已登录用户：web ↔ 扩展双向同步；
-  未登录：401 静默忽略，仅本地有效。**不要在扩展 chrome.storage 里加敏感字段**——
-  storage 镜像逻辑只针对 `targetLang` / `uiLocale` 子集。
+  SW 代理避开 content script CORS）。inject.ts bootstrap 启动会 `fetchCloudPrefs()`
+  prime 浮窗 UI 显示用 cache。匿名：401 静默忽略，仅本地有效。
+  **不要在扩展 chrome.storage 里加敏感字段**——storage 镜像逻辑只针对
+  `targetLang` / `uiLocale` 子集。
+- **扩展 options 是 auth-aware split**（避免 web ↔ extension 显示不一致）：
+  - 登录用户的 options 仅展示 triggerEnabled + "在 rewrite.so 管理偏好 →" 链接，
+    **不渲染** targetLang/uiLocale 编辑控件——chrome.storage 副本仍存在（SSE meta
+    实时同步给 inject.ts），但用户看不到副本即"看不到不一致"。
+  - 匿名用户的 options 保留完整本地表单（`targetLang`/`uiLocale`/`triggerEnabled`/
+    BYOK 占位）。
+  - 登录态探测：options App.tsx 启动时 `fetchMe()` via SW → GET `/v1/me`。
+  - **不要把 LoggedInSettings 重新加回 targetLang/uiLocale 控件** —— 那是回到不一致
+    问题的根源；要想跨设备同步给"未做 rewrite"的用户看，唯一正解仍然是 web /settings。
+  - 反向 SSE meta `userTargetLang` 同步路径（`onUserPrefsSync`）保留并仍是
+    inject.ts 浮窗 UI 显示正确语言的关键。
 - **实时反向同步 = SSE meta.status.userTargetLang**：服务端 `/v1/rewrite` 在 status
   里带 user_settings.target_lang 原始值（含 'auto'）。扩展 inject.ts 通过 mount() 的
   `onUserPrefsSync` callback 写回 chrome.storage（仅当与 cache 不同；避免无限循环）。

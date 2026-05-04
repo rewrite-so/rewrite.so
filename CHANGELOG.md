@@ -14,6 +14,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `tier='anonymous_install'` + `limit=5`，已登录用户在 popup 看到错误的 5/5。
   改走 background SW 代理（与 `/v1/me/settings`、`claim-install` 同模式，host_permissions
   上下文能正确带 cookie）。SW 加 `me-usage:get` handler。
+- **扩展 options 与 web /settings targetLang 显示不一致**：之前 options 启动会
+  `fetchCloudPrefs()` + `patchUserPrefs()` 双向同步——但 mount 后 web 端再改
+  无任何监听器；从 options 视角看就是"web=en，extension=auto"。改造为
+  **auth-aware split**：登录用户的 options 仅展示 triggerEnabled + "在 rewrite.so
+  管理偏好 →" 跳转，**不再展示 targetLang/uiLocale 本地副本**——chrome.storage
+  仍由 SSE meta `userTargetLang` 实时反向同步给 inject.ts 使用，但用户看不到
+  副本即"看不到不一致"。匿名用户保留完整本地表单（`targetLang`/`uiLocale`/
+  `triggerEnabled`/BYOK 占位）。SW 加 `me:get` handler；新增
+  `apps/extension/src/lib/me.ts` + `LoggedInSettings.tsx`。i18n: `ext.options.loggedIn.*`
+  6 keys × 7 locale。387 keys（之前 381）。
 
 ### Changed
 - **/try 完成改写后转化 nudge**（来自战略 review 的 WS1 — 当前最大转化断点）：

@@ -514,6 +514,14 @@
       },
       "langOption": {
         "auto": "Auto-detect from page"
+      },
+      "loggedIn": {
+        "title": "Account",
+        "signedInAs": "Signed in as {email}",
+        "tierFree": "Free plan",
+        "tierPro": "Pro plan",
+        "hint": "Your target language and UI language are managed in your account on the web. Changes there sync to this extension automatically.",
+        "manage": "Manage on rewrite.so →"
       }
     },
     "onboarding": {

@@ -514,6 +514,14 @@
       },
       "langOption": {
         "auto": "ページから自動検出"
+      },
+      "loggedIn": {
+        "title": "アカウント",
+        "signedInAs": "ログイン中：{email}",
+        "tierFree": "Free プラン",
+        "tierPro": "Pro プラン",
+        "hint": "書き換え先の言語と UI 言語は web 側のアカウントで管理します。変更は自動的に拡張機能に同期されます。",
+        "manage": "rewrite.so で管理 →"
       }
     },
     "onboarding": {

@@ -514,6 +514,14 @@
       },
       "langOption": {
         "auto": "Auto-détection depuis la page"
+      },
+      "loggedIn": {
+        "title": "Compte",
+        "signedInAs": "Connecté en tant que {email}",
+        "tierFree": "Forfait Free",
+        "tierPro": "Forfait Pro",
+        "hint": "La langue cible et la langue de l'interface sont gérées dans votre compte sur le web. Les modifications sont synchronisées automatiquement avec cette extension.",
+        "manage": "Gérer sur rewrite.so →"
       }
     },
     "onboarding": {

@@ -514,6 +514,14 @@
       },
       "langOption": {
         "auto": "自动检测页面语言"
+      },
+      "loggedIn": {
+        "title": "账号",
+        "signedInAs": "已登录：{email}",
+        "tierFree": "Free 套餐",
+        "tierPro": "Pro 套餐",
+        "hint": "改写目标语言和界面语言在 web 端账号中管理；那里的修改会自动同步到扩展。",
+        "manage": "前往 rewrite.so 管理 →"
       }
     },
     "onboarding": {

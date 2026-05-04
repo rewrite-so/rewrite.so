@@ -514,6 +514,14 @@
       },
       "langOption": {
         "auto": "페이지에서 자동 감지"
+      },
+      "loggedIn": {
+        "title": "계정",
+        "signedInAs": "로그인됨: {email}",
+        "tierFree": "Free 요금제",
+        "tierPro": "Pro 요금제",
+        "hint": "재작성 대상 언어와 UI 언어는 웹 계정에서 관리합니다. 변경 사항은 확장 프로그램에 자동으로 동기화됩니다.",
+        "manage": "rewrite.so 에서 관리 →"
       }
     },
     "onboarding": {

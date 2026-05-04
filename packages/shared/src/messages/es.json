@@ -514,6 +514,14 @@
       },
       "langOption": {
         "auto": "Auto-detectar desde la página"
+      },
+      "loggedIn": {
+        "title": "Cuenta",
+        "signedInAs": "Sesión iniciada como {email}",
+        "tierFree": "Plan Free",
+        "tierPro": "Plan Pro",
+        "hint": "El idioma de destino y el idioma de la interfaz se gestionan en tu cuenta en la web. Los cambios se sincronizan automáticamente con esta extensión.",
+        "manage": "Gestionar en rewrite.so →"
       }
     },
     "onboarding": {

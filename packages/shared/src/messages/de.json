@@ -514,6 +514,14 @@
       },
       "langOption": {
         "auto": "Automatisch von Seite erkennen"
+      },
+      "loggedIn": {
+        "title": "Konto",
+        "signedInAs": "Angemeldet als {email}",
+        "tierFree": "Free-Plan",
+        "tierPro": "Pro-Plan",
+        "hint": "Zielsprache und UI-Sprache werden in deinem Konto im Web verwaltet. Änderungen werden automatisch mit dieser Erweiterung synchronisiert.",
+        "manage": "Auf rewrite.so verwalten →"
       }
     },
     "onboarding": {
