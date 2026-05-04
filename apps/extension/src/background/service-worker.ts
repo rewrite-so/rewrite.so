@@ -67,7 +67,15 @@ chrome.runtime.onMessage.addListener((rawMsg: unknown, _sender, sendResponse) =>
           sendResponse({ ok: false, error: `http_${res.status}` });
           return;
         }
-        const data = await res.json();
+        const data = (await res.json()) as {
+          user: {
+            id: string;
+            email: string;
+            name: string | null;
+            image: string | null;
+          } | null;
+          tier?: 'free' | 'pro';
+        };
         sendResponse({ ok: true, data });
       })
       .catch((err) => sendResponse({ ok: false, error: (err as Error).message }));
@@ -86,7 +94,13 @@ chrome.runtime.onMessage.addListener((rawMsg: unknown, _sender, sendResponse) =>
           sendResponse({ ok: false, error: `http_${res.status}` });
           return;
         }
-        const data = await res.json();
+        const data = (await res.json()) as {
+          used: number;
+          limit: number;
+          remaining: number;
+          resetAt: string;
+          tier: 'anonymous' | 'anonymous_install' | 'free' | 'pro';
+        };
         sendResponse({ ok: true, data });
       })
       .catch((err) => sendResponse({ ok: false, error: (err as Error).message }));

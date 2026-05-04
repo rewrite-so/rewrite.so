@@ -1,12 +1,11 @@
 import type { ComponentChildren } from 'preact';
 import { WEB_BASE } from '../lib/config.ts';
 import { useT } from '../lib/i18n.ts';
-import type { MeUser } from '../lib/me.ts';
 import type { UserPrefs } from '../lib/storage.ts';
 
 interface Props {
   prefs: UserPrefs;
-  user: MeUser;
+  userEmail: string;
   tier: 'free' | 'pro';
   onUpdate: (patch: Partial<UserPrefs>) => void;
 }
@@ -20,7 +19,7 @@ interface Props {
  * 让 web 成为唯一真相源避免"看起来不一致"。chrome.storage 的 targetLang 仍由
  * SSE meta.userTargetLang 在每次 rewrite 时反向同步，但用户看不到副本 ≠ 没有副本。
  */
-export function LoggedInSettings({ prefs, user, tier, onUpdate }: Props) {
+export function LoggedInSettings({ prefs, userEmail, tier, onUpdate }: Props) {
   const t = useT();
   return (
     <main style={pageStyle}>
@@ -32,7 +31,7 @@ export function LoggedInSettings({ prefs, user, tier, onUpdate }: Props) {
 
         <Section title={t('ext.options.loggedIn.title')}>
           <p style={{ margin: '0 0 4px', fontSize: 13, color: '#111' }}>
-            {t('ext.options.loggedIn.signedInAs').replace('{email}', user.email)}
+            {t('ext.options.loggedIn.signedInAs').replace('{email}', userEmail)}
           </p>
           <p style={{ margin: '0 0 12px', fontSize: 12, color: '#888' }}>
             {tier === 'pro'
@@ -40,7 +39,12 @@ export function LoggedInSettings({ prefs, user, tier, onUpdate }: Props) {
               : t('ext.options.loggedIn.tierFree')}
           </p>
           <p style={hintStyle}>{t('ext.options.loggedIn.hint')}</p>
-          <a href={`${WEB_BASE}/settings`} target="_blank" rel="noopener" style={linkBtnStyle}>
+          <a
+            href={`${WEB_BASE}/settings`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={linkBtnStyle}
+          >
             {t('ext.options.loggedIn.manage')}
           </a>
         </Section>

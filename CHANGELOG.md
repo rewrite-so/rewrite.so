@@ -24,6 +24,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `triggerEnabled`/BYOK 占位）。SW 加 `me:get` handler；新增
   `apps/extension/src/lib/me.ts` + `LoggedInSettings.tsx`。i18n: `ext.options.loggedIn.*`
   6 keys × 7 locale。387 keys（之前 381）。
+- **Onboarding 对已登录用户跳过 step 2（语言选择）**：随 auth-aware split CR follow-up。
+  登录用户在 onboarding 选 targetLang 写本地后，会立刻被 inject.ts bootstrap
+  `fetchCloudPrefs()` 或第一次 rewrite 的 SSE meta 反向覆盖——选择"被吃掉"。
+  现 step 1 触发后 setStep 直接跳 step 3（tips），Stepper 渲染 2 段而不是 3 段；
+  done 按钮的 `onComplete` 不带 targetLang。匿名流程不变。
+- 类型/打磨：
+  - `MeUser.name` / `image` 改为 `string | null`，匹配 better-auth magic-link 用户
+    无 OAuth displayName/avatar 的实际返回
+  - SW `me:get` / `me-usage:get` handler 加返回类型 cast，与 `me-settings:get`
+    / `claim-install` 现有模式一致
+  - `LoggedInSettings` 接 `userEmail: string` 替代完整 `MeUser`（接口最小化）
+  - `<a target="_blank">` 加 `rel="noopener noreferrer"`
+  - `patchCloudPrefs` 加 jsdoc 标"现仅匿名路径触发，保留待未来快捷入口复用"
+  - CLAUDE.md 收紧"扩展 prefs 跨端同步策略"条目：明确 inject.ts bootstrap +
+    SSE meta 是登录用户的两条同步路径，options 不再做主动 pull
 
 ### Changed
 - **/try 完成改写后转化 nudge**（来自战略 review 的 WS1 — 当前最大转化断点）：

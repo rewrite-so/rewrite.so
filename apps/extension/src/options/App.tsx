@@ -25,6 +25,7 @@ export function App() {
   if (!prefs.hasCompletedOnboarding) {
     return (
       <Onboarding
+        authed={me.user != null}
         onComplete={async (patch) => {
           const next = await patchUserPrefs({ ...patch, hasCompletedOnboarding: true });
           setPrefs(next);
@@ -37,7 +38,7 @@ export function App() {
     return (
       <LoggedInSettings
         prefs={prefs}
-        user={me.user}
+        userEmail={me.user.email}
         tier={me.tier ?? 'free'}
         onUpdate={async (patch) => {
           const next = await patchUserPrefs(patch);

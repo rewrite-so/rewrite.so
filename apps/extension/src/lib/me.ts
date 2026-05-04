@@ -7,8 +7,9 @@
 export interface MeUser {
   id: string;
   email: string;
-  name?: string;
-  image?: string;
+  // better-auth: magic-link 用户 name/image 为 null（仅 OAuth 走 displayName / avatar）
+  name?: string | null;
+  image?: string | null;
 }
 
 export interface MeResponse {

@@ -8,9 +8,14 @@ type Step = 1 | 2 | 3;
 
 interface Props {
   onComplete: (patch: Partial<UserPrefs>) => void;
+  /**
+   * 已登录：跳过 step 2（语言选择）—— 偏好在 web /settings 管理，本地选只会被
+   * inject.ts bootstrap 的 fetchCloudPrefs() 或 SSE meta.userTargetLang 反向覆盖。
+   */
+  authed: boolean;
 }
 
-export function Onboarding({ onComplete }: Props) {
+export function Onboarding({ onComplete, authed }: Props) {
   const t = useT();
   const [step, setStep] = useState<Step>(1);
   const [targetLang, setTargetLang] = useState('auto');
@@ -38,18 +43,18 @@ export function Onboarding({ onComplete }: Props) {
     const handle = attachDoubleShift(window, {
       onTrigger: () => {
         setTriggered(true);
-        setTimeout(() => setStep(2), 600);
+        setTimeout(() => setStep(authed ? 3 : 2), 600);
       },
     });
     return () => handle.detach();
-  }, [step]);
+  }, [step, authed]);
 
   return (
     <main style={pageStyle}>
       <div style={shellStyle}>
         <header style={{ marginBottom: 24 }}>
           <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700 }}>{t('ext.onboarding.header')}</h1>
-          <Stepper current={step} />
+          <Stepper current={step} authed={authed} />
         </header>
 
         {step === 1 && (
@@ -117,7 +122,7 @@ export function Onboarding({ onComplete }: Props) {
             <button
               type="button"
               style={primaryBtnStyle}
-              onClick={() => onComplete({ targetLang })}
+              onClick={() => onComplete(authed ? {} : { targetLang })}
             >
               {t('ext.onboarding.step3.done')}
             </button>
@@ -128,17 +133,21 @@ export function Onboarding({ onComplete }: Props) {
   );
 }
 
-function Stepper({ current }: { current: Step }) {
+function Stepper({ current, authed }: { current: Step; authed: boolean }) {
+  // 已登录跳过 step 2（语言选择），整体只 2 段；step 1 = 段 1，step 3 = 段 2
+  const total = authed ? 2 : 3;
+  const visualCurrent = authed && current === 3 ? 2 : current;
+  const segments = Array.from({ length: total }, (_, i) => i + 1);
   return (
     <div style={{ marginTop: 12, display: 'flex', gap: 4 }}>
-      {[1, 2, 3].map((n) => (
+      {segments.map((n) => (
         <div
           key={n}
           style={{
             flex: 1,
             height: 3,
             borderRadius: 2,
-            background: n <= current ? '#111' : '#e4e4e7',
+            background: n <= visualCurrent ? '#111' : '#e4e4e7',
           }}
         />
       ))}

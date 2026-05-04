@@ -101,10 +101,16 @@
   month_utc) 幂等——重复调用 no-op。**只 merge install 一种 source**：IP 跨网络/跨日轮换
   salt 没稳定标识，merge 价值低。Web 注册（无 installId）走的人不需要 merge。
   没这步的话匿名用 5/5 → 注册 → 拿到全新 30/30，是绕匿名档的滥用通道。
-- **扩展 prefs 跨端同步策略**：`patchUserPrefs(targetLang/uiLocale)` 写 chrome.storage
-  同时 fail-soft `void patchCloudPrefs(...)` PATCH `/v1/me/settings`（通过 background
-  SW 代理避开 content script CORS）。inject.ts bootstrap 启动会 `fetchCloudPrefs()`
-  prime 浮窗 UI 显示用 cache。匿名：401 静默忽略，仅本地有效。
+- **扩展 prefs 跨端同步策略**：登录用户的 web → extension chrome.storage 同步**只有两条路径**：
+  - **inject.ts bootstrap `fetchCloudPrefs()`**（主动 pull）：每个支持页加载时拉一次。
+    对未做 rewrite 的新打开 tab 是唯一同步源。
+  - **SSE meta `userTargetLang`** via `onUserPrefsSync` callback（rewrite 副产物 push）：
+    用户做 rewrite 时服务端把 user_settings.target_lang 原始值（含 'auto'）echo 回。
+  
+  **没有第三条**——options App.tsx 自 d9cf3e9 不再做 fetchCloudPrefs（避免和 web 编辑
+  时序错位造成"看起来不一致"）。`patchCloudPrefs` 现仅在匿名 patchUserPrefs 路径
+  triggers（401 静默无副作用），保留以便未来快捷入口复用。
+  
   **不要在扩展 chrome.storage 里加敏感字段**——storage 镜像逻辑只针对
   `targetLang` / `uiLocale` 子集。
 - **扩展 options 是 auth-aware split**（避免 web ↔ extension 显示不一致）：

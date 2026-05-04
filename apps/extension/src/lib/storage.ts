@@ -117,6 +117,11 @@ export async function claimInstallQuota(installId: string): Promise<boolean> {
 /**
  * 推送偏好到 web（通过 background SW）。fail-soft：成功 / 失败均不抛异常，
  * 调用方不阻塞 local 写入流程。
+ *
+ * 注：自 d9cf3e9 起，登录用户在 extension options 不再编辑 targetLang/uiLocale
+ * （改在 web /settings 唯一入口管理），此函数实际只在匿名 patchUserPrefs 路径
+ * 触发——而匿名调返 401 无副作用。保留以便未来如果给登录用户加快捷入口（如
+ * popup 切语言）能直接复用，不必再加 SW handler。
  */
 export async function patchCloudPrefs(
   patch: Partial<Pick<UserPrefs, 'targetLang' | 'uiLocale'>>,
