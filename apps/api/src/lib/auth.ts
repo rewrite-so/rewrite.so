@@ -24,19 +24,23 @@ function detectLocaleFromHeaders(headers: Headers | undefined): string {
  * 设计：
  * - drizzle 仅给 better-auth 4 张表用（CLAUDE.md 已说明这是"D1 不用 ORM"原则的唯一例外）
  * - 启用 Magic Link（通过 Resend 发送）
- * - Google OAuth 待用户提供 client id/secret 后开启
  * - 生产环境 cookie domain = `.rewrite.so`，主域和 api 子域共享 session cookie
  */
 export function createAuth(env: Bindings) {
   const db = drizzle(env.DB, { schema: authSchema });
   const resend = env.RESEND_API_KEY ? new Resend(env.RESEND_API_KEY) : null;
 
-  const trustedOrigins = [
-    'http://localhost:3000',
-    'http://localhost:8787',
-    'https://rewrite.so',
-    'https://api.rewrite.so',
-  ];
+  const trustedOrigins = Array.from(
+    new Set(
+      [
+        env.WEB_ORIGIN,
+        'http://localhost:3000',
+        'http://localhost:8787',
+        'https://rewrite.so',
+        'https://api.rewrite.so',
+      ].filter((origin): origin is string => Boolean(origin)),
+    ),
+  );
 
   // 生产环境（api.rewrite.so）下让 cookie domain = .rewrite.so，
   // 这样 api 设的 session cookie 在 web origin (rewrite.so) 也能读到 —

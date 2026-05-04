@@ -55,4 +55,21 @@ describe('RewriteRequestSchema styles length', () => {
     });
     expect(r.success).toBe(false);
   });
+
+  it('rejects empty or overlong lang values', () => {
+    expect(
+      RewriteRequestSchema.safeParse({
+        ...baseReq,
+        lang: '',
+        styles: ['faithful'],
+      }).success,
+    ).toBe(false);
+    expect(
+      RewriteRequestSchema.safeParse({
+        ...baseReq,
+        lang: 'x'.repeat(51),
+        styles: ['faithful'],
+      }).success,
+    ).toBe(false);
+  });
 });

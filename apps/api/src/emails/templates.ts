@@ -400,7 +400,7 @@ export function day7Email(
   locale: Locale = 'en',
 ): EmailTemplate {
   const c = DAY7[locale];
-  const billingUrl = `${ctx.webOrigin}/billing`;
+  const settingsUrl = `${ctx.webOrigin}/settings`;
   const docsUrl = `${ctx.webOrigin}/pricing#faq`;
   const unsubUrl = unsubscribeUrl(ctx, r);
   const name = r.name ?? '';
@@ -411,11 +411,11 @@ export function day7Email(
 <p>${c.intro}</p>
 <p>${c.body}</p>
 <p>${c.pricing}</p>
-<p><a href="${escapeHtml(billingUrl)}" class="btn">${c.cta}</a> &nbsp; <a href="${escapeHtml(docsUrl)}" style="color:#666">${c.faq}</a></p>`,
+<p><a href="${escapeHtml(settingsUrl)}" class="btn">${c.cta}</a> &nbsp; <a href="${escapeHtml(docsUrl)}" style="color:#666">${c.faq}</a></p>`,
       unsubUrl,
       locale,
     ),
-    text: `${HI[locale](name)}\n\n${stripHtml(c.intro)}\n\n${stripHtml(c.body)}\n\n${c.pricing}\n\n${c.cta.replace(' →', '')}: ${billingUrl}\n${c.faq}: ${docsUrl}\n\n${TEXT_UNSUB_LABEL[locale]}${unsubUrl}`,
+    text: `${HI[locale](name)}\n\n${stripHtml(c.intro)}\n\n${stripHtml(c.body)}\n\n${c.pricing}\n\n${c.cta.replace(' →', '')}: ${settingsUrl}\n${c.faq}: ${docsUrl}\n\n${TEXT_UNSUB_LABEL[locale]}${unsubUrl}`,
   };
 }
 

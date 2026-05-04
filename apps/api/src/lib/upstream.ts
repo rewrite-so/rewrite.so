@@ -13,6 +13,7 @@ export interface UpstreamConfig {
   baseUrl: string;
   apiKey: string;
   model: string;
+  timeoutMs?: number;
 }
 
 export class UpstreamError extends Error {
@@ -27,6 +28,7 @@ export class UpstreamError extends Error {
 }
 
 const DONE_MARKER = '[DONE]';
+export const DEFAULT_UPSTREAM_TIMEOUT_MS = 25_000;
 
 /**
  * 流式调用上游，逐 chunk 产出 content delta（去掉 SSE 包装）。
@@ -37,7 +39,21 @@ export async function* streamCompletion(
   messages: ChatMessage[],
   signal: AbortSignal,
 ): AsyncIterable<string> {
+  const ac = new AbortController();
+  let timeoutFired = false;
+  const onAbort = () => ac.abort(signal.reason);
+  if (signal.aborted) {
+    ac.abort(signal.reason);
+  } else {
+    signal.addEventListener('abort', onAbort, { once: true });
+  }
+  const timer = setTimeout(() => {
+    timeoutFired = true;
+    ac.abort();
+  }, config.timeoutMs ?? DEFAULT_UPSTREAM_TIMEOUT_MS);
+
   let res: Response;
+  let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
   try {
     res = await fetch(`${config.baseUrl.replace(/\/$/, '')}/chat/completions`, {
       method: 'POST',
@@ -51,28 +67,25 @@ export async function* streamCompletion(
         stream: true,
         temperature: 0.7,
       }),
-      signal,
+      signal: ac.signal,
     });
-  } catch (err) {
-    if ((err as Error).name === 'AbortError') {
-      throw new UpstreamError('aborted', null, 'request aborted');
+
+    if (!res.ok) {
+      const detail = await res.text().catch(() => '');
+      throw new UpstreamError(
+        'http',
+        res.status,
+        `upstream ${res.status}: ${detail.slice(0, 500)}`,
+      );
     }
-    throw new UpstreamError('http', null, (err as Error).message);
-  }
+    if (!res.body) {
+      throw new UpstreamError('protocol', null, 'empty body');
+    }
 
-  if (!res.ok) {
-    const detail = await res.text().catch(() => '');
-    throw new UpstreamError('http', res.status, `upstream ${res.status}: ${detail.slice(0, 500)}`);
-  }
-  if (!res.body) {
-    throw new UpstreamError('protocol', null, 'empty body');
-  }
+    reader = res.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let buffer = '';
 
-  const reader = res.body.getReader();
-  const decoder = new TextDecoder('utf-8');
-  let buffer = '';
-
-  try {
     while (true) {
       const { value, done } = await reader.read();
       if (done) break;
@@ -96,11 +109,14 @@ export async function* streamCompletion(
     }
   } catch (err) {
     if ((err as Error).name === 'AbortError') {
-      throw new UpstreamError('aborted', null, 'stream aborted');
+      if (timeoutFired) throw new UpstreamError('timeout', null, 'upstream timeout');
+      throw new UpstreamError('aborted', null, 'request aborted');
     }
     throw err;
   } finally {
-    reader.releaseLock();
+    clearTimeout(timer);
+    signal.removeEventListener('abort', onAbort);
+    reader?.releaseLock();
   }
 }
 

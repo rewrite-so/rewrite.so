@@ -6,12 +6,7 @@ import type { ReactNode } from 'react';
 import { Footer } from '../../components/Footer.tsx';
 import { TopNav } from '../../components/TopNav.tsx';
 import { routing } from '../../i18n/routing.ts';
-
-const SITE_ORIGIN = process.env.NEXT_PUBLIC_SITE_ORIGIN ?? 'https://rewrite.so';
-
-function localePath(locale: string): string {
-  return locale === routing.defaultLocale ? '' : `/${locale}`;
-}
+import { localizedMetadata } from '../metadata.ts';
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -29,21 +24,10 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: 'meta.home' });
 
   // 输出 7 个 hreflang + x-default 给 Google / Bing 关联多语言版本
-  const languages: Record<string, string> = {};
-  for (const l of routing.locales) {
-    languages[l] = `${SITE_ORIGIN}${localePath(l)}/`;
-  }
-  languages['x-default'] = `${SITE_ORIGIN}/`;
-
-  return {
+  return localizedMetadata(locale, '/', {
     title: t('title'),
     description: t('description'),
-    metadataBase: new URL(SITE_ORIGIN),
-    alternates: {
-      canonical: `${SITE_ORIGIN}${localePath(locale)}/`,
-      languages,
-    },
-  };
+  });
 }
 
 export default async function LocaleLayout({

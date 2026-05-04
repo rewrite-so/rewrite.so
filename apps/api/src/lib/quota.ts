@@ -86,8 +86,8 @@ export async function checkAndIncrement(
     };
   }
 
-  // 用 D1 batch 在一次往返中：① 读现值 ② UPSERT 累加
-  // SQLite 的 RETURNING * 在 UPSERT 上 D1 支持有限，所以分两步
+  // 先读现值用于快速拒绝与 UI 返回；真正消耗用条件 UPDATE 原子完成，
+  // 避免并发请求同时看到 count=limit-1 后都放行。
   const before = await db
     .prepare(
       'SELECT count FROM usage_monthly WHERE subject_kind = ? AND subject_id = ? AND month_utc = ?',
@@ -107,8 +107,44 @@ export async function checkAndIncrement(
     };
   }
 
-  await upsertUsage(db, subject, month, { count: 1, byokCount: 0 }, now);
-  const used = usedBefore + 1;
+  await insertUsageRowIfMissing(db, subject, month, now);
+  const updateRes = await db
+    .prepare(
+      `UPDATE usage_monthly
+          SET count = count + 1,
+              updated_at = ?
+        WHERE subject_kind = ?
+          AND subject_id = ?
+          AND month_utc = ?
+          AND count < ?`,
+    )
+    .bind(now, subject.kind, subject.id, month, limit)
+    .run();
+  const changes = getD1Changes(updateRes);
+  if (changes === 0) {
+    const current = await db
+      .prepare(
+        'SELECT count FROM usage_monthly WHERE subject_kind = ? AND subject_id = ? AND month_utc = ?',
+      )
+      .bind(subject.kind, subject.id, month)
+      .first<{ count: number }>();
+    const used = Math.max(usedBefore, current?.count ?? usedBefore);
+    return {
+      allowed: false,
+      used,
+      limit,
+      remaining: 0,
+      resetAt: nextMonthUtcIso(),
+    };
+  }
+
+  const after = await db
+    .prepare(
+      'SELECT count FROM usage_monthly WHERE subject_kind = ? AND subject_id = ? AND month_utc = ?',
+    )
+    .bind(subject.kind, subject.id, month)
+    .first<{ count: number }>();
+  const used = after?.count ?? usedBefore + 1;
   return {
     allowed: true,
     used,
@@ -116,6 +152,27 @@ export async function checkAndIncrement(
     remaining: Math.max(0, limit - used),
     resetAt: nextMonthUtcIso(),
   };
+}
+
+async function insertUsageRowIfMissing(
+  db: D1Database,
+  subject: Subject,
+  month: string,
+  now: number,
+): Promise<void> {
+  await db
+    .prepare(
+      `INSERT OR IGNORE INTO usage_monthly
+         (subject_kind, subject_id, month_utc, count, byok_count, updated_at)
+       VALUES (?, ?, ?, 0, 0, ?)`,
+    )
+    .bind(subject.kind, subject.id, month, now)
+    .run();
+}
+
+function getD1Changes(result: unknown): number | undefined {
+  const meta = (result as { meta?: { changes?: unknown } } | null)?.meta;
+  return typeof meta?.changes === 'number' ? meta.changes : undefined;
 }
 
 async function upsertUsage(

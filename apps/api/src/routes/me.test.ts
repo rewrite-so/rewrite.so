@@ -149,6 +149,37 @@ describe('PUT /v1/me/byok (Pro gate removed)', () => {
     );
     expect(res.status).toBe(400);
   });
+
+  it('returns 400 when baseUrl is not HTTPS', async () => {
+    mockSession = { user: { id: 'u_free', email: 'free@test.com' } };
+    const res = await app.request(
+      '/v1/me/byok',
+      {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ ...validBody, baseUrl: 'http://api.openai.com/v1' }),
+      },
+      MOCK_ENV,
+    );
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 400 when baseUrl includes /chat/completions', async () => {
+    mockSession = { user: { id: 'u_free', email: 'free@test.com' } };
+    const res = await app.request(
+      '/v1/me/byok',
+      {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          ...validBody,
+          baseUrl: 'https://api.openai.com/v1/chat/completions',
+        }),
+      },
+      MOCK_ENV,
+    );
+    expect(res.status).toBe(400);
+  });
 });
 
 describe('DELETE /v1/me/byok', () => {
@@ -324,6 +355,25 @@ describe('POST /v1/me/byok/test', () => {
         body: JSON.stringify({
           ...validBody,
           baseUrl: 'https://api.openai.com/v1/chat/completions',
+        }),
+      },
+      MOCK_ENV,
+    );
+    const body = (await res.json()) as { ok: boolean; error: string };
+    expect(body.ok).toBe(false);
+    expect(body.error).toBe('invalid_base_url');
+  });
+
+  it('returns error=invalid_base_url when baseUrl is not HTTPS', async () => {
+    mockSession = { user: { id: 'u_free', email: 'free@test.com' } };
+    const res = await app.request(
+      '/v1/me/byok/test',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          ...validBody,
+          baseUrl: 'http://api.openai.com/v1',
         }),
       },
       MOCK_ENV,

@@ -426,6 +426,100 @@ describe('POST /v1/rewrite', () => {
     expect(body).toMatchObject({ error: 'turnstile_failed' });
   });
 
+  it('rejects forged installId from non-extension origins in production', async () => {
+    const res = await app.request(
+      '/v1/rewrite',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', origin: 'https://evil.example' },
+        body: JSON.stringify({
+          text: 'hi',
+          hasSelection: false,
+          lang: 'en',
+          styles: ['faithful'],
+          installId: 'install-abc-123',
+        }),
+      },
+      { ...MOCK_ENV, BETTER_AUTH_URL: 'https://api.rewrite.so' },
+    );
+
+    expect(res.status).toBe(403);
+    expect(await res.json()).toMatchObject({ error: 'invalid_client' });
+  });
+
+  it('accepts installId from the extension origin in production', async () => {
+    const res = await app.request(
+      '/v1/rewrite',
+      {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          // chrome-extension:// origin 由浏览器自动设置，**不可被 web JS 伪造**——
+          // 这是唯一可信任的"扩展身份"信号
+          origin: 'chrome-extension://abcdefghijklmnopabcdefghijklmnop',
+        },
+        body: JSON.stringify({
+          text: 'hi',
+          hasSelection: false,
+          lang: 'en',
+          styles: ['faithful'],
+          installId: 'install-abc-123',
+        }),
+      },
+      { ...MOCK_ENV, BETTER_AUTH_URL: 'https://api.rewrite.so' },
+    );
+
+    expect(res.status).toBe(200);
+  });
+
+  it('rejects forged x-rewrite-client header from same-site web JS', async () => {
+    // CSRF 防御：rewrite.so 网页里的 JS 可任意伪造 HTTP header（包括 x-rewrite-client），
+    // 但 chrome-extension:// origin 是浏览器自动设置不可伪造。仅 origin 是信任来源。
+    // header 仅留给 service-worker 设置作 telemetry / 日志区分用，不参与授权决策。
+    const res = await app.request(
+      '/v1/rewrite',
+      {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-rewrite-client': 'extension', // 伪造 header
+          origin: 'https://rewrite.so', // web origin 而非 chrome-extension://
+        },
+        body: JSON.stringify({
+          text: 'hi',
+          hasSelection: false,
+          lang: 'en',
+          styles: ['faithful'],
+          installId: 'install-forged-123',
+        }),
+      },
+      { ...MOCK_ENV, BETTER_AUTH_URL: 'https://api.rewrite.so' },
+    );
+
+    expect(res.status).toBe(403);
+    expect(await res.json()).toMatchObject({ error: 'invalid_client' });
+  });
+
+  it('rejects lang values that sanitize to empty before prompt injection', async () => {
+    const res = await app.request(
+      '/v1/rewrite',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          text: 'hi',
+          hasSelection: false,
+          lang: '"\\',
+          styles: ['faithful'],
+        }),
+      },
+      MOCK_ENV,
+    );
+
+    expect(res.status).toBe(400);
+    expect(await res.json()).toMatchObject({ error: 'invalid_input' });
+  });
+
   it('accepts valid Turnstile token for anonymous web requests', async () => {
     vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
       const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;

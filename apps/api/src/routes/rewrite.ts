@@ -17,6 +17,7 @@ import {
   type Subject,
   type Tier,
 } from '../lib/quota.ts';
+import { sanitizeTargetLang } from '../lib/sanitize-target-lang.ts';
 import { muxToSSE } from '../lib/sse.ts';
 import { stripThinking } from '../lib/strip-thinking.ts';
 import { verifyTurnstile } from '../lib/turnstile.ts';
@@ -31,6 +32,23 @@ interface ByokConfigRow {
 }
 
 export const rewriteRoute = new Hono<AppEnv>();
+
+function isExtensionRewriteRequest(headers: Headers, env: AppEnv['Bindings']): boolean {
+  const origin = headers.get('origin') ?? '';
+  // chrome-extension:// origin 由浏览器自动设置，**不可被 web JS 伪造**——这是
+  // 唯一可信任的"扩展身份"信号。x-rewrite-client header 任何 same-site fetch 都能
+  // 加（同域 web JS / 第三方网页），不能作为授权依据，仅留给 service-worker 设置
+  // 用作 telemetry / 日志区分（CORS allowHeaders 仍允许它通过预检）。
+  if (origin.startsWith('chrome-extension://')) return true;
+
+  // 本地/测试环境下 Hono app.request 没有 extension origin；允许 installId 走 dev。
+  // 生产环境 BETTER_AUTH_URL 是 https://api.rewrite.so 不会命中这条分支。
+  const authUrl = env.BETTER_AUTH_URL ?? '';
+  const isLocalApi =
+    authUrl.startsWith('http://localhost') || authUrl.startsWith('http://127.0.0.1');
+  if (!isLocalApi) return false;
+  return !origin || origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1');
+}
 
 rewriteRoute.post('/v1/rewrite', async (c) => {
   let body: unknown;
@@ -73,9 +91,12 @@ rewriteRoute.post('/v1/rewrite', async (c) => {
       .bind(userId)
       .first<{ target_lang: string }>();
     if (prefs?.target_lang) {
-      userTargetLangRaw = prefs.target_lang;
-      if (prefs.target_lang !== 'auto') {
-        userTargetLang = prefs.target_lang;
+      const cleaned = sanitizeTargetLang(prefs.target_lang);
+      if (cleaned) {
+        userTargetLangRaw = cleaned;
+        if (cleaned !== 'auto') {
+          userTargetLang = cleaned;
+        }
       }
     }
     // BYOK 配置（任何登录用户都可配；Pro 差异化是 hosted model 配额与支持）
@@ -85,6 +106,9 @@ rewriteRoute.post('/v1/rewrite', async (c) => {
       .bind(userId)
       .first<ByokConfigRow>();
   } else if (req.installId) {
+    if (!isExtensionRewriteRequest(c.req.raw.headers, c.env)) {
+      return c.json({ error: 'invalid_client' }, 403);
+    }
     subject = { kind: 'install', id: req.installId };
     tier = 'anonymous_install';
   } else {
@@ -178,7 +202,11 @@ rewriteRoute.post('/v1/rewrite', async (c) => {
   // ===== 服务端目标语言判定 =====
   // 优先级: 账号偏好（登录用户）> 客户端 lang > 'en' 兜底
   // 客户端 lang='auto' 表示让服务端决定（取自启发式或账号偏好）
-  const targetLang = userTargetLang ?? (req.lang === 'auto' ? 'en' : req.lang);
+  const requestTargetLang = req.lang === 'auto' ? 'en' : sanitizeTargetLang(req.lang);
+  if (!requestTargetLang) {
+    return c.json({ error: 'invalid_input', detail: 'lang empty after sanitize' }, 400);
+  }
+  const targetLang = userTargetLang ?? requestTargetLang;
 
   // AbortSignal: client 断开 → c.req.raw.signal abort → 级联到 3 路 fetch
   const signal = c.req.raw.signal;

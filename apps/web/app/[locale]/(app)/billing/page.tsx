@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import { localizedMetadata } from '../../../metadata.ts';
 import { BillingClient } from './BillingClient.tsx';
 
 export async function generateMetadata({
@@ -9,7 +10,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'meta.billing' });
-  return { title: t('title') };
+  return localizedMetadata(locale, '/billing', { title: t('title') });
 }
 
 export default async function BillingPage({ params }: { params: Promise<{ locale: string }> }) {

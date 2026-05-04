@@ -23,6 +23,7 @@ export function App() {
         const installId = await getOrCreateInstallId();
         const res = await fetch(
           `${API_BASE}/v1/me/usage?installId=${encodeURIComponent(installId)}`,
+          { credentials: 'include' },
         );
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = (await res.json()) as Usage;
@@ -62,7 +63,14 @@ export function App() {
         <button
           type="button"
           style={btnPrimaryStyle}
-          onClick={() => chrome.tabs.create({ url: `${WEB_BASE}/login` })}
+          onClick={() =>
+            chrome.tabs.create({
+              url:
+                usage?.tier === 'free' || usage?.tier === 'pro'
+                  ? `${WEB_BASE}/settings`
+                  : `${WEB_BASE}/login`,
+            })
+          }
         >
           {usage?.tier === 'free' || usage?.tier === 'pro'
             ? t('ext.popup.myAccount')

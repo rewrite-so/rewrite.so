@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { routing } from '../i18n/routing.ts';
+import { localePath } from './metadata.ts';
 
 const SITE_ORIGIN = process.env.NEXT_PUBLIC_SITE_ORIGIN ?? 'https://rewrite.so';
 
@@ -15,13 +16,6 @@ const PUBLIC_PATHS = [
   '/refund',
   '/aup',
 ] as const;
-
-function localePath(locale: string, path: string): string {
-  const prefix = locale === routing.defaultLocale ? '' : `/${locale}`;
-  // 根 '/' 时 prefix 已包含路径，避免 '//'
-  if (path === '/') return prefix || '/';
-  return `${prefix}${path}`;
-}
 
 /**
  * 生成 sitemap.xml。

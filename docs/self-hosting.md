@@ -15,7 +15,6 @@ Cloudflare Workers + D1 + a domain you control.
 - An OpenAI-compatible LLM API key (OpenAI, DeepSeek, vLLM, etc.).
 - A [Resend](https://resend.com) account + a verified sender domain.
 - (Optional but recommended) A [Creem](https://creem.io) merchant account if you want subscriptions.
-- (Optional) A Google OAuth client if you want sign-in with Google.
 
 ## Initial setup
 

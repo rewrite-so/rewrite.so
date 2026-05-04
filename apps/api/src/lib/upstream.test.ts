@@ -141,6 +141,36 @@ describe('streamCompletion — error paths', () => {
     await expect(promise).rejects.toMatchObject({ name: 'UpstreamError', code: 'aborted' });
   });
 
+  it('throws UpstreamError(timeout) when upstream does not respond before timeoutMs', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation((_, init) => {
+      return new Promise((_, reject) => {
+        (init as RequestInit).signal?.addEventListener('abort', () => {
+          const e = new Error('aborted');
+          e.name = 'AbortError';
+          reject(e);
+        });
+      });
+    });
+
+    vi.useFakeTimers();
+    const promise = (async () => {
+      for await (const _ of streamCompletion(
+        { baseUrl: 'https://api.test/v1', apiKey: 'k', model: 'gpt', timeoutMs: 50 },
+        [{ role: 'user', content: 'hi' }],
+        new AbortController().signal,
+      ))
+        void _;
+    })();
+
+    const assertion = expect(promise).rejects.toMatchObject({
+      name: 'UpstreamError',
+      code: 'timeout',
+    });
+    await vi.advanceTimersByTimeAsync(51);
+    await assertion;
+    vi.useRealTimers();
+  });
+
   it('skips frames with non-string content (role-only frame)', async () => {
     const sse = [
       'data: {"choices":[{"delta":{"role":"assistant"}}]}\n\n',

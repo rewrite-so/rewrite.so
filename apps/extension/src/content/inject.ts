@@ -1,4 +1,4 @@
-import { type MountOptions, mount } from '@rewrite/core';
+import { type MountHandle, type MountOptions, mount } from '@rewrite/core';
 import { type Locale, pickLocale } from '@rewrite/shared/locales';
 import { WEB_BASE } from '../lib/config.ts';
 import {
@@ -38,18 +38,29 @@ async function syncFromCloud(): Promise<boolean> {
 const VISIBILITY_SYNC_THROTTLE_MS = 30_000;
 
 async function bootstrap(): Promise<void> {
-  // 启动时尝试从 web /v1/me/settings 拉偏好覆盖本地 cache —— 让用户在 web /settings
-  // 改的偏好能在扩展立即生效。已登录拿到值，未登录返 null 不动。
-  // 注：不阻塞 mount —— cloud sync 失败不影响本地体验
-  const isAuthed = await syncFromCloud();
+  const [prefs, installId] = await Promise.all([getUserPrefs(), getOrCreateInstallId()]);
+  const apiClient = createPortApiClient();
+  let currentPrefs = prefs;
+  let suppressNextTargetLangRemount = false;
+  let claimedInstallQuota = false;
+  let claimInFlight = false;
 
-  // 已登录用户：把当月匿名 install 配额合并到 user 维度（兑现 CLAUDE.md 承诺，
-  // 防匿名→注册薅档位）。服务端 usage_claims PK 幂等，重复调用 no-op；这里
-  // fail-soft 不阻塞 mount。每次 bootstrap 都会调一次 —— 单次 D1 query 成本可忽略。
-  if (isAuthed) {
-    const id = await getOrCreateInstallId();
-    void claimInstallQuota(id);
-  }
+  const syncAndClaim = async () => {
+    const isAuthed = await syncFromCloud();
+    if (isAuthed && !claimedInstallQuota && !claimInFlight) {
+      claimInFlight = true;
+      void claimInstallQuota(installId)
+        .then((ok) => {
+          claimedInstallQuota = ok;
+        })
+        .finally(() => {
+          claimInFlight = false;
+        });
+    }
+  };
+
+  // 启动时拉 cloud 偏好，但不阻塞 mount；未登录或网络失败都不影响本地体验。
+  void syncAndClaim();
 
   // 标签页重新可见时再 sync 一次（节流 30s），让用户在 web 改完偏好切回当前标签页时
   // 立即拿到新值——不用刷新页面。chrome.storage.onChanged 会触发现有 mount 重新挂载。
@@ -58,13 +69,8 @@ async function bootstrap(): Promise<void> {
     if (document.hidden) return;
     if (Date.now() - lastSync < VISIBILITY_SYNC_THROTTLE_MS) return;
     lastSync = Date.now();
-    void syncFromCloud();
+    void syncAndClaim();
   });
-
-  const [prefs, installId] = await Promise.all([getUserPrefs(), getOrCreateInstallId()]);
-  if (!prefs.triggerEnabled) return;
-
-  const apiClient = createPortApiClient();
 
   const buildOpts = (p: UserPrefs): MountOptions => ({
     host: 'extension',
@@ -81,11 +87,11 @@ async function bootstrap(): Promise<void> {
     // 扩展把它写回 chrome.storage（如果与本地 cache 不同）。下次 inject 重 mount
     // 时直接拿到新值——避免等 30s visibilitychange 节流
     onUserPrefsSync: ({ targetLang }) => {
-      if (targetLang !== p.targetLang) {
-        // patchUserPrefs 内部会 fail-soft 同时 PATCH /v1/me/settings —— 这里
-        // 反向 sync 只走本地写入避免回写源头造成无限循环
+      if (targetLang !== currentPrefs.targetLang) {
+        // 这是服务端 -> 本地 cache 的反向同步，不 PATCH 回源头，避免无限循环。
+        suppressNextTargetLangRemount = true;
         void chrome.storage.local.set({
-          userPrefs: { ...p, targetLang, _v: 1 as const },
+          userPrefs: { ...currentPrefs, targetLang, _v: 1 as const },
         });
       }
     },
@@ -96,22 +102,23 @@ async function bootstrap(): Promise<void> {
     },
   });
 
-  let handle = mount(buildOpts(prefs));
-  let currentPrefs = prefs;
+  let handle: MountHandle | null = prefs.triggerEnabled ? mount(buildOpts(prefs)) : null;
 
   onPrefsChanged((next) => {
-    // 仅 triggerEnabled / uiLocale 变化时需要 unmount/remount —— 它们是 mount 的
-    // 初始化参数。targetLang 单独变化**不要 unmount**：服务端 SSE meta.status 反向
-    // 同步触发的 storage 写入会立即冒泡到这里；如果 unmount 会 abort 正在进行的
-    // SSE 流，用户当下的改写直接挂掉。targetLang 是软状态（服务端 user_settings 是
-    // 权威源，detectTargetLang 下次触发时本来就会重读 chrome.storage），stale 几秒
-    // 没关系，比 abort 中流好得多。
+    // triggerEnabled / uiLocale 变化必然重挂；targetLang 是 mount 初始化参数，用户在
+    // options 里本地修改时也要重挂。服务端 SSE meta.status 的反向同步只更新 cache，
+    // 不打断当前正在进行的流。
     const triggerChanged = next.triggerEnabled !== currentPrefs.triggerEnabled;
     const uiLocaleChanged = next.uiLocale !== currentPrefs.uiLocale;
+    const targetLangChanged = next.targetLang !== currentPrefs.targetLang;
+    const suppressTargetOnly =
+      suppressNextTargetLangRemount && targetLangChanged && !triggerChanged && !uiLocaleChanged;
+    suppressNextTargetLangRemount = false;
     currentPrefs = next;
-    if (!triggerChanged && !uiLocaleChanged) return;
+    if (!triggerChanged && !uiLocaleChanged && (!targetLangChanged || suppressTargetOnly)) return;
 
-    handle.unmount();
+    handle?.unmount();
+    handle = null;
     if (!next.triggerEnabled) return;
     handle = mount(buildOpts(next));
   });

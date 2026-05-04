@@ -27,7 +27,7 @@ shims.
 
 ## How to set it up
 
-1. Sign in (Magic Link or Google).
+1. Sign in with Magic Link.
 2. Open `/settings`. The BYOK panel shows for any signed-in account.
 3. Enter your **Base URL**, **Model**, and **API Key**.
 4. Save. The key is encrypted with AES-GCM-256 before insert. You can never see it again — only the last 4 characters appear in the UI for confirmation.

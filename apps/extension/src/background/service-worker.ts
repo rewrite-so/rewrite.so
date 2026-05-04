@@ -119,7 +119,7 @@ async function handleRewrite(
     console.info('[rewrite.so/bg] fetch', `${API_BASE}/v1/rewrite`);
     res = await fetch(`${API_BASE}/v1/rewrite`, {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: { 'content-type': 'application/json', 'x-rewrite-client': 'extension' },
       body: JSON.stringify(msg.req),
       signal,
       credentials: 'include',

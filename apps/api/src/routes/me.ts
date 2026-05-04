@@ -261,9 +261,30 @@ meRoute.post('/v1/me/claim-install', async (c) => {
 // BYOK
 // ============================================================
 
+const ByokBaseUrlSchema = z
+  .string()
+  .url()
+  .max(200)
+  .refine(
+    (url) => {
+      try {
+        return new URL(url).protocol === 'https:';
+      } catch {
+        return false;
+      }
+    },
+    {
+      message: 'base URL must use https',
+    },
+  )
+  // 用户常误把完整 endpoint 当 base URL；提示更准确的错误而不是让它 404
+  .refine((url) => !/\/chat\/completions\/?$/i.test(url), {
+    message: 'base URL should not include /chat/completions',
+  });
+
 const ByokPutSchema = z
   .object({
-    baseUrl: z.string().url().max(200),
+    baseUrl: ByokBaseUrlSchema,
     model: z.string().min(1).max(100),
     apiKey: z.string().min(8).max(500),
   })
@@ -381,14 +402,7 @@ meRoute.delete('/v1/me/byok', async (c) => {
  */
 const ByokTestSchema = z
   .object({
-    baseUrl: z
-      .string()
-      .url()
-      .max(200)
-      // 用户常误把完整 endpoint 当 base URL；提示更准确的错误而不是让它 404
-      .refine((url) => !/\/chat\/completions\/?$/i.test(url), {
-        message: 'base URL should not include /chat/completions',
-      }),
+    baseUrl: ByokBaseUrlSchema,
     model: z.string().min(1).max(100),
     apiKey: z.string().min(8).max(500),
   })
@@ -419,7 +433,7 @@ meRoute.post('/v1/me/byok/test', async (c) => {
   if (!parsed.success) {
     // 把 zod 的 refine error 当 invalid_base_url 透传给客户端，让 UI 能精确归因
     const issue = parsed.error.issues[0];
-    if (issue?.message.includes('chat/completions')) {
+    if (issue?.path.includes('baseUrl')) {
       return c.json({ ok: false, error: 'invalid_base_url' });
     }
     return c.json({ error: 'invalid_input', detail: issue?.message }, 400);

@@ -49,7 +49,7 @@
 - **Hono on CF Workers**.
 - Routes:
   - `POST /v1/rewrite` — the core SSE endpoint (3-way fan-out).
-  - `GET/POST /api/auth/*` — better-auth handler (Magic Link + Google OAuth).
+  - `GET/POST /api/auth/*` — better-auth handler (Magic Link sign-in).
   - `GET /v1/me`, `/v1/me/usage`, `/v1/me/settings`, `/v1/me/byok` — account dashboard.
   - `POST /v1/billing/checkout`, `GET /v1/billing/portal` — Creem checkout.
   - `POST /webhooks/creem` — Creem webhook handler with HMAC-SHA256 verification.

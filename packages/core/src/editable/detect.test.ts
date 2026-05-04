@@ -59,6 +59,11 @@ describe('isExcluded — PII hard-block', () => {
     expect(isExcluded(el('<input autocomplete="cc-name">'))).toBe(true);
     expect(isExcluded(el('<input autocomplete="cc-csc">'))).toBe(true);
   });
+  it('excludes sensitive autocomplete tokens after section/billing prefixes', () => {
+    expect(isExcluded(el('<input autocomplete="section-checkout billing cc-number">'))).toBe(true);
+    expect(isExcluded(el('<input autocomplete="shipping one-time-code">'))).toBe(true);
+    expect(isExcluded(el('<input autocomplete="section-login current-password">'))).toBe(true);
+  });
   it('excludes autocomplete=current-password / new-password / one-time-code', () => {
     expect(isExcluded(el('<input autocomplete="current-password">'))).toBe(true);
     expect(isExcluded(el('<input autocomplete="new-password">'))).toBe(true);

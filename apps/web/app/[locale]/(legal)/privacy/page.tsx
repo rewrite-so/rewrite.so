@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import { localizedMetadata } from '../../../metadata.ts';
 
 export async function generateMetadata({
   params,
@@ -8,7 +9,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'meta.privacy' });
-  return { title: t('title') };
+  return localizedMetadata(locale, '/privacy', { title: t('title') });
 }
 
 export default function PrivacyPage() {
@@ -44,9 +45,8 @@ export default function PrivacyPage() {
       <h2 style={H2}>What we do collect</h2>
       <ul style={UL}>
         <li>
-          <strong>Account data.</strong> Your email address (for sign-in via magic link or Google
-          OAuth), your name and avatar if provided by Google, and your user preferences (target
-          language, UI locale).
+          <strong>Account data.</strong> Your email address (for sign-in via magic link) and your
+          user preferences (target language, UI locale).
         </li>
         <li>
           <strong>Usage counters.</strong> Per-month rewrite counts for quota enforcement. We store
@@ -98,10 +98,6 @@ export default function PrivacyPage() {
         <li>
           <strong>Resend</strong> — sends transactional emails (login links, billing notifications).
           Receives your email address.
-        </li>
-        <li>
-          <strong>Google</strong> — if you sign in with Google OAuth, we receive your basic profile
-          (email, name, avatar) per the consent screen.
         </li>
       </ul>
       <p>

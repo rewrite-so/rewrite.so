@@ -5,7 +5,7 @@
  * PII 输入框（密码 / 信用卡 / OTP / CVV 等）的内容**绝不**能被发到 LLM。
  */
 
-const PII_AUTOCOMPLETE_PREFIXES = [
+const PII_AUTOCOMPLETE_TOKENS = [
   'cc-', // Credit card 系列
   'current-password',
   'new-password',
@@ -46,10 +46,15 @@ export function isExcluded(el: HTMLElement): boolean {
   if ('disabled' in el && el.disabled === true) return true;
   if ('readOnly' in el && el.readOnly === true) return true;
 
-  // autocomplete 含敏感前缀
-  const ac = (el.getAttribute('autocomplete') ?? '').toLowerCase();
-  for (const prefix of PII_AUTOCOMPLETE_PREFIXES) {
-    if (ac.startsWith(prefix)) return true;
+  // autocomplete 是空格分隔 token 列表，真实页面常见：
+  // "section-checkout billing cc-number"。逐 token 判断，避免敏感 token
+  // 被 section-* / billing / shipping 等前缀挡住。
+  const autocompleteTokens = (el.getAttribute('autocomplete') ?? '').toLowerCase().split(/\s+/);
+  for (const token of autocompleteTokens) {
+    if (!token) continue;
+    for (const piiToken of PII_AUTOCOMPLETE_TOKENS) {
+      if (piiToken.endsWith('-') ? token.startsWith(piiToken) : token === piiToken) return true;
+    }
   }
 
   // name / id 含敏感关键字

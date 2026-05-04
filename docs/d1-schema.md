@@ -13,9 +13,9 @@ Columns: `id` (PK), `email` (UNIQUE), `email_verified` (0/1), `name`, `image`, `
 
 Columns: `id` (PK), `user_id` (FK), `expires_at`, `token` (UNIQUE), `ip_address`, `user_agent`, timestamps. Indexed by `user_id` and `token`.
 
-### `accounts` — better-auth (OAuth linkage)
+### `accounts` — better-auth account linkage
 
-Columns: `id` (PK), `user_id` (FK), `account_id`, `provider_id`, OAuth tokens, `password` (only used by email-password auth, currently unused), timestamps. Unique on `(provider_id, account_id)`.
+Columns: `id` (PK), `user_id` (FK), `account_id`, `provider_id`, provider token columns (used only if a social/OAuth provider is enabled), `password` (only used by email-password auth, currently unused), timestamps. Unique on `(provider_id, account_id)`.
 
 ### `verifications` — better-auth (Magic Link / OTP)
 

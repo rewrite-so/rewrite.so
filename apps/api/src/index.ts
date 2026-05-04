@@ -13,12 +13,27 @@ import type { AppEnv, Bindings } from './types.ts';
 
 const app = new Hono<AppEnv>();
 
+const TRUSTED_CORS_ORIGINS = new Set([
+  'https://rewrite.so',
+  'https://www.rewrite.so',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+]);
+
+function resolveCorsOrigin(origin: string | undefined, env: Bindings): string | undefined {
+  if (!origin) return undefined;
+  if (env.WEB_ORIGIN && origin === env.WEB_ORIGIN) return origin;
+  if (TRUSTED_CORS_ORIGINS.has(origin)) return origin;
+  if (origin.startsWith('chrome-extension://')) return origin;
+  return undefined;
+}
+
 app.use(
   '*',
   cors({
-    origin: (origin) => origin,
+    origin: (origin, c) => resolveCorsOrigin(origin, c.env),
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Authorization', 'cf-turnstile-token'],
+    allowHeaders: ['Content-Type', 'Authorization', 'cf-turnstile-token', 'x-rewrite-client'],
     credentials: true,
     maxAge: 86400,
   }),

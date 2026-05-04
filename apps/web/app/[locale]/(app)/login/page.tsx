@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { localizedMetadata } from '../../../metadata.ts';
 import { LoginClient } from './LoginClient.tsx';
 
 export async function generateMetadata({
@@ -9,7 +10,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'meta.login' });
-  return { title: t('title') };
+  return localizedMetadata(locale, '/login', { title: t('title') });
 }
 
 export default async function LoginPage({ params }: { params: Promise<{ locale: string }> }) {

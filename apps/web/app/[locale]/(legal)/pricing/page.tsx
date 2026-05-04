@@ -2,6 +2,7 @@ import { PRO_PRICE, QUOTA } from '@rewrite/shared';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { localizedMetadata } from '../../../metadata.ts';
 
 export async function generateMetadata({
   params,
@@ -10,7 +11,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'meta.pricing' });
-  return { title: t('title'), description: t('description') };
+  return localizedMetadata(locale, '/pricing', {
+    title: t('title'),
+    description: t('description'),
+  });
 }
 
 export default async function PricingPage({ params }: { params: Promise<{ locale: string }> }) {

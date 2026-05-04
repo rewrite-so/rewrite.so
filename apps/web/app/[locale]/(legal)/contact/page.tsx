@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { ReactNode } from 'react';
+import { localizedMetadata } from '../../../metadata.ts';
 
 export async function generateMetadata({
   params,
@@ -9,7 +10,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'meta.contact' });
-  return { title: t('title'), description: t('description') };
+  return localizedMetadata(locale, '/contact', {
+    title: t('title'),
+    description: t('description'),
+  });
 }
 
 export default async function ContactPage({ params }: { params: Promise<{ locale: string }> }) {

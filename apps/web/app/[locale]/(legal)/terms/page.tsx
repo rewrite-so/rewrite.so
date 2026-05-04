@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import { localizedMetadata } from '../../../metadata.ts';
 
 export async function generateMetadata({
   params,
@@ -8,7 +9,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'meta.terms' });
-  return { title: t('title') };
+  return localizedMetadata(locale, '/terms', { title: t('title') });
 }
 
 export default function TermsPage() {
