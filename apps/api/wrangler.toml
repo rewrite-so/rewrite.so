@@ -11,6 +11,11 @@ routes = [
 [observability]
 enabled = true
 
+# CORS 白名单：Chrome Web Store 正式扩展 ID（gheiendipgcgiligfmbimbbffkkfiamk）。
+# 逗号分隔可加多个；本地 unpacked dev 不受此限（isLocalApi 路径放行）。
+[vars]
+EXTENSION_ALLOWED_ORIGINS = "chrome-extension://gheiendipgcgiligfmbimbbffkkfiamk"
+
 # Cron Trigger: 每天 09:00 UTC 跑一次 onboarding 邮件 dispatcher。
 # dispatcher 内部按 user_email_state 列幂等，重跑不会重发。
 [triggers]

@@ -10,9 +10,9 @@ const devHostPermissions = ['http://localhost:8787/*', 'http://127.0.0.1:8787/*'
 
 export default defineManifest({
   manifest_version: 3,
-  name: 'rewrite.so — 双击 Shift 即时改写',
+  name: 'rewrite.so — Write freely. Send confidently.',
   version: pkg.version,
-  description: '在支持的网页输入框双击 Shift，立刻拿到 3 种风格的 AI 改写。',
+  description: 'Double-tap Shift in any supported text field for 3 AI rewrites: faithful, casual, and formal.',
   icons: {
     16: 'icons/icon-16.png',
     32: 'icons/icon-32.png',
