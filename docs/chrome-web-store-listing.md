@@ -23,11 +23,11 @@ Official references:
 
 ### Item name
 
-rewrite.so — Double-Shift to rewrite
+rewrite.so — Write freely. Send confidently.
 
 ### Short description
 
-Write freely. Send confidently. Double-Shift for 3 AI rewrites: faithful, casual, and formal.
+Write freely. Send confidently. Three AI rewrites — faithful, casual, formal — in any supported text field.
 
 ### Detailed description
 
