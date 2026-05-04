@@ -12,7 +12,8 @@ export default defineManifest({
   manifest_version: 3,
   name: 'rewrite.so — Write freely. Send confidently.',
   version: pkg.version,
-  description: 'Double-tap Shift in any supported text field for 3 AI rewrites: faithful, casual, and formal.',
+  description:
+    'Double-tap Shift in any supported text field for 3 AI rewrites: faithful, casual, and formal.',
   icons: {
     16: 'icons/icon-16.png',
     32: 'icons/icon-32.png',
