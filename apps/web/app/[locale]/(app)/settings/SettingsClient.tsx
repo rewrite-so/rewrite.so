@@ -169,6 +169,15 @@ export function SettingsClient() {
         setMe(meData);
         setUsage(await usageRes.json());
 
+        // WelcomeCard 仅在登录 + 没 dismiss 过时显示。在 setMe 之后立刻定值——
+        // 与下游 settings/byok fetch 解耦：既避免 settings/byok 还在 fetch 时主 UI
+        // 已渲染但 welcome card 慢半拍弹出的视觉跳，也防御 fetch throw 时 welcome
+        // 永远不显示的退化。Pro 升级路径已先调 dismissWelcome() 永久关掉，
+        // shouldShowWelcome() 此时返 false
+        if (meData.user && !cancelled) {
+          setWelcomeVisible(shouldShowWelcome());
+        }
+
         // 仅登录用户加载 settings + byok
         if (meData.user) {
           const [sRes, byokRes] = await Promise.all([
@@ -177,9 +186,6 @@ export function SettingsClient() {
           ]);
           if (sRes.ok && !cancelled) setSettings(await sRes.json());
           if (byokRes.ok && !cancelled) setByok(await byokRes.json());
-          // WelcomeCard 仅在登录 + 没 dismiss 过时显示。Pro 升级路径已先调
-          // dismissWelcome() 永久关掉，shouldShowWelcome() 此时返 false
-          if (!cancelled) setWelcomeVisible(shouldShowWelcome());
         }
       } catch (err) {
         console.warn('settings load failed', err);
@@ -850,7 +856,8 @@ function WelcomeCard({ onDismiss }: { onDismiss: () => void }) {
   const t = useTranslations('page.settings.welcomeCard');
   const tCore = useTranslations('core');
   return (
-    <div
+    <section
+      aria-label={t('title')}
       style={{
         position: 'relative',
         padding: '16px 20px',
@@ -920,7 +927,7 @@ function WelcomeCard({ onDismiss }: { onDismiss: () => void }) {
           {t('ctaInstall')}
         </a>
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -929,6 +936,8 @@ function UpgradeBanner({ onDismiss }: { onDismiss: () => void }) {
   const tCore = useTranslations('core');
   return (
     <div
+      role="status"
+      aria-live="polite"
       style={{
         position: 'relative',
         padding: '14px 20px',
