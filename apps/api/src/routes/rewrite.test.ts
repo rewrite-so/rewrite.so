@@ -1,12 +1,20 @@
 import { parseSSEStream, type SSEEvent } from '@rewrite/shared';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+const mockAuthState = vi.hoisted(() => ({
+  session: null as { user: { id: string } } | null,
+}));
+
 // 必须在 import app 之前 mock auth，避免 better-auth 在测试环境下查 D1
 vi.mock('../lib/auth.ts', () => ({
   createAuth: () => ({
-    api: { getSession: async () => null },
+    api: { getSession: async () => mockAuthState.session },
     handler: async () => new Response('mock', { status: 200 }),
   }),
+}));
+
+vi.mock('../lib/crypto.ts', () => ({
+  decryptApiKey: async () => 'sk-byok',
 }));
 
 const app = (await import('../index.ts')).app;
@@ -38,10 +46,13 @@ const MOCK_ENV = {
   OPENAI_BASE_URL: 'https://upstream.test/v1',
   OPENAI_API_KEY: 'sk-test',
   OPENAI_MODEL: 'gpt-4o-mini',
+  BYOK_MASTER_KEY: 'test-master-key',
   BETTER_AUTH_SECRET: 'test-secret',
   BETTER_AUTH_URL: 'http://localhost',
   RESEND_API_KEY: '',
   RESEND_FROM_EMAIL: '',
+  TURNSTILE_SECRET: '',
+  EXTENSION_INSTALL_URL: 'https://github.com/rewrite-so/rewrite.so/releases/latest',
   DB: fakeDB,
   KV: fakeKV,
   RATE_LIMITER: fakeRateLimiter,
@@ -70,6 +81,7 @@ afterEach(() => {
 
 describe('POST /v1/rewrite', () => {
   beforeEach(() => {
+    mockAuthState.session = null;
     // 默认 mock：每路返回不同文本
     let callCount = 0;
     vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {
@@ -321,6 +333,125 @@ describe('POST /v1/rewrite', () => {
       authed: false,
       tier: 'anonymous_ip',
     });
+  });
+
+  it('uses BYOK user burst bucket and skips monthly hosted-model quota', async () => {
+    mockAuthState.session = { user: { id: 'user-free' } };
+    let capturedBucket: Record<string, unknown> | null = null;
+
+    const byokDB = {
+      prepare: (sql: string) => ({
+        bind: (..._args: unknown[]) => ({
+          first: async () => {
+            if (sql.includes('FROM byok_keys')) {
+              return {
+                base_url: 'https://byok-provider.test/v1',
+                model: 'custom-model',
+                encrypted_api_key: 'encrypted',
+                iv: 'iv',
+              };
+            }
+            return null;
+          },
+          run: async () => ({ success: true }),
+          all: async () => ({ results: [], success: true }),
+        }),
+      }),
+    } as unknown as D1Database;
+
+    const capturingRateLimiter = {
+      idFromName: (name: string) => {
+        expect(name).toBe('user:user-free');
+        return {} as DurableObjectId;
+      },
+      get: (_id: DurableObjectId) =>
+        ({
+          fetch: async (_input: RequestInfo | URL, init?: RequestInit) => {
+            capturedBucket = JSON.parse(String(init?.body ?? '{}')) as Record<string, unknown>;
+            return Response.json(
+              { allowed: true, remaining: 99, retryAfterMs: 0 },
+              { status: 200 },
+            );
+          },
+        }) as unknown as DurableObjectStub,
+    } as unknown as DurableObjectNamespace;
+
+    const res = await app.request(
+      '/v1/rewrite',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          text: 'hi',
+          hasSelection: false,
+          lang: 'en',
+          styles: ['faithful'],
+        }),
+      },
+      { ...MOCK_ENV, DB: byokDB, RATE_LIMITER: capturingRateLimiter },
+    );
+
+    expect(res.status).toBe(200);
+    expect(capturedBucket).toMatchObject({ cost: 1, capacity: 100, refillPerSec: 100 / 60 });
+
+    if (!res.body) throw new Error('expected body');
+    const events: SSEEvent[] = [];
+    for await (const ev of parseSSEStream(res.body)) events.push(ev);
+    const meta = events[0] as Extract<SSEEvent, { event: 'meta' }>;
+    expect(meta.data.status?.authed).toBe(true);
+    expect(meta.data.status?.tier).toBe('free');
+    expect(meta.data.status?.isBYOK).toBe(true);
+    expect(meta.data.status?.used).toBeUndefined();
+    expect(meta.data.status?.limit).toBeUndefined();
+  });
+
+  it('requires Turnstile token for anonymous web requests when secret is configured', async () => {
+    const res = await app.request(
+      '/v1/rewrite',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          text: 'hi',
+          hasSelection: false,
+          lang: 'en',
+          styles: ['faithful'],
+        }),
+      },
+      { ...MOCK_ENV, TURNSTILE_SECRET: 'turnstile-secret' },
+    );
+
+    expect(res.status).toBe(403);
+    const body = await res.json();
+    expect(body).toMatchObject({ error: 'turnstile_failed' });
+  });
+
+  it('accepts valid Turnstile token for anonymous web requests', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+      const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+      if (url.includes('siteverify')) {
+        return Response.json({ success: true });
+      }
+      return makeUpstreamSSE('ok');
+    });
+
+    const res = await app.request(
+      '/v1/rewrite',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          text: 'hi',
+          hasSelection: false,
+          lang: 'en',
+          styles: ['faithful'],
+          turnstileToken: 'token-ok',
+        }),
+      },
+      { ...MOCK_ENV, TURNSTILE_SECRET: 'turnstile-secret' },
+    );
+
+    expect(res.status).toBe(200);
   });
 
   it('one upstream fails, the other two still complete', async () => {

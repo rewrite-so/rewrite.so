@@ -23,9 +23,10 @@ Cookie: better-auth.session_token=...    (optional — anonymous OK)
 ```
 
 - `text` — must be ≤ 4000 characters (server returns 413 otherwise).
-- `styles` — exactly 3 fixed values: `faithful`, `casual`, `formal`. The product contract is "always 3."
+- `styles` — initial requests send exactly the 3 fixed values: `faithful`, `casual`, `formal`; single-card regenerate may send 1 style. The product contract is "never show a fourth candidate."
 - `lang` — preferred target language, or `'auto'` to let the server decide from page lang / user pref / Unicode heuristics.
 - `installId` — required for unsigned extension users (so per-install quota counters work).
+- `turnstileToken` — required for anonymous web `/try` calls only when `TURNSTILE_SECRET` is configured. Signed-in users and extension requests do not need it.
 
 ## Response
 
@@ -104,6 +105,7 @@ non-conformant provider are on their own.
 
 ## Client implementation reference
 
-- Web/extension client: `packages/core/src/transport/sse-client.ts`.
+- Web/extension transport: `packages/core/src/transport/api-client.ts`.
+- SSE parser: `packages/shared/src/sse-frame.ts`.
 - Server multiplexer: `apps/api/src/lib/sse.ts`.
 - Tests: `apps/api/src/lib/sse.test.ts` (5 tests covering interleaving, error isolation, and abort cascade).

@@ -47,6 +47,8 @@ jobs:
         working-directory: apps/web
         env:
           API_BASE_URL: https://api.rewrite.so
+          NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
+          NEXT_PUBLIC_EXTENSION_INSTALL_URL: ${{ vars.NEXT_PUBLIC_EXTENSION_INSTALL_URL }}
         run: pnpm exec opennextjs-cloudflare build
 
       - name: Deploy worker

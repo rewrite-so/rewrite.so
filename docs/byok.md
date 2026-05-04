@@ -1,6 +1,6 @@
 # BYOK (Bring Your Own Key)
 
-Pro users can plug in their own OpenAI-compatible endpoint and key. When
+Signed-in users can plug in their own OpenAI-compatible endpoint and key. When
 BYOK is configured:
 
 - Rewrites bypass the platform default model and go directly to your provider.
@@ -28,10 +28,9 @@ shims.
 ## How to set it up
 
 1. Sign in (Magic Link or Google).
-2. Subscribe to Pro (`/billing`). BYOK is gated to Pro because the AES-GCM-encrypted-key path costs us storage + a tier of trust.
-3. Open `/settings`. The BYOK panel only shows for Pro accounts.
-4. Enter your **Base URL**, **Model**, and **API Key**.
-5. Save. The key is encrypted with AES-GCM-256 before insert. You can never see it again — only the last 4 characters appear in the UI for confirmation.
+2. Open `/settings`. The BYOK panel shows for any signed-in account.
+3. Enter your **Base URL**, **Model**, and **API Key**.
+4. Save. The key is encrypted with AES-GCM-256 before insert. You can never see it again — only the last 4 characters appear in the UI for confirmation.
 
 ## How your key is stored
 

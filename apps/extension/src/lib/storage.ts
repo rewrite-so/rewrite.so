@@ -1,4 +1,4 @@
-import type { StoredLocale } from '@rewrite/shared';
+import type { StoredLocale } from '@rewrite/shared/locales';
 
 /**
  * chrome.storage 封装。

@@ -1,12 +1,8 @@
-import {
-  ALL_STYLES,
-  type Locale,
-  type MetaStatus,
-  QUOTA,
-  STYLE_LABEL,
-  type Style,
-  t,
-} from '@rewrite/shared';
+import { tCore as t } from '@rewrite/shared/core-i18n';
+import type { Locale } from '@rewrite/shared/locales';
+import { QUOTA } from '@rewrite/shared/quotas';
+import type { MetaStatus } from '@rewrite/shared/sse-frame';
+import { ALL_STYLES, STYLE_LABEL, type Style } from '@rewrite/shared/styles';
 
 type ActionMode = 'hidden' | 'streaming' | 'regen' | 'retry';
 

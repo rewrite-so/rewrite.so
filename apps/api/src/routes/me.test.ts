@@ -26,7 +26,7 @@ vi.mock('../lib/quota.ts', async () => {
 // crypto: encryptApiKey 真跑会要求 BYOK_MASTER_KEY 是真 32 byte AES-GCM key；mock 简化
 vi.mock('../lib/crypto.ts', () => ({
   encryptApiKey: async (apiKey: string) => ({
-    encrypted: 'enc_' + apiKey,
+    encrypted: `enc_${apiKey}`,
     iv: 'iv_x',
     mask: apiKey.slice(-4),
   }),

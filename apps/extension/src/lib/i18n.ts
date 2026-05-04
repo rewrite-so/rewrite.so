@@ -1,4 +1,5 @@
-import { type Locale, resolveLocale, t as sharedT } from '@rewrite/shared';
+import { t as sharedT } from '@rewrite/shared/i18n';
+import { type Locale, resolveLocale } from '@rewrite/shared/locales';
 import { useEffect, useState } from 'preact/hooks';
 import { getUserPrefs, onPrefsChanged } from './storage.ts';
 

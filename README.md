@@ -16,7 +16,7 @@ flow.
 - ⌨️ **Keyboard-only** — double-tap Shift to summon, `1`/`2`/`3` to accept, `Esc` to dismiss.
 - 🔒 **Privacy by architecture** — input text and rewrite output are *never* persisted, anywhere. Password / CC / CVV / OTP fields are hard-excluded by design.
 - 🌐 **Cross-language by default** — auto-detects the page language; cross-language rewriting is just implicit translation.
-- 🔧 **BYOK** — Pro users can plug in their own OpenAI-compatible API key for unlimited usage.
+- 🔧 **BYOK** — signed-in users can plug in their own OpenAI-compatible API key for unlimited usage.
 
 ## Quick start (development)
 

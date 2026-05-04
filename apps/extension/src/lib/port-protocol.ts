@@ -1,4 +1,4 @@
-import type { RewriteRequest } from '@rewrite/shared';
+import type { RewriteRequest } from '@rewrite/shared/api-contract';
 
 /**
  * content script ↔ background SW 长连接消息协议（chrome.runtime.connect）。

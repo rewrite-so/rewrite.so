@@ -1,4 +1,4 @@
-import type { Locale } from '@rewrite/shared';
+import type { Locale } from '@rewrite/shared/locales';
 
 export interface DotController {
   /** 显示并跟随某输入框的右下角 */

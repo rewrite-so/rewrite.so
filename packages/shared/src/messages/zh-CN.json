@@ -186,7 +186,7 @@
       },
       "byok": {
         "title": "BYOK（自带 API key）",
-        "intro": "填入你自己的 OpenAI 兼容 endpoint 和 key。改写直达你的 provider，<strong>不计入 {limit, number}/月 配额</strong>。Key 用 AES-GCM 加密存储，永远不写日志。",
+        "intro": "填入你自己的 OpenAI 兼容 endpoint 和 key。改写直达你的 provider，<strong>不计入托管模型月配额</strong>。Key 用 AES-GCM 加密存储，永远不写日志。",
         "baseUrl": "Base URL",
         "model": "Model",
         "apiKey": "API Key",

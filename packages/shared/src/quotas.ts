@@ -25,3 +25,11 @@ export const PRO_PRICE = {
   /** 年付相对月付节省百分比，向下取整以保守 */
   yearlySavingsPercent: 43,
 } as const;
+
+/**
+ * 扩展安装入口 URL 的内置 fallback。
+ * 所有 web/api/email 中"用户没在 env 配 EXTENSION_INSTALL_URL / NEXT_PUBLIC_EXTENSION_INSTALL_URL
+ * 时跳哪儿"统一回退到这个值。Chrome Web Store 上架后改这一处即可，无需找全 6+ 处 hardcode。
+ */
+export const DEFAULT_EXTENSION_INSTALL_URL =
+  'https://github.com/rewrite-so/rewrite.so/releases/latest';

@@ -94,16 +94,17 @@ export default function TermsPage() {
 
       <h2 style={H2}>5. Quotas and rate limits</h2>
       <p>
-        Free, Pro, and BYOK accounts are subject to the per-month rewrite quotas listed on the
-        Pricing page, plus short-term burst rate limits to prevent abuse. We may adjust these limits
-        at any time with reasonable notice for paid tiers. Quota counters reset at 00:00 UTC on the
-        first day of each calendar month.
+        Free and Pro accounts are subject to the per-month rewrite quotas listed on the Pricing
+        page. When BYOK is active, rewrites bypass the monthly hosted-model quota but remain subject
+        to short-term burst rate limits to prevent abuse. We may adjust these limits at any time
+        with reasonable notice for paid tiers. Quota counters reset at 00:00 UTC on the first day of
+        each calendar month.
       </p>
 
       <h2 style={H2}>6. BYOK (Bring Your Own Key)</h2>
       <p>
-        Pro users may configure rewrite.so to send their text to a third-party OpenAI-compatible
-        endpoint of their choice using their own API key. When BYOK is active:
+        Signed-in users may configure rewrite.so to send their text to a third-party
+        OpenAI-compatible endpoint of their choice using their own API key. When BYOK is active:
       </p>
       <ul style={UL}>
         <li>

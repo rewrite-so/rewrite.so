@@ -1,4 +1,4 @@
-import type { RewriteRequest } from '@rewrite/shared';
+import type { RewriteRequest } from '@rewrite/shared/api-contract';
 
 /**
  * 抽象 API 客户端：

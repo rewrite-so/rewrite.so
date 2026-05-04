@@ -1,10 +1,7 @@
-import {
-  ALL_STYLES,
-  type Locale,
-  parseSSEStream,
-  type RewriteRequest,
-  type Style,
-} from '@rewrite/shared';
+import type { RewriteRequest } from '@rewrite/shared/api-contract';
+import type { Locale } from '@rewrite/shared/locales';
+import { parseSSEStream } from '@rewrite/shared/sse-frame';
+import { ALL_STYLES, type Style } from '@rewrite/shared/styles';
 import { isUsableEditable } from './editable/detect.ts';
 import { readEditable } from './editable/read.ts';
 import { replaceEditable } from './editable/write.ts';
@@ -30,6 +27,8 @@ export interface MountOptions {
   /** web 模式下浮层底部显示"安装扩展"链接 */
   showInstallHook?: boolean;
   onInstallClick?: () => void;
+  /** web 匿名体验页的人机校验 token；扩展端和登录用户通常不传 */
+  getTurnstileToken?: () => Promise<string | undefined>;
   /** 错误时显示登录 CTA 的目标 URL（如 web: '/login'，扩展: 'https://rewrite.so/login'） */
   loginUrl?: string;
   /** 已登录用户超配额时引导去配 BYOK / 升 Pro 的 URL（如 web: '/settings'，扩展: '${WEB_BASE}/settings'） */
@@ -243,12 +242,10 @@ export function mount(opts: MountOptions): MountHandle {
       ...(read.context ? { context: read.context } : {}),
     };
 
-    const req: RewriteRequest = {
-      ...lastRequestContext,
-      styles: [...ALL_STYLES],
-      ...(opts.installId ? { installId: opts.installId } : {}),
-    };
-
+    // 先开浮层（用户立即看到 skeleton），再 await turnstile token——
+    // turnstile invisible challenge 偶尔 timeout（10 秒）/ 失败，如果先 await 再开
+    // 浮层，用户双击 Shift 后等很久看到的是"什么都没发生"，无法 setGlobalError 反馈。
+    // panel 先打开后失败时走 setGlobalError('turnstile_failed') 跟 regenerateOne 路径对齐
     const ac = new AbortController();
     const panel = candidates.open({
       target,
@@ -262,6 +259,22 @@ export function mount(opts: MountOptions): MountHandle {
     });
     currentPanel = panel;
 
+    let turnstileToken: string | undefined;
+    try {
+      turnstileToken = await opts.getTurnstileToken?.();
+    } catch (err) {
+      panel.setGlobalError('turnstile_failed');
+      opts.onError?.(err as Error);
+      return;
+    }
+
+    const req: RewriteRequest = {
+      ...lastRequestContext,
+      styles: [...ALL_STYLES],
+      ...(opts.installId ? { installId: opts.installId } : {}),
+      ...(turnstileToken ? { turnstileToken } : {}),
+    };
+
     await runRewrite(req, ac, panel, (code, detail) => panel.setGlobalError(code, detail));
   };
 
@@ -272,10 +285,20 @@ export function mount(opts: MountOptions): MountHandle {
 
     panel.resetCard(style);
 
+    let turnstileToken: string | undefined;
+    try {
+      turnstileToken = await opts.getTurnstileToken?.();
+    } catch (err) {
+      panel.setGlobalError('turnstile_failed');
+      opts.onError?.(err as Error);
+      return;
+    }
+
     const req: RewriteRequest = {
       ...lastRequestContext,
       styles: [style],
       ...(opts.installId ? { installId: opts.installId } : {}),
+      ...(turnstileToken ? { turnstileToken } : {}),
     };
 
     const ac = new AbortController();

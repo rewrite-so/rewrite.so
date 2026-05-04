@@ -186,7 +186,7 @@
       },
       "byok": {
         "title": "BYOK (자체 API 키 사용)",
-        "intro": "OpenAI 호환 endpoint와 key를 입력하면 재작성이 해당 provider로 직접 전송되며, <strong>월 {limit, number}회 한도에 포함되지 않습니다</strong>. Key는 AES-GCM 으로 암호화 저장되며 로그에 절대 기록되지 않습니다.",
+        "intro": "OpenAI 호환 endpoint와 key를 입력하면 재작성이 해당 provider로 직접 전송되며, <strong>호스팅 모델 월간 한도에 포함되지 않습니다</strong>. Key는 AES-GCM 으로 암호화 저장되며 로그에 절대 기록되지 않습니다.",
         "baseUrl": "Base URL",
         "model": "Model",
         "apiKey": "API Key",

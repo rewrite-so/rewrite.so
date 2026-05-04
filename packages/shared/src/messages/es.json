@@ -186,7 +186,7 @@
       },
       "byok": {
         "title": "BYOK (usa tu propia API key)",
-        "intro": "Conecta tu propio endpoint y key compatibles con OpenAI. Las reescrituras van directo a tu provider y <strong>no cuentan en la cuota de {limit, number} / mes</strong>. Tu key se guarda cifrada con AES-GCM y nunca se escribe en logs.",
+        "intro": "Conecta tu propio endpoint y key compatibles con OpenAI. Las reescrituras van directo a tu provider y <strong>no cuentan en tu cuota mensual del modelo alojado</strong>. Tu key se guarda cifrada con AES-GCM y nunca se escribe en logs.",
         "baseUrl": "Base URL",
         "model": "Model",
         "apiKey": "API Key",

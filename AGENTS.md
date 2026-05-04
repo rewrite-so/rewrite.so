@@ -61,9 +61,9 @@
 - **Creem test mode 走 `https://test-api.creem.io`，生产走 `https://api.creem.io`**：
   `creem.ts` 的 `creemBase(apiKey)` 按 key 前缀自动路由（`creem_test_*` → test，`creem_*` → live）。
   写错 base URL 会一律 401 invalid key（test key 在 live endpoint 上无效）。
-- **BYOK 仅 Pro 用户可配（在 PUT 路径校验）**：但 /v1/rewrite 在执行时只看 byok_keys 表是否有行，
-  不再二次校验订阅——避免订阅过期后用户的 BYOK 突然失效。订阅过期时若想强制回退，
-  应在 webhook subscription.expired 处理器里清掉 byok_keys。MVP 不做。
+- **BYOK 对所有登录用户可配（PUT 只校验登录）**：/v1/rewrite 执行时只看 byok_keys 表是否有行，
+  不再二次校验订阅。Pro 的差异化是托管 model 2000/月、无需自管 key、优先支持，
+  不是"是否能用 BYOK"。
 - **BYOK_MASTER_KEY 是 base64 编码的 32 字节 AES-GCM key**（`openssl rand -base64 32` 生成）。
   改 master key 会让所有 byok_keys 失效。`key_version` 字段保留给将来多 key 轮换用，MVP v=1。
 
@@ -162,6 +162,6 @@
 
 ## 环境变量
 
-`OPENAI_BASE_URL` / `OPENAI_API_KEY` / `OPENAI_MODEL`（**无内置默认值**）/ `BYOK_MASTER_KEY` / `CREEM_*` / `RESEND_API_KEY` / `GOOGLE_OAUTH_*` / `TURNSTILE_*` / `BETTER_AUTH_*` / `NEXT_PUBLIC_SITE_ORIGIN`（i18n hreflang/sitemap 绝对 URL，默认 `https://rewrite.so`）。
+`OPENAI_BASE_URL` / `OPENAI_API_KEY` / `OPENAI_MODEL`（**无内置默认值**）/ `BYOK_MASTER_KEY` / `CREEM_*` / `RESEND_API_KEY` / `GOOGLE_OAUTH_*` / `TURNSTILE_*` / `BETTER_AUTH_*` / `EXTENSION_INSTALL_URL` / `NEXT_PUBLIC_EXTENSION_INSTALL_URL` / `NEXT_PUBLIC_SITE_ORIGIN`（i18n hreflang/sitemap 绝对 URL，默认 `https://rewrite.so`）。
 
 详见 `.env.example`。

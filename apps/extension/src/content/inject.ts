@@ -1,5 +1,5 @@
 import { type MountOptions, mount } from '@rewrite/core';
-import { type Locale, pickLocale } from '@rewrite/shared';
+import { type Locale, pickLocale } from '@rewrite/shared/locales';
 import { WEB_BASE } from '../lib/config.ts';
 import {
   claimInstallQuota,

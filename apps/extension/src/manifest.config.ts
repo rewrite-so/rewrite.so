@@ -6,10 +6,21 @@ export default defineManifest({
   name: 'rewrite.so — 双击 Shift 即时改写',
   version: pkg.version,
   description: '在任何网页输入框双击 Shift，立刻拿到 3 种风格的 AI 改写。',
-  // 图标资产占位（Phase 5 替换为实际 PNG 16/32/48/128）
+  icons: {
+    16: 'icons/icon-16.png',
+    32: 'icons/icon-32.png',
+    48: 'icons/icon-48.png',
+    128: 'icons/icon-128.png',
+  },
   action: {
     default_popup: 'src/popup/index.html',
     default_title: 'rewrite.so',
+    default_icon: {
+      16: 'icons/icon-16.png',
+      32: 'icons/icon-32.png',
+      48: 'icons/icon-48.png',
+      128: 'icons/icon-128.png',
+    },
   },
   options_page: 'src/options/index.html',
   background: {

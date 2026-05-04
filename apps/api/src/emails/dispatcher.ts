@@ -17,7 +17,7 @@
  *   Each template is locale-aware (see emails/templates.ts).
  */
 
-import { LOCALES, type Locale } from '@rewrite/shared';
+import { DEFAULT_EXTENSION_INSTALL_URL, LOCALES, type Locale } from '@rewrite/shared';
 import { Resend } from 'resend';
 import { log } from '../lib/log.ts';
 import type { Bindings } from '../types.ts';
@@ -28,6 +28,7 @@ import {
   day30Email,
   type EmailRecipient,
   type EmailTemplate,
+  type TemplateContext,
   welcomeEmail,
 } from './templates.ts';
 import { makeUnsubscribeToken } from './unsubscribe.ts';
@@ -38,7 +39,7 @@ interface Stage {
   /** Column on user_email_state that gets stamped after a successful send. */
   column: 'welcome_sent_at' | 'd1_sent_at' | 'd7_sent_at' | 'd14_sent_at' | 'd30_sent_at';
   /** Template builder. Receives the user's resolved UI locale. */
-  build: (r: EmailRecipient, ctx: { webOrigin: string }, locale: Locale) => EmailTemplate;
+  build: (r: EmailRecipient, ctx: TemplateContext, locale: Locale) => EmailTemplate;
   label: string;
 }
 
@@ -84,7 +85,10 @@ export async function processOnboardingEmails(env: Bindings): Promise<{ sent: nu
   }
   const resend = new Resend(env.RESEND_API_KEY);
   const now = Date.now();
-  const ctx = { webOrigin: env.WEB_ORIGIN || 'https://rewrite.so' };
+  const ctx: TemplateContext = {
+    webOrigin: env.WEB_ORIGIN || 'https://rewrite.so',
+    extensionInstallUrl: env.EXTENSION_INSTALL_URL || DEFAULT_EXTENSION_INSTALL_URL,
+  };
   const fromAddr = env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
   const from = `rewrite.so <${fromAddr}>`;
 
@@ -101,7 +105,7 @@ async function processStage(
   resend: Resend,
   secret: string,
   from: string,
-  ctx: { webOrigin: string },
+  ctx: TemplateContext,
   stage: Stage,
   now: number,
 ): Promise<number> {
@@ -184,7 +188,10 @@ export async function sendWelcomeNow(
 ): Promise<void> {
   if (!env.RESEND_API_KEY) return;
   const resend = new Resend(env.RESEND_API_KEY);
-  const ctx = { webOrigin: env.WEB_ORIGIN || 'https://rewrite.so' };
+  const ctx: TemplateContext = {
+    webOrigin: env.WEB_ORIGIN || 'https://rewrite.so',
+    extensionInstallUrl: env.EXTENSION_INSTALL_URL || DEFAULT_EXTENSION_INSTALL_URL,
+  };
   const fromAddr = env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
   const from = `rewrite.so <${fromAddr}>`;
   try {

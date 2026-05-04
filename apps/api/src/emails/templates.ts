@@ -15,7 +15,7 @@
  * - dispatcher resolves user_settings.ui_locale ('auto' → 'en') and passes here.
  */
 
-import type { Locale } from '@rewrite/shared';
+import { DEFAULT_EXTENSION_INSTALL_URL, type Locale } from '@rewrite/shared';
 
 export interface EmailRecipient {
   email: string;
@@ -33,6 +33,7 @@ export interface EmailTemplate {
 
 export interface TemplateContext {
   webOrigin: string;
+  extensionInstallUrl?: string;
 }
 
 // ===== Per-locale shell + greeting =====
@@ -291,7 +292,7 @@ export function day1Email(
   locale: Locale = 'en',
 ): EmailTemplate {
   const c = DAY1[locale];
-  const extUrl = 'https://chrome.google.com/webstore/'; // updated when listed
+  const extUrl = ctx.extensionInstallUrl ?? DEFAULT_EXTENSION_INSTALL_URL;
   const unsubUrl = unsubscribeUrl(ctx, r);
   const name = r.name ?? '';
   return {

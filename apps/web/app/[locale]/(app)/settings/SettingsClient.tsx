@@ -1,7 +1,12 @@
 'use client';
 
 import type { Locale, StoredLocale } from '@rewrite/shared';
-import { QUOTA, REWRITE_TARGET_LABELS, REWRITE_TARGETS } from '@rewrite/shared';
+import {
+  DEFAULT_EXTENSION_INSTALL_URL,
+  QUOTA,
+  REWRITE_TARGET_LABELS,
+  REWRITE_TARGETS,
+} from '@rewrite/shared';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { Link, usePathname, useRouter } from '../../../../i18n/navigation.ts';
@@ -9,6 +14,8 @@ import { Link, usePathname, useRouter } from '../../../../i18n/navigation.ts';
 // 一次性 dismiss flag（参考 packages/core/src/ui/candidates.ts L18-31 模式）。
 // 老用户 deploy 后会看到一次 WelcomeCard，dismiss 后永久消失，无 created_at gate。
 const WELCOME_DISMISSED_KEY = '__rewrite_so_settings_welcome_dismissed_v1';
+const EXTENSION_INSTALL_URL =
+  process.env.NEXT_PUBLIC_EXTENSION_INSTALL_URL || DEFAULT_EXTENSION_INSTALL_URL;
 function shouldShowWelcome(): boolean {
   try {
     return localStorage.getItem(WELCOME_DISMISSED_KEY) !== '1';
@@ -651,7 +658,6 @@ function ByokSection({
         <div style={{ fontSize: 14, color: '#111', fontWeight: 500 }}>{t('title')}</div>
         <div style={{ fontSize: 12, color: '#888', marginTop: 2, lineHeight: 1.6 }}>
           {t.rich('intro', {
-            limit: 2000,
             strong: (chunks) => <strong style={{ color: '#111' }}>{chunks}</strong>,
           })}
         </div>
@@ -910,7 +916,7 @@ function WelcomeCard({ onDismiss }: { onDismiss: () => void }) {
           {t('ctaTry')}
         </Link>
         <a
-          href="https://github.com/rewrite-so/rewrite.so"
+          href={EXTENSION_INSTALL_URL}
           target="_blank"
           rel="noopener"
           style={{

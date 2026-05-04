@@ -2,6 +2,7 @@
 
 import { createWebApiClient, mount } from '@rewrite/core';
 import {
+  DEFAULT_EXTENSION_INSTALL_URL,
   type Locale,
   QUOTA,
   REWRITE_TARGET_LABELS,
@@ -9,12 +10,15 @@ import {
   type RewriteTarget,
 } from '@rewrite/shared';
 import { useLocale, useTranslations } from 'next-intl';
-import { useEffect, useRef, useState } from 'react';
+import { type RefObject, useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from '../../../../i18n/navigation.ts';
 
 // 留空让 fetch 走 same-origin（Next rewrites 代理到 wrangler dev）
 // 这样 better-auth session cookie 是 web origin 的，不需跨域
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? '';
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? '';
+const EXTENSION_INSTALL_URL =
+  process.env.NEXT_PUBLIC_EXTENSION_INSTALL_URL || DEFAULT_EXTENSION_INSTALL_URL;
 
 const TARGET_LANG_STORAGE = 'rewrite-so-try-target-lang-v1';
 // /try 上累计的成功改写次数，跨 session 持久化。仅匿名用户用作转化 nudge
@@ -34,6 +38,7 @@ export function TryClient() {
   // 避免登录用户在 /v1/me 探测期间闪现错误的 "sign in"
   const [rewriteCount, setRewriteCount] = useState(0);
   const [authed, setAuthed] = useState<boolean | null>(null);
+  const { containerRef: turnstileRef, getTurnstileToken } = useTurnstileToken(TURNSTILE_SITE_KEY);
 
   useEffect(() => {
     const stored = window.localStorage.getItem(TARGET_LANG_STORAGE);
@@ -79,9 +84,9 @@ export function TryClient() {
       // 超配额 CTA 跳 /billing（营销页直接列定价/Subscribe 按钮），不跳 /settings 配置页
       upgradeUrl: '/billing?from=quota_exceeded',
       onInstallClick: () => {
-        // Phase 5 接 Chrome Web Store 链接
-        window.open('https://github.com/rewrite-so/rewrite.so', '_blank');
+        window.open(EXTENSION_INSTALL_URL, '_blank');
       },
+      getTurnstileToken,
       onOpenSettings: () => {
         window.open('/settings', '_blank');
       },
@@ -97,7 +102,7 @@ export function TryClient() {
       },
     });
     return () => handle.unmount();
-  }, [locale, targetLang]);
+  }, [getTurnstileToken, locale, targetLang]);
 
   useEffect(() => {
     // 首次访问 hint 兜底（输入框聚焦后显示，触发过一次后消失）
@@ -135,6 +140,19 @@ export function TryClient() {
 
   return (
     <div style={{ position: 'relative' }}>
+      {TURNSTILE_SITE_KEY && (
+        <div
+          ref={turnstileRef}
+          style={{
+            position: 'absolute',
+            left: -10000,
+            top: 0,
+            width: 1,
+            height: 1,
+            overflow: 'hidden',
+          }}
+        />
+      )}
       <div
         style={{
           display: 'flex',
@@ -226,6 +244,148 @@ export function TryClient() {
       {rewriteCount > 0 && authed === false && <TryNudge count={rewriteCount} />}
     </div>
   );
+}
+
+interface TurnstileApi {
+  render: (
+    container: HTMLElement,
+    options: {
+      sitekey: string;
+      size: 'invisible';
+      callback: (token: string) => void;
+      'error-callback': () => void;
+      'expired-callback': () => void;
+    },
+  ) => string | number;
+  execute: (widgetId: string) => void;
+  reset?: (widgetId: string) => void;
+  remove?: (widgetId: string) => void;
+}
+
+declare global {
+  interface Window {
+    turnstile?: TurnstileApi;
+  }
+}
+
+let turnstileLoader: Promise<TurnstileApi> | null = null;
+
+function loadTurnstile(): Promise<TurnstileApi> {
+  if (window.turnstile) return Promise.resolve(window.turnstile);
+  if (turnstileLoader) return turnstileLoader;
+
+  turnstileLoader = new Promise<TurnstileApi>((resolve, reject) => {
+    const existing = document.getElementById('rewrite-so-turnstile');
+    const finish = () => {
+      if (window.turnstile) resolve(window.turnstile);
+      else reject(new Error('turnstile_unavailable'));
+    };
+    if (existing) {
+      existing.addEventListener('load', finish, { once: true });
+      existing.addEventListener('error', () => reject(new Error('turnstile_load_failed')), {
+        once: true,
+      });
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.id = 'rewrite-so-turnstile';
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+    script.async = true;
+    script.defer = true;
+    script.addEventListener('load', finish, { once: true });
+    script.addEventListener('error', () => reject(new Error('turnstile_load_failed')), {
+      once: true,
+    });
+    document.head.appendChild(script);
+  }).catch((err) => {
+    turnstileLoader = null;
+    throw err;
+  });
+
+  return turnstileLoader;
+}
+
+function useTurnstileToken(siteKey: string): {
+  containerRef: RefObject<HTMLDivElement | null>;
+  getTurnstileToken: () => Promise<string | undefined>;
+} {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const widgetIdRef = useRef<string | null>(null);
+  const pendingRef = useRef<{
+    resolve: (token: string) => void;
+    reject: (err: Error) => void;
+    timeoutId: number;
+  } | null>(null);
+
+  const rejectPending = useCallback((message: string) => {
+    const pending = pendingRef.current;
+    if (!pending) return;
+    window.clearTimeout(pending.timeoutId);
+    pendingRef.current = null;
+    pending.reject(new Error(message));
+  }, []);
+
+  const renderWidget = useCallback(async (): Promise<string | null> => {
+    if (!siteKey) return null;
+    if (widgetIdRef.current) return widgetIdRef.current;
+    const api = await loadTurnstile();
+    const container = containerRef.current;
+    if (!container) throw new Error('turnstile_container_missing');
+
+    const widgetId = String(
+      api.render(container, {
+        sitekey: siteKey,
+        size: 'invisible',
+        callback: (token) => {
+          const pending = pendingRef.current;
+          if (!pending) return;
+          window.clearTimeout(pending.timeoutId);
+          pendingRef.current = null;
+          pending.resolve(token);
+        },
+        'error-callback': () => rejectPending('turnstile_failed'),
+        'expired-callback': () => rejectPending('turnstile_expired'),
+      }),
+    );
+    widgetIdRef.current = widgetId;
+    return widgetId;
+  }, [rejectPending, siteKey]);
+
+  useEffect(() => {
+    if (!siteKey) return;
+    void renderWidget().catch(() => undefined);
+    return () => {
+      rejectPending('turnstile_unmounted');
+      const widgetId = widgetIdRef.current;
+      if (widgetId && window.turnstile?.remove) {
+        window.turnstile.remove(widgetId);
+      }
+      widgetIdRef.current = null;
+    };
+  }, [rejectPending, renderWidget, siteKey]);
+
+  const getTurnstileToken = useCallback(async (): Promise<string | undefined> => {
+    if (!siteKey) return undefined;
+    const api = await loadTurnstile();
+    const widgetId = await renderWidget();
+    if (!widgetId) return undefined;
+
+    rejectPending('turnstile_replaced');
+    return new Promise<string>((resolve, reject) => {
+      pendingRef.current = {
+        resolve,
+        reject,
+        timeoutId: window.setTimeout(() => {
+          rejectPending('turnstile_timeout');
+        }, 10000),
+      };
+      api.reset?.(widgetId);
+      api.execute(widgetId);
+    });
+  }, [rejectPending, renderWidget, siteKey]);
+
+  return { containerRef, getTurnstileToken };
 }
 
 function TryNudge({ count }: { count: number }) {

@@ -19,6 +19,7 @@ import {
 } from '../lib/quota.ts';
 import { muxToSSE } from '../lib/sse.ts';
 import { stripThinking } from '../lib/strip-thinking.ts';
+import { verifyTurnstile } from '../lib/turnstile.ts';
 import { streamCompletion } from '../lib/upstream.ts';
 import type { AppEnv } from '../types.ts';
 
@@ -63,6 +64,7 @@ rewriteRoute.post('/v1/rewrite', async (c) => {
   // 注入 —— 'auto' 时为 null 让客户端 lang 兜底
   let userTargetLangRaw: string | null = null;
   let byokConfig: ByokConfigRow | null = null;
+  let anonymousIp: string | null = null;
   if (userId) {
     subject = { kind: 'user', id: userId };
     tier = await resolveUserTier(c.env.DB, userId);
@@ -76,7 +78,7 @@ rewriteRoute.post('/v1/rewrite', async (c) => {
         userTargetLang = prefs.target_lang;
       }
     }
-    // BYOK 配置（仅 Pro 用户能配，但这里不再校验 tier，写入路径已校验过）
+    // BYOK 配置（任何登录用户都可配；Pro 差异化是 hosted model 配额与支持）
     byokConfig = await c.env.DB.prepare(
       'SELECT base_url, model, encrypted_api_key, iv FROM byok_keys WHERE user_id = ?',
     )
@@ -90,18 +92,33 @@ rewriteRoute.post('/v1/rewrite', async (c) => {
       c.req.header('cf-connecting-ip') ||
       c.req.header('x-forwarded-for')?.split(',')[0]?.trim() ||
       '0.0.0.0';
+    anonymousIp = ip;
     const ipHash = await hashIp(ip, c.env.BETTER_AUTH_SECRET);
     subject = { kind: 'ip', id: ipHash };
     tier = 'anonymous_ip';
   }
 
+  if (!userId && !req.installId) {
+    const turnstileOk = await verifyTurnstile(
+      c.env.TURNSTILE_SECRET,
+      req.turnstileToken,
+      anonymousIp ?? undefined,
+    );
+    if (!turnstileOk) {
+      return c.json({ error: 'turnstile_failed' }, 403);
+    }
+  }
+
   // ===== Burst 限流（DO） =====
+  const isBYOK = byokConfig !== null;
   const bucket =
-    subject.kind === 'user'
-      ? BURST_BUCKETS.user
-      : subject.kind === 'install'
-        ? BURST_BUCKETS.install
-        : BURST_BUCKETS.ip;
+    isBYOK && subject.kind === 'user'
+      ? BURST_BUCKETS.byokUser
+      : subject.kind === 'user'
+        ? BURST_BUCKETS.user
+        : subject.kind === 'install'
+          ? BURST_BUCKETS.install
+          : BURST_BUCKETS.ip;
   const burst = await consume(c.env.RATE_LIMITER, subject, bucket);
   if (!burst.allowed) {
     return c.json({ error: 'rate_limit', retryAfterMs: burst.retryAfterMs }, 429, {
@@ -111,7 +128,6 @@ rewriteRoute.post('/v1/rewrite', async (c) => {
 
   // ===== 月配额（D1 usage_monthly） =====
   // BYOK 用户：不查月配额，仅记 byok_count；DO burst 仍生效作为反代滥用底线
-  const isBYOK = byokConfig !== null;
   const quota = await checkAndIncrement(c.env.DB, subject, tier, isBYOK);
   if (!quota.allowed) {
     // 把 authed/tier 带入 4xx body，让客户端 setGlobalError 决定 CTA：

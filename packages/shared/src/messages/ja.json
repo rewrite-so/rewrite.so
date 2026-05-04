@@ -186,7 +186,7 @@
       },
       "byok": {
         "title": "BYOK（自分の API キーを使う）",
-        "intro": "OpenAI 互換の endpoint と key を入力すると、書き換えは直接そのプロバイダーへ送信され、<strong>{limit, number} 回 / 月の上限にカウントされません</strong>。Key は AES-GCM で暗号化保存され、ログには一切残りません。",
+        "intro": "OpenAI 互換の endpoint と key を入力すると、書き換えは直接そのプロバイダーへ送信され、<strong>ホスト型モデルの月間上限にはカウントされません</strong>。Key は AES-GCM で暗号化保存され、ログには一切残りません。",
         "baseUrl": "Base URL",
         "model": "Model",
         "apiKey": "API Key",

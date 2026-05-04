@@ -20,7 +20,7 @@ export const RewriteRequestSchema = z.object({
   /** 扩展安装 ID（匿名维度） */
   installId: z.string().min(1).max(64).optional(),
   /** 网页体验页 Turnstile token，扩展端不必填 */
-  turnstileToken: z.string().optional(),
+  turnstileToken: z.string().max(4096).optional(),
 });
 
 export type RewriteRequest = z.infer<typeof RewriteRequestSchema>;

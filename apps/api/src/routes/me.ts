@@ -306,7 +306,7 @@ meRoute.get('/v1/me/byok', async (c) => {
 /**
  * PUT /v1/me/byok
  *
- * 设置或替换 BYOK 配置。需登录 + Pro 订阅（订阅校验在路由内做）。
+ * 设置或替换 BYOK 配置。需登录；免费登录用户也可配置。
  * apiKey 仅传输不存明文，AES-GCM 加密后存。
  */
 meRoute.put('/v1/me/byok', async (c) => {
