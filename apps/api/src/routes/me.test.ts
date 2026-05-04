@@ -44,7 +44,20 @@ const fakeDB = {
   }),
 } as unknown as D1Database;
 
-const fakeRateLimiter = {} as unknown as DurableObjectNamespace;
+// Fake DurableObjectNamespace：默认所有 consume 返 allowed=true，
+// 测试 rate-limit case 时可临时 override
+let rateLimiterAllowed = true;
+const fakeRateLimiter = {
+  idFromName: (_name: string) => ({}) as DurableObjectId,
+  get: (_id: DurableObjectId) =>
+    ({
+      fetch: async () =>
+        Response.json(
+          { allowed: rateLimiterAllowed, remaining: 99, retryAfterMs: 0 },
+          { status: 200 },
+        ),
+    }) as unknown as DurableObjectStub,
+} as unknown as DurableObjectNamespace;
 const fakeKV = {} as unknown as KVNamespace;
 
 const MOCK_ENV = {
@@ -64,6 +77,7 @@ const MOCK_ENV = {
 beforeEach(() => {
   mockSession = null;
   mockTier = 'free';
+  rateLimiterAllowed = true;
 });
 
 afterEach(() => {
@@ -281,5 +295,74 @@ describe('POST /v1/me/byok/test', () => {
       MOCK_ENV,
     );
     expect(res.status).toBe(400);
+  });
+
+  it('returns 429 when rate-limited (10 req/min/user)', async () => {
+    mockSession = { user: { id: 'u_free', email: 'free@test.com' } };
+    rateLimiterAllowed = false;
+    const res = await app.request(
+      '/v1/me/byok/test',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(validBody),
+      },
+      MOCK_ENV,
+    );
+    expect(res.status).toBe(429);
+    const body = (await res.json()) as { error: string };
+    expect(body.error).toBe('rate_limit');
+  });
+
+  it('returns error=invalid_base_url when baseUrl includes /chat/completions', async () => {
+    mockSession = { user: { id: 'u_free', email: 'free@test.com' } };
+    const res = await app.request(
+      '/v1/me/byok/test',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          ...validBody,
+          baseUrl: 'https://api.openai.com/v1/chat/completions',
+        }),
+      },
+      MOCK_ENV,
+    );
+    const body = (await res.json()) as { ok: boolean; error: string };
+    expect(body.ok).toBe(false);
+    expect(body.error).toBe('invalid_base_url');
+  });
+
+  it('returns error=timeout when fetch is aborted by 8s timer', async () => {
+    mockSession = { user: { id: 'u_free', email: 'free@test.com' } };
+    // mock fetch 让它响应 AbortSignal 抛 AbortError —— 模拟超时被 controller.abort() 触发
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (_input, init) => {
+      const signal = (init as RequestInit | undefined)?.signal;
+      return new Promise<Response>((_, reject) => {
+        signal?.addEventListener('abort', () => {
+          const err = new DOMException('aborted', 'AbortError');
+          reject(err);
+        });
+      });
+    });
+
+    vi.useFakeTimers();
+    const promise = app.request(
+      '/v1/me/byok/test',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(validBody),
+      },
+      MOCK_ENV,
+    );
+    // 推进时钟越过 8s timeout，触发 controller.abort()
+    await vi.advanceTimersByTimeAsync(8001);
+    const res = await promise;
+    vi.useRealTimers();
+
+    const body = (await res.json()) as { ok: boolean; error: string };
+    expect(body.ok).toBe(false);
+    expect(body.error).toBe('timeout');
   });
 });

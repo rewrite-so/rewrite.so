@@ -18,6 +18,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 商业划分调整为 Pro = hosted model（2000/月）+ Priority；Free + BYOK = 自带 key 无限
   - 产品决策合理性：能配 BYOK 的人本来就是技术用户，他们 OpenAI key 在手要么直接用 ChatGPT
     要么找别家工具——锁 Pro 反消费者。Cursor/Continue/Raycast 都是登录即 BYOK
+- （CR follow-up）BYOK test endpoint 三处加固：
+  - 加 rate limit `byokTest`（10 req/min/user，比生产 100 严格 10x）防 SSRF / DDoS
+    amplification —— 用户能填任意 baseUrl 让 worker fetch，不限速时单账号可 burst 100 req
+  - baseUrl zod refine 检测 `/chat/completions` 后缀，返回 `invalid_base_url` 而不是
+    "model_not_found" 误导
+  - me.test.ts 加 3 条测试覆盖新路径：rate_limit / invalid_base_url / timeout（用
+    vi.useFakeTimers + AbortSignal）。API 测试 209 → 212
 - BYOK Test 按钮 + `POST /v1/me/byok/test` endpoint —— 保存前验证连通性：
   - 8s 超时；错误码：unauthorized/forbidden/model_not_found/rate_limited/timeout/unreachable
   - 不存 DB / 不写日志 / 不计配额（key 是用户的，绝不落地）

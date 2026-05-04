@@ -122,6 +122,9 @@ export const BURST_BUCKETS = {
   user: { capacity: 8, refillPerSec: 8 / 30 }, // 8/30s
   // BYOK 用户专用反代滥用底线：100 req/min（CLAUDE.md 契约）
   byokUser: { capacity: 100, refillPerSec: 100 / 60 },
+  // BYOK Test endpoint：10 req/min/user。比生产严格——配置态不该频繁打。
+  // 防止登录用户用我们 worker 的 IP 做 SSRF / DDoS amplification。
+  byokTest: { capacity: 10, refillPerSec: 10 / 60 },
 } as const;
 
 export interface ConsumeResult {

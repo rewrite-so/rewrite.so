@@ -195,6 +195,7 @@
           "rate_limited": "プロバイダーがレート制限中（429）。後で再試行してください。",
           "timeout": "8 秒以内に応答がありませんでした。base URL を確認してください。",
           "unreachable": "URL に到達できません。base URL / ネットワークを確認してください。",
+          "invalid_base_url": "base URL に /chat/completions を含めないでください — エンドポイントパスは自動で付加されます。",
           "unknown": "テスト失敗。プロバイダーのレスポンスを確認してください。"
         }
       },

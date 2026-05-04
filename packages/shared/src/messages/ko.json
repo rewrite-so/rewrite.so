@@ -195,6 +195,7 @@
           "rate_limited": "Provider 가 속도 제한 중 (429). 나중에 다시 시도하세요.",
           "timeout": "8초 이내 응답 없음. base URL 을 확인하세요.",
           "unreachable": "URL 에 연결할 수 없음. base URL / 네트워크를 확인하세요.",
+          "invalid_base_url": "base URL 에 /chat/completions 를 포함하지 마세요 — 엔드포인트 경로는 자동으로 추가됩니다.",
           "unknown": "테스트 실패. provider 응답을 확인하세요."
         }
       },

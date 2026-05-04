@@ -195,6 +195,7 @@
           "rate_limited": "Provider 限流中（429），稍后再试。",
           "timeout": "8 秒内未响应，请检查 base URL。",
           "unreachable": "URL 无法访问，请检查 base URL / 网络。",
+          "invalid_base_url": "Base URL 不要带 /chat/completions——那是会自动拼上的 endpoint 路径。",
           "unknown": "测试失败，请查看 provider 响应。"
         }
       },

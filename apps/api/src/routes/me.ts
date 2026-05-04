@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
+import { BURST_BUCKETS, consume } from '../do/rate-limiter.ts';
 import { createAuth } from '../lib/auth.ts';
 import { encryptApiKey } from '../lib/crypto.ts';
 import { log } from '../lib/log.ts';
@@ -316,7 +317,14 @@ meRoute.delete('/v1/me/byok', async (c) => {
  */
 const ByokTestSchema = z
   .object({
-    baseUrl: z.string().url().max(200),
+    baseUrl: z
+      .string()
+      .url()
+      .max(200)
+      // 用户常误把完整 endpoint 当 base URL；提示更准确的错误而不是让它 404
+      .refine((url) => !/\/chat\/completions\/?$/i.test(url), {
+        message: 'base URL should not include /chat/completions',
+      }),
     model: z.string().min(1).max(100),
     apiKey: z.string().min(8).max(500),
   })
@@ -327,6 +335,16 @@ meRoute.post('/v1/me/byok/test', async (c) => {
   const session = await auth.api.getSession({ headers: c.req.raw.headers });
   if (!session) return c.json({ error: 'unauthorized' }, 401);
 
+  // 比生产严格的 rate limit：10 req/min/user —— 配置态不该频繁打，且
+  // 防止登录用户用我们 worker IP 做 SSRF / DDoS amplification（任意 baseUrl 都能 fetch）
+  const subject: Subject = { kind: 'user', id: session.user.id };
+  const burst = await consume(c.env.RATE_LIMITER, subject, BURST_BUCKETS.byokTest);
+  if (!burst.allowed) {
+    return c.json({ error: 'rate_limit', retryAfterMs: burst.retryAfterMs }, 429, {
+      'retry-after': String(Math.ceil(burst.retryAfterMs / 1000)),
+    });
+  }
+
   let body: unknown;
   try {
     body = await c.req.json();
@@ -335,7 +353,12 @@ meRoute.post('/v1/me/byok/test', async (c) => {
   }
   const parsed = ByokTestSchema.safeParse(body);
   if (!parsed.success) {
-    return c.json({ error: 'invalid_input', detail: parsed.error.issues[0]?.message }, 400);
+    // 把 zod 的 refine error 当 invalid_base_url 透传给客户端，让 UI 能精确归因
+    const issue = parsed.error.issues[0];
+    if (issue?.message.includes('chat/completions')) {
+      return c.json({ ok: false, error: 'invalid_base_url' });
+    }
+    return c.json({ error: 'invalid_input', detail: issue?.message }, 400);
   }
   const { baseUrl, model, apiKey } = parsed.data;
 

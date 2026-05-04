@@ -195,6 +195,7 @@
           "rate_limited": "Proveedor con rate limit (429). Inténtalo después.",
           "timeout": "Sin respuesta en 8s. Verifica la base URL.",
           "unreachable": "No se pudo alcanzar la URL. Verifica base URL / red.",
+          "invalid_base_url": "La base URL no debe incluir /chat/completions — esa ruta se añade automáticamente.",
           "unknown": "Prueba falló. Revisa la respuesta del proveedor."
         }
       },

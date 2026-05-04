@@ -195,6 +195,7 @@
           "rate_limited": "Provider drosselt (429). Später erneut versuchen.",
           "timeout": "Keine Antwort innerhalb 8 s. Base URL prüfen.",
           "unreachable": "URL nicht erreichbar. Base URL / Netzwerk prüfen.",
+          "invalid_base_url": "Base URL darf nicht /chat/completions enthalten — dieser Pfad wird automatisch angehängt.",
           "unknown": "Test fehlgeschlagen. Provider-Antwort prüfen."
         }
       },

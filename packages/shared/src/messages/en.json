@@ -195,6 +195,7 @@
           "rate_limited": "Provider rate-limited (429). Try later.",
           "timeout": "Timed out after 8s. Check the base URL.",
           "unreachable": "Couldn't reach the URL. Check base URL / network.",
+          "invalid_base_url": "Base URL should not include /chat/completions — that's the endpoint path appended automatically.",
           "unknown": "Test failed. See provider response."
         }
       },
