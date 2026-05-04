@@ -7,7 +7,13 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["**", "!scripts", "!**/.wrangler-state", "!**/next-env.d.ts"]
+    "includes": [
+      "**",
+      "!scripts",
+      "!**/.wrangler-state",
+      "!**/next-env.d.ts",
+      "!docs/chrome-web-store-assets/generate-assets.mjs"
+    ]
   },
   "formatter": {
     "enabled": true,
