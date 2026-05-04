@@ -53,6 +53,17 @@ export function TryClient() {
       .catch(() => setAuthed(false));
   }, []);
 
+  // rewriteCount 变化时持久化到 localStorage（独立 effect 避免在 React
+  // setState updater 里做 side effect；StrictMode 下 updater 可能双调用）
+  useEffect(() => {
+    if (rewriteCount === 0) return; // 初始化时不写
+    try {
+      window.localStorage.setItem(REWRITES_KEY, String(rewriteCount));
+    } catch {
+      /* localStorage 不可用 */
+    }
+  }, [rewriteCount]);
+
   useEffect(() => {
     // 注：扩展不在 rewrite.so 自家域工作（manifest exclude_matches），所以
     // /try 永远是 web 端这一份 mount —— 装扩展的用户在 /try 也是"试用"体验。
@@ -77,19 +88,12 @@ export function TryClient() {
       onError: (err) => {
         console.warn('[rewrite.so]', err);
       },
-      // 用户接受候选改写后递增计数（持久化到 localStorage）。
-      // 触发"登录解锁更多"nudge 显示。仅在 onSelect 真正成功（panel close +
-      // editable 替换）后才 fire，所以 abort / Esc / 失败的改写不会算
+      // 用户接受候选改写后递增计数。触发"登录解锁更多"nudge 显示。
+      // 仅在 onSelect 真正成功（panel close + editable 替换）后 fire，
+      // abort / Esc / 失败的改写不算。localStorage 持久化在独立 effect
+      // 里 watch rewriteCount——避免在 React updater 里做 side effect
       onAccepted: () => {
-        setRewriteCount((n) => {
-          const next = n + 1;
-          try {
-            window.localStorage.setItem(REWRITES_KEY, String(next));
-          } catch {
-            /* ignore */
-          }
-          return next;
-        });
+        setRewriteCount((n) => n + 1);
       },
     });
     return () => handle.unmount();
@@ -226,9 +230,11 @@ export function TryClient() {
 
 function TryNudge({ count }: { count: number }) {
   const t = useTranslations('page.try');
+  // 故意**不加** role="status"——它隐式带 aria-live="polite"，每次 count
+  // +1 屏幕阅读器都会重新播报，对做多次改写的用户是噪音。这是底部的静态
+  // 引导文字，screen reader 用户 tab 到时自然读出
   return (
     <p
-      role="status"
       style={{
         marginTop: 14,
         fontSize: 13,
