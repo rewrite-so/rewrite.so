@@ -4,7 +4,14 @@ import { BURST_BUCKETS, consume } from '../do/rate-limiter.ts';
 import { createAuth } from '../lib/auth.ts';
 import { encryptApiKey } from '../lib/crypto.ts';
 import { log } from '../lib/log.ts';
-import { getUsage, hashIp, resolveUserTier, type Subject, type Tier } from '../lib/quota.ts';
+import {
+  claimAnonymousUsage,
+  getUsage,
+  hashIp,
+  resolveUserTier,
+  type Subject,
+  type Tier,
+} from '../lib/quota.ts';
 import { sanitizeTargetLang } from '../lib/sanitize-target-lang.ts';
 import type { AppEnv } from '../types.ts';
 
@@ -191,6 +198,52 @@ meRoute.patch('/v1/me/settings', async (c) => {
     .run();
 
   return c.json({ targetLang, uiLocale });
+});
+
+// ============================================================
+// 配额合并：匿名（installId）→ 登录用户
+// ============================================================
+
+const ClaimInstallSchema = z
+  .object({
+    installId: z.string().min(8).max(64),
+  })
+  .strict();
+
+/**
+ * POST /v1/me/claim-install
+ *
+ * 扩展 content script 在用户登录后调用一次。把当月 ('install', installId) 维度的
+ * count 加到 ('user', userId) 维度。靠 usage_claims 表 PK 幂等，重复调用 no-op。
+ *
+ * 这是兑现 CLAUDE.md / migrations/0001_init.sql 里"登录后 install 配额合并"承诺的实现。
+ * 以前没有这一步，匿名扩展用户用完 5/5 → 注册 → 拿到全新 30/30，是绕匿名档位的滥用通道。
+ */
+meRoute.post('/v1/me/claim-install', async (c) => {
+  const auth = createAuth(c.env);
+  const session = await auth.api.getSession({ headers: c.req.raw.headers });
+  if (!session) return c.json({ error: 'unauthorized' }, 401);
+
+  let body: unknown;
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ error: 'invalid_json' }, 400);
+  }
+  const parsed = ClaimInstallSchema.safeParse(body);
+  if (!parsed.success) {
+    return c.json({ error: 'invalid_input', detail: parsed.error.issues[0]?.message }, 400);
+  }
+
+  const result = await claimAnonymousUsage(c.env.DB, session.user.id, {
+    kind: 'install',
+    id: parsed.data.installId,
+  });
+
+  return c.json({
+    merged: result.merged,
+    applied: result.applied,
+  });
 });
 
 // ============================================================

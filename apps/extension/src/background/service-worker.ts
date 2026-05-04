@@ -32,6 +32,30 @@ chrome.runtime.onMessage.addListener((rawMsg: unknown, _sender, sendResponse) =>
     return true; // 异步响应
   }
 
+  if (msg?.type === 'claim-install') {
+    const installId = (msg as { installId?: string }).installId;
+    if (typeof installId !== 'string' || installId.length === 0) {
+      sendResponse({ ok: false, error: 'invalid_install_id' });
+      return false;
+    }
+    fetch(`${API_BASE}/v1/me/claim-install`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ installId }),
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          sendResponse({ ok: false, error: `http_${res.status}` });
+          return;
+        }
+        const data = (await res.json()) as { merged: number; applied: boolean };
+        sendResponse({ ok: true, data });
+      })
+      .catch((err) => sendResponse({ ok: false, error: (err as Error).message }));
+    return true;
+  }
+
   if (msg?.type === 'me-settings:patch') {
     fetch(`${API_BASE}/v1/me/settings`, {
       method: 'PATCH',

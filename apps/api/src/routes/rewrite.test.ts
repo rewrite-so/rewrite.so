@@ -233,6 +233,28 @@ describe('POST /v1/rewrite', () => {
     expect(res.status).toBe(400);
   });
 
+  it('meta event omits userTargetLang for anonymous user (no DB pref)', async () => {
+    const res = await app.request(
+      '/v1/rewrite',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          text: 'hi',
+          hasSelection: false,
+          lang: 'en',
+          styles: ['faithful'],
+        }),
+      },
+      MOCK_ENV,
+    );
+    if (!res.body) throw new Error('expected body');
+    const events: SSEEvent[] = [];
+    for await (const ev of parseSSEStream(res.body)) events.push(ev);
+    const meta = events[0] as Extract<SSEEvent, { event: 'meta' }>;
+    expect(meta.data.status?.userTargetLang).toBeUndefined();
+  });
+
   it('meta event includes status payload (anonymous: authed=false)', async () => {
     const res = await app.request(
       '/v1/rewrite',

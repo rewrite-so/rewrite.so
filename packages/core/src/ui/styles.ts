@@ -130,17 +130,23 @@ export const SHADOW_STYLES = `
   pointer-events: none;
 }
 
-/* quota chip：used/limit 数字，接近上限时显示（80% 阈值），琥珀色提示 */
+/* quota chip：used/limit 数字，分两段显示
+ *  - .quota-chip 默认（>=50%, <80%）：与 target chip 同款灰色，柔和提示
+ *  - .quota-chip.warn（>=80%）：琥珀色，明显警告"快用完" */
 .quota-chip {
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.02em;
   padding: 2px 8px;
   border-radius: 4px;
-  background: light-dark(rgba(245,158,11,0.10), rgba(245,158,11,0.18));
-  color: light-dark(#b45309, #fbbf24);
+  background: light-dark(rgba(0,0,0,0.05), rgba(255,255,255,0.08));
+  color: light-dark(rgba(0,0,0,0.6), rgba(255,255,255,0.6));
   pointer-events: none;
   font-feature-settings: "tnum";
+}
+.quota-chip.warn {
+  background: light-dark(rgba(245,158,11,0.10), rgba(245,158,11,0.18));
+  color: light-dark(#b45309, #fbbf24);
 }
 
 .settings-btn {

@@ -478,7 +478,8 @@
       },
       "settings": "설정",
       "myAccount": "내 계정",
-      "signIn": "로그인"
+      "signIn": "로그인",
+      "reportTranslation": "번역 오류 신고 →"
     },
     "options": {
       "title": "설정",

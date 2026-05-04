@@ -478,7 +478,8 @@
       },
       "settings": "Configuración",
       "myAccount": "Mi cuenta",
-      "signIn": "Iniciar sesión"
+      "signIn": "Iniciar sesión",
+      "reportTranslation": "Reportar traducción incorrecta →"
     },
     "options": {
       "title": "Configuración",

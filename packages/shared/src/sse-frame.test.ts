@@ -70,6 +70,30 @@ describe('parseSSEFrame', () => {
     expect(parsed).toEqual(orig);
   });
 
+  it('round-trips meta status with userTargetLang for cross-end sync', () => {
+    const orig: SSEEvent = {
+      event: 'meta',
+      data: {
+        requestId: 'abc',
+        streams: ['faithful'],
+        langDetected: 'ja',
+        status: {
+          authed: true,
+          tier: 'free',
+          isBYOK: false,
+          used: 1,
+          limit: 30,
+          userTargetLang: 'ja',
+        },
+      },
+    };
+    const parsed = parseSSEFrame(encodeSSEFrame(orig).trimEnd()) as Extract<
+      SSEEvent,
+      { event: 'meta' }
+    >;
+    expect(parsed.data.status?.userTargetLang).toBe('ja');
+  });
+
   it('meta status is optional (omitted when not set)', () => {
     const orig: SSEEvent = {
       event: 'meta',

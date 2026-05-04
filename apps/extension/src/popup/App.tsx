@@ -69,6 +69,45 @@ export function App() {
             : t('ext.popup.signIn')}
         </button>
       </div>
+
+      <FeedbackLink />
+    </div>
+  );
+}
+
+/**
+ * 翻译反馈入口：以前没渠道收集 i18n 错译反馈（zh-TW 是否要拆出 / ja-ko-es-fr-de
+ * 是 LLM 翻译初稿待母语校对）。这里加一行小字链接，mailto 预填 subject + locale，
+ * 让用户点一下就能给我们写邮件。空间小、噪音小、用户主动行为。
+ */
+function FeedbackLink() {
+  const t = useT();
+  const locale = useUiLocale();
+  const subject = encodeURIComponent(`Translation feedback (${locale})`);
+  const body = encodeURIComponent(
+    `Locale: ${locale}\nExtension version: ${chrome.runtime.getManifest().version}\n\n[Describe what's wrong]`,
+  );
+  const href = `mailto:hello@rewrite.so?subject=${subject}&body=${body}`;
+  return (
+    <div style={{ marginTop: 10, textAlign: 'center', fontSize: 11 }}>
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener"
+        style={{
+          color: '#999',
+          textDecoration: 'none',
+          borderBottom: '1px solid transparent',
+        }}
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLAnchorElement).style.borderBottomColor = '#999';
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLAnchorElement).style.borderBottomColor = 'transparent';
+        }}
+      >
+        {t('ext.popup.reportTranslation')}
+      </a>
     </div>
   );
 }

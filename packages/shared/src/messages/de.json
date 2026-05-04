@@ -478,7 +478,8 @@
       },
       "settings": "Einstellungen",
       "myAccount": "Mein Konto",
-      "signIn": "Anmelden"
+      "signIn": "Anmelden",
+      "reportTranslation": "Falsche Übersetzung melden →"
     },
     "options": {
       "title": "Einstellungen",

@@ -142,15 +142,30 @@ async function upsertSubscription(
     log.warn('webhook.missing_object', { eventId: evt.id });
     return;
   }
+  await upsertSubscriptionFromObject(env, obj, status, evt.id);
+}
 
+/**
+ * 从一个 Creem subscription-like object 落库。被 webhook 路由（subscription.* 事件）
+ * 和 /v1/billing/verify-checkout（旁路 webhook，避免延迟期间用户感知不一致）共用。
+ *
+ * 幂等：以 creem_subscription_id 为去重键；同 sub 多次调（webhook + verify 都跑）会
+ * UPDATE 而不是重复 INSERT。
+ */
+export async function upsertSubscriptionFromObject(
+  env: AppEnv['Bindings'],
+  obj: Record<string, unknown>,
+  status: SubscriptionStatus,
+  ctxId: string, // 日志关联用（webhook eventId / verify checkoutId）
+): Promise<void> {
   const userId = extractUserIdFromMetadata(obj);
   const customerId = extractCustomerId(obj);
   const productId = extractProductId(obj);
   const subId = typeof obj.id === 'string' ? obj.id : null;
 
   if (!userId || !customerId || !productId || !subId) {
-    log.warn('webhook.missing_fields', {
-      eventId: evt.id,
+    log.warn('subscription.missing_fields', {
+      ctxId,
       hasUserId: !!userId,
       hasCustomerId: !!customerId,
       hasProductId: !!productId,
@@ -165,7 +180,7 @@ async function upsertSubscription(
     env.CREEM_PRO_YEARLY_PRODUCT_ID,
   );
   if (!plan) {
-    log.warn('webhook.unknown_product', { eventId: evt.id, productId });
+    log.warn('subscription.unknown_product', { ctxId, productId });
     return;
   }
 

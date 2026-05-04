@@ -2,6 +2,7 @@ import { type MountOptions, mount } from '@rewrite/core';
 import { type Locale, pickLocale } from '@rewrite/shared';
 import { WEB_BASE } from '../lib/config.ts';
 import {
+  claimInstallQuota,
   fetchCloudPrefs,
   getOrCreateInstallId,
   getUserPrefs,
@@ -19,15 +20,19 @@ function resolveUiLocale(prefs: UserPrefs): Locale {
  * 拉 cloud → 覆盖 chrome.storage cache（如果有变化）。chrome.storage.set 会触发
  * onPrefsChanged → mount/unmount 自动 reflow，不需要手动重 mount。
  * fail-soft：未登录或网络错误返 null，跳过写入。
+ *
+ * 返回 true 表示用户已登录（cloud 拉成功），false 表示未登录或失败。
  */
-async function syncFromCloud(): Promise<void> {
+async function syncFromCloud(): Promise<boolean> {
   const cloud = await fetchCloudPrefs();
-  if (!cloud) return;
+  if (!cloud) return false;
   const current = await getUserPrefs();
-  if (current.targetLang === cloud.targetLang && current.uiLocale === cloud.uiLocale) return;
-  await chrome.storage.local.set({
-    userPrefs: { ...current, ...cloud, _v: 1 as const },
-  });
+  if (current.targetLang !== cloud.targetLang || current.uiLocale !== cloud.uiLocale) {
+    await chrome.storage.local.set({
+      userPrefs: { ...current, ...cloud, _v: 1 as const },
+    });
+  }
+  return true;
 }
 
 const VISIBILITY_SYNC_THROTTLE_MS = 30_000;
@@ -36,7 +41,15 @@ async function bootstrap(): Promise<void> {
   // 启动时尝试从 web /v1/me/settings 拉偏好覆盖本地 cache —— 让用户在 web /settings
   // 改的偏好能在扩展立即生效。已登录拿到值，未登录返 null 不动。
   // 注：不阻塞 mount —— cloud sync 失败不影响本地体验
-  await syncFromCloud();
+  const isAuthed = await syncFromCloud();
+
+  // 已登录用户：把当月匿名 install 配额合并到 user 维度（兑现 CLAUDE.md 承诺，
+  // 防匿名→注册薅档位）。服务端 usage_claims PK 幂等，重复调用 no-op；这里
+  // fail-soft 不阻塞 mount。每次 bootstrap 都会调一次 —— 单次 D1 query 成本可忽略。
+  if (isAuthed) {
+    const id = await getOrCreateInstallId();
+    void claimInstallQuota(id);
+  }
 
   // 标签页重新可见时再 sync 一次（节流 30s），让用户在 web 改完偏好切回当前标签页时
   // 立即拿到新值——不用刷新页面。chrome.storage.onChanged 会触发现有 mount 重新挂载。
@@ -62,6 +75,18 @@ async function bootstrap(): Promise<void> {
     installId,
     loginUrl: `${WEB_BASE}/login`,
     upgradeUrl: `${WEB_BASE}/settings`,
+    // 实时跨端同步：服务端在 SSE meta.status 里 echo user_settings.target_lang，
+    // 扩展把它写回 chrome.storage（如果与本地 cache 不同）。下次 inject 重 mount
+    // 时直接拿到新值——避免等 30s visibilitychange 节流
+    onUserPrefsSync: ({ targetLang }) => {
+      if (targetLang !== p.targetLang) {
+        // patchUserPrefs 内部会 fail-soft 同时 PATCH /v1/me/settings —— 这里
+        // 反向 sync 只走本地写入避免回写源头造成无限循环
+        void chrome.storage.local.set({
+          userPrefs: { ...p, targetLang, _v: 1 as const },
+        });
+      }
+    },
     // content script 不能直接调 chrome.runtime.openOptionsPage()（API 不存在 in isolated world）
     // 走 sendMessage → background SW 代为打开
     onOpenSettings: () => {

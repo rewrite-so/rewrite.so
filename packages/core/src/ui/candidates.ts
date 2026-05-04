@@ -465,18 +465,22 @@ function openPanel(
       // BYOK badge：仅 BYOK 模式显示
       byokBadge.style.display = status.isBYOK ? '' : 'none';
 
-      // quota chip：BYOK 模式不显示；非 BYOK 且 used/limit > 0.8 时显示
+      // quota chip：BYOK 模式不显示；其它两段显示——
+      //   >=50% 显示灰色（用 .quota-chip 默认样式），引起轻度注意
+      //   >=80% 加 .warn 变琥珀色，明显警告"快用完"
       if (
         !status.isBYOK &&
         typeof status.used === 'number' &&
         typeof status.limit === 'number' &&
         status.limit > 0 &&
-        status.used / status.limit > 0.8
+        status.used / status.limit >= 0.5
       ) {
         quotaChip.textContent = `${status.used}/${status.limit}`;
+        quotaChip.classList.toggle('warn', status.used / status.limit >= 0.8);
         quotaChip.style.display = '';
       } else {
         quotaChip.style.display = 'none';
+        quotaChip.classList.remove('warn');
       }
 
       // signin hint footer：未登录 + 无 install hook + 没插过；仅插一次

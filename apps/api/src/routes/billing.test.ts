@@ -1,0 +1,219 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+// 必须在 import app 之前 mock auth
+let mockSession: { user: { id: string; email: string } } | null = null;
+
+vi.mock('../lib/auth.ts', () => ({
+  createAuth: () => ({
+    api: { getSession: async () => mockSession },
+    handler: async () => new Response('mock', { status: 200 }),
+  }),
+}));
+
+const app = (await import('../index.ts')).app;
+
+const fakeDB = {
+  prepare: (_sql: string) => ({
+    bind: (..._args: unknown[]) => ({
+      first: async () => null,
+      run: async () => ({ success: true }),
+      all: async () => ({ results: [], success: true }),
+    }),
+  }),
+} as unknown as D1Database;
+
+const fakeRateLimiter = {
+  idFromName: (_name: string) => ({}) as DurableObjectId,
+  get: (_id: DurableObjectId) =>
+    ({
+      fetch: async () =>
+        Response.json({ allowed: true, remaining: 99, retryAfterMs: 0 }, { status: 200 }),
+    }) as unknown as DurableObjectStub,
+} as unknown as DurableObjectNamespace;
+const fakeKV = {} as unknown as KVNamespace;
+
+const MOCK_ENV = {
+  OPENAI_BASE_URL: 'https://upstream.test/v1',
+  OPENAI_API_KEY: 'sk-test',
+  OPENAI_MODEL: 'gpt-4o-mini',
+  BETTER_AUTH_SECRET: 'test-secret',
+  BETTER_AUTH_URL: 'http://localhost',
+  RESEND_API_KEY: '',
+  RESEND_FROM_EMAIL: '',
+  CREEM_API_KEY: 'creem_test_key',
+  CREEM_PRO_MONTHLY_PRODUCT_ID: 'prod_monthly',
+  CREEM_PRO_YEARLY_PRODUCT_ID: 'prod_yearly',
+  WEB_ORIGIN: 'https://rewrite.so',
+  DB: fakeDB,
+  KV: fakeKV,
+  RATE_LIMITER: fakeRateLimiter,
+} as const;
+
+beforeEach(() => {
+  mockSession = null;
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+describe('POST /v1/billing/verify-checkout', () => {
+  it('returns 401 when not signed in', async () => {
+    mockSession = null;
+    const res = await app.request(
+      '/v1/billing/verify-checkout',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ checkoutId: 'ck_123' }),
+      },
+      MOCK_ENV,
+    );
+    expect(res.status).toBe(401);
+  });
+
+  it('returns 400 on missing checkoutId', async () => {
+    mockSession = { user: { id: 'u1', email: 'u1@test.com' } };
+    const res = await app.request(
+      '/v1/billing/verify-checkout',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({}),
+      },
+      MOCK_ENV,
+    );
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 502 when Creem fetch fails', async () => {
+    mockSession = { user: { id: 'u1', email: 'u1@test.com' } };
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response('boom', { status: 500 }));
+    const res = await app.request(
+      '/v1/billing/verify-checkout',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ checkoutId: 'ck_123' }),
+      },
+      MOCK_ENV,
+    );
+    expect(res.status).toBe(502);
+  });
+
+  it('returns 403 when checkout metadata.user_id does not match session user', async () => {
+    mockSession = { user: { id: 'u1', email: 'u1@test.com' } };
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+      Response.json({
+        id: 'ck_123',
+        status: 'completed',
+        metadata: { user_id: 'OTHER_USER' },
+        subscription: {},
+      }),
+    );
+    const res = await app.request(
+      '/v1/billing/verify-checkout',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ checkoutId: 'ck_123' }),
+      },
+      MOCK_ENV,
+    );
+    expect(res.status).toBe(403);
+    expect(((await res.json()) as { error: string }).error).toBe('user_mismatch');
+  });
+
+  it('checkout still pending → applied=false, no DB write', async () => {
+    mockSession = { user: { id: 'u1', email: 'u1@test.com' } };
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+      Response.json({
+        id: 'ck_123',
+        status: 'pending',
+        metadata: { user_id: 'u1' },
+      }),
+    );
+    const res = await app.request(
+      '/v1/billing/verify-checkout',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ checkoutId: 'ck_123' }),
+      },
+      MOCK_ENV,
+    );
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ status: 'pending', applied: false });
+  });
+
+  it('completed checkout with subscription object → upserts to DB and returns applied=true', async () => {
+    mockSession = { user: { id: 'u1', email: 'u1@test.com' } };
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+      Response.json({
+        id: 'ck_123',
+        status: 'completed',
+        metadata: { user_id: 'u1' },
+        subscription: {
+          id: 'sub_456',
+          status: 'active',
+          customer: { id: 'cust_789' },
+          product: { id: 'prod_monthly' },
+          current_period_start: '2026-05-04T00:00:00Z',
+          current_period_end: '2026-06-04T00:00:00Z',
+          metadata: { user_id: 'u1' },
+        },
+      }),
+    );
+
+    const writes: string[] = [];
+    const stubDB = {
+      prepare: (sql: string) => ({
+        bind: (..._args: unknown[]) => ({
+          first: async () => null, // 不存在 → INSERT 路径
+          run: async () => {
+            if (sql.includes('INSERT INTO subscriptions')) writes.push('insert');
+            else if (sql.includes('UPDATE subscriptions')) writes.push('update');
+            return { success: true };
+          },
+          all: async () => ({ results: [], success: true }),
+        }),
+      }),
+    } as unknown as D1Database;
+
+    const res = await app.request(
+      '/v1/billing/verify-checkout',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ checkoutId: 'ck_123' }),
+      },
+      { ...MOCK_ENV, DB: stubDB },
+    );
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ status: 'completed', applied: true });
+    expect(writes).toEqual(['insert']);
+  });
+
+  it('completed checkout but subscription is just an id string → applied=false (webhook fallback)', async () => {
+    mockSession = { user: { id: 'u1', email: 'u1@test.com' } };
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+      Response.json({
+        id: 'ck_123',
+        status: 'completed',
+        metadata: { user_id: 'u1' },
+        subscription: 'sub_456', // 仅 id 不带 object
+      }),
+    );
+    const res = await app.request(
+      '/v1/billing/verify-checkout',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ checkoutId: 'ck_123' }),
+      },
+      MOCK_ENV,
+    );
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ status: 'completed', applied: false });
+  });
+});

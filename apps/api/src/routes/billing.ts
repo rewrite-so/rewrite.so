@@ -1,9 +1,15 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { createAuth } from '../lib/auth.ts';
-import { createCheckoutSession, createPortalSession } from '../lib/creem.ts';
+import {
+  createCheckoutSession,
+  createPortalSession,
+  extractUserIdFromMetadata,
+  fetchCheckout,
+} from '../lib/creem.ts';
 import { log } from '../lib/log.ts';
 import type { AppEnv } from '../types.ts';
+import { upsertSubscriptionFromObject } from './webhook.ts';
 
 export const billingRoute = new Hono<AppEnv>();
 
@@ -67,6 +73,83 @@ billingRoute.post('/v1/billing/checkout', async (c) => {
     log.error('billing.checkout_error', { err });
     return c.json({ error: 'creem_error' }, 502);
   }
+});
+
+/**
+ * POST /v1/billing/verify-checkout
+ *
+ * Web 端从 Creem 跳回 /settings?billing=ok&checkout_id=xxx 后立即调一次：
+ * - 如果 checkout 已完成且 metadata.user_id 与登录 session 匹配，把订阅直接落库
+ * - 不等 webhook（可能延迟几秒到几分钟），但 webhook 仍会发，靠 creem_subscription_id PK 幂等
+ *
+ * 不验证签名（因为是用户带着 session 主动调；恶意用户最多触发"自己订阅落库"——
+ * Creem 不会让别人付钱给你）。但严格校验 checkout.metadata.user_id == session.user.id
+ * 防止伪造 checkout_id 把别人的订阅落到自己名下。
+ */
+const VerifyCheckoutSchema = z
+  .object({
+    checkoutId: z.string().min(1).max(200),
+  })
+  .strict();
+
+billingRoute.post('/v1/billing/verify-checkout', async (c) => {
+  const auth = createAuth(c.env);
+  const session = await auth.api.getSession({ headers: c.req.raw.headers });
+  if (!session) return c.json({ error: 'unauthorized' }, 401);
+
+  let body: unknown;
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ error: 'invalid_json' }, 400);
+  }
+  const parsed = VerifyCheckoutSchema.safeParse(body);
+  if (!parsed.success) {
+    return c.json({ error: 'invalid_input', detail: parsed.error.issues[0]?.message }, 400);
+  }
+
+  let checkout: Awaited<ReturnType<typeof fetchCheckout>>;
+  try {
+    checkout = await fetchCheckout({
+      apiKey: c.env.CREEM_API_KEY,
+      checkoutId: parsed.data.checkoutId,
+    });
+  } catch (err) {
+    log.error('billing.verify_fetch_error', { err });
+    return c.json({ error: 'creem_error' }, 502);
+  }
+
+  // 严格校验 metadata.user_id 防伪造
+  const checkoutUserId = extractUserIdFromMetadata(checkout);
+  if (checkoutUserId !== session.user.id) {
+    log.warn('billing.verify_user_mismatch', {
+      checkoutId: parsed.data.checkoutId,
+      sessionUserId: session.user.id,
+      checkoutUserId,
+    });
+    return c.json({ error: 'user_mismatch' }, 403);
+  }
+
+  // checkout 未完成（用户取消 / 还在支付中）
+  if (checkout.status !== 'completed') {
+    return c.json({ status: checkout.status, applied: false });
+  }
+
+  // checkout.subscription 是订阅对象（或 string id；后者无法落库，交给 webhook）
+  const sub = checkout.subscription;
+  if (!sub || typeof sub !== 'object') {
+    return c.json({ status: checkout.status, applied: false });
+  }
+
+  // active 状态落库（trialing / paused 等会由后续 webhook 修正；新购通常是 active）
+  await upsertSubscriptionFromObject(
+    c.env,
+    sub as unknown as Record<string, unknown>,
+    'active',
+    `verify-${parsed.data.checkoutId}`,
+  );
+
+  return c.json({ status: 'completed', applied: true });
 });
 
 /**

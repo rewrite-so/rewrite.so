@@ -35,6 +35,13 @@ export interface MetaStatus {
   used?: number;
   /** 月配额上限。BYOK 模式下省略（无限）。 */
   limit?: number;
+  /**
+   * 登录用户在 user_settings 里存的 target_lang（'auto' / BCP-47 / 自定义自然语言）。
+   * 扩展端 mount 收到后写回 chrome.storage 实现 web ↔ extension 实时同步——
+   * 用户在 web /settings 改语言后，下一次扩展改写就立即同步过去（不必等 30s
+   * visibilitychange 节流的 fetchCloudPrefs）。匿名用户省略此字段。
+   */
+  userTargetLang?: string;
 }
 
 export interface DeltaData {

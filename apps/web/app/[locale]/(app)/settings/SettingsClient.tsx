@@ -100,6 +100,33 @@ export function SettingsClient() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      // billing 跳回时（/settings?billing=ok&checkout_id=xxx）主动 verify checkout 后
+      // 再加载数据，避免等 webhook 延迟期间 /v1/me 还看到"free"的错觉。webhook 仍会
+      // 发，靠 creem_subscription_id PK 幂等
+      if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href);
+        if (url.searchParams.get('billing') === 'ok') {
+          const checkoutId =
+            url.searchParams.get('checkout_id') ?? url.searchParams.get('checkoutId');
+          if (checkoutId) {
+            try {
+              await fetch('/v1/billing/verify-checkout', {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ checkoutId }),
+              });
+            } catch {
+              /* fail-soft：webhook 兜底 */
+            }
+            url.searchParams.delete('billing');
+            url.searchParams.delete('checkout_id');
+            url.searchParams.delete('checkoutId');
+            window.history.replaceState({}, '', url.toString());
+          }
+        }
+      }
+
       try {
         const [meRes, usageRes] = await Promise.all([
           fetch('/v1/me', { credentials: 'include' }),

@@ -478,7 +478,8 @@
       },
       "settings": "Paramètres",
       "myAccount": "Mon compte",
-      "signIn": "Se connecter"
+      "signIn": "Se connecter",
+      "reportTranslation": "Signaler une mauvaise traduction →"
     },
     "options": {
       "title": "Paramètres",

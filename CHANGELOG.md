@@ -8,6 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **配额合并 install_id → user_id**（兑现 CLAUDE.md / migration 注释里写了但从未实现的承诺）：
+  - 新表 `usage_claims (user_id, source_kind, source_id, month_utc, merged_count, claimed_at)`
+    PK 防重放
+  - `POST /v1/me/claim-install` 端点：把当月匿名 install 维度的 count 加到 user 维度
+  - 扩展 inject.ts bootstrap 时若已登录就调一次（fail-soft）
+  - 修了"匿名扩展用 5/5 → 注册 → 拿到全新 30/30"的滥用通道；服务端 PK 幂等，重复
+    调用 no-op
+- **Billing checkout verify 旁路**（webhook 延迟期间不再"看着还是 free"）：
+  - `POST /v1/billing/verify-checkout` 主动 GET Creem checkout，幂等 upsert subscription
+  - SettingsClient 在 `?billing=ok&checkout_id=xxx` 跳回时 await verify 后再 load /v1/me
+  - 严格校验 `metadata.user_id == session.user.id` 防伪造 checkout_id 把别人订阅落到自己名下
+  - webhook.ts 的 upsertSubscription 抽出 `upsertSubscriptionFromObject` 公用 helper
+- **SSE meta.status 携带 userTargetLang 实时跨端同步**（不再 30s visibilitychange 节流）：
+  - 服务端登录用户的 user_settings.target_lang 透传到 meta.status.userTargetLang
+  - mount() 加 `onUserPrefsSync` callback；扩展 inject.ts 实现把它写回 chrome.storage
+  - 用户在 web /settings 改语言后，下一次扩展改写就立即拿到（0 额外 RTT）
+- **quota chip 两段式视觉**：>=50% 灰色提示，>=80% 加 .warn 琥珀色警告
+- **popup 加 "Report wrong translation →" 链接**：mailto 预填 subject + locale + 扩展版本，
+  收集 i18n 错译反馈渠道（之前没有）
 - 浮窗状态信息显示 — auth/quota/BYOK 显式可见：
   - header 加 BYOK badge（仅 BYOK 模式）+ quota chip（used/limit > 80% 时琥珀色提示）
   - 未登录用户底部加 "Sign in for {N} rewrites / month →" footer（web 模式有 install

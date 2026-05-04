@@ -97,6 +97,23 @@ export async function fetchCloudPrefs(): Promise<Pick<
 }
 
 /**
+ * 触发"匿名 install 配额合并到登录用户"。inject.ts bootstrap 时若 user 已登录则调一次：
+ * 服务端通过 usage_claims 表（user_id, source_kind, source_id, month_utc）做幂等，
+ * 重复调用 no-op。fail-soft，未登录返 401 → 静默 false。
+ */
+export async function claimInstallQuota(installId: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    try {
+      chrome.runtime.sendMessage({ type: 'claim-install', installId }, (res: { ok?: boolean }) => {
+        resolve(!chrome.runtime.lastError && res?.ok === true);
+      });
+    } catch {
+      resolve(false);
+    }
+  });
+}
+
+/**
  * 推送偏好到 web（通过 background SW）。fail-soft：成功 / 失败均不抛异常，
  * 调用方不阻塞 local 写入流程。
  */

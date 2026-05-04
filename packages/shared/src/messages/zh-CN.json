@@ -478,7 +478,8 @@
       },
       "settings": "设置",
       "myAccount": "我的",
-      "signIn": "登录"
+      "signIn": "登录",
+      "reportTranslation": "报告翻译错误 →"
     },
     "options": {
       "title": "设置",

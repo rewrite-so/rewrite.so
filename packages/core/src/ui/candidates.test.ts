@@ -399,16 +399,27 @@ describe('createCandidates', () => {
     expect(root.querySelector('.byok-badge')?.textContent).toBe('BYOK');
   });
 
-  it('setStatus shows quota chip when used/limit > 0.8', () => {
+  it('setStatus shows quota chip with .warn class at >=80% (amber)', () => {
     const { factory, target, root } = setup();
     const handle = factory.open({ target, locale: 'en', targetLang: 'en' });
     handle.setStatus({ authed: true, tier: 'free', isBYOK: false, used: 25, limit: 30 });
     const chip = root.querySelector('.quota-chip') as HTMLElement;
     expect(chip.style.display).toBe('');
     expect(chip.textContent).toBe('25/30');
+    expect(chip.classList.contains('warn')).toBe(true);
   });
 
-  it('setStatus hides quota chip below 80% threshold', () => {
+  it('setStatus shows quota chip without .warn class at >=50% but <80% (gray)', () => {
+    const { factory, target, root } = setup();
+    const handle = factory.open({ target, locale: 'en', targetLang: 'en' });
+    handle.setStatus({ authed: true, tier: 'free', isBYOK: false, used: 18, limit: 30 });
+    const chip = root.querySelector('.quota-chip') as HTMLElement;
+    expect(chip.style.display).toBe('');
+    expect(chip.textContent).toBe('18/30');
+    expect(chip.classList.contains('warn')).toBe(false);
+  });
+
+  it('setStatus hides quota chip below 50% threshold', () => {
     const { factory, target, root } = setup();
     const handle = factory.open({ target, locale: 'en', targetLang: 'en' });
     handle.setStatus({ authed: true, tier: 'free', isBYOK: false, used: 10, limit: 30 });

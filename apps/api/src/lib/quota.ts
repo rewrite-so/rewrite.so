@@ -165,6 +165,72 @@ export async function resolveUserTier(db: D1Database, userId: string): Promise<T
   return 'free';
 }
 
+export interface ClaimResult {
+  /** 本次实际合并掉的 count（已 claim 过则为 0） */
+  merged: number;
+  /** 是否触发了实际写入（false = 已 claim 过 / source 行不存在） */
+  applied: boolean;
+}
+
+/**
+ * 把匿名 source（'install' 维度）当月配额合并到登录用户名下。
+ * 幂等：靠 usage_claims 表 PK 防重放，第二次调用 merged=0 / applied=false。
+ *
+ * 设计选择：
+ * - 只把 source.count 加到 user.count，**不删 source 行** —— 留作审计；如果用户登出
+ *   再用同一 installId 也仍按 install 配额走（已扣的次数不会再扣给 user）
+ * - 跨月不需要重 claim，next month 双方都从 0 起
+ */
+export async function claimAnonymousUsage(
+  db: D1Database,
+  userId: string,
+  source: { kind: 'install'; id: string },
+): Promise<ClaimResult> {
+  const month = currentMonthUtc();
+  const now = Date.now();
+
+  // 1) 拿 source 行的 count
+  const sourceRow = await db
+    .prepare(
+      'SELECT count FROM usage_monthly WHERE subject_kind = ? AND subject_id = ? AND month_utc = ?',
+    )
+    .bind(source.kind, source.id, month)
+    .first<{ count: number }>();
+  const sourceCount = sourceRow?.count ?? 0;
+
+  // 2) 写 usage_claims 防重放（INSERT OR IGNORE）
+  // changes 仅在该 (user, source_kind, source_id, month) 第一次触发时为 1
+  const insertRes = await db
+    .prepare(
+      `INSERT OR IGNORE INTO usage_claims (user_id, source_kind, source_id, month_utc, merged_count, claimed_at)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+    )
+    .bind(userId, source.kind, source.id, month, sourceCount, now)
+    .run();
+
+  const meta = (insertRes.meta ?? {}) as { changes?: number };
+  if ((meta.changes ?? 0) === 0) {
+    return { merged: 0, applied: false };
+  }
+  if (sourceCount === 0) {
+    return { merged: 0, applied: true };
+  }
+
+  // 3) 把 sourceCount 加到 user 维度的 count 上（UPSERT）
+  await db
+    .prepare(
+      `INSERT INTO usage_monthly (subject_kind, subject_id, month_utc, count, byok_count, updated_at)
+       VALUES ('user', ?, ?, ?, 0, ?)
+       ON CONFLICT (subject_kind, subject_id, month_utc) DO UPDATE SET
+         count = count + excluded.count,
+         updated_at = excluded.updated_at`,
+    )
+    .bind(userId, month, sourceCount, now)
+    .run();
+
+  return { merged: sourceCount, applied: true };
+}
+
 /** 返回 'YYYY-MM' (UTC)。 */
 export function currentMonthUtc(d: Date = new Date()): string {
   const y = d.getUTCFullYear();

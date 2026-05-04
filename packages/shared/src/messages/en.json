@@ -478,7 +478,8 @@
       },
       "settings": "Settings",
       "myAccount": "My account",
-      "signIn": "Sign in"
+      "signIn": "Sign in",
+      "reportTranslation": "Report wrong translation →"
     },
     "options": {
       "title": "Settings",

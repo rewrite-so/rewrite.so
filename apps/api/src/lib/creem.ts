@@ -74,6 +74,33 @@ export interface CreatePortalOutput {
   customer_portal_link: string;
 }
 
+/**
+ * GET /v1/checkouts/{id} —— 主动查询 checkout 状态。
+ *
+ * 用途：用户从 Creem 跳回 web /settings?billing=ok 后，web 立即调
+ * /v1/billing/verify-checkout 让我们这边查一次 Creem，把 subscription 直接落库——
+ * 不等 webhook（可能延迟数秒到数分钟）。webhook 仍会发，靠 PK 幂等。
+ *
+ * Creem 文档：返回的 checkout 完成后 object 里会带 subscription / customer 字段。
+ */
+export async function fetchCheckout(input: {
+  apiKey: string;
+  checkoutId: string;
+}): Promise<CreemCheckoutObject> {
+  const res = await fetch(
+    `${creemBase(input.apiKey)}/checkouts/${encodeURIComponent(input.checkoutId)}`,
+    {
+      method: 'GET',
+      headers: { 'x-api-key': input.apiKey },
+    },
+  );
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Creem fetchCheckout failed: ${res.status} ${text}`);
+  }
+  return (await res.json()) as CreemCheckoutObject;
+}
+
 export async function createPortalSession(input: CreatePortalInput): Promise<CreatePortalOutput> {
   const res = await fetch(`${creemBase(input.apiKey)}/customers/billing`, {
     method: 'POST',

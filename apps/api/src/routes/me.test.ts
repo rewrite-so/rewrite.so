@@ -366,3 +366,143 @@ describe('POST /v1/me/byok/test', () => {
     expect(body.error).toBe('timeout');
   });
 });
+
+describe('POST /v1/me/claim-install', () => {
+  it('returns 401 when not signed in', async () => {
+    mockSession = null;
+    const res = await app.request(
+      '/v1/me/claim-install',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ installId: 'install-abc-123-def' }),
+      },
+      MOCK_ENV,
+    );
+    expect(res.status).toBe(401);
+  });
+
+  it('returns 400 on missing installId', async () => {
+    mockSession = { user: { id: 'u1', email: 'u1@test.com' } };
+    const res = await app.request(
+      '/v1/me/claim-install',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({}),
+      },
+      MOCK_ENV,
+    );
+    expect(res.status).toBe(400);
+  });
+
+  it('first call merges install count to user; idempotent second call no-op', async () => {
+    mockSession = { user: { id: 'user_abc', email: 'u@test.com' } };
+
+    // 模拟：install 行 count=4；usage_claims 第一次 INSERT 成功（changes=1）；
+    // 第二次 INSERT IGNORE 不写入（changes=0）
+    let claimAttempt = 0;
+    const callLog: string[] = [];
+    const stubDB = {
+      prepare: (sql: string) => ({
+        bind: (..._args: unknown[]) => ({
+          first: async () => {
+            if (sql.includes('FROM usage_monthly')) {
+              callLog.push('select_install');
+              return { count: 4 };
+            }
+            return null;
+          },
+          run: async () => {
+            if (sql.includes('INSERT OR IGNORE INTO usage_claims')) {
+              claimAttempt++;
+              callLog.push(`claim_${claimAttempt}`);
+              return { success: true, meta: { changes: claimAttempt === 1 ? 1 : 0 } };
+            }
+            if (sql.includes('INSERT INTO usage_monthly')) {
+              callLog.push('upsert_user');
+            }
+            return { success: true };
+          },
+          all: async () => ({ results: [], success: true }),
+        }),
+      }),
+    } as unknown as D1Database;
+
+    // 第一次：merged=4
+    const res1 = await app.request(
+      '/v1/me/claim-install',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ installId: 'install-abc-123-def' }),
+      },
+      { ...MOCK_ENV, DB: stubDB },
+    );
+    expect(res1.status).toBe(200);
+    expect(await res1.json()).toEqual({ merged: 4, applied: true });
+
+    // 第二次：merged=0, applied=false（PK 重放保护）
+    const res2 = await app.request(
+      '/v1/me/claim-install',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ installId: 'install-abc-123-def' }),
+      },
+      { ...MOCK_ENV, DB: stubDB },
+    );
+    expect(res2.status).toBe(200);
+    expect(await res2.json()).toEqual({ merged: 0, applied: false });
+
+    // 验证第二次没碰 user 维度的 upsert
+    expect(callLog).toEqual([
+      'select_install',
+      'claim_1',
+      'upsert_user',
+      'select_install',
+      'claim_2',
+    ]);
+  });
+
+  it('install count=0 still records claim but does not upsert user row', async () => {
+    mockSession = { user: { id: 'user_abc', email: 'u@test.com' } };
+
+    const callLog: string[] = [];
+    const stubDB = {
+      prepare: (sql: string) => ({
+        bind: (..._args: unknown[]) => ({
+          first: async () => {
+            if (sql.includes('FROM usage_monthly')) return null; // install 行不存在
+            return null;
+          },
+          run: async () => {
+            if (sql.includes('INSERT OR IGNORE INTO usage_claims')) {
+              callLog.push('claim');
+              return { success: true, meta: { changes: 1 } };
+            }
+            if (sql.includes('INSERT INTO usage_monthly')) {
+              callLog.push('upsert_user');
+            }
+            return { success: true };
+          },
+          all: async () => ({ results: [], success: true }),
+        }),
+      }),
+    } as unknown as D1Database;
+
+    const res = await app.request(
+      '/v1/me/claim-install',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ installId: 'install-fresh-no-history' }),
+      },
+      { ...MOCK_ENV, DB: stubDB },
+    );
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ merged: 0, applied: true });
+    // 0 count 不必动 user 行
+    expect(callLog).toEqual(['claim']);
+  });
+});

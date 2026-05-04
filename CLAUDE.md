@@ -55,6 +55,12 @@
 
 - **SSE delta 帧 data 必须整行 JSON.parse**：上游 chunk 含换行须转义为 `\n`，前端解析器逐行处理。
 - **SSE AbortSignal 链式透传**：客户端断开时 Worker 必须级联 abort 3 路 upstream fetch（`req.signal` → 3 路 fetch.signal），否则继续烧 token。
+- **Webhook 延迟旁路 = `POST /v1/billing/verify-checkout`**：用户从 Creem 跳回
+  `/settings?billing=ok&checkout_id=xxx` 时 SettingsClient 主动调，让我们这边查一次
+  Creem checkout 直接落库，不等 webhook（可能延迟数秒到分钟级）。webhook 仍发，靠
+  `creem_subscription_id` PK 幂等。**严格校验 metadata.user_id == session.user.id**
+  防伪造 checkout_id 把别人订阅落到自己名下。webhook.ts 的 upsertSubscriptionFromObject
+  是公用 helper（webhook 路由 + verify 端点都用）。
 - **浮窗状态信息（auth/tier/usage/byok）有两条传输路径**：
   - 200 OK 路径：SSE meta event 的 `status` 字段（authed/tier/isBYOK/used/limit）→ 客户端
     `panel.setStatus()` 决定 BYOK badge / quota chip / signin footer 显示。
@@ -89,13 +95,23 @@
 - **配额按 UTC 自然月聚合**：表 `usage_monthly`，主键含 `month_utc='YYYY-MM'`。Token bucket（DO）只做秒级反爆刷，与月配额逻辑分离。
 - **配额数字（10/5/30/2000）改动需重算成本**：当前售价（月付 $13.99 / 年付 $7.99/月，即 $95.88/年）下 Pro 跑满约 $4/月，留 $4-10 利润。匿名/扩展/登录免费档不应放宽至单用户成本超 $0.20/月。
 - **BYOK 用户走 token bucket（100 req/min 反代滥用底线）但不查月配额**：防止当作我们 SSE 的反代。
-- **installId 永不重置**：包括登录后；登录会做 `usage_monthly` 一次性 merge。
+- **installId 永不重置 + 登录后 install 配额合并**：扩展 inject.ts bootstrap 时若已登录调
+  一次 `POST /v1/me/claim-install`，把当月 `('install', installId)` 维度的 count 加到
+  `('user', userId)` 维度。靠 `usage_claims` 表 PK (user_id, source_kind, source_id,
+  month_utc) 幂等——重复调用 no-op。**只 merge install 一种 source**：IP 跨网络/跨日轮换
+  salt 没稳定标识，merge 价值低。Web 注册（无 installId）走的人不需要 merge。
+  没这步的话匿名用 5/5 → 注册 → 拿到全新 30/30，是绕匿名档的滥用通道。
 - **扩展 prefs 跨端同步策略**：`patchUserPrefs(targetLang/uiLocale)` 写 chrome.storage
   同时 fail-soft `void patchCloudPrefs(...)` PATCH `/v1/me/settings`（通过 background
   SW 代理避开 content script CORS）。inject.ts bootstrap 和 options App.tsx 启动
   都会先 `fetchCloudPrefs()` 拉云端覆盖本地 cache。已登录用户：web ↔ 扩展双向同步；
   未登录：401 静默忽略，仅本地有效。**不要在扩展 chrome.storage 里加敏感字段**——
   storage 镜像逻辑只针对 `targetLang` / `uiLocale` 子集。
+- **实时反向同步 = SSE meta.status.userTargetLang**：服务端 `/v1/rewrite` 在 status
+  里带 user_settings.target_lang 原始值（含 'auto'）。扩展 inject.ts 通过 mount() 的
+  `onUserPrefsSync` callback 写回 chrome.storage（仅当与 cache 不同；避免无限循环）。
+  这是 visibilitychange + 30s 节流的轻量补充：用户改完语言下一次改写就立即跨端同步，
+  0 额外网络往返。匿名用户不带这字段，跳过同步。
 - **resolveUserTier 是订阅 → 配额档位的唯一入口**：`/v1/rewrite` 和 `/v1/me/usage` 都通过它查 subscriptions
   表决定 free/pro。`status` 为 `active|trialing|paused`，或 `canceled` 但 `current_period_end > now`，
   都返回 'pro'。其它（包括 `expired|past_due`）返回 'free'。webhook 状态机和这个查询逻辑必须一致。

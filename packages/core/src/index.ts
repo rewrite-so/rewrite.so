@@ -36,6 +36,12 @@ export interface MountOptions {
   upgradeUrl?: string;
   /** 浮层右上角齿轮点击时调用 —— 扩展传 chrome.runtime.openOptionsPage，web 传 跳 /settings */
   onOpenSettings?: () => void;
+  /**
+   * SSE meta.status.userTargetLang 收到时调用（仅登录用户）。
+   * 扩展端实现：把值写回 chrome.storage 实现 web ↔ extension 实时同步。
+   * web 端不需要实现（user_settings 是 web 这边的源头）。
+   */
+  onUserPrefsSync?: (prefs: { targetLang: string }) => void;
   onError?: (e: Error) => void;
 }
 
@@ -164,7 +170,14 @@ export function mount(opts: MountOptions): MountHandle {
             // 服务端权威 echo —— 登录用户的 DB 偏好优先于客户端 chrome.storage cache；
             // chip 跟服务端走，避免 cache 与 DB 不一致时显示错误的 target lang
             panel.setLangDetected(ev.data.langDetected);
-            if (ev.data.status) panel.setStatus(ev.data.status);
+            if (ev.data.status) {
+              panel.setStatus(ev.data.status);
+              // 实时跨端同步：服务端 echo 用户在 user_settings 里的 target_lang，
+              // 让扩展把它写回 chrome.storage。下次 inject 重 mount 时立即生效
+              if (ev.data.status.userTargetLang !== undefined) {
+                opts.onUserPrefsSync?.({ targetLang: ev.data.status.userTargetLang });
+              }
+            }
             break;
           case 'delta':
             panel.appendDelta(ev.data.style, ev.data.text);

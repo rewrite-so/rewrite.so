@@ -58,6 +58,10 @@ rewriteRoute.post('/v1/rewrite', async (c) => {
   let subject: Subject;
   let tier: Tier;
   let userTargetLang: string | null = null;
+  // DB 里 user_settings.target_lang 的原始值（含 'auto'）。给 SSE meta.status.userTargetLang
+  // 透传，扩展端写回 chrome.storage 实现实时同步。userTargetLang 上面那个用于 prompt
+  // 注入 —— 'auto' 时为 null 让客户端 lang 兜底
+  let userTargetLangRaw: string | null = null;
   let byokConfig: ByokConfigRow | null = null;
   if (userId) {
     subject = { kind: 'user', id: userId };
@@ -66,8 +70,11 @@ rewriteRoute.post('/v1/rewrite', async (c) => {
     const prefs = await c.env.DB.prepare('SELECT target_lang FROM user_settings WHERE user_id = ?')
       .bind(userId)
       .first<{ target_lang: string }>();
-    if (prefs?.target_lang && prefs.target_lang !== 'auto') {
-      userTargetLang = prefs.target_lang;
+    if (prefs?.target_lang) {
+      userTargetLangRaw = prefs.target_lang;
+      if (prefs.target_lang !== 'auto') {
+        userTargetLang = prefs.target_lang;
+      }
     }
     // BYOK 配置（仅 Pro 用户能配，但这里不再校验 tier，写入路径已校验过）
     byokConfig = await c.env.DB.prepare(
@@ -179,11 +186,13 @@ rewriteRoute.post('/v1/rewrite', async (c) => {
   }));
 
   // 浮窗状态信息：BYOK 模式不带 used/limit（无限），其它都带
+  // userTargetLang 仅登录用户带（DB 原始值，含 'auto'）—— 扩展端写回 chrome.storage
   const status: MetaStatus = {
     authed: !!userId,
     tier,
     isBYOK,
     ...(isBYOK ? {} : { used: quota.used, limit: quota.limit }),
+    ...(userTargetLangRaw !== null ? { userTargetLang: userTargetLangRaw } : {}),
   };
   const sse = muxToSSE({ streams, requestId, langDetected: targetLang, status }, signal);
 

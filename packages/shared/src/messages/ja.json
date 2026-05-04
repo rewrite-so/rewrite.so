@@ -478,7 +478,8 @@
       },
       "settings": "設定",
       "myAccount": "マイアカウント",
-      "signIn": "ログイン"
+      "signIn": "ログイン",
+      "reportTranslation": "誤訳を報告 →"
     },
     "options": {
       "title": "設定",
