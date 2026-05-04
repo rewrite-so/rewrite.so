@@ -14,10 +14,10 @@ export const SHADOW_STYLES = `
 
 .dot {
   position: fixed;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: light-dark(#1f1f22, #e8e8ea);
+  width: 10px;
+  height: 10px;
+  border-radius: 4px;
+  background: #20C7B5;
   pointer-events: auto;
   cursor: default;
   z-index: 2147483646;
@@ -26,24 +26,27 @@ export const SHADOW_STYLES = `
     box-shadow 160ms ease;
   opacity: 0;
   transform: scale(0.9);
+  box-shadow:
+    0 0 0 1px light-dark(rgba(255, 255, 255, 0.82), rgba(21, 26, 31, 0.88)),
+    0 1px 5px rgba(0, 0, 0, 0.16);
 }
 .dot.visible {
-  opacity: 0.55;
+  opacity: 0.76;
   transform: scale(1);
   animation: rs-dot-breathe 3s ease-in-out infinite;
 }
 .dot:hover {
   opacity: 0.95;
-  transform: scale(1.3);
+  transform: scale(1.2);
   animation: none;
   box-shadow:
-    0 0 0 1.5px light-dark(rgba(255, 255, 255, 0.92), rgba(20, 20, 22, 0.92)),
-    0 1px 4px rgba(0, 0, 0, 0.2);
+    0 0 0 1.5px light-dark(rgba(255, 255, 255, 0.92), rgba(21, 26, 31, 0.92)),
+    0 2px 8px rgba(0, 0, 0, 0.22);
 }
 
 @keyframes rs-dot-breathe {
-  0%, 100% { opacity: 0.55; }
-  50% { opacity: 0.4; }
+  0%, 100% { opacity: 0.76; }
+  50% { opacity: 0.58; }
 }
 
 @media (prefers-reduced-motion: reduce) {

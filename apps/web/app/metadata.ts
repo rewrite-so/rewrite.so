@@ -2,6 +2,13 @@ import type { Metadata } from 'next';
 import { routing } from '../i18n/routing.ts';
 
 const SITE_ORIGIN = process.env.NEXT_PUBLIC_SITE_ORIGIN ?? 'https://rewrite.so';
+const APP_ICONS: Metadata['icons'] = {
+  icon: [
+    { url: '/favicon.svg', type: 'image/svg+xml' },
+    { url: '/favicon-32.png', sizes: '32x32', type: 'image/png' },
+  ],
+  apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+};
 
 export function localePath(locale: string, path = '/'): string {
   const prefix = locale === routing.defaultLocale ? '' : `/${locale}`;
@@ -28,5 +35,6 @@ export function localizedMetadata(
       canonical: `${SITE_ORIGIN}${localePath(locale, path)}`,
       languages,
     },
+    icons: metadata.icons ?? APP_ICONS,
   };
 }

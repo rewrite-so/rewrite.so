@@ -316,8 +316,8 @@
   "home": {
     "hero": {
       "eyebrow": "Unterstützte Eingabefelder · Open Source",
-      "h1Line1": "Roh schreiben.",
-      "h1Line2": "Geschliffen senden.",
+      "h1Line1": "Frei schreiben.",
+      "h1Line2": "Sicher senden.",
       "subHeadline": "Hör auf, jede Nachricht zu zerdenken.",
       "polyglot": "Beliebige Sprache rein. Beliebige Sprache raus.",
       "intro": "Drücke <kbd>Shift</kbd> doppelt in einem unterstützten Web-Eingabefeld. Die KI gibt dir drei Formulierungen. Wähle eine mit <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> und sende.",

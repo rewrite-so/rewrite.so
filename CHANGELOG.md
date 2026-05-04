@@ -168,7 +168,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   扩展 i18n 加 `ext.options.langOption.{custom,customLabelFmt,customPlaceholder,customHelp}`。
   注：扩展端偏好与 web `/settings` 仍各自独立（chrome.storage.local vs user_settings 表），
   跨端同步是单独的 follow-up。
-- **Landing 重新定位** — Hero 从「隐私不存储」改为「随手写，自信发」（outcome-led），
+- **Landing 重新定位** — Hero 从「隐私不存储」改为「随意写，自信发送」（outcome-led），
   五层金字塔：eyebrow / H1 / sub-h1（泛化痛点 "Stop overthinking every message"）/
   polyglot pill（"Any language in. Any language out."）/ intro。
 - 新增「Sound familiar?」痛点-场景 section（Hero 后、How it works 前），4 行具体场景

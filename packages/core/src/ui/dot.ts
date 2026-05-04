@@ -9,6 +9,7 @@ export interface DotController {
   destroy(): void;
 }
 
+const DOT_SIZE = 10;
 const DOT_OFFSET = 6; // 右下角偏移 px
 
 export function createDot(root: ShadowRoot, locale: Locale): DotController {
@@ -44,8 +45,8 @@ export function createDot(root: ShadowRoot, locale: Locale): DotController {
       dot.classList.remove('visible');
       return;
     }
-    dot.style.left = `${rect.right - 8 - DOT_OFFSET}px`;
-    dot.style.top = `${rect.bottom - 8 - DOT_OFFSET}px`;
+    dot.style.left = `${rect.right - DOT_SIZE - DOT_OFFSET}px`;
+    dot.style.top = `${rect.bottom - DOT_SIZE - DOT_OFFSET}px`;
     dot.classList.add('visible');
   };
 
