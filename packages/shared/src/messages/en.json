@@ -1,14 +1,14 @@
 {
   "meta": {
     "home": {
-      "title": "rewrite.so — Double-tap Shift to rewrite",
+      "title": "rewrite.so — Write freely. Send confidently.",
       "description": "Input-box-level AI rewrite engine. 3 styles, keyboard-only, never breaks your flow."
     },
     "login": {
       "title": "Sign in — rewrite.so"
     },
     "try": {
-      "title": "Try rewrite.so — Double-tap Shift to rewrite"
+      "title": "Try rewrite.so — Write freely. Send confidently."
     },
     "settings": {
       "title": "Settings — rewrite.so"
@@ -287,7 +287,7 @@
     "languageSwitcher": "Language"
   },
   "footer": {
-    "tagline": "Double-tap Shift, instant AI rewrite in supported text fields.",
+    "tagline": "Write freely. Send confidently.",
     "heading": {
       "product": "Product",
       "account": "Account",
@@ -477,7 +477,7 @@
   },
   "ext": {
     "popup": {
-      "tagline": "Double-tap Shift Shift in supported text fields.",
+      "tagline": "Write freely. Send confidently.",
       "usageError": "Failed to load quota:",
       "loading": "Loading…",
       "remainingThisMonth": "remaining this month",
