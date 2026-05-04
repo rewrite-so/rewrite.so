@@ -526,6 +526,15 @@ function describeErrorDetail(
       return locale === 'zh-CN' ? `请 ${sec} 秒后重试。` : `Try again in ${sec}s.`;
     }
   }
+  // upstream_error / unauthorized / 等：透传上游/服务端的 message + status，让用户能 debug
+  // （比如平台 OPENAI_API_KEY 配错时显示 "401 invalid api key"，不再让用户对着通用文案猜）
+  const msg = typeof detail.message === 'string' ? detail.message : null;
+  const status = typeof detail.status === 'number' ? detail.status : null;
+  if (msg) {
+    const truncated = msg.length > 180 ? `${msg.slice(0, 177)}…` : msg;
+    return status ? `[${status}] ${truncated}` : truncated;
+  }
+  if (status) return `HTTP ${status}`;
   return null;
 }
 

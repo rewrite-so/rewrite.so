@@ -43,7 +43,16 @@ export function createPortApiClient(): RewriteApiClient {
             return;
           }
           if (msg.type === 'error') {
-            const err = new Error(`${msg.code}: ${msg.message ?? ''}`);
+            // 用 ApiError-like 结构（带 detailObj）让 mount() 的 extractErrorCode/Detail
+            // 拿到精确的 code + status + message，setGlobalError 能显示具体原因
+            const err = new Error(`${msg.code}: ${msg.message ?? ''}`) as Error & {
+              detailObj?: Record<string, unknown>;
+            };
+            err.detailObj = {
+              error: msg.code,
+              ...(msg.status !== undefined ? { status: msg.status } : {}),
+              ...(msg.message !== undefined ? { message: msg.message } : {}),
+            };
             if (!resolved) {
               resolved = true;
               reject(err);

@@ -108,17 +108,19 @@ async function handleRewrite(
   if (!res.ok) {
     const detail = await res.text().catch(() => '');
     console.warn('[rewrite.so/bg] non-2xx', res.status, detail.slice(0, 200));
-    // 把 api 返回的原始 JSON 直接透传给 content（detailObj 能拿到 used/limit/resetAt 等）
+    // 更精确的 error code 映射（从 4xx/5xx body 解析 server 端 error code）
+    let code: string;
+    if (res.status === 401) code = 'unauthorized';
+    else if (res.status === 403) code = 'forbidden';
+    else if (res.status === 503 && detail.includes('upstream_not_configured'))
+      code = 'upstream_not_configured';
+    else if (res.status === 429)
+      code = detail.includes('quota_exceeded') ? 'quota_exceeded' : 'rate_limit';
+    else if (res.status === 413) code = 'input_too_long';
+    else code = 'upstream_error';
     send({
       type: 'error',
-      code:
-        res.status === 429
-          ? detail.includes('quota_exceeded')
-            ? 'quota_exceeded'
-            : 'rate_limit'
-          : res.status === 413
-            ? 'input_too_long'
-            : 'upstream_error',
+      code,
       status: res.status,
       message: detail.slice(0, 500),
     });
