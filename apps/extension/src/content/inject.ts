@@ -95,8 +95,20 @@ async function bootstrap(): Promise<void> {
   });
 
   let handle = mount(buildOpts(prefs));
+  let currentPrefs = prefs;
 
   onPrefsChanged((next) => {
+    // 仅 triggerEnabled / uiLocale 变化时需要 unmount/remount —— 它们是 mount 的
+    // 初始化参数。targetLang 单独变化**不要 unmount**：服务端 SSE meta.status 反向
+    // 同步触发的 storage 写入会立即冒泡到这里；如果 unmount 会 abort 正在进行的
+    // SSE 流，用户当下的改写直接挂掉。targetLang 是软状态（服务端 user_settings 是
+    // 权威源，detectTargetLang 下次触发时本来就会重读 chrome.storage），stale 几秒
+    // 没关系，比 abort 中流好得多。
+    const triggerChanged = next.triggerEnabled !== currentPrefs.triggerEnabled;
+    const uiLocaleChanged = next.uiLocale !== currentPrefs.uiLocale;
+    currentPrefs = next;
+    if (!triggerChanged && !uiLocaleChanged) return;
+
     handle.unmount();
     if (!next.triggerEnabled) return;
     handle = mount(buildOpts(next));

@@ -465,6 +465,23 @@ describe('POST /v1/me/claim-install', () => {
     ]);
   });
 
+  it('returns 429 when rate-limit bucket exhausted', async () => {
+    mockSession = { user: { id: 'u1', email: 'u1@test.com' } };
+    rateLimiterAllowed = false;
+    const res = await app.request(
+      '/v1/me/claim-install',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ installId: 'install-abc-123-def' }),
+      },
+      MOCK_ENV,
+    );
+    expect(res.status).toBe(429);
+    expect(((await res.json()) as { error: string }).error).toBe('rate_limit');
+    rateLimiterAllowed = true;
+  });
+
   it('install count=0 still records claim but does not upsert user row', async () => {
     mockSession = { user: { id: 'user_abc', email: 'u@test.com' } };
 

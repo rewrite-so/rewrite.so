@@ -42,7 +42,12 @@ export function BillingClient() {
         credentials: 'include',
         body: JSON.stringify({
           plan: p,
-          successUrl: `${window.location.origin}/settings?billing=ok`,
+          // {CHECKOUT_ID} 是 Stripe-style 模板占位符——Creem 在 redirect 时替换成
+          // 实际 checkout id。SettingsClient 拿到后调 /v1/billing/verify-checkout
+          // 主动落库，避开 webhook 延迟期间用户感知"还是 free"的错觉。
+          // 如果 Creem 不替换，literal '{CHECKOUT_ID}' 会被 SettingsClient 的 UUID
+          // 形状校验过滤掉，verify 不 fire，退化到纯 webhook 路径（仍能落库，只是慢）。
+          successUrl: `${window.location.origin}/settings?billing=ok&checkout_id={CHECKOUT_ID}`,
         }),
       });
       if (res.status === 401) {

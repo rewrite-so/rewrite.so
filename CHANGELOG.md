@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **CR 跟进修 4 处**（同 commit 内）：
+  - 修 SSE userTargetLang 反向同步会终止当前 SSE 流的 bug：inject.ts 的 onPrefsChanged
+    现在仅对 triggerEnabled / uiLocale 变化做 unmount/remount；targetLang-only 变化
+    静默更新 currentPrefs 不动 mount。stale cache 几秒没关系（服务端 user_settings
+    是权威），比 abort 中流好得多
+  - BillingClient successUrl 加 `{CHECKOUT_ID}` 占位符（Stripe-style 模板）+
+    SettingsClient 加 UUID-shape 校验：Creem 替换则 verify 立即生效，不替换则
+    literal 串被过滤，退化到纯 webhook 路径
+  - upsertSubscriptionFromObject 改返 boolean：字段缺失静默 skip 时 verify 端点不再
+    骗客户端 `applied: true`，让 SettingsClient 知道要等 webhook
+  - claim-install 加 5 req/min/user token bucket：防脚本灌随机 installId 污染
+    usage_claims 表（每用户每月理论只 1-2 次正常调用）
 - **配额合并 install_id → user_id**（兑现 CLAUDE.md / migration 注释里写了但从未实现的承诺）：
   - 新表 `usage_claims (user_id, source_kind, source_id, month_utc, merged_count, claimed_at)`
     PK 防重放

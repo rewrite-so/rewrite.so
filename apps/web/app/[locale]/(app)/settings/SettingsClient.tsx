@@ -106,8 +106,12 @@ export function SettingsClient() {
       if (typeof window !== 'undefined') {
         const url = new URL(window.location.href);
         if (url.searchParams.get('billing') === 'ok') {
-          const checkoutId =
+          const rawCheckoutId =
             url.searchParams.get('checkout_id') ?? url.searchParams.get('checkoutId');
+          // Creem 不替换 {CHECKOUT_ID} 模板时会留 literal 串；只对看起来真实的 id
+          // （字母数字 + 短横/下划线，长度 8-200）发 verify 请求。退化时 webhook 兜底
+          const checkoutId =
+            rawCheckoutId && /^[A-Za-z0-9_-]{8,200}$/.test(rawCheckoutId) ? rawCheckoutId : null;
           if (checkoutId) {
             try {
               await fetch('/v1/billing/verify-checkout', {
@@ -119,11 +123,11 @@ export function SettingsClient() {
             } catch {
               /* fail-soft：webhook 兜底 */
             }
-            url.searchParams.delete('billing');
-            url.searchParams.delete('checkout_id');
-            url.searchParams.delete('checkoutId');
-            window.history.replaceState({}, '', url.toString());
           }
+          url.searchParams.delete('billing');
+          url.searchParams.delete('checkout_id');
+          url.searchParams.delete('checkoutId');
+          window.history.replaceState({}, '', url.toString());
         }
       }
 

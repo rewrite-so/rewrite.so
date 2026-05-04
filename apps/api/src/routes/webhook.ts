@@ -151,13 +151,16 @@ async function upsertSubscription(
  *
  * 幂等：以 creem_subscription_id 为去重键；同 sub 多次调（webhook + verify 都跑）会
  * UPDATE 而不是重复 INSERT。
+ *
+ * 返回 true=实际落库；false=因字段缺失或产品 id 未识别等原因 skip（已记 warn 日志）。
+ * verify 端点用返回值决定是否给客户端返 applied=true，避免静默 fail 但 UI 显示成功。
  */
 export async function upsertSubscriptionFromObject(
   env: AppEnv['Bindings'],
   obj: Record<string, unknown>,
   status: SubscriptionStatus,
   ctxId: string, // 日志关联用（webhook eventId / verify checkoutId）
-): Promise<void> {
+): Promise<boolean> {
   const userId = extractUserIdFromMetadata(obj);
   const customerId = extractCustomerId(obj);
   const productId = extractProductId(obj);
@@ -171,7 +174,7 @@ export async function upsertSubscriptionFromObject(
       hasProductId: !!productId,
       hasSubId: !!subId,
     });
-    return;
+    return false;
   }
 
   const plan: CreemPlan | null = planFromProductId(
@@ -181,7 +184,7 @@ export async function upsertSubscriptionFromObject(
   );
   if (!plan) {
     log.warn('subscription.unknown_product', { ctxId, productId });
-    return;
+    return false;
   }
 
   const periodStartIso = pickIsoDate(obj, 'currentPeriodStart', 'current_period_start');
@@ -226,7 +229,7 @@ export async function upsertSubscriptionFromObject(
         subId,
       )
       .run();
-    return;
+    return true;
   }
 
   // 新订阅：用 sub_id 当主键 id（避免再生成一份）
@@ -253,6 +256,7 @@ export async function upsertSubscriptionFromObject(
       now,
     )
     .run();
+  return true;
 }
 
 async function markPastDue(env: AppEnv['Bindings'], evt: CreemEventEnvelope): Promise<void> {

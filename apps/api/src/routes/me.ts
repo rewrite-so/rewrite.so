@@ -224,6 +224,17 @@ meRoute.post('/v1/me/claim-install', async (c) => {
   const session = await auth.api.getSession({ headers: c.req.raw.headers });
   if (!session) return c.json({ error: 'unauthorized' }, 401);
 
+  // 防止脚本用随机 installId 灌 usage_claims 表（5 req/min/user）。每个登录用户
+  // 每月理论只该调 1-2 次（首次登录 + 跨月）；正常 bootstrap 重复调因服务端 PK 幂等
+  // 不写新行但仍会消耗 token bucket。容量足够多个 tab 同时启动，但拦得住脚本滥用。
+  const subject: Subject = { kind: 'user', id: session.user.id };
+  const burst = await consume(c.env.RATE_LIMITER, subject, BURST_BUCKETS.claimInstall);
+  if (!burst.allowed) {
+    return c.json({ error: 'rate_limit', retryAfterMs: burst.retryAfterMs }, 429, {
+      'retry-after': String(Math.ceil(burst.retryAfterMs / 1000)),
+    });
+  }
+
   let body: unknown;
   try {
     body = await c.req.json();

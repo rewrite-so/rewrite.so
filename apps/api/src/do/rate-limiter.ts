@@ -125,6 +125,9 @@ export const BURST_BUCKETS = {
   // BYOK Test endpoint：10 req/min/user。比生产严格——配置态不该频繁打。
   // 防止登录用户用我们 worker 的 IP 做 SSRF / DDoS amplification。
   byokTest: { capacity: 10, refillPerSec: 10 / 60 },
+  // claim-install：5 req/min/user。每用户每月只该调一两次（首次登录 + 跨月），
+  // 限严是为了防止用户脚本用随机 installId 刷 usage_claims 表灌脏数据。
+  claimInstall: { capacity: 5, refillPerSec: 5 / 60 },
 } as const;
 
 export interface ConsumeResult {

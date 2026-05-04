@@ -194,6 +194,31 @@ describe('POST /v1/billing/verify-checkout', () => {
     expect(writes).toEqual(['insert']);
   });
 
+  it('completed checkout but subscription object missing required fields → applied=false', async () => {
+    mockSession = { user: { id: 'u1', email: 'u1@test.com' } };
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+      Response.json({
+        id: 'ck_123',
+        status: 'completed',
+        metadata: { user_id: 'u1' },
+        // sub object 缺 customer / product / id
+        subscription: { status: 'active', metadata: { user_id: 'u1' } },
+      }),
+    );
+    const res = await app.request(
+      '/v1/billing/verify-checkout',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ checkoutId: 'ck_123' }),
+      },
+      MOCK_ENV,
+    );
+    expect(res.status).toBe(200);
+    // 字段不齐没真的写入 DB —— 不能骗客户端 applied=true，让 webhook 兜底
+    expect(await res.json()).toMatchObject({ status: 'completed', applied: false });
+  });
+
   it('completed checkout but subscription is just an id string → applied=false (webhook fallback)', async () => {
     mockSession = { user: { id: 'u1', email: 'u1@test.com' } };
     vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
