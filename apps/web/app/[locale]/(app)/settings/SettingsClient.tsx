@@ -1,10 +1,28 @@
 'use client';
 
 import type { Locale, StoredLocale } from '@rewrite/shared';
-import { REWRITE_TARGET_LABELS, REWRITE_TARGETS } from '@rewrite/shared';
+import { QUOTA, REWRITE_TARGET_LABELS, REWRITE_TARGETS } from '@rewrite/shared';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
-import { usePathname, useRouter } from '../../../../i18n/navigation.ts';
+import { Link, usePathname, useRouter } from '../../../../i18n/navigation.ts';
+
+// 一次性 dismiss flag（参考 packages/core/src/ui/candidates.ts L18-31 模式）。
+// 老用户 deploy 后会看到一次 WelcomeCard，dismiss 后永久消失，无 created_at gate。
+const WELCOME_DISMISSED_KEY = '__rewrite_so_settings_welcome_dismissed_v1';
+function shouldShowWelcome(): boolean {
+  try {
+    return localStorage.getItem(WELCOME_DISMISSED_KEY) !== '1';
+  } catch {
+    return true;
+  }
+}
+function dismissWelcome(): void {
+  try {
+    localStorage.setItem(WELCOME_DISMISSED_KEY, '1');
+  } catch {
+    /* ignore */
+  }
+}
 
 interface UserInfo {
   user: { id: string; email: string; name?: string | null; image?: string | null } | null;
@@ -53,6 +71,11 @@ export function SettingsClient() {
   const [savingLang, setSavingLang] = useState(false);
   const [savingUiLocale, setSavingUiLocale] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  // ?billing=ok 跳回时显示 Pro 升级庆祝 banner（不依赖 verify-checkout 成功——
+  // celebrate 用户支付完成的情绪事件，verify 只是让 D1 立即一致）
+  const [showUpgradeBanner, setShowUpgradeBanner] = useState(false);
+  // WelcomeCard 渲染门：一次性 dismiss + 升级用户自动 dismiss
+  const [welcomeVisible, setWelcomeVisible] = useState(false);
   // 用户选了 "Custom..." 但还没提交输入框时显示的草稿值
   const [customDraft, setCustomDraft] = useState('');
   // 是否正在编辑自定义（用户主动选了 Custom，或已存值就是 custom）
@@ -106,6 +129,11 @@ export function SettingsClient() {
       if (typeof window !== 'undefined') {
         const url = new URL(window.location.href);
         if (url.searchParams.get('billing') === 'ok') {
+          // 进入路径立即触发庆祝 banner（不等 verify；celebrate 支付事件本身），
+          // 同时永久 dismiss WelcomeCard——升级用户已经"上手"，不需要 new-user 引导
+          setShowUpgradeBanner(true);
+          dismissWelcome();
+
           const rawCheckoutId =
             url.searchParams.get('checkout_id') ?? url.searchParams.get('checkoutId');
           // Creem 不替换 {CHECKOUT_ID} 模板时会留 literal 串；只对看起来真实的 id
@@ -149,6 +177,9 @@ export function SettingsClient() {
           ]);
           if (sRes.ok && !cancelled) setSettings(await sRes.json());
           if (byokRes.ok && !cancelled) setByok(await byokRes.json());
+          // WelcomeCard 仅在登录 + 没 dismiss 过时显示。Pro 升级路径已先调
+          // dismissWelcome() 永久关掉，shouldShowWelcome() 此时返 false
+          if (!cancelled) setWelcomeVisible(shouldShowWelcome());
         }
       } catch (err) {
         console.warn('settings load failed', err);
@@ -282,6 +313,16 @@ export function SettingsClient() {
 
   return (
     <section style={{ marginTop: 32 }}>
+      {showUpgradeBanner ? (
+        <UpgradeBanner onDismiss={() => setShowUpgradeBanner(false)} />
+      ) : welcomeVisible ? (
+        <WelcomeCard
+          onDismiss={() => {
+            dismissWelcome();
+            setWelcomeVisible(false);
+          }}
+        />
+      ) : null}
       <div style={cardStyle}>
         <Row label={t('field.email')} value={me.user.email} />
         {me.user.name && <Row label={t('field.name')} value={me.user.name} />}
@@ -801,6 +842,129 @@ function Row({ label, value }: { label: string; value: string }) {
     >
       <span style={{ color: '#888' }}>{label}</span>
       <span style={{ color: '#111' }}>{value}</span>
+    </div>
+  );
+}
+
+function WelcomeCard({ onDismiss }: { onDismiss: () => void }) {
+  const t = useTranslations('page.settings.welcomeCard');
+  const tCore = useTranslations('core');
+  return (
+    <div
+      style={{
+        position: 'relative',
+        padding: '16px 20px',
+        marginBottom: 16,
+        border: '1px solid #3b82f6',
+        borderRadius: 10,
+        background: '#eff6ff',
+      }}
+    >
+      <button
+        type="button"
+        onClick={onDismiss}
+        aria-label={tCore('dismiss')}
+        style={{
+          position: 'absolute',
+          top: 8,
+          right: 10,
+          width: 22,
+          height: 22,
+          border: 'none',
+          background: 'transparent',
+          fontSize: 16,
+          cursor: 'pointer',
+          color: '#64748b',
+          lineHeight: 1,
+          padding: 0,
+        }}
+      >
+        ×
+      </button>
+      <h2 style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 600, color: '#1e3a8a' }}>
+        {t('title')}
+      </h2>
+      <p style={{ margin: '0 0 12px', fontSize: 13, color: '#1e40af', lineHeight: 1.55 }}>
+        {t('description')}
+      </p>
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+        <Link
+          href="/try"
+          style={{
+            padding: '7px 14px',
+            background: '#1d4ed8',
+            color: '#fff',
+            textDecoration: 'none',
+            borderRadius: 6,
+            fontSize: 13,
+            fontWeight: 500,
+          }}
+        >
+          {t('ctaTry')}
+        </Link>
+        <a
+          href="https://github.com/rewrite-so/rewrite.so"
+          target="_blank"
+          rel="noopener"
+          style={{
+            padding: '7px 14px',
+            background: '#fff',
+            color: '#1d4ed8',
+            textDecoration: 'none',
+            border: '1px solid #93c5fd',
+            borderRadius: 6,
+            fontSize: 13,
+            fontWeight: 500,
+          }}
+        >
+          {t('ctaInstall')}
+        </a>
+      </div>
+    </div>
+  );
+}
+
+function UpgradeBanner({ onDismiss }: { onDismiss: () => void }) {
+  const t = useTranslations('page.settings.upgradeBanner');
+  const tCore = useTranslations('core');
+  return (
+    <div
+      style={{
+        position: 'relative',
+        padding: '14px 20px',
+        marginBottom: 16,
+        border: '1px solid #16a34a',
+        borderRadius: 10,
+        background: '#ecfdf5',
+      }}
+    >
+      <button
+        type="button"
+        onClick={onDismiss}
+        aria-label={tCore('dismiss')}
+        style={{
+          position: 'absolute',
+          top: 8,
+          right: 10,
+          width: 22,
+          height: 22,
+          border: 'none',
+          background: 'transparent',
+          fontSize: 16,
+          cursor: 'pointer',
+          color: '#15803d',
+          lineHeight: 1,
+          padding: 0,
+        }}
+      >
+        ×
+      </button>
+      <h2 style={{ margin: '0 0 4px', fontSize: 15, fontWeight: 600, color: '#14532d' }}>
+        ✓ {t('title')}
+      </h2>
+      <p style={{ margin: 0, fontSize: 13, color: '#166534', lineHeight: 1.55 }}>
+        {t('subtitle', { count: QUOTA.pro })}
+      </p>
     </div>
   );
 }

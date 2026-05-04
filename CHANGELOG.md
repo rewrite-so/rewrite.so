@@ -8,6 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **设置 + Onboarding 反馈缺口打磨**（来自第四轮"梳理设置/onboarding 关系"分析的 G1/G3/G5）：
+  - web /settings 顶部加一次性 WelcomeCard（蓝色，新登录用户引导，2 按钮：去 /try /
+    安装扩展）。dismiss 后写 localStorage `__rewrite_so_settings_welcome_dismissed_v1`
+    永久消失；老用户首次访问会看一次（接受这个 MVP 阶段意外）
+  - web /settings Pro 升级成功后顶部显绿色 UpgradeBanner（"✓ Welcome to Pro! 你的
+    2000 / 月配额已生效"）。基于 URL `?billing=ok` 触发，不依赖 verify-checkout 成功
+    （庆祝支付事件本身），verify 失败时仍显示，webhook 异步兜底
+  - 升级路径同时永久 dismiss WelcomeCard——避免用户 × 掉 banner 后又看到"new user
+    引导"的视觉跳
+  - 扩展 onboarding step 2 加 customHint 小字（select 下方）告知"更多选项（自定义
+    方言、口音、风格）可在设置里配置"。不带链接（onboarding 时未登录会跳 /login
+    干扰流程）
+  - i18n: page.settings.welcomeCard.* (4) / page.settings.upgradeBanner.* (2) /
+    ext.onboarding.step2.customHint (1) 共 7 keys × 7 locale = 49 字符串。dismiss ×
+    按钮 aria-label 复用已有 `core.dismiss`。ja/ko/es/fr/de 是 LLM 初稿待母语校对
 - **第三轮 review 修 5 处** — 隐私契约 + 运营 + UX：
   - **P0 修隐私契约违规**：扩展 service-worker.ts 的两处 console.info 删掉了用户访问的
     URL 和原文前 40 字（`port.sender?.url` / `msg.req.text.slice(0, 40)`）。即便是

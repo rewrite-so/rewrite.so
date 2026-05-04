@@ -138,6 +138,16 @@
       "loading": "Chargement…",
       "notSignedIn": "Vous n'êtes pas connecté.",
       "signIn": "Se connecter →",
+      "welcomeCard": {
+        "title": "Bienvenue ! Deux façons de commencer",
+        "description": "Essayez la démo ici, ou installez l'extension Chrome pour l'utiliser sur tous les sites.",
+        "ctaTry": "Essayer sur /try →",
+        "ctaInstall": "Installer l'extension Chrome →"
+      },
+      "upgradeBanner": {
+        "title": "Bienvenue dans Pro !",
+        "subtitle": "Votre forfait de {count, number} réécritures / mois est désormais actif."
+      },
       "field": {
         "email": "Email",
         "name": "Nom"
@@ -516,6 +526,7 @@
       "step2": {
         "title": "Définissez la langue cible",
         "body": "Les réécritures sont produites dans la langue cible. « Auto-détection depuis la page » convient à la plupart — écrire en chinois sur un site anglais traduit automatiquement la réécriture en anglais.",
+        "customHint": "Plus d'options (dialectes, accents, styles personnalisés) disponibles dans les Paramètres.",
         "next": "Suivant"
       },
       "step3": {

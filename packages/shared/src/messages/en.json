@@ -138,6 +138,16 @@
       "loading": "Loading…",
       "notSignedIn": "You're not signed in.",
       "signIn": "Sign in →",
+      "welcomeCard": {
+        "title": "Welcome! Two ways to get started",
+        "description": "Try the demo right here, or install the Chrome extension to use it on every site.",
+        "ctaTry": "Try it on /try →",
+        "ctaInstall": "Install Chrome extension →"
+      },
+      "upgradeBanner": {
+        "title": "Welcome to Pro!",
+        "subtitle": "Your {count, number} rewrites / month plan is now active."
+      },
       "field": {
         "email": "Email",
         "name": "Name"
@@ -516,6 +526,7 @@
       "step2": {
         "title": "Set the target language",
         "body": "Rewrites are output in the target language. \"Auto-detect from page\" works for most people — typing Chinese on an English site auto-translates the rewrite to English.",
+        "customHint": "More options (custom dialects, accents, styles) available in Settings.",
         "next": "Next"
       },
       "step3": {

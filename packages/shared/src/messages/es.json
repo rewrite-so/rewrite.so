@@ -138,6 +138,16 @@
       "loading": "Cargando…",
       "notSignedIn": "No has iniciado sesión.",
       "signIn": "Iniciar sesión →",
+      "welcomeCard": {
+        "title": "¡Bienvenido! Dos formas de empezar",
+        "description": "Pruébalo en la demo o instala la extensión de Chrome para usarlo en cualquier sitio.",
+        "ctaTry": "Probar en /try →",
+        "ctaInstall": "Instalar extensión de Chrome →"
+      },
+      "upgradeBanner": {
+        "title": "¡Bienvenido a Pro!",
+        "subtitle": "Tu plan de {count, number} reescrituras / mes ya está activo."
+      },
       "field": {
         "email": "Correo",
         "name": "Nombre"
@@ -516,6 +526,7 @@
       "step2": {
         "title": "Configura el idioma objetivo",
         "body": "Las reescrituras se generan en el idioma objetivo. \"Auto-detectar desde la página\" funciona para la mayoría — escribir chino en un sitio en inglés traduce automáticamente la reescritura al inglés.",
+        "customHint": "Más opciones (dialectos, acentos y estilos personalizados) disponibles en los Ajustes.",
         "next": "Siguiente"
       },
       "step3": {

@@ -138,6 +138,16 @@
       "loading": "Lädt…",
       "notSignedIn": "Du bist nicht angemeldet.",
       "signIn": "Anmelden →",
+      "welcomeCard": {
+        "title": "Willkommen! Zwei Wege loszulegen",
+        "description": "Probier die Demo direkt aus oder installiere die Chrome-Erweiterung, um sie auf allen Websites zu nutzen.",
+        "ctaTry": "Auf /try ausprobieren →",
+        "ctaInstall": "Chrome-Erweiterung installieren →"
+      },
+      "upgradeBanner": {
+        "title": "Willkommen bei Pro!",
+        "subtitle": "Dein Plan mit {count, number} Rewrites / Monat ist jetzt aktiv."
+      },
       "field": {
         "email": "E-Mail",
         "name": "Name"
@@ -516,6 +526,7 @@
       "step2": {
         "title": "Zielsprache festlegen",
         "body": "Umschreibungen werden in der Zielsprache ausgegeben. „Automatisch von Seite erkennen\" passt für die meisten — Chinesisch auf einer englischen Seite tippen übersetzt die Umschreibung automatisch ins Englische.",
+        "customHint": "Weitere Optionen (eigene Dialekte, Akzente, Stile) findest du in den Einstellungen.",
         "next": "Weiter"
       },
       "step3": {

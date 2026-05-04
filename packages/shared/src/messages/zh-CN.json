@@ -138,6 +138,16 @@
       "loading": "加载中…",
       "notSignedIn": "你还没登录。",
       "signIn": "去登录 →",
+      "welcomeCard": {
+        "title": "欢迎！两种方式开始使用",
+        "description": "直接在演示页试试，或装上 Chrome 扩展用在任何网站。",
+        "ctaTry": "去 /try 试试 →",
+        "ctaInstall": "安装 Chrome 扩展 →"
+      },
+      "upgradeBanner": {
+        "title": "欢迎加入 Pro！",
+        "subtitle": "你的每月 {count, number} 次改写已生效。"
+      },
       "field": {
         "email": "邮箱",
         "name": "昵称"
@@ -516,6 +526,7 @@
       "step2": {
         "title": "设置目标语言",
         "body": "改写结果会输出为目标语言。\"自动检测页面语言\"适合大多数人——例如你在英文网站打中文，会自动翻成英文 3 风格。",
+        "customHint": "更多选项（自定义方言、口音、风格）可在「设置」里配置。",
         "next": "下一步"
       },
       "step3": {

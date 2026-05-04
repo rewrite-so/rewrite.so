@@ -16,6 +16,10 @@
 | `fr` | LLM 初稿 | 待招募 | 未审 | 同上；魁北克 vs 法国变体未区分 |
 | `de` | LLM 初稿 | 待招募 | 未审 | 同上；瑞士德语 / 奥地利德语未区分 |
 
+**最近未审 keys**（按 commit 排，给 reviewer 提示重点）：
+- `page.settings.welcomeCard.*` / `page.settings.upgradeBanner.*` /
+  `ext.onboarding.step2.customHint` — 第四轮 UX 打磨加入（ja/ko/es/fr/de 5 个 locale 待校）
+
 ## 流程约定
 
 - **新加 key**：必须 7 locale 同步加（CI gate `pnpm i18n:validate` 强制）。先在 en 写定稿，

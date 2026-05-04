@@ -93,6 +93,9 @@ export function Onboarding({ onComplete }: Props) {
                 </option>
               ))}
             </select>
+            <p style={{ margin: '12px 0 0', fontSize: 12, color: '#888', lineHeight: 1.55 }}>
+              {t('ext.onboarding.step2.customHint')}
+            </p>
             <div style={{ marginTop: 24, display: 'flex', gap: 12 }}>
               <button type="button" style={primaryBtnStyle} onClick={() => setStep(3)}>
                 {t('ext.onboarding.step2.next')}
