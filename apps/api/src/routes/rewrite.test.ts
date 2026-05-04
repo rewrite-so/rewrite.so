@@ -233,6 +233,74 @@ describe('POST /v1/rewrite', () => {
     expect(res.status).toBe(400);
   });
 
+  it('meta event includes status payload (anonymous: authed=false)', async () => {
+    const res = await app.request(
+      '/v1/rewrite',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          text: 'hi',
+          hasSelection: false,
+          lang: 'en',
+          styles: ['faithful', 'casual', 'formal'],
+        }),
+      },
+      MOCK_ENV,
+    );
+
+    if (!res.body) throw new Error('expected body');
+    const events: SSEEvent[] = [];
+    for await (const ev of parseSSEStream(res.body)) events.push(ev);
+
+    const meta = events[0] as Extract<SSEEvent, { event: 'meta' }>;
+    expect(meta.event).toBe('meta');
+    expect(meta.data.status).toBeDefined();
+    expect(meta.data.status?.authed).toBe(false);
+    // 没传 installId → IP 维度匿名
+    expect(meta.data.status?.tier).toBe('anonymous_ip');
+    expect(meta.data.status?.isBYOK).toBe(false);
+    // anonymous_ip 配额 10/月，第一次请求 used=1
+    expect(meta.data.status?.used).toBe(1);
+    expect(meta.data.status?.limit).toBe(10);
+  });
+
+  it('429 quota_exceeded body includes authed/tier for client CTA routing', async () => {
+    // mock D1 SELECT 返回 count=10（达 anonymous_ip 上限）
+    const exhaustedDB = {
+      prepare: (_sql: string) => ({
+        bind: (..._args: unknown[]) => ({
+          first: async () => ({ count: 10 }),
+          run: async () => ({ success: true }),
+          all: async () => ({ results: [], success: true }),
+        }),
+      }),
+    } as unknown as D1Database;
+
+    const res = await app.request(
+      '/v1/rewrite',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          text: 'hi',
+          hasSelection: false,
+          lang: 'en',
+          styles: ['faithful', 'casual', 'formal'],
+        }),
+      },
+      { ...MOCK_ENV, DB: exhaustedDB },
+    );
+
+    expect(res.status).toBe(429);
+    const body = (await res.json()) as Record<string, unknown>;
+    expect(body).toMatchObject({
+      error: 'quota_exceeded',
+      authed: false,
+      tier: 'anonymous_ip',
+    });
+  });
+
   it('one upstream fails, the other two still complete', async () => {
     let n = 0;
     vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {

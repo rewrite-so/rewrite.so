@@ -541,6 +541,13 @@
     "shortcuts": "{accept} aceptar · {regen} regenerar · {cancel} cerrar",
     "openSettings": "Abrir ajustes",
     "dismiss": "Cerrar",
+    "byokBadge": "BYOK",
+    "signinHint": "Inicia sesión para {count} reescrituras / mes →",
+    "cta": {
+      "signIn": "Iniciar sesión →",
+      "signInForMore": "Inicia sesión para obtener más →",
+      "upgradeOrByok": "Configura BYOK o pásate a Pro →"
+    },
     "lang": {
       "custom": "Personalizado…",
       "customLabelFmt": "Personalizado: {value}",

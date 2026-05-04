@@ -55,6 +55,17 @@
 
 - **SSE delta 帧 data 必须整行 JSON.parse**：上游 chunk 含换行须转义为 `\n`，前端解析器逐行处理。
 - **SSE AbortSignal 链式透传**：客户端断开时 Worker 必须级联 abort 3 路 upstream fetch（`req.signal` → 3 路 fetch.signal），否则继续烧 token。
+- **浮窗状态信息（auth/tier/usage/byok）有两条传输路径**：
+  - 200 OK 路径：SSE meta event 的 `status` 字段（authed/tier/isBYOK/used/limit）→ 客户端
+    `panel.setStatus()` 决定 BYOK badge / quota chip / signin footer 显示。
+  - 4xx 路径（quota_exceeded 等不进 muxToSSE）：response body 直接带 `authed/tier`，
+    客户端 `setGlobalError(code, detail)` 的 detail 拿来决定 CTA（登录用户 → "Configure
+    BYOK or upgrade"，匿名 → "Sign in for more"）。
+  扩展路径要在 `service-worker.ts` 解析 4xx body JSON 后通过 port-protocol 显式
+  forward `authed/tier/used/limit/resetAt`——`message` 字段是字符串切片，不会被自动
+  parse。**新增 4xx 透传字段时三处都要加**：`port-protocol.ts` FromBackground 类型、
+  `service-worker.ts` 的 extras 解析、`port-client.ts` 的 detailObj 重建。
+  避免再起额外请求（如 `/v1/me`）来拿这些状态——0 额外网络往返。
 - **上游协议严格 OpenAI Chat Completions SSE**：仅认 `choices[0].delta.content`，不为 vendor 自创字段做兼容层。BYOK 用户用其它 vendor 自担兼容性。
 - **D1 不支持 RETURNING * 的全部场景**：用先 `INSERT` 后 `SELECT by id`，不要假设 RETURNING 总能用。
 - **drizzle 仅给 better-auth 4 张表用**：业务表保持裸 SQL，这是"D1 不用 ORM"原则的唯一例外。不要顺手把业务表也搬到 drizzle。

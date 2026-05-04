@@ -16,5 +16,18 @@ export type FromContent = { type: 'rewrite'; req: RewriteRequest };
 
 export type FromBackground =
   | { type: 'chunk'; data: number[] } // Uint8Array → Array.from()
-  | { type: 'error'; code: string; message?: string; status?: number }
+  | {
+      type: 'error';
+      code: string;
+      message?: string;
+      status?: number;
+      // 服务端 4xx body 的可选字段，bg 解析后透传给 content（让 setGlobalError 决定 CTA）
+      // - quota_exceeded: authed / tier / used / limit / resetAt
+      // - 其它错误一般无附加字段
+      authed?: boolean;
+      tier?: string;
+      used?: number;
+      limit?: number;
+      resetAt?: string;
+    }
   | { type: 'end' };

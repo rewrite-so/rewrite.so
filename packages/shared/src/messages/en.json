@@ -541,6 +541,13 @@
     "shortcuts": "{accept} accept · {regen} regen · {cancel} cancel",
     "openSettings": "Open settings",
     "dismiss": "Dismiss",
+    "byokBadge": "BYOK",
+    "signinHint": "Sign in for {count} rewrites / month →",
+    "cta": {
+      "signIn": "Sign in →",
+      "signInForMore": "Sign in for more →",
+      "upgradeOrByok": "Configure BYOK or upgrade →"
+    },
     "lang": {
       "custom": "Custom…",
       "customLabelFmt": "Custom: {value}",

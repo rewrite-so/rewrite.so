@@ -1,6 +1,6 @@
 /// <reference lib="dom" />
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createCandidates } from './candidates.ts';
+import { createCandidates, isRetryableError } from './candidates.ts';
 import { createShadowRoot, destroyShadowRoot } from './shadow.ts';
 
 afterEach(() => {
@@ -386,6 +386,170 @@ describe('createCandidates', () => {
     // unauthorized 不可重试 —— 只有 Sign-in CTA
     expect(buttons.length).toBe(1);
     expect(buttons[0]?.textContent).toContain('Sign in');
+  });
+
+  // ===== setStatus: BYOK badge / quota chip / signin hint =====
+
+  it('setStatus shows BYOK badge when isBYOK=true', () => {
+    const { factory, target, root } = setup();
+    const handle = factory.open({ target, locale: 'en', targetLang: 'en' });
+    expect((root.querySelector('.byok-badge') as HTMLElement).style.display).toBe('none');
+    handle.setStatus({ authed: true, tier: 'pro', isBYOK: true });
+    expect((root.querySelector('.byok-badge') as HTMLElement).style.display).toBe('');
+    expect(root.querySelector('.byok-badge')?.textContent).toBe('BYOK');
+  });
+
+  it('setStatus shows quota chip when used/limit > 0.8', () => {
+    const { factory, target, root } = setup();
+    const handle = factory.open({ target, locale: 'en', targetLang: 'en' });
+    handle.setStatus({ authed: true, tier: 'free', isBYOK: false, used: 25, limit: 30 });
+    const chip = root.querySelector('.quota-chip') as HTMLElement;
+    expect(chip.style.display).toBe('');
+    expect(chip.textContent).toBe('25/30');
+  });
+
+  it('setStatus hides quota chip below 80% threshold', () => {
+    const { factory, target, root } = setup();
+    const handle = factory.open({ target, locale: 'en', targetLang: 'en' });
+    handle.setStatus({ authed: true, tier: 'free', isBYOK: false, used: 10, limit: 30 });
+    expect((root.querySelector('.quota-chip') as HTMLElement).style.display).toBe('none');
+  });
+
+  it('setStatus hides quota chip in BYOK mode regardless of usage', () => {
+    const { factory, target, root } = setup();
+    const handle = factory.open({ target, locale: 'en', targetLang: 'en' });
+    // BYOK 时即使有 used/limit 也不显示 quota chip
+    handle.setStatus({ authed: true, tier: 'pro', isBYOK: true, used: 9999, limit: 10000 });
+    expect((root.querySelector('.quota-chip') as HTMLElement).style.display).toBe('none');
+  });
+
+  it('setStatus shows signin hint footer when authed=false and no install hook', () => {
+    const { factory, target, root } = setup();
+    const handle = factory.open({
+      target,
+      locale: 'en',
+      targetLang: 'en',
+      loginUrl: '/login',
+    });
+    expect(root.querySelector('.signin-hint')).toBeNull();
+    handle.setStatus({
+      authed: false,
+      tier: 'anonymous_ip',
+      isBYOK: false,
+      used: 1,
+      limit: 10,
+    });
+    const hint = root.querySelector('.signin-hint') as HTMLElement;
+    expect(hint).not.toBeNull();
+    // 文案应使用 QUOTA.loggedInFree=30（引导值，不用当前匿名 limit）
+    expect(hint.textContent).toContain('30');
+  });
+
+  it('setStatus does NOT show signin hint when showInstallHook=true', () => {
+    const { factory, target, root } = setup();
+    const handle = factory.open({
+      target,
+      locale: 'en',
+      targetLang: 'en',
+      showInstallHook: true,
+      loginUrl: '/login',
+    });
+    handle.setStatus({
+      authed: false,
+      tier: 'anonymous_ip',
+      isBYOK: false,
+      used: 1,
+      limit: 10,
+    });
+    // install hook 优先（web 模式），signin hint 不重复出现
+    expect(root.querySelector('.signin-hint')).toBeNull();
+  });
+
+  it('setStatus does NOT show signin hint when authed=true', () => {
+    const { factory, target, root } = setup();
+    const handle = factory.open({
+      target,
+      locale: 'en',
+      targetLang: 'en',
+      loginUrl: '/login',
+    });
+    handle.setStatus({ authed: true, tier: 'free', isBYOK: false, used: 5, limit: 30 });
+    expect(root.querySelector('.signin-hint')).toBeNull();
+  });
+
+  // ===== decideCTA: 按 detail.authed 路由超配额 CTA =====
+
+  it('quota_exceeded with detail.authed=true and upgradeUrl shows "Configure BYOK or upgrade" CTA', () => {
+    const { factory, target, root } = setup();
+    const handle = factory.open({
+      target,
+      locale: 'en',
+      targetLang: 'en',
+      loginUrl: '/login',
+      upgradeUrl: '/settings',
+    });
+    handle.setGlobalError('quota_exceeded', { authed: true, used: 30, limit: 30 });
+    const buttons = root.querySelectorAll('.global-error-cta');
+    expect(buttons.length).toBe(1);
+    expect(buttons[0]?.textContent).toContain('BYOK');
+  });
+
+  it('quota_exceeded with detail.authed=false shows "Sign in for more" CTA', () => {
+    const { factory, target, root } = setup();
+    const handle = factory.open({
+      target,
+      locale: 'en',
+      targetLang: 'en',
+      loginUrl: '/login',
+      upgradeUrl: '/settings',
+    });
+    handle.setGlobalError('quota_exceeded', { authed: false, used: 10, limit: 10 });
+    const buttons = root.querySelectorAll('.global-error-cta');
+    expect(buttons.length).toBe(1);
+    expect(buttons[0]?.textContent).toContain('Sign in for more');
+  });
+
+  it('setStatus after setGlobalError is a noop (panel already wiped)', () => {
+    const { factory, target, root } = setup();
+    const handle = factory.open({ target, locale: 'en', targetLang: 'en', loginUrl: '/login' });
+    handle.setGlobalError('quota_exceeded', { authed: false, used: 10, limit: 10 });
+    // 此时 byokBadge / quotaChip / signinHintEl 都已 detach（panel.innerHTML 被清空）
+    expect(root.querySelector('.byok-badge')).toBeNull();
+    expect(root.querySelector('.signin-hint')).toBeNull();
+
+    // setStatus 不应抛错也不应在 detached 节点上 mutate，更不应往 panel 重新插 footer
+    expect(() =>
+      handle.setStatus({ authed: false, tier: 'anonymous_ip', isBYOK: false, used: 1, limit: 10 }),
+    ).not.toThrow();
+    expect(root.querySelector('.signin-hint')).toBeNull();
+    expect(root.querySelector('.byok-badge')).toBeNull();
+  });
+
+  it('unauthorized always shows "Sign in" CTA when loginUrl present', () => {
+    const { factory, target, root } = setup();
+    const handle = factory.open({ target, locale: 'en', targetLang: 'en', loginUrl: '/login' });
+    handle.setGlobalError('unauthorized');
+    const btn = root.querySelector('.global-error-cta') as HTMLButtonElement;
+    expect(btn?.textContent).toContain('Sign in');
+  });
+
+  // ===== isRetryableError export（mount.ts regen 升级路径用） =====
+
+  it('isRetryableError classifies transient errors as retryable', () => {
+    expect(isRetryableError('upstream_error')).toBe(true);
+    expect(isRetryableError('upstream_timeout')).toBe(true);
+    expect(isRetryableError('rate_limit')).toBe(true);
+    expect(isRetryableError('internal_error')).toBe(true);
+    expect(isRetryableError('network')).toBe(true);
+  });
+
+  it('isRetryableError classifies user/quota errors as non-retryable', () => {
+    // mount.ts 用这些做单卡 regen → setGlobalError 升级判断
+    expect(isRetryableError('quota_exceeded')).toBe(false);
+    expect(isRetryableError('unauthorized')).toBe(false);
+    expect(isRetryableError('invalid_input')).toBe(false);
+    expect(isRetryableError('input_too_long')).toBe(false);
+    expect(isRetryableError('turnstile_failed')).toBe(false);
   });
 
   it('setGlobalError without onRetryAll callback shows no button (graceful degrade)', () => {

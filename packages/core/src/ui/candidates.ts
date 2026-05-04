@@ -1,4 +1,12 @@
-import { ALL_STYLES, type Locale, STYLE_LABEL, type Style, t } from '@rewrite/shared';
+import {
+  ALL_STYLES,
+  type Locale,
+  type MetaStatus,
+  QUOTA,
+  STYLE_LABEL,
+  type Style,
+  t,
+} from '@rewrite/shared';
 
 type ActionMode = 'hidden' | 'streaming' | 'regen' | 'retry';
 
@@ -75,6 +83,13 @@ export interface CandidatesHandle {
    * 比客户端 opts.targetLang（chrome.storage cache）更权威。
    */
   setLangDetected(target: string): void;
+  /**
+   * SSE meta 事件来到时调用，更新浮窗状态信息：
+   * - BYOK 模式：header 显示 BYOK badge，不显示 quota chip
+   * - 接近月配额（used/limit > 80%）：header 显示 quota chip
+   * - 未登录用户：底部显示 signin footer 引导（除非 web 模式有 install hook）
+   */
+  setStatus(status: MetaStatus): void;
   /** 整体错误：替换整个浮层为单一错误卡片（含 CTA 链接，按 code 决定文案） */
   setGlobalError(code: string, detail?: Record<string, unknown>): void;
   close(): void;
@@ -87,8 +102,10 @@ export interface OpenOptions {
   targetLang: string;
   /** web 模式下 true，浮层底部显示"安装扩展"链接 */
   showInstallHook?: boolean;
-  /** 登录引导 URL（错误状态显示登录 CTA 时跳转） */
+  /** 未登录用户的登录引导 URL（unauthorized 错误显示登录 CTA 时跳转） */
   loginUrl?: string;
+  /** 已登录用户超配额时引导去配 BYOK / 升 Pro 的 URL（通常是 /settings 或 /billing） */
+  upgradeUrl?: string;
 }
 
 /** 把 targetLang 转成 chip 文字：短码大写、长自定义文本截短 */
@@ -132,9 +149,23 @@ function openPanel(
     ev.preventDefault();
   });
 
-  // 顶部 header：target lang chip + settings 齿轮
+  // 顶部 header：[BYOK badge?] [quota chip?] [target chip] [⚙]
+  // BYOK badge 和 quota chip 在 setStatus 收到 meta event 后插入；初始不显示
   const header = document.createElement('div');
   header.className = 'panel-header';
+
+  // BYOK badge 占位（永远在最前；setStatus 决定 display）
+  const byokBadge = document.createElement('div');
+  byokBadge.className = 'byok-badge';
+  byokBadge.textContent = t('core.byokBadge', opts.locale);
+  byokBadge.style.display = 'none';
+  header.appendChild(byokBadge);
+
+  // quota chip 占位（target chip 之前；setStatus 决定 display）
+  const quotaChip = document.createElement('div');
+  quotaChip.className = 'quota-chip';
+  quotaChip.style.display = 'none';
+  header.appendChild(quotaChip);
 
   const targetChip = document.createElement('div');
   targetChip.className = 'target-chip';
@@ -271,7 +302,8 @@ function openPanel(
   }
 
   // 底部 hook（仅 web 模式 + 用户没主动 dismiss 过）
-  if (opts.showInstallHook && shouldShowInstallHint()) {
+  const hasInstallHint = !!(opts.showInstallHook && shouldShowInstallHint());
+  if (hasInstallHint) {
     const footer = document.createElement('div');
     footer.className = 'footer';
     const note = document.createElement('span');
@@ -302,6 +334,15 @@ function openPanel(
     footer.appendChild(dismissBtn);
     panel.appendChild(footer);
   }
+
+  // signin hint footer 占位（setStatus 收到 authed=false 且无 install hint 时显示一次）
+  let signinHintEl: HTMLElement | null = null;
+
+  // setGlobalError 会 wipe 整个 panel.innerHTML —— 之后 byokBadge / quotaChip /
+  // signinHintEl 都成 detached 节点。setStatus 在此之后调用应直接 bail，不要 mutate
+  // detached DOM。当前协议下 server 总是 meta 先于 error，理论上不会触发；这里做
+  // 防御性 guard 防止未来协议变更（流式推送 status 等）导致 dead writes。
+  let globalErrored = false;
 
   root.appendChild(panel);
 
@@ -419,9 +460,49 @@ function openPanel(
         targetChip.removeAttribute('title');
       }
     },
+    setStatus(status) {
+      if (closed || globalErrored || !status) return;
+      // BYOK badge：仅 BYOK 模式显示
+      byokBadge.style.display = status.isBYOK ? '' : 'none';
+
+      // quota chip：BYOK 模式不显示；非 BYOK 且 used/limit > 0.8 时显示
+      if (
+        !status.isBYOK &&
+        typeof status.used === 'number' &&
+        typeof status.limit === 'number' &&
+        status.limit > 0 &&
+        status.used / status.limit > 0.8
+      ) {
+        quotaChip.textContent = `${status.used}/${status.limit}`;
+        quotaChip.style.display = '';
+      } else {
+        quotaChip.style.display = 'none';
+      }
+
+      // signin hint footer：未登录 + 无 install hook + 没插过；仅插一次
+      if (!status.authed && !hasInstallHint && !signinHintEl && opts.loginUrl) {
+        const el = document.createElement('div');
+        el.className = 'signin-hint';
+        el.textContent = t('core.signinHint', opts.locale).replace(
+          '{count}',
+          String(QUOTA.loggedInFree),
+        );
+        el.addEventListener('click', (e) => {
+          e.preventDefault();
+          if (opts.loginUrl) window.open(opts.loginUrl, '_blank');
+        });
+        panel.appendChild(el);
+        signinHintEl = el;
+        // panel 高度变了，重新定位
+        positionPanel(panel, opts.target);
+      }
+    },
     setGlobalError(code, detail) {
       if (closed) return;
       // 替换整个浮层为单一错误卡片 + CTA
+      // 一旦进入 global-error 态，setStatus 不再生效（badges/chips 已 detach）
+      globalErrored = true;
+      signinHintEl = null;
       panel.innerHTML = '';
       panel.classList.add('global-error');
 
@@ -454,7 +535,7 @@ function openPanel(
         btnRow.appendChild(retryBtn);
       }
 
-      const ctaInfo = decideCTA(code, opts);
+      const ctaInfo = decideCTA(code, detail, opts);
       if (ctaInfo) {
         const cta = document.createElement('button');
         cta.type = 'button';
@@ -474,14 +555,38 @@ function openPanel(
   };
 }
 
-function decideCTA(code: string, opts: OpenOptions): { label: string; onClick: () => void } | null {
-  // 配额超限 / 鉴权失败：引导登录（如果有 loginUrl）
-  if ((code === 'quota_exceeded' || code === 'unauthorized') && opts.loginUrl) {
+function decideCTA(
+  code: string,
+  detail: Record<string, unknown> | undefined,
+  opts: OpenOptions,
+): { label: string; onClick: () => void } | null {
+  // detail.authed 由服务端 4xx response body 透传（rewrite.ts 在 quota_exceeded 时带）
+  // 没有 detail（非 4xx 路径）时按未登录处理 —— 退化到 "Sign in" 引导
+  const authed = detail?.authed === true;
+
+  if (code === 'quota_exceeded') {
+    // 已登录 + 有 upgradeUrl → "Configure BYOK or upgrade"，跳 /settings
+    if (authed && opts.upgradeUrl) {
+      const url = opts.upgradeUrl;
+      return {
+        label: t('core.cta.upgradeOrByok', opts.locale),
+        onClick: () => window.open(url, '_blank'),
+      };
+    }
+    // 未登录（或登录但 host 没传 upgradeUrl）→ "Sign in for more"
+    if (opts.loginUrl) {
+      const url = opts.loginUrl;
+      return {
+        label: t('core.cta.signInForMore', opts.locale),
+        onClick: () => window.open(url, '_blank'),
+      };
+    }
+  }
+  if (code === 'unauthorized' && opts.loginUrl) {
+    const url = opts.loginUrl;
     return {
-      label: opts.locale === 'zh-CN' ? '登录解锁更多 →' : 'Sign in for more →',
-      onClick: () => {
-        if (opts.loginUrl) window.open(opts.loginUrl, '_blank');
-      },
+      label: t('core.cta.signIn', opts.locale),
+      onClick: () => window.open(url, '_blank'),
     };
   }
   return null;
@@ -492,8 +597,12 @@ function decideCTA(code: string, opts: OpenOptions): { label: string; onClick: (
  * 不可重试：quota_exceeded（配额没了）/ unauthorized（要登录）/ invalid_input、
  * input_too_long（用户输入问题）/ turnstile_failed（要重新人机校验）。
  * 其余（upstream / network / timeout / rate_limit）都是临时性问题，可重试。
+ *
+ * mount.ts 的 regenerateOne 也用这个判断：单卡 regen 失败时，可重试错误显示 Retry
+ * 按钮（panel.setError），不可重试错误升级到 panel.setGlobalError 让用户看到正确的
+ * CTA（quota_exceeded → "Configure BYOK or upgrade"），避免单卡 Retry 死循环。
  */
-function isRetryableError(code: string): boolean {
+export function isRetryableError(code: string): boolean {
   const nonRetryable = new Set([
     'quota_exceeded',
     'unauthorized',

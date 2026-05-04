@@ -118,11 +118,33 @@ async function handleRewrite(
       code = detail.includes('quota_exceeded') ? 'quota_exceeded' : 'rate_limit';
     else if (res.status === 413) code = 'input_too_long';
     else code = 'upstream_error';
+
+    // 解析 4xx body 透传 authed / tier / used / limit / resetAt 给 content。
+    // 服务端 quota_exceeded 路径会带 authed/tier 让 content 决定 CTA 文案；
+    // 没有这一步 detail.authed 永远 undefined，登录用户也会看到 "Sign in for more"。
+    const extras: {
+      authed?: boolean;
+      tier?: string;
+      used?: number;
+      limit?: number;
+      resetAt?: string;
+    } = {};
+    try {
+      const body = JSON.parse(detail) as Record<string, unknown>;
+      if (typeof body.authed === 'boolean') extras.authed = body.authed;
+      if (typeof body.tier === 'string') extras.tier = body.tier;
+      if (typeof body.used === 'number') extras.used = body.used;
+      if (typeof body.limit === 'number') extras.limit = body.limit;
+      if (typeof body.resetAt === 'string') extras.resetAt = body.resetAt;
+    } catch {
+      // body 非 JSON（如 503 文本错误），保持空 extras
+    }
     send({
       type: 'error',
       code,
       status: res.status,
       message: detail.slice(0, 500),
+      ...extras,
     });
     send({ type: 'end' });
     return;

@@ -541,6 +541,13 @@
     "shortcuts": "{accept} 선택 · {regen} 재생성 · {cancel} 닫기",
     "openSettings": "설정 열기",
     "dismiss": "닫기",
+    "byokBadge": "BYOK",
+    "signinHint": "로그인하면 매월 {count}회 사용 가능 →",
+    "cta": {
+      "signIn": "로그인 →",
+      "signInForMore": "로그인하여 더 많이 사용 →",
+      "upgradeOrByok": "BYOK 설정 또는 Pro 업그레이드 →"
+    },
     "lang": {
       "custom": "사용자 지정…",
       "customLabelFmt": "사용자 지정: {value}",

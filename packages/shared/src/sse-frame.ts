@@ -16,6 +16,25 @@ export interface MetaData {
   requestId: string;
   streams: Style[];
   langDetected: string;
+  /**
+   * 浮窗状态信息（用户感知层）。客户端 panel.setStatus 消费决定显示
+   * BYOK badge / quota chip / signin footer / 超配额 CTA 文案。
+   * 老服务端可能不发——客户端必须容忍 undefined。
+   */
+  status?: MetaStatus;
+}
+
+export interface MetaStatus {
+  /** 是否登录用户（false = anonymous IP/install） */
+  authed: boolean;
+  /** anonymous_ip / anonymous_install / free / pro */
+  tier: 'anonymous_ip' | 'anonymous_install' | 'free' | 'pro';
+  /** 是否使用 BYOK（已登录 + byok_keys 表有行） */
+  isBYOK: boolean;
+  /** 已用配额（已含本次 +1）。BYOK 模式下省略。 */
+  used?: number;
+  /** 月配额上限。BYOK 模式下省略（无限）。 */
+  limit?: number;
 }
 
 export interface DeltaData {

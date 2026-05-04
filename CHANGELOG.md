@@ -8,6 +8,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- 浮窗状态信息显示 — auth/quota/BYOK 显式可见：
+  - header 加 BYOK badge（仅 BYOK 模式）+ quota chip（used/limit > 80% 时琥珀色提示）
+  - 未登录用户底部加 "Sign in for {N} rewrites / month →" footer（web 模式有 install
+    hook 时不重复出现）
+  - 超配额 CTA 按登录态分流：登录用户 → "Configure BYOK or upgrade"（跳 /settings），
+    匿名用户 → "Sign in for more"（跳 /login）；之前所有用户都看 "Sign in for more" 即使
+    已经登录，文案错位
+  - SSE meta event 加 status 字段（authed/tier/isBYOK/used/limit）；服务端 rewrite.ts
+    在 200 路径 emit 到 meta event，在 429 quota_exceeded 路径写入 4xx response body。
+    后者关键：用户首次就 quota_exceeded（如 30/30 已用完）从未收到过 meta event，
+    setGlobalError 只能从 4xx body detail 拿 authed 决定 CTA
+  - decideCTA 文案改走 i18n（之前 zh/en hardcoded，其它 5 个 locale fallback 英文）
+  - 扩展 port-protocol 透传 4xx body 字段（authed/tier/used/limit/resetAt）：原本
+    bg 只 forward `{code, status, message}`，导致 detail.authed/used 这些信息在
+    扩展路径全部丢失，只在 web 同源 fetch 路径生效。补这条传输链路才能让登录扩展
+    用户看到正确的 "Configure BYOK or upgrade" CTA
+  - 修单卡 regen 死循环：之前 ↻ Regenerate 触发 quota_exceeded 时，mount.ts 走
+    `setError(style)` 显示卡级 Retry 按钮 → 用户点 Retry 又超配 → 死循环。改为
+    可重试错误才走 setError，不可重试错误（quota_exceeded / unauthorized）升级到
+    setGlobalError 让用户看到正确 CTA（Configure BYOK or upgrade / Sign in）。
+    `isRetryableError` 从 candidates.ts export 给 mount.ts 复用
+  - 修 setStatus 在 setGlobalError 后的 dead writes：global-error 时 panel.innerHTML=''
+    会把 byokBadge / quotaChip / signinHintEl 全部 detach，加 globalErrored 标记防御
+    后续 setStatus 在 detached 节点上空转
+  - 工程量：rewrite.test +2、sse-frame.test +2、candidates.test +13（core 91→104 / api 212→214）
 - catalog 合并 `core.lang.{custom,customLabelFmt,customPlaceholder,customHelp}` ——
   原来扩展 `ext.options.langOption.custom*` + web `page.settings.lang.custom*` 两套
   完全相同的 4 keys × 7 locale 现在归一到 `core.lang.*` 一份。SettingsClient 加

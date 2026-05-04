@@ -541,6 +541,13 @@
     "shortcuts": "{accept} wählen · {regen} regenerieren · {cancel} schließen",
     "openSettings": "Einstellungen öffnen",
     "dismiss": "Schließen",
+    "byokBadge": "BYOK",
+    "signinHint": "Anmelden für {count} Rewrites / Monat →",
+    "cta": {
+      "signIn": "Anmelden →",
+      "signInForMore": "Anmelden für mehr →",
+      "upgradeOrByok": "BYOK einrichten oder Pro freischalten →"
+    },
     "lang": {
       "custom": "Eigener Wert…",
       "customLabelFmt": "Eigener Wert: {value}",

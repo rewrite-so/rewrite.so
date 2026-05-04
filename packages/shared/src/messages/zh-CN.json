@@ -541,6 +541,13 @@
     "shortcuts": "{accept} 选用 · {regen} 重生成 · {cancel} 关闭",
     "openSettings": "打开设置",
     "dismiss": "关闭",
+    "byokBadge": "BYOK",
+    "signinHint": "登录后每月 {count} 次改写 →",
+    "cta": {
+      "signIn": "登录 →",
+      "signInForMore": "登录解锁更多 →",
+      "upgradeOrByok": "升级 Pro 或配置 BYOK →"
+    },
     "lang": {
       "custom": "自定义…",
       "customLabelFmt": "自定义：{value}",

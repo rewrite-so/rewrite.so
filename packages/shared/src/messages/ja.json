@@ -541,6 +541,13 @@
     "shortcuts": "{accept} 採用 · {regen} 再生成 · {cancel} キャンセル",
     "openSettings": "設定を開く",
     "dismiss": "閉じる",
+    "byokBadge": "BYOK",
+    "signinHint": "ログインで毎月 {count} 回まで利用可能 →",
+    "cta": {
+      "signIn": "ログイン →",
+      "signInForMore": "ログインしてさらに利用 →",
+      "upgradeOrByok": "BYOK 設定または Pro にアップグレード →"
+    },
     "lang": {
       "custom": "カスタム…",
       "customLabelFmt": "カスタム：{value}",

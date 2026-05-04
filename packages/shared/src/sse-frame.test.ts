@@ -50,6 +50,42 @@ describe('parseSSEFrame', () => {
     expect(parsed).toEqual(orig);
   });
 
+  it('round-trips meta with optional status field', () => {
+    const orig: SSEEvent = {
+      event: 'meta',
+      data: {
+        requestId: 'abc',
+        streams: ['faithful', 'casual', 'formal'],
+        langDetected: 'en',
+        status: {
+          authed: true,
+          tier: 'free',
+          isBYOK: false,
+          used: 25,
+          limit: 30,
+        },
+      },
+    };
+    const parsed = parseSSEFrame(encodeSSEFrame(orig).trimEnd());
+    expect(parsed).toEqual(orig);
+  });
+
+  it('meta status is optional (omitted when not set)', () => {
+    const orig: SSEEvent = {
+      event: 'meta',
+      data: {
+        requestId: 'abc',
+        streams: ['faithful', 'casual', 'formal'],
+        langDetected: 'en',
+      },
+    };
+    const parsed = parseSSEFrame(encodeSSEFrame(orig).trimEnd()) as Extract<
+      SSEEvent,
+      { event: 'meta' }
+    >;
+    expect(parsed.data.status).toBeUndefined();
+  });
+
   it('throws on missing event:', () => {
     expect(() => parseSSEFrame('data: {"x":1}')).toThrow();
   });

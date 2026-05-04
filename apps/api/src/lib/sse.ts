@@ -1,4 +1,4 @@
-import { type ErrorCode, encodeSSEFrame, type Style } from '@rewrite/shared';
+import { type ErrorCode, encodeSSEFrame, type MetaStatus, type Style } from '@rewrite/shared';
 
 /**
  * SSE 多路复用：
@@ -19,6 +19,8 @@ export interface MuxOptions {
   streams: MuxInputStream[];
   requestId: string;
   langDetected: string;
+  /** 浮窗状态信息，透传到 meta event payload 让客户端 panel.setStatus 消费 */
+  status?: MetaStatus;
 }
 
 export function muxToSSE(opts: MuxOptions, signal: AbortSignal): ReadableStream<Uint8Array> {
@@ -41,7 +43,12 @@ export function muxToSSE(opts: MuxOptions, signal: AbortSignal): ReadableStream<
       enqueue(
         encodeSSEFrame({
           event: 'meta',
-          data: { requestId: opts.requestId, streams: styles, langDetected: opts.langDetected },
+          data: {
+            requestId: opts.requestId,
+            streams: styles,
+            langDetected: opts.langDetected,
+            ...(opts.status ? { status: opts.status } : {}),
+          },
         }),
       );
 

@@ -44,7 +44,8 @@ export function createPortApiClient(): RewriteApiClient {
           }
           if (msg.type === 'error') {
             // 用 ApiError-like 结构（带 detailObj）让 mount() 的 extractErrorCode/Detail
-            // 拿到精确的 code + status + message，setGlobalError 能显示具体原因
+            // 拿到精确的 code + status + message + 服务端 4xx body 字段（authed/tier/
+            // used/limit/resetAt），setGlobalError 能精确决定 CTA 文案 + 详细描述
             const err = new Error(`${msg.code}: ${msg.message ?? ''}`) as Error & {
               detailObj?: Record<string, unknown>;
             };
@@ -52,6 +53,11 @@ export function createPortApiClient(): RewriteApiClient {
               error: msg.code,
               ...(msg.status !== undefined ? { status: msg.status } : {}),
               ...(msg.message !== undefined ? { message: msg.message } : {}),
+              ...(msg.authed !== undefined ? { authed: msg.authed } : {}),
+              ...(msg.tier !== undefined ? { tier: msg.tier } : {}),
+              ...(msg.used !== undefined ? { used: msg.used } : {}),
+              ...(msg.limit !== undefined ? { limit: msg.limit } : {}),
+              ...(msg.resetAt !== undefined ? { resetAt: msg.resetAt } : {}),
             };
             if (!resolved) {
               resolved = true;

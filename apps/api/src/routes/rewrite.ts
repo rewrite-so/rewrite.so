@@ -1,5 +1,10 @@
 import { buildMessages } from '@rewrite/prompts';
-import { MAX_INPUT_CHARS, RewriteRequestSchema, type Style } from '@rewrite/shared';
+import {
+  MAX_INPUT_CHARS,
+  type MetaStatus,
+  RewriteRequestSchema,
+  type Style,
+} from '@rewrite/shared';
 import { Hono } from 'hono';
 import { BURST_BUCKETS, consume } from '../do/rate-limiter.ts';
 import { createAuth } from '../lib/auth.ts';
@@ -102,12 +107,16 @@ rewriteRoute.post('/v1/rewrite', async (c) => {
   const isBYOK = byokConfig !== null;
   const quota = await checkAndIncrement(c.env.DB, subject, tier, isBYOK);
   if (!quota.allowed) {
+    // 把 authed/tier 带入 4xx body，让客户端 setGlobalError 决定 CTA：
+    // 登录用户 → "Configure BYOK or upgrade"，匿名 → "Sign in for more"
     return c.json(
       {
         error: 'quota_exceeded',
         used: quota.used,
         limit: quota.limit,
         resetAt: quota.resetAt,
+        authed: !!userId,
+        tier,
       },
       429,
     );
@@ -169,7 +178,14 @@ rewriteRoute.post('/v1/rewrite', async (c) => {
     ),
   }));
 
-  const sse = muxToSSE({ streams, requestId, langDetected: targetLang }, signal);
+  // 浮窗状态信息：BYOK 模式不带 used/limit（无限），其它都带
+  const status: MetaStatus = {
+    authed: !!userId,
+    tier,
+    isBYOK,
+    ...(isBYOK ? {} : { used: quota.used, limit: quota.limit }),
+  };
+  const sse = muxToSSE({ streams, requestId, langDetected: targetLang, status }, signal);
 
   return new Response(sse, {
     status: 200,

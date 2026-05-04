@@ -11,7 +11,7 @@ import { replaceEditable } from './editable/write.ts';
 import { detectTargetLang } from './lang/detect.ts';
 import type { RewriteApiClient } from './transport/api-client.ts';
 import { attachDoubleShift } from './trigger/double-shift.ts';
-import { createCandidates } from './ui/candidates.ts';
+import { createCandidates, isRetryableError } from './ui/candidates.ts';
 import { createDot } from './ui/dot.ts';
 import { createShadowRoot } from './ui/shadow.ts';
 
@@ -32,6 +32,8 @@ export interface MountOptions {
   onInstallClick?: () => void;
   /** 错误时显示登录 CTA 的目标 URL（如 web: '/login'，扩展: 'https://rewrite.so/login'） */
   loginUrl?: string;
+  /** 已登录用户超配额时引导去配 BYOK / 升 Pro 的 URL（如 web: '/settings'，扩展: '${WEB_BASE}/settings'） */
+  upgradeUrl?: string;
   /** 浮层右上角齿轮点击时调用 —— 扩展传 chrome.runtime.openOptionsPage，web 传 跳 /settings */
   onOpenSettings?: () => void;
   onError?: (e: Error) => void;
@@ -162,6 +164,7 @@ export function mount(opts: MountOptions): MountHandle {
             // 服务端权威 echo —— 登录用户的 DB 偏好优先于客户端 chrome.storage cache；
             // chip 跟服务端走，避免 cache 与 DB 不一致时显示错误的 target lang
             panel.setLangDetected(ev.data.langDetected);
+            if (ev.data.status) panel.setStatus(ev.data.status);
             break;
           case 'delta':
             panel.appendDelta(ev.data.style, ev.data.text);
@@ -231,6 +234,7 @@ export function mount(opts: MountOptions): MountHandle {
       targetLang,
       ...(opts.showInstallHook ? { showInstallHook: opts.showInstallHook } : {}),
       ...(opts.loginUrl ? { loginUrl: opts.loginUrl } : {}),
+      ...(opts.upgradeUrl ? { upgradeUrl: opts.upgradeUrl } : {}),
     });
     currentPanel = panel;
 
@@ -251,8 +255,18 @@ export function mount(opts: MountOptions): MountHandle {
     };
 
     const ac = new AbortController();
-    // 单卡 fatal → setError（错误卡仍可 Retry），不影响其它卡
-    await runRewrite(req, ac, panel, (code) => panel.setError(style, code));
+    // 单卡 fatal 处理：
+    // - 可重试错误（upstream/timeout/network/rate_limit）→ setError 显示 Retry 按钮，
+    //   保留其它卡片正常状态
+    // - 不可重试错误（quota_exceeded / unauthorized）→ 升级到 setGlobalError 显示
+    //   正确 CTA（"Configure BYOK or upgrade" / "Sign in"），避免单卡 Retry 死循环
+    await runRewrite(req, ac, panel, (code, detail) => {
+      if (isRetryableError(code)) {
+        panel.setError(style, code);
+      } else {
+        panel.setGlobalError(code, detail);
+      }
+    });
   }
 
   /**

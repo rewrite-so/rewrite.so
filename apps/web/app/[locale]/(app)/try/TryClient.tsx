@@ -44,6 +44,7 @@ export function TryClient() {
       userPrefLang: targetLang,
       showInstallHook: true,
       loginUrl: '/login',
+      upgradeUrl: '/settings',
       onInstallClick: () => {
         // Phase 5 接 Chrome Web Store 链接
         window.open('https://github.com/rewrite-so/rewrite.so', '_blank');

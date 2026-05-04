@@ -118,6 +118,31 @@ export const SHADOW_STYLES = `
   white-space: nowrap;
 }
 
+/* BYOK badge：绿色 chip，BYOK 模式下显示在 header 最左 */
+.byok-badge {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: light-dark(rgba(34,197,94,0.12), rgba(34,197,94,0.18));
+  color: light-dark(#15803d, #4ade80);
+  pointer-events: none;
+}
+
+/* quota chip：used/limit 数字，接近上限时显示（80% 阈值），琥珀色提示 */
+.quota-chip {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: light-dark(rgba(245,158,11,0.10), rgba(245,158,11,0.18));
+  color: light-dark(#b45309, #fbbf24);
+  pointer-events: none;
+  font-feature-settings: "tnum";
+}
+
 .settings-btn {
   width: 22px;
   height: 22px;
@@ -333,6 +358,22 @@ export const SHADOW_STYLES = `
 }
 .footer-dismiss:hover {
   background: light-dark(rgba(0,0,0,0.06), rgba(255,255,255,0.10));
+  color: light-dark(#1f1f22, #f5f5f5);
+}
+
+/* signin hint：未登录用户底部引导，整行可点击 */
+.signin-hint {
+  padding: 8px 12px;
+  margin-top: 2px;
+  font-size: 11px;
+  color: light-dark(rgba(0,0,0,0.55), rgba(255,255,255,0.55));
+  text-align: center;
+  cursor: pointer;
+  border-top: 1px solid light-dark(rgba(0,0,0,0.06), rgba(255,255,255,0.08));
+  transition: background 120ms ease, color 120ms ease;
+}
+.signin-hint:hover {
+  background: light-dark(rgba(0,0,0,0.04), rgba(255,255,255,0.06));
   color: light-dark(#1f1f22, #f5f5f5);
 }
 
