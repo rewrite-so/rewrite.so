@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
-import { API_BASE, WEB_BASE } from '../lib/config.ts';
+import { WEB_BASE } from '../lib/config.ts';
 import { useT, useUiLocale } from '../lib/i18n.ts';
 import { getOrCreateInstallId } from '../lib/storage.ts';
 
@@ -21,13 +21,25 @@ export function App() {
     (async () => {
       try {
         const installId = await getOrCreateInstallId();
-        const res = await fetch(
-          `${API_BASE}/v1/me/usage?installId=${encodeURIComponent(installId)}`,
-          { credentials: 'include' },
+        // 走 background SW 代理：popup 直接 fetch 拿不到 better-auth session cookie
+        // （SameSite=Lax 不跨站走子资源请求），SW 在 host_permissions 上下文里能正确带 cookie。
+        const res = await new Promise<{ ok: true; data: Usage } | { ok: false; error: string }>(
+          (resolve) => {
+            chrome.runtime.sendMessage(
+              { type: 'me-usage:get', installId },
+              (response: { ok: true; data: Usage } | { ok: false; error: string } | undefined) => {
+                if (chrome.runtime.lastError) {
+                  resolve({ ok: false, error: chrome.runtime.lastError.message ?? 'sw_error' });
+                  return;
+                }
+                resolve(response ?? { ok: false, error: 'no_response' });
+              },
+            );
+          },
         );
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = (await res.json()) as Usage;
-        if (!cancelled) setUsage(data);
+        if (cancelled) return;
+        if (!res.ok) throw new Error(res.error);
+        setUsage(res.data);
       } catch (e) {
         if (!cancelled) setError((e as Error).message);
       }

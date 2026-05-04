@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **扩展 popup "remaining this month" 显示错误**：popup 直接 fetch `/v1/me/usage`
+  时 better-auth session cookie（SameSite=Lax）不跨 `chrome-extension://` →
+  `api.rewrite.so` 子资源请求 → 服务端看不到 session → 走 installId 兜底分支返
+  `tier='anonymous_install'` + `limit=5`，已登录用户在 popup 看到错误的 5/5。
+  改走 background SW 代理（与 `/v1/me/settings`、`claim-install` 同模式，host_permissions
+  上下文能正确带 cookie）。SW 加 `me-usage:get` handler。
+
 ### Changed
 - **/try 完成改写后转化 nudge**（来自战略 review 的 WS1 — 当前最大转化断点）：
   - 用户接受候选后 textarea 下方 inline 显示 "✓ N rewrites done. Sign in for 30/month →"

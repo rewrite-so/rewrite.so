@@ -7,9 +7,12 @@ chrome.runtime.onInstalled.addListener((details) => {
   }
 });
 
-// content script / options 页面通过 sendMessage 让 background 代理：
+// content script / popup / options 页面通过 sendMessage 让 background 代理：
 // - open-options：调 chrome.runtime.openOptionsPage()（content script 没这个 API）
 // - me-settings:get / patch：跨域 fetch /v1/me/settings（host_permissions 在 background）
+// - me-usage:get：跨域 fetch /v1/me/usage（同上；popup 直接 fetch 拿不到
+//   better-auth session cookie——SameSite=Lax 不跨站走子资源请求，需 SW 代理）
+// - claim-install：跨域 POST /v1/me/claim-install
 chrome.runtime.onMessage.addListener((rawMsg: unknown, _sender, sendResponse) => {
   const msg = rawMsg as { type?: string; body?: unknown };
 
@@ -50,6 +53,25 @@ chrome.runtime.onMessage.addListener((rawMsg: unknown, _sender, sendResponse) =>
           return;
         }
         const data = (await res.json()) as { merged: number; applied: boolean };
+        sendResponse({ ok: true, data });
+      })
+      .catch((err) => sendResponse({ ok: false, error: (err as Error).message }));
+    return true;
+  }
+
+  if (msg?.type === 'me-usage:get') {
+    const installId = (msg as { installId?: string }).installId;
+    const qs =
+      typeof installId === 'string' && installId.length > 0
+        ? `?installId=${encodeURIComponent(installId)}`
+        : '';
+    fetch(`${API_BASE}/v1/me/usage${qs}`, { credentials: 'include' })
+      .then(async (res) => {
+        if (!res.ok) {
+          sendResponse({ ok: false, error: `http_${res.status}` });
+          return;
+        }
+        const data = await res.json();
         sendResponse({ ok: true, data });
       })
       .catch((err) => sendResponse({ ok: false, error: (err as Error).message }));
