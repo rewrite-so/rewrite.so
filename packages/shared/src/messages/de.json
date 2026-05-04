@@ -1,14 +1,14 @@
 {
   "meta": {
     "home": {
-      "title": "rewrite.so — Doppel-Shift zum Umschreiben",
+      "title": "rewrite.so — Frei schreiben. Sicher senden.",
       "description": "AI-Umschreibungs-Engine auf Eingabefeld-Ebene. 3 Stile, nur Tastatur, unterbricht deinen Flow nicht."
     },
     "login": {
       "title": "Anmelden — rewrite.so"
     },
     "try": {
-      "title": "rewrite.so testen — Doppel-Shift zum Umschreiben"
+      "title": "rewrite.so testen — Frei schreiben. Sicher senden."
     },
     "settings": {
       "title": "Einstellungen — rewrite.so"
@@ -287,7 +287,7 @@
     "languageSwitcher": "Sprache"
   },
   "footer": {
-    "tagline": "Doppel-Shift, sofortige AI-Umschreibung in unterstützten Eingabefeldern.",
+    "tagline": "Frei schreiben. Sicher senden.",
     "heading": {
       "product": "Produkt",
       "account": "Konto",
@@ -477,7 +477,7 @@
   },
   "ext": {
     "popup": {
-      "tagline": "Doppel-Shift Shift in unterstützten Eingabefeldern.",
+      "tagline": "Frei schreiben. Sicher senden.",
       "usageError": "Kontingent konnte nicht geladen werden:",
       "loading": "Lädt…",
       "remainingThisMonth": "verbleibend diesen Monat",

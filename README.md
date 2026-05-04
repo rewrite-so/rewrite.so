@@ -3,7 +3,7 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)
 [![Trademark](https://img.shields.io/badge/trademark-policy-orange.svg)](./TRADEMARK.md)
 
-> Double-tap Shift in supported web text fields to get 3 streaming AI rewrites instantly.
+> Write freely. Send confidently.
 
 **rewrite.so** is an input-box-level AI rewrite engine. Translation, error
 correction, and tone polishing are all unified into a single Rewrite Engine.

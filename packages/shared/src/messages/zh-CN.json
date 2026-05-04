@@ -1,14 +1,14 @@
 {
   "meta": {
     "home": {
-      "title": "rewrite.so — 双击 Shift 即时改写",
+      "title": "rewrite.so — 随意写，自信发送",
       "description": "输入框级 AI 改写引擎。3 种风格，纯键盘操作，不打断写作流。"
     },
     "login": {
       "title": "登录 — rewrite.so"
     },
     "try": {
-      "title": "试用 rewrite.so — 双击 Shift 改写"
+      "title": "试用 rewrite.so — 随意写，自信发送"
     },
     "settings": {
       "title": "设置 — rewrite.so"
@@ -287,7 +287,7 @@
     "languageSwitcher": "语言"
   },
   "footer": {
-    "tagline": "双击 Shift，在支持的输入框中即时 AI 改写。",
+    "tagline": "随意写，自信发送。",
     "heading": {
       "product": "产品",
       "account": "账户",
@@ -477,7 +477,7 @@
   },
   "ext": {
     "popup": {
-      "tagline": "在支持的输入框双击 Shift Shift。",
+      "tagline": "随意写，自信发送。",
       "usageError": "无法加载配额：",
       "loading": "加载中…",
       "remainingThisMonth": "本月剩余",

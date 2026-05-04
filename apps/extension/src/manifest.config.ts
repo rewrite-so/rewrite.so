@@ -13,7 +13,7 @@ export default defineManifest({
   name: 'rewrite.so — Write freely. Send confidently.',
   version: pkg.version,
   description:
-    'Double-tap Shift in any supported text field for 3 AI rewrites: faithful, casual, and formal.',
+    'Write freely. Send confidently. Three AI rewrites — faithful, casual, formal — in any supported text field.',
   icons: {
     16: 'icons/icon-16.png',
     32: 'icons/icon-32.png',

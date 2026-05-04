@@ -1,14 +1,14 @@
 {
   "meta": {
     "home": {
-      "title": "rewrite.so — Double Shift pour réécrire",
+      "title": "rewrite.so — Écrivez librement. Envoyez en confiance.",
       "description": "Moteur de réécriture IA au niveau du champ de saisie. 3 styles, clavier uniquement, sans casser votre flux."
     },
     "login": {
       "title": "Connexion — rewrite.so"
     },
     "try": {
-      "title": "Essayer rewrite.so — Double Shift pour réécrire"
+      "title": "Essayer rewrite.so — Écrivez librement. Envoyez en confiance."
     },
     "settings": {
       "title": "Paramètres — rewrite.so"
@@ -287,7 +287,7 @@
     "languageSwitcher": "Langue"
   },
   "footer": {
-    "tagline": "Double Shift, réécriture IA instantanée dans les champs pris en charge.",
+    "tagline": "Écrivez librement. Envoyez en confiance.",
     "heading": {
       "product": "Produit",
       "account": "Compte",
@@ -477,7 +477,7 @@
   },
   "ext": {
     "popup": {
-      "tagline": "Double Shift Shift dans les champs pris en charge.",
+      "tagline": "Écrivez librement. Envoyez en confiance.",
       "usageError": "Échec du chargement du quota :",
       "loading": "Chargement…",
       "remainingThisMonth": "restantes ce mois-ci",
