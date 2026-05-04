@@ -8,6 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **第三轮 review 修 5 处** — 隐私契约 + 运营 + UX：
+  - **P0 修隐私契约违规**：扩展 service-worker.ts 的两处 console.info 删掉了用户访问的
+    URL 和原文前 40 字（`port.sender?.url` / `msg.req.text.slice(0, 40)`）。即便是
+    Chrome devtools 本地日志，用户截图分享时会暴露——违反 CLAUDE.md L44 "完全不
+    记录原文"契约。改为只记 port name + `text.length`。
+  - **P1 加 webhook miss reconcile cron**：每天 09:00 UTC 跑 `reconcileSubscriptions()`，
+    扫 Creem 最近 48h 的 active subscriptions，对比 D1，缺的补落库（`creem_subscription_id`
+    PK 幂等）。webhook 投递永久失败 / 用户跳回时关浏览器导致 verify-checkout 没跑的
+    极端场景下兜底。新增 `apps/api/src/cron/reconcile.ts` + 4 条测试。
+  - **P1 写灾难恢复 runbook**：`docs/disaster-recovery.md` 覆盖 deploy 回滚 / D1
+    time-travel / schema 误改 / webhook miss 应急 / BYOK_MASTER_KEY 误改/泄露 5 个
+    场景，含各业务表丢失影响等级表。
+  - **P2 quota CTA 跳 /billing 不跳 /settings**：营销页直接列定价/Subscribe 按钮，
+    转化路径最短。i18n key `core.cta.upgradeOrByok` → `core.cta.upgradePro`，
+    7 locale 文案改 "Upgrade to Pro →"（原文案"配置 BYOK 或升级"在 /billing 页
+    没 BYOK 表单是错位的）。BYOK 用户走齿轮入口 /settings 不变。
+  - **P2 i18n 翻译状态文档**：`docs/i18n-status.md` 列 7 locale 各自 reviewer / 审阅状态。
+    ja/ko/es/fr/de 是 LLM 初稿待母语校对，扩展 popup 上一轮加的 feedback 链接现在
+    有正式入口跟踪反馈。
 - **CR 跟进修 4 处**（同 commit 内）：
   - 修 SSE userTargetLang 反向同步会终止当前 SSE 流的 bug：inject.ts 的 onPrefsChanged
     现在仅对 triggerEnabled / uiLocale 变化做 unmount/remount；targetLang-only 变化

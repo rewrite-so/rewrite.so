@@ -5,7 +5,8 @@ import type { StoredLocale } from '@rewrite/shared';
  *
  * 关键约定（CLAUDE.md 已记录）：
  * - 所有 key 带 `_v: 1` schema 版本字段（跨版本兼容时新字段读旧值）
- * - installId 永不重置（包括登录后；登录会做 usage_monthly 一次性 merge）
+ * - installId 永不重置（包括登录后；登录后由 inject.ts 调 claimInstallQuota
+ *   触发 POST /v1/me/claim-install 一次性 merge 当月配额到 user 维度）
  */
 
 const STORAGE_KEY_INSTALL_ID = 'installId';

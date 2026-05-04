@@ -547,7 +547,7 @@
     "cta": {
       "signIn": "Iniciar sesión →",
       "signInForMore": "Inicia sesión para obtener más →",
-      "upgradeOrByok": "Configura BYOK o pásate a Pro →"
+      "upgradePro": "Pasarse a Pro →"
     },
     "lang": {
       "custom": "Personalizado…",

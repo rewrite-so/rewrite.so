@@ -44,7 +44,8 @@ export function TryClient() {
       userPrefLang: targetLang,
       showInstallHook: true,
       loginUrl: '/login',
-      upgradeUrl: '/settings',
+      // 超配额 CTA 跳 /billing（营销页直接列定价/Subscribe 按钮），不跳 /settings 配置页
+      upgradeUrl: '/billing?from=quota_exceeded',
       onInstallClick: () => {
         // Phase 5 接 Chrome Web Store 链接
         window.open('https://github.com/rewrite-so/rewrite.so', '_blank');

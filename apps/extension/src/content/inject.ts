@@ -74,7 +74,9 @@ async function bootstrap(): Promise<void> {
     uiLocale: resolveUiLocale(p),
     installId,
     loginUrl: `${WEB_BASE}/login`,
-    upgradeUrl: `${WEB_BASE}/settings`,
+    // 超配额 CTA 跳 /billing 而非 /settings：营销页直接列定价 / Subscribe 按钮，
+    // 转化路径最短。/settings 是配置页，upgrade 链接埋在订阅区块里，UX 错位
+    upgradeUrl: `${WEB_BASE}/billing?from=quota_exceeded`,
     // 实时跨端同步：服务端在 SSE meta.status 里 echo user_settings.target_lang，
     // 扩展把它写回 chrome.storage（如果与本地 cache 不同）。下次 inject 重 mount
     // 时直接拿到新值——避免等 30s visibilitychange 节流

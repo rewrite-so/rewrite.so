@@ -547,7 +547,7 @@
     "cta": {
       "signIn": "登录 →",
       "signInForMore": "登录解锁更多 →",
-      "upgradeOrByok": "升级 Pro 或配置 BYOK →"
+      "upgradePro": "升级到 Pro →"
     },
     "lang": {
       "custom": "自定义…",

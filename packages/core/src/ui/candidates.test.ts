@@ -490,19 +490,19 @@ describe('createCandidates', () => {
 
   // ===== decideCTA: 按 detail.authed 路由超配额 CTA =====
 
-  it('quota_exceeded with detail.authed=true and upgradeUrl shows "Configure BYOK or upgrade" CTA', () => {
+  it('quota_exceeded with detail.authed=true and upgradeUrl shows "Upgrade to Pro" CTA', () => {
     const { factory, target, root } = setup();
     const handle = factory.open({
       target,
       locale: 'en',
       targetLang: 'en',
       loginUrl: '/login',
-      upgradeUrl: '/settings',
+      upgradeUrl: '/billing',
     });
     handle.setGlobalError('quota_exceeded', { authed: true, used: 30, limit: 30 });
     const buttons = root.querySelectorAll('.global-error-cta');
     expect(buttons.length).toBe(1);
-    expect(buttons[0]?.textContent).toContain('BYOK');
+    expect(buttons[0]?.textContent).toContain('Upgrade');
   });
 
   it('quota_exceeded with detail.authed=false shows "Sign in for more" CTA', () => {

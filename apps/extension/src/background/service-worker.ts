@@ -79,7 +79,11 @@ chrome.runtime.onMessage.addListener((rawMsg: unknown, _sender, sendResponse) =>
 });
 
 chrome.runtime.onConnect.addListener((port) => {
-  console.info('[rewrite.so/bg] port connect', port.name, 'sender:', port.sender?.url);
+  // 隐私契约（CLAUDE.md L44）：日志不得携带原文 / 输出文本 / 用户访问的 URL。
+  // sender.url（用户当前在哪个网站）和 msg.req.text（待改写原文）都属于不可记录范畴——
+  // 即便只在 chrome devtools 本地显示，用户截图分享时会暴露。这里只记不可识别的
+  // port name + 长度统计。
+  console.info('[rewrite.so/bg] port connect', port.name);
   if (port.name !== PORT_NAME_REWRITE) return;
 
   const ac = new AbortController();
@@ -92,7 +96,7 @@ chrome.runtime.onConnect.addListener((port) => {
   port.onMessage.addListener((raw: unknown) => {
     const msg = raw as FromContent;
     if (msg.type !== 'rewrite') return;
-    console.info('[rewrite.so/bg] rewrite request', msg.req.text.slice(0, 40));
+    console.info('[rewrite.so/bg] rewrite request len=', msg.req.text.length);
     void handleRewrite(port, msg, ac.signal);
   });
 });

@@ -547,7 +547,7 @@
     "cta": {
       "signIn": "로그인 →",
       "signInForMore": "로그인하여 더 많이 사용 →",
-      "upgradeOrByok": "BYOK 설정 또는 Pro 업그레이드 →"
+      "upgradePro": "Pro로 업그레이드 →"
     },
     "lang": {
       "custom": "사용자 지정…",

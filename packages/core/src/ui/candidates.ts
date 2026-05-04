@@ -573,7 +573,7 @@ function decideCTA(
     if (authed && opts.upgradeUrl) {
       const url = opts.upgradeUrl;
       return {
-        label: t('core.cta.upgradeOrByok', opts.locale),
+        label: t('core.cta.upgradePro', opts.locale),
         onClick: () => window.open(url, '_blank'),
       };
     }
