@@ -447,15 +447,42 @@ describe('POST /v1/rewrite', () => {
     expect(await res.json()).toMatchObject({ error: 'invalid_client' });
   });
 
-  it('accepts installId from the extension origin in production', async () => {
+  it('rejects installId from an unlisted extension origin in production', async () => {
     const res = await app.request(
       '/v1/rewrite',
       {
         method: 'POST',
         headers: {
           'content-type': 'application/json',
-          // chrome-extension:// origin 由浏览器自动设置，**不可被 web JS 伪造**——
-          // 这是唯一可信任的"扩展身份"信号
+          origin: 'chrome-extension://bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+        },
+        body: JSON.stringify({
+          text: 'hi',
+          hasSelection: false,
+          lang: 'en',
+          styles: ['faithful'],
+          installId: 'install-abc-123',
+        }),
+      },
+      {
+        ...MOCK_ENV,
+        BETTER_AUTH_URL: 'https://api.rewrite.so',
+        EXTENSION_ALLOWED_ORIGINS: 'chrome-extension://abcdefghijklmnopabcdefghijklmnop',
+      },
+    );
+
+    expect(res.status).toBe(403);
+    expect(await res.json()).toMatchObject({ error: 'invalid_client' });
+  });
+
+  it('accepts installId from the allowlisted extension origin in production', async () => {
+    const res = await app.request(
+      '/v1/rewrite',
+      {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          // 生产环境必须在 EXTENSION_ALLOWED_ORIGINS 里显式放行正式扩展 ID。
           origin: 'chrome-extension://abcdefghijklmnopabcdefghijklmnop',
         },
         body: JSON.stringify({
@@ -466,7 +493,11 @@ describe('POST /v1/rewrite', () => {
           installId: 'install-abc-123',
         }),
       },
-      { ...MOCK_ENV, BETTER_AUTH_URL: 'https://api.rewrite.so' },
+      {
+        ...MOCK_ENV,
+        BETTER_AUTH_URL: 'https://api.rewrite.so',
+        EXTENSION_ALLOWED_ORIGINS: 'abcdefghijklmnopabcdefghijklmnop',
+      },
     );
 
     expect(res.status).toBe(200);

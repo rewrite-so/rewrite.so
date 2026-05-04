@@ -2,7 +2,7 @@ import type { Locale } from './locales.ts';
 
 const CORE_MESSAGES: Record<Locale, Record<string, string>> = {
   en: {
-    'hint.tryOnAnyInput': 'Install the extension to use it on any site',
+    'hint.tryOnAnyInput': 'Install the extension to use it on supported sites',
     'cta.installExtension': 'Install extension →',
     'core.regen': 'Regenerate',
     'core.retry': 'Retry',
@@ -23,7 +23,7 @@ const CORE_MESSAGES: Record<Locale, Record<string, string>> = {
     'error.network': 'Network error',
   },
   'zh-CN': {
-    'hint.tryOnAnyInput': '安装扩展，在任何网站都能用',
+    'hint.tryOnAnyInput': '安装扩展，在支持的网站使用',
     'cta.installExtension': '安装扩展 →',
     'core.regen': '重新生成',
     'core.retry': '重试',
@@ -44,7 +44,7 @@ const CORE_MESSAGES: Record<Locale, Record<string, string>> = {
     'error.network': '网络异常',
   },
   ja: {
-    'hint.tryOnAnyInput': '拡張機能を入れるとどのサイトでも使えます',
+    'hint.tryOnAnyInput': '拡張機能を入れると対応サイトで使えます',
     'cta.installExtension': '拡張機能をインストール →',
     'core.regen': '再生成',
     'core.retry': '再試行',
@@ -65,7 +65,7 @@ const CORE_MESSAGES: Record<Locale, Record<string, string>> = {
     'error.network': 'ネットワークエラー',
   },
   ko: {
-    'hint.tryOnAnyInput': '확장 프로그램을 설치하면 모든 사이트에서 사용할 수 있습니다',
+    'hint.tryOnAnyInput': '확장 프로그램을 설치하면 지원되는 사이트에서 사용할 수 있습니다',
     'cta.installExtension': '확장 프로그램 설치 →',
     'core.regen': '다시 생성',
     'core.retry': '재시도',
@@ -86,7 +86,7 @@ const CORE_MESSAGES: Record<Locale, Record<string, string>> = {
     'error.network': '네트워크 오류',
   },
   es: {
-    'hint.tryOnAnyInput': 'Instala la extensión para usarlo en cualquier sitio',
+    'hint.tryOnAnyInput': 'Instala la extensión para usarlo en sitios compatibles',
     'cta.installExtension': 'Instalar extensión →',
     'core.regen': 'Regenerar',
     'core.retry': 'Reintentar',
@@ -107,7 +107,7 @@ const CORE_MESSAGES: Record<Locale, Record<string, string>> = {
     'error.network': 'Error de red',
   },
   fr: {
-    'hint.tryOnAnyInput': "Installez l'extension pour l'utiliser sur tous les sites",
+    'hint.tryOnAnyInput': "Installez l'extension pour l'utiliser sur les sites pris en charge",
     'cta.installExtension': "Installer l'extension →",
     'core.regen': 'Régénérer',
     'core.retry': 'Réessayer',
@@ -128,7 +128,7 @@ const CORE_MESSAGES: Record<Locale, Record<string, string>> = {
     'error.network': 'Erreur réseau',
   },
   de: {
-    'hint.tryOnAnyInput': 'Installiere die Erweiterung, um sie auf jeder Website zu nutzen',
+    'hint.tryOnAnyInput': 'Installiere die Erweiterung, um sie auf unterstützten Seiten zu nutzen',
     'cta.installExtension': 'Erweiterung installieren →',
     'core.regen': 'Neu generieren',
     'core.retry': 'Erneut versuchen',

@@ -3,7 +3,7 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)
 [![Trademark](https://img.shields.io/badge/trademark-policy-orange.svg)](./TRADEMARK.md)
 
-> Double-tap Shift in any web input box to get 3 streaming AI rewrites instantly.
+> Double-tap Shift in supported web text fields to get 3 streaming AI rewrites instantly.
 
 **rewrite.so** is an input-box-level AI rewrite engine. Translation, error
 correction, and tone polishing are all unified into a single Rewrite Engine.
@@ -13,7 +13,7 @@ an editable input is focused. It does not steal focus, does not break your
 flow.
 
 - 🎯 **Three fixed styles** — *faithful*, *casual*, *formal*. Always three, no more.
-- ⌨️ **Keyboard-only** — double-tap Shift to summon, `1`/`2`/`3` to accept, `Esc` to dismiss.
+- ⌨️ **Keyboard-only** — double-tap Shift to summon, `1`/`2`/`3` or `↑`/`↓` + `Enter` to accept, `Esc` to dismiss.
 - 🔒 **Privacy by architecture** — input text and rewrite output are *never* persisted, anywhere. Password / CC / CVV / OTP fields are hard-excluded by design.
 - 🌐 **Cross-language by default** — auto-detects the page language; cross-language rewriting is just implicit translation.
 - 🔧 **BYOK** — signed-in users can plug in their own OpenAI-compatible API key for unlimited usage.

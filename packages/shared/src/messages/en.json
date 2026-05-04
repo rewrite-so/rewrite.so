@@ -94,7 +94,7 @@
       "faq": {
         "h2": "FAQ",
         "q1": "What does \"rewrite\" mean here?",
-        "a1": "Each time you trigger rewrite.so (double-tap Shift in any input), one request is sent to the model and three style variants stream back. That counts as one rewrite against your quota.",
+        "a1": "Each time you trigger rewrite.so (double-tap Shift in a supported input), one request is sent to the model and three style variants stream back. That counts as one rewrite against your quota.",
         "q2": "Do you store the text I rewrite?",
         "a2": "No. Inputs and outputs pass through but are never persisted — not in application logs, not in error reporters, not in analytics. See our <privacy>Privacy Policy</privacy> for details.",
         "q3": "What is BYOK?",
@@ -142,7 +142,7 @@
       "signIn": "Sign in →",
       "welcomeCard": {
         "title": "Welcome! Two ways to get started",
-        "description": "Try the demo right here, or install the Chrome extension to use it on every site.",
+        "description": "Try the demo right here, or install the Chrome extension to use it on supported sites.",
         "ctaTry": "Try it on /try →",
         "ctaInstall": "Install Chrome extension →"
       },
@@ -287,7 +287,7 @@
     "languageSwitcher": "Language"
   },
   "footer": {
-    "tagline": "Double-tap Shift, instant AI rewrite in any input box.",
+    "tagline": "Double-tap Shift, instant AI rewrite in supported text fields.",
     "heading": {
       "product": "Product",
       "account": "Account",
@@ -315,12 +315,12 @@
   },
   "home": {
     "hero": {
-      "eyebrow": "Works in any input. Open source.",
+      "eyebrow": "Supported text fields. Open source.",
       "h1Line1": "Write rough.",
       "h1Line2": "Send polished.",
       "subHeadline": "Stop overthinking every message.",
       "polyglot": "Any language in. Any language out.",
-      "intro": "Double-tap <kbd>Shift</kbd> in any input box. AI gives you three ways to say it. Pick one with <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> and send.",
+      "intro": "Double-tap <kbd>Shift</kbd> in a supported web text field. AI gives you three ways to say it. Pick one with <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> and send.",
       "ctaPrimary": "Try it free →",
       "ctaSecondary": "⭐ Star on GitHub",
       "fineprint": "{count} free rewrites/month · No card · Bring your own API key for unlimited"
@@ -420,12 +420,12 @@
     },
     "finalCta": {
       "h2": "Try it. Takes 30 seconds.",
-      "body": "No signup. Open <code>/try</code> for the demo. Install the extension to use it on every site.",
+      "body": "No signup. Open <code>/try</code> for the demo. Install the extension to use it on supported sites.",
       "primary": "Try it free →",
       "secondary": "Sign in"
     },
     "demo": {
-      "anyInput": "any input box",
+      "anyInput": "supported text field",
       "youTyped": "# You typed:",
       "streams": "→ 3 streams in, ~200ms first token",
       "accepted": "→ accepted, input replaced",
@@ -477,7 +477,7 @@
   },
   "ext": {
     "popup": {
-      "tagline": "Double-tap Shift Shift in any input.",
+      "tagline": "Double-tap Shift Shift in supported text fields.",
       "usageError": "Failed to load quota:",
       "loading": "Loading…",
       "remainingThisMonth": "remaining this month",
@@ -533,7 +533,7 @@
       },
       "step3": {
         "title": "Ready",
-        "body": "When you focus any web input, a tiny dot appears bottom-right. Double-tap Shift to rewrite. Try it on:",
+        "body": "When you focus a supported web text field, a tiny dot appears bottom-right. Double-tap Shift to rewrite. Try it on:",
         "example1": "Twitter / X compose",
         "example2": "Reddit / Hacker News comments",
         "example3": "Slack / Discord web",
@@ -544,7 +544,7 @@
   },
   "hint": {
     "doubleShift": "Press Shift Shift to rewrite",
-    "tryOnAnyInput": "Install the extension to use it on any site"
+    "tryOnAnyInput": "Install the extension to use it on supported sites"
   },
   "cta": {
     "installExtension": "Install extension →"

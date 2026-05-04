@@ -38,6 +38,9 @@ jobs:
 
       - name: Build extension (production env)
         working-directory: apps/extension
+        env:
+          VITE_API_BASE: https://api.rewrite.so
+          VITE_WEB_BASE: https://rewrite.so
         run: pnpm build
 
       - name: Compute version label

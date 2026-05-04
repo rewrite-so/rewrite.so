@@ -94,7 +94,7 @@
       "faq": {
         "h2": "FAQ",
         "q1": "Was bedeutet „Umschreibung\" hier?",
-        "a1": "Jedes Mal, wenn du rewrite.so auslöst (Doppel-Shift in einem Eingabefeld), wird eine Anfrage an das Modell gesendet und drei Stilvarianten kommen per Streaming zurück. Das zählt als eine Umschreibung gegen dein Kontingent.",
+        "a1": "Jedes Mal, wenn du rewrite.so auslöst (Doppel-Shift in einem unterstützten Eingabefeld), wird eine Anfrage an das Modell gesendet und drei Stilvarianten kommen per Streaming zurück. Das zählt als eine Umschreibung gegen dein Kontingent.",
         "q2": "Speichert ihr den Text, den ich umschreibe?",
         "a2": "Nein. Eingaben und Ausgaben durchlaufen das System, werden aber nie persistiert — weder in Anwendungslogs, noch in Fehler-Reportern, noch in Analytics. Siehe unsere <privacy>Datenschutzerklärung</privacy> für Details.",
         "q3": "Was ist BYOK?",
@@ -142,7 +142,7 @@
       "signIn": "Anmelden →",
       "welcomeCard": {
         "title": "Willkommen! Zwei Wege loszulegen",
-        "description": "Probier die Demo direkt aus oder installiere die Chrome-Erweiterung, um sie auf allen Websites zu nutzen.",
+        "description": "Probier die Demo direkt aus oder installiere die Chrome-Erweiterung, um sie auf unterstützten Websites zu nutzen.",
         "ctaTry": "Auf /try ausprobieren →",
         "ctaInstall": "Chrome-Erweiterung installieren →"
       },
@@ -287,7 +287,7 @@
     "languageSwitcher": "Sprache"
   },
   "footer": {
-    "tagline": "Doppel-Shift, sofortige AI-Umschreibung in jedem Eingabefeld.",
+    "tagline": "Doppel-Shift, sofortige AI-Umschreibung in unterstützten Eingabefeldern.",
     "heading": {
       "product": "Produkt",
       "account": "Konto",
@@ -315,12 +315,12 @@
   },
   "home": {
     "hero": {
-      "eyebrow": "Jedes Eingabefeld · Open Source",
+      "eyebrow": "Unterstützte Eingabefelder · Open Source",
       "h1Line1": "Roh schreiben.",
       "h1Line2": "Geschliffen senden.",
       "subHeadline": "Hör auf, jede Nachricht zu zerdenken.",
       "polyglot": "Beliebige Sprache rein. Beliebige Sprache raus.",
-      "intro": "Drücke <kbd>Shift</kbd> doppelt in einem beliebigen Eingabefeld. Die KI gibt dir drei Formulierungen. Wähle eine mit <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> und sende.",
+      "intro": "Drücke <kbd>Shift</kbd> doppelt in einem unterstützten Web-Eingabefeld. Die KI gibt dir drei Formulierungen. Wähle eine mit <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> und sende.",
       "ctaPrimary": "Kostenlos testen →",
       "ctaSecondary": "⭐ Star auf GitHub",
       "fineprint": "{count} kostenlose Umschreibungen/Monat · Keine Kreditkarte · BYOK für unbegrenzt"
@@ -420,12 +420,12 @@
     },
     "finalCta": {
       "h2": "Probier's. Dauert 30 Sekunden.",
-      "body": "Keine Anmeldung. Öffne <code>/try</code> für die Demo. Installiere die Erweiterung, um sie auf jeder Seite zu nutzen.",
+      "body": "Keine Anmeldung. Öffne <code>/try</code> für die Demo. Installiere die Erweiterung, um sie auf unterstützten Seiten zu nutzen.",
       "primary": "Kostenlos testen →",
       "secondary": "Anmelden"
     },
     "demo": {
-      "anyInput": "beliebiges Eingabefeld",
+      "anyInput": "unterstütztes Eingabefeld",
       "youTyped": "# Du hast getippt:",
       "streams": "→ 3 Streams gestartet, ~200ms erstes Token",
       "accepted": "→ ins Eingabefeld übernommen",
@@ -477,7 +477,7 @@
   },
   "ext": {
     "popup": {
-      "tagline": "Doppel-Shift Shift in jedem Eingabefeld.",
+      "tagline": "Doppel-Shift Shift in unterstützten Eingabefeldern.",
       "usageError": "Kontingent konnte nicht geladen werden:",
       "loading": "Lädt…",
       "remainingThisMonth": "verbleibend diesen Monat",
@@ -533,7 +533,7 @@
       },
       "step3": {
         "title": "Bereit",
-        "body": "Wenn du ein Web-Eingabefeld fokussierst, erscheint unten rechts ein kleiner Punkt. Doppel-Shift zum Umschreiben. Probier's auf:",
+        "body": "Wenn du ein unterstütztes Web-Eingabefeld fokussierst, erscheint unten rechts ein kleiner Punkt. Doppel-Shift zum Umschreiben. Probier's auf:",
         "example1": "Twitter / X Verfassen",
         "example2": "Reddit / Hacker News Kommentare",
         "example3": "Slack / Discord Web",
@@ -544,7 +544,7 @@
   },
   "hint": {
     "doubleShift": "Shift Shift drücken zum Umschreiben",
-    "tryOnAnyInput": "Installiere die Erweiterung, um sie auf jeder Seite zu nutzen"
+    "tryOnAnyInput": "Installiere die Erweiterung, um sie auf unterstützten Seiten zu nutzen"
   },
   "cta": {
     "installExtension": "Erweiterung installieren →"

@@ -95,46 +95,52 @@ export function mount(opts: MountOptions): MountHandle {
     inflightAborts.clear();
   }
 
-  const candidates = createCandidates(root, {
-    onSelect: (style, finalText) => {
-      // 用浮层打开时锁定的 editable，避免被中途 focus 切换影响
-      const target = lockedEditable;
-      if (!target) return;
-      // 如果焦点已离开 target（少见，例如用户 Cmd+Tab 切走），先 focus 回来
-      // —— contenteditable 框架（Lexical/Slate/ProseMirror）通常要求目标 focused
-      if (document.activeElement !== target) {
-        try {
-          target.focus({ preventScroll: true });
-        } catch {
-          /* 老浏览器无 preventScroll，忽略 */
+  const candidates = createCandidates(
+    root,
+    {
+      onSelect: (style, finalText) => {
+        // 用浮层打开时锁定的 editable，避免被中途 focus 切换影响
+        const target = lockedEditable;
+        if (!target) return;
+        // 如果焦点已离开 target（少见，例如用户 Cmd+Tab 切走），先 focus 回来
+        // —— contenteditable 框架（Lexical/Slate/ProseMirror）通常要求目标 focused
+        if (document.activeElement !== target) {
+          try {
+            target.focus({ preventScroll: true });
+          } catch {
+            /* 老浏览器无 preventScroll，忽略 */
+          }
         }
-      }
-      const range = readEditable(target).hasSelection ? 'selection' : 'all';
-      replaceEditable(target, finalText, range);
-      currentPanel?.close();
-      currentPanel = null;
-      lockedEditable = null;
-      abortAllInflight();
-      // 通知 host 用户接受了改写（onAccepted optional；扩展不实现）。
-      // 必须在 replaceEditable 成功之后—— !target early return 或替换 throw 时
-      // 不应触发 "accepted" 事件
-      opts.onAccepted?.(style);
+        const range = readEditable(target).hasSelection ? 'selection' : 'all';
+        replaceEditable(target, finalText, range);
+        currentPanel?.close();
+        currentPanel = null;
+        lockedEditable = null;
+        abortAllInflight();
+        // 通知 host 用户接受了改写（onAccepted optional；扩展不实现）。
+        // 必须在 replaceEditable 成功之后—— !target early return 或替换 throw 时
+        // 不应触发 "accepted" 事件
+        opts.onAccepted?.(style);
+      },
+      onCancel: () => {
+        currentPanel?.close();
+        currentPanel = null;
+        lockedEditable = null;
+        abortAllInflight();
+      },
+      onRegenerate: (style) => {
+        void regenerateOne(style);
+      },
+      onRetryAll: () => {
+        void retryAll();
+      },
+      ...(opts.onInstallClick ? { onInstallClick: opts.onInstallClick } : {}),
+      ...(opts.onOpenSettings ? { onOpenSettings: opts.onOpenSettings } : {}),
     },
-    onCancel: () => {
-      currentPanel?.close();
-      currentPanel = null;
-      lockedEditable = null;
-      abortAllInflight();
+    {
+      hintStorage: opts.host === 'extension' ? null : undefined,
     },
-    onRegenerate: (style) => {
-      void regenerateOne(style);
-    },
-    onRetryAll: () => {
-      void retryAll();
-    },
-    ...(opts.onInstallClick ? { onInstallClick: opts.onInstallClick } : {}),
-    ...(opts.onOpenSettings ? { onOpenSettings: opts.onOpenSettings } : {}),
-  });
+  );
 
   const onFocusIn = (ev: Event) => {
     const target = ev.target as Element | null;

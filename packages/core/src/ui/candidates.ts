@@ -6,40 +6,80 @@ import { ALL_STYLES, STYLE_LABEL, type Style } from '@rewrite/shared/styles';
 
 type ActionMode = 'hidden' | 'streaming' | 'regen' | 'retry';
 
+export interface HintStorage {
+  getItem(key: string): string | null;
+  setItem(key: string, value: string): void;
+}
+
+export interface CandidatesFactoryOptions {
+  /**
+   * Storage backend for lightweight UI hint flags (shortcut-shown counter,
+   * install-hint dismissed). **Three explicit states**:
+   *
+   * - `undefined` (default) — use the current page's `localStorage`. Right for
+   *   the web /try host: hints persist across the user's own visits.
+   * - `null` — **disable persistence**. Right for the extension content
+   *   script host: writing into the host page's localStorage would pollute
+   *   sites the user is browsing (Twitter, Slack, GitHub, etc.) and is a
+   *   privacy boundary violation. With `null`, hints simply don't show
+   *   (shortcut hint) or always show (install hint, no dismiss memory).
+   * - Custom `HintStorage` — for testing (fake in-memory) or future use cases
+   *   like routing through `chrome.storage.local` instead of host page storage.
+   */
+  hintStorage?: HintStorage | null;
+}
+
 const SHORTCUT_HINT_STORAGE_KEY = '__rewrite_so_shortcuts_shown_v1';
 const SHORTCUT_HINT_MAX_SHOWS = 3;
 
 const INSTALL_HINT_DISMISSED_KEY = '__rewrite_so_install_hint_dismissed_v1';
 
-function shouldShowInstallHint(): boolean {
+function getBrowserHintStorage(): HintStorage | null {
   try {
-    return localStorage.getItem(INSTALL_HINT_DISMISSED_KEY) !== '1';
+    if (typeof localStorage === 'undefined') return null;
+    return localStorage;
+  } catch {
+    return null;
+  }
+}
+
+function resolveHintStorage(storage: HintStorage | null | undefined): HintStorage | null {
+  return storage === undefined ? getBrowserHintStorage() : storage;
+}
+
+function shouldShowInstallHint(storage: HintStorage | null): boolean {
+  if (!storage) return true;
+  try {
+    return storage.getItem(INSTALL_HINT_DISMISSED_KEY) !== '1';
   } catch {
     return true;
   }
 }
-function markInstallHintDismissed(): void {
+function markInstallHintDismissed(storage: HintStorage | null): void {
+  if (!storage) return;
   try {
-    localStorage.setItem(INSTALL_HINT_DISMISSED_KEY, '1');
+    storage.setItem(INSTALL_HINT_DISMISSED_KEY, '1');
   } catch {
-    /* localStorage 不可用 */
+    /* storage 不可用 */
   }
 }
 
-function shouldShowShortcutHint(): boolean {
+function shouldShowShortcutHint(storage: HintStorage | null): boolean {
+  if (!storage) return false;
   try {
-    const n = Number(localStorage.getItem(SHORTCUT_HINT_STORAGE_KEY) ?? '0');
+    const n = Number(storage.getItem(SHORTCUT_HINT_STORAGE_KEY) ?? '0');
     return Number.isFinite(n) && n < SHORTCUT_HINT_MAX_SHOWS;
   } catch {
     return false;
   }
 }
-function markShortcutHintShown(): void {
+function markShortcutHintShown(storage: HintStorage | null): void {
+  if (!storage) return;
   try {
-    const n = Number(localStorage.getItem(SHORTCUT_HINT_STORAGE_KEY) ?? '0');
-    localStorage.setItem(SHORTCUT_HINT_STORAGE_KEY, String(Number.isFinite(n) ? n + 1 : 1));
+    const n = Number(storage.getItem(SHORTCUT_HINT_STORAGE_KEY) ?? '0');
+    storage.setItem(SHORTCUT_HINT_STORAGE_KEY, String(Number.isFinite(n) ? n + 1 : 1));
   } catch {
-    /* localStorage 不可用 */
+    /* storage 不可用 */
   }
 }
 
@@ -116,12 +156,13 @@ function targetChipText(target: string): string {
 export function createCandidates(
   root: ShadowRoot,
   callbacks: CandidatesCallbacks,
+  factoryOptions: CandidatesFactoryOptions = {},
 ): {
   open: (opts: OpenOptions) => CandidatesHandle;
 } {
   return {
     open(opts) {
-      return openPanel(root, callbacks, opts);
+      return openPanel(root, callbacks, opts, factoryOptions);
     },
   };
 }
@@ -130,7 +171,9 @@ function openPanel(
   root: ShadowRoot,
   callbacks: CandidatesCallbacks,
   opts: OpenOptions,
+  factoryOptions: CandidatesFactoryOptions,
 ): CandidatesHandle {
+  const hintStorage = resolveHintStorage(factoryOptions.hintStorage);
   const panel = document.createElement('div');
   panel.className = 'panel';
   panel.setAttribute('role', 'listbox');
@@ -193,6 +236,27 @@ function openPanel(
     Style,
     { root: HTMLElement; textEl: HTMLElement; actionEl: HTMLButtonElement; data: CardData }
   > = new Map();
+  let activeIndex = 0;
+
+  function setActiveIndex(nextIndex: number) {
+    const len = ALL_STYLES.length;
+    activeIndex = ((nextIndex % len) + len) % len;
+    for (let i = 0; i < ALL_STYLES.length; i++) {
+      const style = ALL_STYLES[i] as Style;
+      const entry = cards.get(style);
+      if (!entry) continue;
+      const active = i === activeIndex;
+      entry.root.classList.toggle('focused', active);
+      entry.root.setAttribute('aria-selected', active ? 'true' : 'false');
+    }
+  }
+
+  function trySelectStyle(style: Style): boolean {
+    const data = cards.get(style)?.data;
+    if (!data || (data.state !== 'done' && data.state !== 'streaming')) return false;
+    callbacks.onSelect(style, data.text);
+    return true;
+  }
 
   function fillSkeleton(textEl: HTMLElement) {
     textEl.innerHTML = '';
@@ -235,6 +299,7 @@ function openPanel(
     const card = document.createElement('div');
     card.className = 'card';
     card.setAttribute('role', 'option');
+    card.setAttribute('aria-selected', 'false');
     card.dataset.style = style;
 
     const kbd = document.createElement('div');
@@ -271,10 +336,11 @@ function openPanel(
     card.addEventListener('click', (ev) => {
       // 点击 action button 不触发 onSelect
       if (ev.target === actionEl || actionEl.contains(ev.target as Node)) return;
-      const data = cards.get(style)?.data;
-      if (data && (data.state === 'done' || data.state === 'streaming')) {
-        callbacks.onSelect(style, data.text);
-      }
+      setActiveIndex(i);
+      trySelectStyle(style);
+    });
+    card.addEventListener('mouseenter', () => {
+      setActiveIndex(i);
     });
 
     cards.set(style, {
@@ -284,9 +350,10 @@ function openPanel(
       data: { style, state: 'pending', text: '' },
     });
   }
+  setActiveIndex(0);
 
   // 首次使用提示（前 3 次显示）—— 教用户 1/2/3 接受、↻ 重生成、Esc 取消
-  if (shouldShowShortcutHint()) {
+  if (shouldShowShortcutHint(hintStorage)) {
     const hint = document.createElement('div');
     hint.className = 'shortcut-hint';
     hint.textContent = t('core.shortcuts', opts.locale)
@@ -294,11 +361,11 @@ function openPanel(
       .replace('{regen}', '↻')
       .replace('{cancel}', 'Esc');
     panel.appendChild(hint);
-    markShortcutHintShown();
+    markShortcutHintShown(hintStorage);
   }
 
   // 底部 hook（仅 web 模式 + 用户没主动 dismiss 过）
-  const hasInstallHint = !!(opts.showInstallHook && shouldShowInstallHint());
+  const hasInstallHint = !!(opts.showInstallHook && shouldShowInstallHint(hintStorage));
   if (hasInstallHint) {
     const footer = document.createElement('div');
     footer.className = 'footer';
@@ -321,7 +388,7 @@ function openPanel(
     dismissBtn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      markInstallHintDismissed();
+      markInstallHintDismissed(hintStorage);
       footer.remove();
     });
 
@@ -359,11 +426,25 @@ function openPanel(
     if (idx >= 0) {
       const style = ALL_STYLES[idx];
       if (!style) return;
-      const data = cards.get(style)?.data;
-      if (data && (data.state === 'done' || data.state === 'streaming')) {
+      setActiveIndex(idx);
+      if (trySelectStyle(style)) {
         e.preventDefault();
         e.stopPropagation();
-        callbacks.onSelect(style, data.text);
+      }
+      return;
+    }
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      e.stopPropagation();
+      setActiveIndex(activeIndex + (e.key === 'ArrowDown' ? 1 : -1));
+      return;
+    }
+    if (e.key === 'Enter') {
+      const style = ALL_STYLES[activeIndex];
+      if (!style) return;
+      if (trySelectStyle(style)) {
+        e.preventDefault();
+        e.stopPropagation();
       }
     }
   };

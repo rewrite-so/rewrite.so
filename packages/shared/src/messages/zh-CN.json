@@ -94,7 +94,7 @@
       "faq": {
         "h2": "常见问题",
         "q1": "「改写」具体指什么？",
-        "a1": "每次触发 rewrite.so（在输入框双击 Shift），后端发一次请求给模型，三种风格的候选并行流式返回。算作 1 次改写计入配额。",
+        "a1": "每次触发 rewrite.so（在支持的输入框双击 Shift），后端发一次请求给模型，三种风格的候选并行流式返回。算作 1 次改写计入配额。",
         "q2": "你们会存储我改写的文本吗？",
         "a2": "不存。原文和改写结果只在 worker 中过一次就丢弃 —— 不进应用日志、不进错误监控、不进分析。详见 <privacy>隐私政策</privacy>。",
         "q3": "BYOK 是什么？",
@@ -142,7 +142,7 @@
       "signIn": "去登录 →",
       "welcomeCard": {
         "title": "欢迎！两种方式开始使用",
-        "description": "直接在演示页试试，或装上 Chrome 扩展用在任何网站。",
+        "description": "直接在演示页试试，或装上 Chrome 扩展在支持的网站使用。",
         "ctaTry": "去 /try 试试 →",
         "ctaInstall": "安装 Chrome 扩展 →"
       },
@@ -287,7 +287,7 @@
     "languageSwitcher": "语言"
   },
   "footer": {
-    "tagline": "双击 Shift，任何输入框瞬间 AI 改写。",
+    "tagline": "双击 Shift，在支持的输入框中即时 AI 改写。",
     "heading": {
       "product": "产品",
       "account": "账户",
@@ -315,12 +315,12 @@
   },
   "home": {
     "hero": {
-      "eyebrow": "任意输入框 · 开源",
+      "eyebrow": "支持的输入框 · 开源",
       "h1Line1": "随手写，",
       "h1Line2": "自信发。",
       "subHeadline": "别再为一句话反复纠结。",
       "polyglot": "任意语言进，任意语言出。",
-      "intro": "在任意网页输入框双击 <kbd>Shift</kbd>。AI 当场给你三种说法，按 <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> 选一个直接发。",
+      "intro": "在支持的网页输入框双击 <kbd>Shift</kbd>。AI 当场给你三种说法，按 <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> 选一个直接发。",
       "ctaPrimary": "免费试用 →",
       "ctaSecondary": "⭐ Star on GitHub",
       "fineprint": "每月 {count} 次免费 · 无需信用卡 · BYOK 无限改写"
@@ -420,12 +420,12 @@
     },
     "finalCta": {
       "h2": "30 秒试一下。",
-      "body": "无需注册。打开 <code>/try</code> 体验。装上扩展就能在所有网站用。",
+      "body": "无需注册。打开 <code>/try</code> 体验。装上扩展即可在支持的网站使用。",
       "primary": "免费试用 →",
       "secondary": "登录"
     },
     "demo": {
-      "anyInput": "任意输入框",
+      "anyInput": "支持的输入框",
       "youTyped": "# 你写的：",
       "streams": "→ 3 路并行开始出字，约 200ms",
       "accepted": "→ 已替换到输入框",
@@ -477,7 +477,7 @@
   },
   "ext": {
     "popup": {
-      "tagline": "在任何输入框双击 Shift Shift。",
+      "tagline": "在支持的输入框双击 Shift Shift。",
       "usageError": "无法加载配额：",
       "loading": "加载中…",
       "remainingThisMonth": "本月剩余",
@@ -533,7 +533,7 @@
       },
       "step3": {
         "title": "就绪",
-        "body": "在任何网页输入框聚焦后，右下角会出现一个小点。双击 Shift 即可改写。试试看：",
+        "body": "聚焦支持的网页输入框后，右下角会出现一个小点。双击 Shift 即可改写。试试看：",
         "example1": "Twitter / 推文输入框",
         "example2": "知乎 / Reddit 评论框",
         "example3": "Slack / Discord 网页消息框",
@@ -544,7 +544,7 @@
   },
   "hint": {
     "doubleShift": "按 Shift Shift 即可改写",
-    "tryOnAnyInput": "安装扩展，在任何网站都能用"
+    "tryOnAnyInput": "安装扩展，在支持的网站使用"
   },
   "cta": {
     "installExtension": "安装扩展 →"

@@ -3,6 +3,7 @@ import { cors } from 'hono/cors';
 import { reconcileSubscriptions } from './cron/reconcile.ts';
 import { processOnboardingEmails } from './emails/dispatcher.ts';
 import { createAuth } from './lib/auth.ts';
+import { isAllowedExtensionOrigin } from './lib/extension-origin.ts';
 import { log } from './lib/log.ts';
 import { billingRoute } from './routes/billing.ts';
 import { meRoute } from './routes/me.ts';
@@ -24,7 +25,7 @@ function resolveCorsOrigin(origin: string | undefined, env: Bindings): string | 
   if (!origin) return undefined;
   if (env.WEB_ORIGIN && origin === env.WEB_ORIGIN) return origin;
   if (TRUSTED_CORS_ORIGINS.has(origin)) return origin;
-  if (origin.startsWith('chrome-extension://')) return origin;
+  if (isAllowedExtensionOrigin(origin, env)) return origin;
   return undefined;
 }
 

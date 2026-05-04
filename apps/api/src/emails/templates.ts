@@ -116,7 +116,7 @@ const WELCOME: Record<Locale, WelcomeStrings> = {
   en: {
     subject: 'Welcome to rewrite.so — try your first rewrite in 30 seconds',
     intro: 'Welcome to <strong>rewrite.so</strong>. Quick reminder of how it works:',
-    step1: 'Focus any input box on a webpage.',
+    step1: 'Focus a supported text field on a webpage.',
     step2: 'Tap <kbd>Shift</kbd> twice (within 500 ms).',
     step3: 'Pick the rewrite you like with <kbd>1</kbd>, <kbd>2</kbd>, or <kbd>3</kbd>.',
     callout: 'If you want to play with it right now without installing anything, hit the demo:',
@@ -127,7 +127,7 @@ const WELCOME: Record<Locale, WelcomeStrings> = {
   'zh-CN': {
     subject: '欢迎使用 rewrite.so —— 30 秒内完成第一次改写',
     intro: '欢迎使用 <strong>rewrite.so</strong>。简单复习一下工作流程：',
-    step1: '聚焦网页上任意输入框。',
+    step1: '聚焦网页上支持的输入框。',
     step2: '500 毫秒内按两下 <kbd>Shift</kbd>。',
     step3: '用 <kbd>1</kbd>、<kbd>2</kbd>、<kbd>3</kbd> 选择你喜欢的改写。',
     callout: '想立即试一下、不装任何东西？打开 demo：',
@@ -137,7 +137,7 @@ const WELCOME: Record<Locale, WelcomeStrings> = {
   ja: {
     subject: 'rewrite.so へようこそ — 30 秒で最初の書き換えを試そう',
     intro: '<strong>rewrite.so</strong> へようこそ。使い方の簡単なおさらいです：',
-    step1: 'ウェブページの任意の入力欄をフォーカス。',
+    step1: 'ウェブページの対応している入力欄をフォーカス。',
     step2: '500 ミリ秒以内に <kbd>Shift</kbd> を 2 回タップ。',
     step3: '<kbd>1</kbd>、<kbd>2</kbd>、<kbd>3</kbd> で好きな書き換えを選択。',
     callout: 'インストールせずにすぐ試したい場合は、デモを開いてください：',
@@ -148,7 +148,7 @@ const WELCOME: Record<Locale, WelcomeStrings> = {
   ko: {
     subject: 'rewrite.so에 오신 것을 환영합니다 — 30초 안에 첫 재작성을 시도해보세요',
     intro: '<strong>rewrite.so</strong>에 오신 것을 환영합니다. 작동 방식 간단 복습:',
-    step1: '웹 페이지의 임의의 입력란을 포커스하세요.',
+    step1: '웹 페이지의 지원되는 입력란을 포커스하세요.',
     step2: '500ms 이내에 <kbd>Shift</kbd>를 두 번 누르세요.',
     step3: '<kbd>1</kbd>, <kbd>2</kbd>, <kbd>3</kbd>으로 마음에 드는 재작성을 선택.',
     callout: '아무것도 설치하지 않고 지금 바로 시도하려면 데모를 여세요:',
@@ -159,7 +159,7 @@ const WELCOME: Record<Locale, WelcomeStrings> = {
   es: {
     subject: 'Bienvenido a rewrite.so — prueba tu primera reescritura en 30 segundos',
     intro: 'Bienvenido a <strong>rewrite.so</strong>. Repaso rápido de cómo funciona:',
-    step1: 'Enfoca cualquier campo de entrada en una página web.',
+    step1: 'Enfoca un campo compatible en una página web.',
     step2: 'Pulsa <kbd>Shift</kbd> dos veces (en 500 ms).',
     step3: 'Elige la reescritura con <kbd>1</kbd>, <kbd>2</kbd> o <kbd>3</kbd>.',
     callout: 'Si quieres probarlo ahora sin instalar nada, abre la demo:',
@@ -170,7 +170,7 @@ const WELCOME: Record<Locale, WelcomeStrings> = {
   fr: {
     subject: 'Bienvenue sur rewrite.so — essayez votre première réécriture en 30 secondes',
     intro: 'Bienvenue sur <strong>rewrite.so</strong>. Petit rappel du fonctionnement :',
-    step1: "Focalisez n'importe quel champ de saisie d'une page web.",
+    step1: 'Focalisez un champ de saisie pris en charge sur une page web.',
     step2: 'Appuyez deux fois sur <kbd>Shift</kbd> (dans 500 ms).',
     step3: 'Choisissez la réécriture avec <kbd>1</kbd>, <kbd>2</kbd> ou <kbd>3</kbd>.',
     callout: 'Pour essayer maintenant sans rien installer, ouvrez la démo :',
@@ -181,7 +181,7 @@ const WELCOME: Record<Locale, WelcomeStrings> = {
   de: {
     subject: 'Willkommen bei rewrite.so — probiere deine erste Umschreibung in 30 Sekunden',
     intro: 'Willkommen bei <strong>rewrite.so</strong>. Kurze Erinnerung, wie es funktioniert:',
-    step1: 'Fokussiere ein beliebiges Eingabefeld auf einer Webseite.',
+    step1: 'Fokussiere ein unterstütztes Eingabefeld auf einer Webseite.',
     step2: 'Drücke <kbd>Shift</kbd> zweimal (innerhalb 500 ms).',
     step3: 'Wähle die Umschreibung mit <kbd>1</kbd>, <kbd>2</kbd> oder <kbd>3</kbd>.',
     callout: 'Wenn du es sofort ohne Installation testen willst, öffne die Demo:',
@@ -228,59 +228,60 @@ interface Day1Strings {
 
 const DAY1: Record<Locale, Day1Strings> = {
   en: {
-    subject: 'rewrite.so works on every site once you install the extension',
-    body: 'Yesterday you signed up for rewrite.so. The /try demo is fun, but the real magic happens once you install the Chrome extension — then it works in <em>any</em> input box on <em>any</em> site.',
+    subject: 'rewrite.so works across supported sites once you install the extension',
+    body: 'Yesterday you signed up for rewrite.so. The /try demo is fun, but the real magic happens once you install the Chrome extension — then it works in supported text fields across everyday sites.',
     examples:
-      'Twitter drafts, GitHub PR descriptions, Slack messages, Notion pages, Gmail (compose works in some clients) — all the same Shift-Shift trigger.',
+      'Twitter / X drafts, GitHub PR descriptions, Slack messages, Notion pages, Outlook web bodies — all the same Shift-Shift trigger.',
     cta: 'Install the extension →',
     alreadyInstalled: "Already installed? Ignore this. We won't ping you about it again.",
   },
   'zh-CN': {
-    subject: '装上扩展后，rewrite.so 在任何网站都能用',
-    body: '你昨天注册了 rewrite.so。/try demo 只是开胃菜——装上 Chrome 扩展才是真本事：<em>任何</em>网站的<em>任何</em>输入框都能用。',
+    subject: '装上扩展后，rewrite.so 可在支持的网站使用',
+    body: '你昨天注册了 rewrite.so。/try demo 只是开胃菜——装上 Chrome 扩展后，就能在常见网站里支持的输入框使用。',
     examples:
-      'Twitter 草稿、GitHub PR 描述、Slack 消息、Notion 页面、Gmail（部分网页客户端 compose 可用）——同一个 Shift-Shift 手势全搞定。',
+      'Twitter / X 草稿、GitHub PR 描述、Slack 消息、Notion 页面、Outlook web 正文——同一个 Shift-Shift 手势全搞定。',
     cta: '安装扩展 →',
     alreadyInstalled: '已经装了？忽略此邮件。我们不会再就此打扰你。',
   },
   ja: {
-    subject: '拡張機能をインストールすれば rewrite.so はどのサイトでも動きます',
-    body: '昨日 rewrite.so にサインアップしていただきました。/try デモも楽しいですが、本当の魔法は Chrome 拡張機能をインストールしたあとに起こります — <em>どの</em>サイトの<em>どの</em>入力欄でも動きます。',
+    subject: '拡張機能をインストールすれば rewrite.so は対応サイトで動きます',
+    body: '昨日 rewrite.so にサインアップしていただきました。/try デモも楽しいですが、本当の力は Chrome 拡張機能をインストールしたあとです — 日常的なサイトの対応している入力欄で動きます。',
     examples:
-      'Twitter の下書き、GitHub PR 説明、Slack メッセージ、Notion ページ、Gmail（一部クライアントの compose）— 同じ Shift-Shift トリガー。',
+      'Twitter / X の下書き、GitHub PR 説明、Slack メッセージ、Notion ページ、Outlook web の本文 — 同じ Shift-Shift トリガー。',
     cta: '拡張機能をインストール →',
     alreadyInstalled:
       'すでにインストール済みですか？このメールは無視してください。再度の通知はしません。',
   },
   ko: {
-    subject: '확장 프로그램을 설치하면 rewrite.so가 모든 사이트에서 작동합니다',
-    body: '어제 rewrite.so에 가입하셨습니다. /try 데모도 재밌지만, 진짜 마법은 Chrome 확장 프로그램을 설치한 후에 일어납니다 — <em>어떤</em> 사이트의 <em>어떤</em> 입력란에서도 작동합니다.',
+    subject: '확장 프로그램을 설치하면 rewrite.so가 지원되는 사이트에서 작동합니다',
+    body: '어제 rewrite.so에 가입하셨습니다. /try 데모도 재밌지만, 진짜 힘은 Chrome 확장 프로그램을 설치한 후에 나타납니다 — 자주 쓰는 사이트의 지원되는 입력란에서 작동합니다.',
     examples:
-      'Twitter 초안, GitHub PR 설명, Slack 메시지, Notion 페이지, Gmail (일부 클라이언트 compose) — 동일한 Shift-Shift 트리거.',
+      'Twitter / X 초안, GitHub PR 설명, Slack 메시지, Notion 페이지, Outlook web 본문 — 동일한 Shift-Shift 트리거.',
     cta: '확장 프로그램 설치 →',
     alreadyInstalled: '이미 설치하셨나요? 이 메일은 무시하세요. 다시 알리지 않겠습니다.',
   },
   es: {
-    subject: 'rewrite.so funciona en cualquier sitio una vez que instalas la extensión',
-    body: 'Ayer te registraste en rewrite.so. La demo /try está bien, pero la magia real ocurre al instalar la extensión de Chrome — funciona en <em>cualquier</em> campo de <em>cualquier</em> sitio.',
+    subject: 'rewrite.so funciona en sitios compatibles al instalar la extensión',
+    body: 'Ayer te registraste en rewrite.so. La demo /try está bien, pero lo mejor ocurre al instalar la extensión de Chrome: funciona en campos compatibles de sitios cotidianos.',
     examples:
-      'Borradores de Twitter, descripciones de PR en GitHub, mensajes de Slack, páginas de Notion, Gmail (compose en algunos clientes) — mismo gesto Shift-Shift.',
+      'Borradores de Twitter / X, descripciones de PR en GitHub, mensajes de Slack, páginas de Notion, cuerpos de Outlook web — mismo gesto Shift-Shift.',
     cta: 'Instalar la extensión →',
     alreadyInstalled: '¿Ya instalada? Ignora esto. No te volveremos a recordar.',
   },
   fr: {
-    subject: "rewrite.so fonctionne sur tous les sites une fois l'extension installée",
-    body: "Hier vous vous êtes inscrit sur rewrite.so. La démo /try est sympa, mais la vraie magie commence avec l'extension Chrome — elle fonctionne dans <em>n'importe quel</em> champ de <em>n'importe quel</em> site.",
+    subject: "rewrite.so fonctionne sur les sites pris en charge une fois l'extension installée",
+    body: "Hier vous vous êtes inscrit sur rewrite.so. La démo /try est sympa, mais le vrai intérêt commence avec l'extension Chrome : elle fonctionne dans les champs pris en charge des sites du quotidien.",
     examples:
-      'Brouillons Twitter, descriptions de PR GitHub, messages Slack, pages Notion, Gmail (compose dans certains clients) — même geste Shift-Shift.',
+      'Brouillons Twitter / X, descriptions de PR GitHub, messages Slack, pages Notion, corps Outlook web — même geste Shift-Shift.',
     cta: "Installer l'extension →",
     alreadyInstalled: 'Déjà installée ? Ignorez ceci. On ne reviendra pas dessus.',
   },
   de: {
-    subject: 'rewrite.so funktioniert auf jeder Seite, sobald die Erweiterung installiert ist',
-    body: 'Gestern hast du dich bei rewrite.so registriert. Die /try-Demo ist nett, aber die wahre Magie beginnt mit der Chrome-Erweiterung — sie funktioniert in <em>jedem</em> Eingabefeld auf <em>jeder</em> Seite.',
+    subject:
+      'rewrite.so funktioniert auf unterstützten Seiten, sobald die Erweiterung installiert ist',
+    body: 'Gestern hast du dich bei rewrite.so registriert. Die /try-Demo ist nett, aber der eigentliche Nutzen beginnt mit der Chrome-Erweiterung: Sie funktioniert in unterstützten Eingabefeldern auf alltäglichen Seiten.',
     examples:
-      'Twitter-Entwürfe, GitHub-PR-Beschreibungen, Slack-Nachrichten, Notion-Seiten, Gmail (compose in einigen Clients) — derselbe Shift-Shift-Trigger.',
+      'Twitter-/X-Entwürfe, GitHub-PR-Beschreibungen, Slack-Nachrichten, Notion-Seiten, Outlook-web-Textfelder — derselbe Shift-Shift-Trigger.',
     cta: 'Erweiterung installieren →',
     alreadyInstalled: 'Bereits installiert? Ignoriere das hier. Wir erinnern nicht erneut.',
   },

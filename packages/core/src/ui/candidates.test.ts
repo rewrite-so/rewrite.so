@@ -106,6 +106,19 @@ describe('createCandidates', () => {
     expect(onSelect).not.toHaveBeenCalled();
   });
 
+  it('ArrowDown + Enter selects the focused card', () => {
+    const { factory, target, onSelect, root } = setup();
+    const handle = factory.open({ target, locale: 'en', targetLang: 'en' });
+    handle.setDone('faithful', 'Hello.');
+    handle.setDone('casual', 'Hey there.');
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    expect(root.querySelector('.card[data-style="casual"]')?.classList.contains('focused')).toBe(
+      true,
+    );
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    expect(onSelect).toHaveBeenCalledWith('casual', 'Hey there.');
+  });
+
   it('Escape triggers onCancel', () => {
     const { factory, target, onCancel } = setup();
     factory.open({ target, locale: 'en', targetLang: 'en' });
@@ -129,6 +142,22 @@ describe('createCandidates', () => {
     const footer = root.querySelector('.footer');
     expect(footer).not.toBeNull();
     expect(footer?.textContent).toContain('安装扩展');
+  });
+
+  it('can disable host-page hint storage for extension mode', () => {
+    const { root } = createShadowRoot('open');
+    const factory = createCandidates(
+      root,
+      {
+        onSelect: vi.fn(),
+        onCancel: vi.fn(),
+      },
+      { hintStorage: null },
+    );
+    const target = document.createElement('textarea');
+    document.body.appendChild(target);
+    factory.open({ target, locale: 'en', targetLang: 'en' });
+    expect(root.querySelector('.shortcut-hint')).toBeNull();
   });
 
   it('install link click triggers onInstallClick', () => {

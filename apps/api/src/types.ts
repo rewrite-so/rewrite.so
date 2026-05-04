@@ -19,6 +19,8 @@ export interface Bindings {
   CREEM_PRO_YEARLY_PRODUCT_ID: string;
   TURNSTILE_SECRET: string;
   EXTENSION_INSTALL_URL?: string;
+  /** Comma-separated Chrome extension origins or IDs allowed to use installId quota. */
+  EXTENSION_ALLOWED_ORIGINS?: string;
 
   // ===== Bindings =====
   DB: D1Database;

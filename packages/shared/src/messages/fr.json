@@ -94,7 +94,7 @@
       "faq": {
         "h2": "FAQ",
         "q1": "Que signifie « réécriture » ici ?",
-        "a1": "Chaque fois que vous déclenchez rewrite.so (double Shift dans n'importe quel champ), une requête est envoyée au modèle et trois variantes de style sont retournées en streaming. Cela compte comme une réécriture sur votre quota.",
+        "a1": "Chaque fois que vous déclenchez rewrite.so (double Shift dans un champ pris en charge), une requête est envoyée au modèle et trois variantes de style sont retournées en streaming. Cela compte comme une réécriture sur votre quota.",
         "q2": "Stockez-vous le texte que je réécris ?",
         "a2": "Non. Les entrées et sorties passent mais ne sont jamais persistées — ni dans les logs d'application, ni dans les rapporteurs d'erreurs, ni dans les analytiques. Voir notre <privacy>Politique de confidentialité</privacy> pour les détails.",
         "q3": "Qu'est-ce que BYOK ?",
@@ -142,7 +142,7 @@
       "signIn": "Se connecter →",
       "welcomeCard": {
         "title": "Bienvenue ! Deux façons de commencer",
-        "description": "Essayez la démo ici, ou installez l'extension Chrome pour l'utiliser sur tous les sites.",
+        "description": "Essayez la démo ici, ou installez l'extension Chrome pour l'utiliser sur les sites pris en charge.",
         "ctaTry": "Essayer sur /try →",
         "ctaInstall": "Installer l'extension Chrome →"
       },
@@ -287,7 +287,7 @@
     "languageSwitcher": "Langue"
   },
   "footer": {
-    "tagline": "Double Shift, réécriture IA instantanée dans n'importe quel champ de saisie.",
+    "tagline": "Double Shift, réécriture IA instantanée dans les champs pris en charge.",
     "heading": {
       "product": "Produit",
       "account": "Compte",
@@ -315,12 +315,12 @@
   },
   "home": {
     "hero": {
-      "eyebrow": "N'importe quel champ · Open source",
+      "eyebrow": "Champs pris en charge · Open source",
       "h1Line1": "Écris brut.",
       "h1Line2": "Envoie peaufiné.",
       "subHeadline": "Arrête de cogiter sur chaque message.",
       "polyglot": "N'importe quelle langue en entrée. N'importe quelle en sortie.",
-      "intro": "Appuyez deux fois sur <kbd>Shift</kbd> dans n'importe quel champ. L'IA vous propose trois manières de le dire. Choisissez avec <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> et envoyez.",
+      "intro": "Appuyez deux fois sur <kbd>Shift</kbd> dans un champ web pris en charge. L'IA vous propose trois manières de le dire. Choisissez avec <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> et envoyez.",
       "ctaPrimary": "Essai gratuit →",
       "ctaSecondary": "⭐ Star sur GitHub",
       "fineprint": "{count} réécritures gratuites/mois · Sans carte · BYOK pour utilisation illimitée"
@@ -420,12 +420,12 @@
     },
     "finalCta": {
       "h2": "Essayez. 30 secondes.",
-      "body": "Pas d'inscription. Ouvrez <code>/try</code> pour la démo. Installez l'extension pour l'utiliser sur tous les sites.",
+      "body": "Pas d'inscription. Ouvrez <code>/try</code> pour la démo. Installez l'extension pour l'utiliser sur les sites pris en charge.",
       "primary": "Essai gratuit →",
       "secondary": "Se connecter"
     },
     "demo": {
-      "anyInput": "n'importe quel champ",
+      "anyInput": "champ pris en charge",
       "youTyped": "# Vous avez tapé :",
       "streams": "→ 3 streams démarrés, ~200ms premier token",
       "accepted": "→ inséré dans le champ",
@@ -477,7 +477,7 @@
   },
   "ext": {
     "popup": {
-      "tagline": "Double Shift Shift dans n'importe quel champ de saisie.",
+      "tagline": "Double Shift Shift dans les champs pris en charge.",
       "usageError": "Échec du chargement du quota :",
       "loading": "Chargement…",
       "remainingThisMonth": "restantes ce mois-ci",
@@ -533,7 +533,7 @@
       },
       "step3": {
         "title": "Prêt",
-        "body": "Quand vous focalisez un champ web, un petit point apparaît en bas à droite. Double Shift pour réécrire. Essayez sur :",
+        "body": "Quand vous focalisez un champ web pris en charge, un petit point apparaît en bas à droite. Double Shift pour réécrire. Essayez sur :",
         "example1": "Composition Twitter / X",
         "example2": "Commentaires Reddit / Hacker News",
         "example3": "Slack / Discord web",
@@ -544,7 +544,7 @@
   },
   "hint": {
     "doubleShift": "Appuyez sur Shift Shift pour réécrire",
-    "tryOnAnyInput": "Installez l'extension pour l'utiliser sur n'importe quel site"
+    "tryOnAnyInput": "Installez l'extension pour l'utiliser sur les sites pris en charge"
   },
   "cta": {
     "installExtension": "Installer l'extension →"

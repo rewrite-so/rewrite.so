@@ -94,7 +94,7 @@
       "faq": {
         "h2": "FAQ",
         "q1": "¿Qué significa \"reescritura\" aquí?",
-        "a1": "Cada vez que activas rewrite.so (doble Shift en cualquier campo), se envía una solicitud al modelo y tres variantes de estilo regresan en streaming. Eso cuenta como una reescritura contra tu cuota.",
+        "a1": "Cada vez que activas rewrite.so (doble Shift en un campo compatible), se envía una solicitud al modelo y tres variantes de estilo regresan en streaming. Eso cuenta como una reescritura contra tu cuota.",
         "q2": "¿Almacenan el texto que reescribo?",
         "a2": "No. Las entradas y salidas pasan por el sistema pero nunca se persisten — ni en logs de aplicación, ni en reportadores de errores, ni en analíticas. Consulta nuestra <privacy>Política de privacidad</privacy> para más detalles.",
         "q3": "¿Qué es BYOK?",
@@ -142,7 +142,7 @@
       "signIn": "Iniciar sesión →",
       "welcomeCard": {
         "title": "¡Bienvenido! Dos formas de empezar",
-        "description": "Pruébalo en la demo o instala la extensión de Chrome para usarlo en cualquier sitio.",
+        "description": "Pruébalo en la demo o instala la extensión de Chrome para usarlo en sitios compatibles.",
         "ctaTry": "Probar en /try →",
         "ctaInstall": "Instalar extensión de Chrome →"
       },
@@ -287,7 +287,7 @@
     "languageSwitcher": "Idioma"
   },
   "footer": {
-    "tagline": "Doble Shift, reescritura con IA al instante en cualquier campo de entrada.",
+    "tagline": "Doble Shift, reescritura con IA al instante en campos compatibles.",
     "heading": {
       "product": "Producto",
       "account": "Cuenta",
@@ -315,12 +315,12 @@
   },
   "home": {
     "hero": {
-      "eyebrow": "Cualquier campo de entrada · Código abierto",
+      "eyebrow": "Campos compatibles · Código abierto",
       "h1Line1": "Escribe en bruto.",
       "h1Line2": "Envía pulido.",
       "subHeadline": "Deja de darle vueltas a cada mensaje.",
       "polyglot": "Cualquier idioma entra. Cualquier idioma sale.",
-      "intro": "Pulsa <kbd>Shift</kbd> dos veces en cualquier campo de entrada. La IA te da tres maneras de decirlo. Elige una con <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> y envía.",
+      "intro": "Pulsa <kbd>Shift</kbd> dos veces en un campo web compatible. La IA te da tres maneras de decirlo. Elige una con <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> y envía.",
       "ctaPrimary": "Probar gratis →",
       "ctaSecondary": "⭐ Estrella en GitHub",
       "fineprint": "{count} reescrituras gratis al mes · Sin tarjeta · BYOK para uso ilimitado"
@@ -420,12 +420,12 @@
     },
     "finalCta": {
       "h2": "Pruébalo. Toma 30 segundos.",
-      "body": "Sin registro. Abre <code>/try</code> para la demo. Instala la extensión para usarlo en todos los sitios.",
+      "body": "Sin registro. Abre <code>/try</code> para la demo. Instala la extensión para usarlo en sitios compatibles.",
       "primary": "Probar gratis →",
       "secondary": "Iniciar sesión"
     },
     "demo": {
-      "anyInput": "cualquier campo de entrada",
+      "anyInput": "campo compatible",
       "youTyped": "# Escribiste:",
       "streams": "→ 3 streams iniciados, ~200ms primer token",
       "accepted": "→ reemplazado en el campo",
@@ -477,7 +477,7 @@
   },
   "ext": {
     "popup": {
-      "tagline": "Doble Shift Shift en cualquier campo de entrada.",
+      "tagline": "Doble Shift Shift en campos compatibles.",
       "usageError": "Error al cargar la cuota:",
       "loading": "Cargando…",
       "remainingThisMonth": "restantes este mes",
@@ -533,7 +533,7 @@
       },
       "step3": {
         "title": "Listo",
-        "body": "Cuando enfocas un campo web, aparece un punto pequeño abajo a la derecha. Doble Shift para reescribir. Pruébalo en:",
+        "body": "Cuando enfocas un campo web compatible, aparece un punto pequeño abajo a la derecha. Doble Shift para reescribir. Pruébalo en:",
         "example1": "Composición de Twitter / X",
         "example2": "Comentarios de Reddit / Hacker News",
         "example3": "Slack / Discord web",
@@ -544,7 +544,7 @@
   },
   "hint": {
     "doubleShift": "Pulsa Shift Shift para reescribir",
-    "tryOnAnyInput": "Instala la extensión para usarla en cualquier sitio"
+    "tryOnAnyInput": "Instala la extensión para usarla en sitios compatibles"
   },
   "cta": {
     "installExtension": "Instalar extensión →"

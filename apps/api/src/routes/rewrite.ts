@@ -9,6 +9,7 @@ import { Hono } from 'hono';
 import { BURST_BUCKETS, consume } from '../do/rate-limiter.ts';
 import { createAuth } from '../lib/auth.ts';
 import { decryptApiKey } from '../lib/crypto.ts';
+import { isAllowedExtensionOrigin } from '../lib/extension-origin.ts';
 import { log } from '../lib/log.ts';
 import {
   checkAndIncrement,
@@ -35,11 +36,9 @@ export const rewriteRoute = new Hono<AppEnv>();
 
 function isExtensionRewriteRequest(headers: Headers, env: AppEnv['Bindings']): boolean {
   const origin = headers.get('origin') ?? '';
-  // chrome-extension:// origin 由浏览器自动设置，**不可被 web JS 伪造**——这是
-  // 唯一可信任的"扩展身份"信号。x-rewrite-client header 任何 same-site fetch 都能
-  // 加（同域 web JS / 第三方网页），不能作为授权依据，仅留给 service-worker 设置
-  // 用作 telemetry / 日志区分（CORS allowHeaders 仍允许它通过预检）。
-  if (origin.startsWith('chrome-extension://')) return true;
+  // x-rewrite-client header 任何 same-site fetch 都能加（同域 web JS / 第三方网页），
+  // 不能作为授权依据。生产只信任 EXTENSION_ALLOWED_ORIGINS 白名单里的 extension origin。
+  if (isAllowedExtensionOrigin(origin, env)) return true;
 
   // 本地/测试环境下 Hono app.request 没有 extension origin；允许 installId 走 dev。
   // 生产环境 BETTER_AUTH_URL 是 https://api.rewrite.so 不会命中这条分支。

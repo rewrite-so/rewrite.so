@@ -52,6 +52,9 @@
 - **配额数字（10/5/30/2000）改动需重算成本**：当前售价（月付 $13.99 / 年付 $7.99/月，即 $95.88/年）下 Pro 跑满约 $4/月，留 $4-10 利润。匿名/扩展/登录免费档不应放宽至单用户成本超 $0.20/月。
 - **BYOK 用户走 token bucket（100 req/min 反代滥用底线）但不查月配额**：防止当作我们 SSE 的反代。
 - **installId 永不重置**：包括登录后；登录会做 `usage_monthly` 一次性 merge。
+- **生产扩展 origin 必须显式白名单**：Chrome Web Store draft 拿到正式 extension ID 后，
+  在 API 生产环境配置 `EXTENSION_ALLOWED_ORIGINS`（可填 `chrome-extension://<id>` 或裸 ID）。
+  生产环境不得接受任意 `chrome-extension://` origin 携带 `installId` 走扩展匿名配额；dev localhost 例外。
 - **resolveUserTier 是订阅 → 配额档位的唯一入口**：`/v1/rewrite` 和 `/v1/me/usage` 都通过它查 subscriptions
   表决定 free/pro。`status` 为 `active|trialing|paused`，或 `canceled` 但 `current_period_end > now`，
   都返回 'pro'。其它（包括 `expired|past_due`）返回 'free'。webhook 状态机和这个查询逻辑必须一致。
@@ -97,7 +100,8 @@
     不要改
 - **release 扩展**：tag 必须 `ext-v*` 前缀（如 `ext-v0.1.0`），其它 tag 不会触发。
   zip artifact 同时上传到 Actions artifacts 和 GitHub Release，方便不发布也能拿到
-  打包结果。
+  打包结果。release build 必须显式注入 `VITE_API_BASE=https://api.rewrite.so` 和
+  `VITE_WEB_BASE=https://rewrite.so`，防止扩展运行时端点误回退到 localhost。
 - **secrets**：CI 不会自动同步 wrangler secrets（如 OPENAI_API_KEY、
   BETTER_AUTH_SECRET）；改 secret 时手动 `wrangler secret put` 或在 dashboard 改。
 
@@ -162,6 +166,6 @@
 
 ## 环境变量
 
-`OPENAI_BASE_URL` / `OPENAI_API_KEY` / `OPENAI_MODEL`（**无内置默认值**）/ `BYOK_MASTER_KEY` / `CREEM_*` / `RESEND_API_KEY` / `GOOGLE_OAUTH_*` / `TURNSTILE_*` / `BETTER_AUTH_*` / `EXTENSION_INSTALL_URL` / `NEXT_PUBLIC_EXTENSION_INSTALL_URL` / `NEXT_PUBLIC_SITE_ORIGIN`（i18n hreflang/sitemap 绝对 URL，默认 `https://rewrite.so`）。
+`OPENAI_BASE_URL` / `OPENAI_API_KEY` / `OPENAI_MODEL`（**无内置默认值**）/ `BYOK_MASTER_KEY` / `CREEM_*` / `RESEND_API_KEY` / `GOOGLE_OAUTH_*` / `TURNSTILE_*` / `BETTER_AUTH_*` / `EXTENSION_INSTALL_URL` / `NEXT_PUBLIC_EXTENSION_INSTALL_URL` / `NEXT_PUBLIC_SITE_ORIGIN`（i18n hreflang/sitemap 绝对 URL，默认 `https://rewrite.so`）/ `EXTENSION_ALLOWED_ORIGINS` / `VITE_API_BASE` / `VITE_WEB_BASE`。
 
 详见 `.env.example`。
