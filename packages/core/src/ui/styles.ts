@@ -355,8 +355,14 @@ export const SHADOW_STYLES = `
   color: light-dark(rgba(0,0,0,0.55), rgba(255,255,255,0.55));
   line-height: 1.5;
 }
-.global-error-cta {
+.global-error-btn-row {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
   margin-top: 4px;
+  flex-wrap: wrap;
+}
+.global-error-cta {
   padding: 7px 13px;
   font-size: 12px;
   font-weight: 500;

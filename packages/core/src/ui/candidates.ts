@@ -57,6 +57,8 @@ export interface CandidatesCallbacks {
   onInstallClick?: () => void;
   /** 用户点击单卡 ↻/Retry → 该 style 重新生成 */
   onRegenerate?: (style: Style) => void;
+  /** 用户点击 setGlobalError 弹出的整组 Retry → 重新走 3-style 改写 */
+  onRetryAll?: () => void;
   /** 用户点击右上角齿轮 → 打开设置（扩展 options 或 web /settings） */
   onOpenSettings?: () => void;
 }
@@ -439,6 +441,19 @@ function openPanel(
         errEl.appendChild(subEl);
       }
 
+      // 按钮容器：Retry（可重试错误）+ CTA（quota/unauthorized 引导登录），可同时存在
+      const btnRow = document.createElement('div');
+      btnRow.className = 'global-error-btn-row';
+
+      if (isRetryableError(code) && callbacks.onRetryAll) {
+        const retryBtn = document.createElement('button');
+        retryBtn.type = 'button';
+        retryBtn.className = 'global-error-cta';
+        retryBtn.textContent = t('core.retry', opts.locale);
+        retryBtn.addEventListener('click', () => callbacks.onRetryAll?.());
+        btnRow.appendChild(retryBtn);
+      }
+
       const ctaInfo = decideCTA(code, opts);
       if (ctaInfo) {
         const cta = document.createElement('button');
@@ -446,8 +461,10 @@ function openPanel(
         cta.className = 'global-error-cta';
         cta.textContent = ctaInfo.label;
         cta.addEventListener('click', ctaInfo.onClick);
-        errEl.appendChild(cta);
+        btnRow.appendChild(cta);
       }
+
+      if (btnRow.children.length > 0) errEl.appendChild(btnRow);
 
       panel.appendChild(errEl);
       // 重新定位（panel 高度变了）
@@ -468,6 +485,23 @@ function decideCTA(code: string, opts: OpenOptions): { label: string; onClick: (
     };
   }
   return null;
+}
+
+/**
+ * 判断错误码是否可重试。
+ * 不可重试：quota_exceeded（配额没了）/ unauthorized（要登录）/ invalid_input、
+ * input_too_long（用户输入问题）/ turnstile_failed（要重新人机校验）。
+ * 其余（upstream / network / timeout / rate_limit）都是临时性问题，可重试。
+ */
+function isRetryableError(code: string): boolean {
+  const nonRetryable = new Set([
+    'quota_exceeded',
+    'unauthorized',
+    'invalid_input',
+    'input_too_long',
+    'turnstile_failed',
+  ]);
+  return !nonRetryable.has(code);
 }
 
 function describeErrorDetail(

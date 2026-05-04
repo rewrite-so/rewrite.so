@@ -111,6 +111,9 @@ export function mount(opts: MountOptions): MountHandle {
     onRegenerate: (style) => {
       void regenerateOne(style);
     },
+    onRetryAll: () => {
+      void retryAll();
+    },
     ...(opts.onInstallClick ? { onInstallClick: opts.onInstallClick } : {}),
     ...(opts.onOpenSettings ? { onOpenSettings: opts.onOpenSettings } : {}),
   });
@@ -250,6 +253,25 @@ export function mount(opts: MountOptions): MountHandle {
     const ac = new AbortController();
     // 单卡 fatal → setError（错误卡仍可 Retry），不影响其它卡
     await runRewrite(req, ac, panel, (code) => panel.setError(style, code));
+  }
+
+  /**
+   * 整组 retry：用户在 setGlobalError 卡片上点 Retry → 关掉错误浮层 + 重新触发改写。
+   * 用 lockedEditable 而非 activeEditable，因为浮层期间用户可能切走焦点。
+   */
+  function retryAll(): void {
+    if (!lockedEditable) return;
+    // 把焦点 focus 回来 —— handleTrigger 依赖 activeEditable（focusin 监听同步触发）
+    try {
+      lockedEditable.focus({ preventScroll: true });
+    } catch {
+      /* 老浏览器无 preventScroll，忽略 */
+    }
+    // 关闭当前错误浮层，让 handleTrigger 创建新 panel + 重新跑首发流程
+    currentPanel?.close();
+    currentPanel = null;
+    abortAllInflight();
+    void handleTrigger();
   }
 
   function extractErrorCode(err: unknown): string {

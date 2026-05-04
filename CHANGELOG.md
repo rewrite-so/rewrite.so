@@ -18,6 +18,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 商业划分调整为 Pro = hosted model（2000/月）+ Priority；Free + BYOK = 自带 key 无限
   - 产品决策合理性：能配 BYOK 的人本来就是技术用户，他们 OpenAI key 在手要么直接用 ChatGPT
     要么找别家工具——锁 Pro 反消费者。Cursor/Continue/Raycast 都是登录即 BYOK
+- 修浮窗 setGlobalError 没有 Retry 按钮的 bug —— "Upstream model error, please retry"
+  文案让用户以为可重试，但浮窗只对 quota_exceeded / unauthorized 显示 CTA，对
+  upstream_error / rate_limit / network / internal_error 等可重试错误返 null →
+  用户卡死。修法：candidates.ts 加 `onRetryAll` callback + `isRetryableError()` helper；
+  setGlobalError 在可重试错误码上显示 Retry 按钮（与 Sign-in CTA 可同时存在）；
+  mount() 实现 retryAll：focus 回 lockedEditable + close + 重跑 handleTrigger。
+  candidates.test.ts +5 用例，core 86 → 91。
 - （CR follow-up）BYOK test endpoint 三处加固：
   - 加 rate limit `byokTest`（10 req/min/user，比生产 100 严格 10x）防 SSRF / DDoS
     amplification —— 用户能填任意 baseUrl 让 worker fetch，不限速时单账号可 burst 100 req

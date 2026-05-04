@@ -15,12 +15,14 @@ function setup() {
   const onInstallClick = vi.fn();
   const onRegenerate = vi.fn();
   const onOpenSettings = vi.fn();
+  const onRetryAll = vi.fn();
   const factory = createCandidates(root, {
     onSelect,
     onCancel,
     onInstallClick,
     onRegenerate,
     onOpenSettings,
+    onRetryAll,
   });
   const target = document.createElement('textarea');
   document.body.appendChild(target);
@@ -33,6 +35,7 @@ function setup() {
     onInstallClick,
     onRegenerate,
     onOpenSettings,
+    onRetryAll,
   };
 }
 
@@ -341,5 +344,60 @@ describe('createCandidates', () => {
     document.body.appendChild(target);
     factory.open({ target, locale: 'en', targetLang: 'en' });
     expect(shadowRoot.querySelector('.settings-btn')).toBeNull();
+  });
+
+  // ===== setGlobalError Retry =====
+
+  it('setGlobalError shows Retry button for retryable errors (upstream_error)', () => {
+    const { factory, target, root, onRetryAll } = setup();
+    const handle = factory.open({ target, locale: 'en', targetLang: 'en' });
+    handle.setGlobalError('upstream_error');
+    const btn = root.querySelector('.global-error-cta') as HTMLButtonElement;
+    expect(btn).not.toBeNull();
+    expect(btn.textContent).toBe('Retry');
+    btn.click();
+    expect(onRetryAll).toHaveBeenCalledTimes(1);
+  });
+
+  it('setGlobalError shows Retry for upstream_timeout / rate_limit / network', () => {
+    for (const code of ['upstream_timeout', 'rate_limit', 'internal_error']) {
+      const { factory, target, root } = setup();
+      const handle = factory.open({ target, locale: 'en', targetLang: 'en' });
+      handle.setGlobalError(code);
+      const btn = root.querySelector('.global-error-cta') as HTMLButtonElement;
+      expect(btn?.textContent).toBe('Retry');
+    }
+  });
+
+  it('setGlobalError does NOT show Retry for non-retryable errors (quota_exceeded)', () => {
+    const { factory, target, root } = setup();
+    const handle = factory.open({ target, locale: 'en', targetLang: 'en', loginUrl: '/login' });
+    handle.setGlobalError('quota_exceeded');
+    const buttons = root.querySelectorAll('.global-error-cta');
+    expect(buttons.length).toBe(1); // 只有 "Sign in for more" CTA
+    expect(buttons[0]?.textContent).toContain('Sign in');
+  });
+
+  it('setGlobalError shows BOTH Retry + Sign-in for unauthorized when loginUrl present', () => {
+    const { factory, target, root } = setup();
+    const handle = factory.open({ target, locale: 'en', targetLang: 'en', loginUrl: '/login' });
+    handle.setGlobalError('unauthorized');
+    const buttons = root.querySelectorAll('.global-error-cta');
+    // unauthorized 不可重试 —— 只有 Sign-in CTA
+    expect(buttons.length).toBe(1);
+    expect(buttons[0]?.textContent).toContain('Sign in');
+  });
+
+  it('setGlobalError without onRetryAll callback shows no button (graceful degrade)', () => {
+    const { root: shadowRoot } = createShadowRoot('open');
+    const factory = createCandidates(shadowRoot, {
+      onSelect: vi.fn(),
+      onCancel: vi.fn(),
+    });
+    const target = document.createElement('textarea');
+    document.body.appendChild(target);
+    const handle = factory.open({ target, locale: 'en', targetLang: 'en' });
+    handle.setGlobalError('upstream_error');
+    expect(shadowRoot.querySelector('.global-error-cta')).toBeNull();
   });
 });
