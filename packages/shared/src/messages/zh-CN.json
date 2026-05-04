@@ -53,7 +53,9 @@
     "try": {
       "h1": "试用",
       "intro": "在下面输入框写点什么，然后双击 Shift 看 3 种风格改写。",
-      "targetLangLabel": "改写为"
+      "targetLangLabel": "改写为",
+      "nudge": "已完成 {count, number} 次改写。",
+      "nudgeCta": "登录解锁每月 {signupQuota, number} 次 →"
     },
     "unsubscribe": {
       "h1": "退订",

@@ -53,7 +53,9 @@
     "try": {
       "h1": "Essayer",
       "intro": "Écrivez quelque chose dans la boîte ci-dessous, puis double-tapez Shift pour voir 3 réécritures de style.",
-      "targetLangLabel": "Réécrire en"
+      "targetLangLabel": "Réécrire en",
+      "nudge": "{count, plural, one {# réécriture effectuée} other {# réécritures effectuées}}.",
+      "nudgeCta": "Connectez-vous pour {signupQuota, number} / mois →"
     },
     "unsubscribe": {
       "h1": "Désabonnement",

@@ -53,7 +53,9 @@
     "try": {
       "h1": "試す",
       "intro": "下のボックスに何か書いて、Shift をダブルタップで 3 スタイルの書き換えを見てください。",
-      "targetLangLabel": "書き換え先"
+      "targetLangLabel": "書き換え先",
+      "nudge": "{count, number} 回の書き換えが完了。",
+      "nudgeCta": "ログインで毎月 {signupQuota, number} 回 →"
     },
     "unsubscribe": {
       "h1": "配信停止",

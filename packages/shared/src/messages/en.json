@@ -53,7 +53,9 @@
     "try": {
       "h1": "Try it",
       "intro": "Write something in the box below, then double-tap Shift to see 3 style rewrites.",
-      "targetLangLabel": "Rewrite into"
+      "targetLangLabel": "Rewrite into",
+      "nudge": "{count, plural, one {# rewrite} other {# rewrites}} done.",
+      "nudgeCta": "Sign in for {signupQuota, number} / month →"
     },
     "unsubscribe": {
       "h1": "Unsubscribe",

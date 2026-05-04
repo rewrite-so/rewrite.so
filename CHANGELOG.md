@@ -8,6 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **/try 完成改写后转化 nudge**（来自战略 review 的 WS1 — 当前最大转化断点）：
+  - 用户接受候选后 textarea 下方 inline 显示 "✓ N rewrites done. Sign in for 30/month →"
+  - 计数持久化到 localStorage `__rewrite_so_try_rewrites_v1`，跨 session 累积
+  - 已登录用户不显示（启动时 probe `/v1/me`）；authed 用三态 null/true/false
+    避免登录用户在 fetch 期间闪现 nudge
+  - 不打断键盘流畅 + 不带 dismiss 按钮（信息型而非打扰型）
+  - `mount()` MountOptions 加 `onAccepted` 可选 callback；扩展端不实现也 OK
+    （扩展用户已过 anonymous 阶段）。**不传 finalText**——隐私契约禁止原文流入
+    host telemetry
+  - i18n: `page.try.nudge` + `page.try.nudgeCta` × 7 locale = 14 字符串，含
+    ICU plural（en/es/fr/de 处理单复数；中日韩无 plural 形式可省）。
+    379 → 381 keys
+  - WS2 加 Plus 中间档（$4.99/mo, 200/月）讨论后**推迟**——MVP 阶段加 SKU 是
+    技术债，没数据支持中间档需求，且 Plus 必然蚕食 Pro。先等用户量与反馈
 - **设置 + Onboarding 反馈缺口打磨**（来自第四轮"梳理设置/onboarding 关系"分析的 G1/G3/G5）：
   - web /settings 顶部加一次性 WelcomeCard（蓝色，新登录用户引导，2 按钮：去 /try /
     安装扩展）。dismiss 后写 localStorage `__rewrite_so_settings_welcome_dismissed_v1`

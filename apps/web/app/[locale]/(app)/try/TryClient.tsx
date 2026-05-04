@@ -3,18 +3,23 @@
 import { createWebApiClient, mount } from '@rewrite/core';
 import {
   type Locale,
+  QUOTA,
   REWRITE_TARGET_LABELS,
   REWRITE_TARGETS,
   type RewriteTarget,
 } from '@rewrite/shared';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
+import { Link } from '../../../../i18n/navigation.ts';
 
 // 留空让 fetch 走 same-origin（Next rewrites 代理到 wrangler dev）
 // 这样 better-auth session cookie 是 web origin 的，不需跨域
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? '';
 
 const TARGET_LANG_STORAGE = 'rewrite-so-try-target-lang-v1';
+// /try 上累计的成功改写次数，跨 session 持久化。仅匿名用户用作转化 nudge
+// 触发条件——已登录用户 fetch /v1/me 后隐藏。
+const REWRITES_KEY = '__rewrite_so_try_rewrites_v1';
 
 export function TryClient() {
   const locale = useLocale() as Locale;
@@ -24,12 +29,28 @@ export function TryClient() {
   // 试用页**始终默认英语**作为目标——不用 auto。
   // 用户切换的偏好持久到 localStorage（仅影响 /try，不影响登录用户的 settings）。
   const [targetLang, setTargetLang] = useState<RewriteTarget>('en');
+  // 转化 nudge 状态：rewriteCount 来自 localStorage 持久；authed 三态
+  // （null=fetching / true=登录 / false=匿名）—— 仅 false 时显示 nudge，
+  // 避免登录用户在 /v1/me 探测期间闪现错误的 "sign in"
+  const [rewriteCount, setRewriteCount] = useState(0);
+  const [authed, setAuthed] = useState<boolean | null>(null);
 
   useEffect(() => {
     const stored = window.localStorage.getItem(TARGET_LANG_STORAGE);
     if (stored && (REWRITE_TARGETS as readonly string[]).includes(stored)) {
       setTargetLang(stored as RewriteTarget);
     }
+    // 读累计计数 + 探测登录态
+    try {
+      const n = Number(window.localStorage.getItem(REWRITES_KEY) ?? 0);
+      if (Number.isFinite(n) && n > 0) setRewriteCount(n);
+    } catch {
+      /* localStorage 不可用 */
+    }
+    fetch('/v1/me', { credentials: 'include' })
+      .then((r) => r.json())
+      .then((d: { user: unknown }) => setAuthed(d?.user != null))
+      .catch(() => setAuthed(false));
   }, []);
 
   useEffect(() => {
@@ -55,6 +76,20 @@ export function TryClient() {
       },
       onError: (err) => {
         console.warn('[rewrite.so]', err);
+      },
+      // 用户接受候选改写后递增计数（持久化到 localStorage）。
+      // 触发"登录解锁更多"nudge 显示。仅在 onSelect 真正成功（panel close +
+      // editable 替换）后才 fire，所以 abort / Esc / 失败的改写不会算
+      onAccepted: () => {
+        setRewriteCount((n) => {
+          const next = n + 1;
+          try {
+            window.localStorage.setItem(REWRITES_KEY, String(next));
+          } catch {
+            /* ignore */
+          }
+          return next;
+        });
       },
     });
     return () => handle.unmount();
@@ -184,6 +219,33 @@ export function TryClient() {
           {t('hint.doubleShift')}
         </div>
       )}
+      {rewriteCount > 0 && authed === false && <TryNudge count={rewriteCount} />}
     </div>
+  );
+}
+
+function TryNudge({ count }: { count: number }) {
+  const t = useTranslations('page.try');
+  return (
+    <p
+      role="status"
+      style={{
+        marginTop: 14,
+        fontSize: 13,
+        color: '#666',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 6,
+        flexWrap: 'wrap',
+      }}
+    >
+      <span style={{ color: '#16a34a', fontWeight: 600 }} aria-hidden="true">
+        ✓
+      </span>
+      {t('nudge', { count })}{' '}
+      <Link href="/login" style={{ color: '#1d4ed8', textDecoration: 'underline' }}>
+        {t('nudgeCta', { signupQuota: QUOTA.loggedInFree })}
+      </Link>
+    </p>
   );
 }

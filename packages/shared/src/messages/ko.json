@@ -53,7 +53,9 @@
     "try": {
       "h1": "체험",
       "intro": "아래 상자에 무언가 입력하고, Shift를 두 번 눌러 3가지 스타일의 재작성을 확인하세요.",
-      "targetLangLabel": "재작성 언어"
+      "targetLangLabel": "재작성 언어",
+      "nudge": "재작성 {count, number}회 완료.",
+      "nudgeCta": "로그인하면 매월 {signupQuota, number}회 →"
     },
     "unsubscribe": {
       "h1": "구독 취소",

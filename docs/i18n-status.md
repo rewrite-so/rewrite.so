@@ -19,6 +19,8 @@
 **最近未审 keys**（按 commit 排，给 reviewer 提示重点）：
 - `page.settings.welcomeCard.*` / `page.settings.upgradeBanner.*` /
   `ext.onboarding.step2.customHint` — 第四轮 UX 打磨加入（ja/ko/es/fr/de 5 个 locale 待校）
+- `page.try.nudge` / `page.try.nudgeCta` — /try 完成改写后转化 nudge（含 ICU plural；
+  ja/ko/es/fr/de 待校；es/fr 用 plural 形式，de 用统一 "# Rewrites" 不变）
 
 ## 流程约定
 

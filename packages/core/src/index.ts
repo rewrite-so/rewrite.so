@@ -42,6 +42,15 @@ export interface MountOptions {
    * web 端不需要实现（user_settings 是 web 这边的源头）。
    */
   onUserPrefsSync?: (prefs: { targetLang: string }) => void;
+  /**
+   * 用户接受了某个候选改写后调用（panel close、editable 替换之后）。
+   * 给 host 一个统计/转化埋点（如 web /try 用 onAccepted 累计匿名用户成功
+   * 改写次数，触发"登录解锁更多"引导）。可选，扩展端不需实现。
+   *
+   * **不传 finalText** —— 隐私契约（CLAUDE.md "完全不记录原文"）禁止原文
+   * 流入 host telemetry。仅传 style 让 host 知道"用户接受了哪种风格"。
+   */
+  onAccepted?: (style: Style) => void;
   onError?: (e: Error) => void;
 }
 
@@ -107,8 +116,10 @@ export function mount(opts: MountOptions): MountHandle {
       currentPanel = null;
       lockedEditable = null;
       abortAllInflight();
-      // 标识 style 已使用（暂留分析用）
-      void style;
+      // 通知 host 用户接受了改写（onAccepted optional；扩展不实现）。
+      // 必须在 replaceEditable 成功之后—— !target early return 或替换 throw 时
+      // 不应触发 "accepted" 事件
+      opts.onAccepted?.(style);
     },
     onCancel: () => {
       currentPanel?.close();

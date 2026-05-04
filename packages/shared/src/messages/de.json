@@ -53,7 +53,9 @@
     "try": {
       "h1": "Testen",
       "intro": "Schreibe etwas in das Feld unten und drücke Shift doppelt, um 3 Stil-Umschreibungen zu sehen.",
-      "targetLangLabel": "Umschreiben in"
+      "targetLangLabel": "Umschreiben in",
+      "nudge": "{count, plural, one {# Rewrite} other {# Rewrites}} fertig.",
+      "nudgeCta": "Anmelden für {signupQuota, number} / Monat →"
     },
     "unsubscribe": {
       "h1": "Abmelden",
