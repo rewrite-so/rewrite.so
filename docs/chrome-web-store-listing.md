@@ -71,7 +71,7 @@ Privacy Policy: https://rewrite.so/privacy
 
 ### Item name
 
-rewrite.so — 双击 Shift 即时改写
+rewrite.so — 随意写，自信发送
 
 ### Short description
 

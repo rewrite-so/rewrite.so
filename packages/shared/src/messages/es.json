@@ -1,14 +1,14 @@
 {
   "meta": {
     "home": {
-      "title": "rewrite.so — Doble Shift para reescribir",
+      "title": "rewrite.so — Escribe con libertad. Envía con confianza.",
       "description": "Motor de reescritura con IA a nivel de campo de entrada. 3 estilos, solo teclado, sin interrumpir tu flujo."
     },
     "login": {
       "title": "Iniciar sesión — rewrite.so"
     },
     "try": {
-      "title": "Prueba rewrite.so — Doble Shift para reescribir"
+      "title": "Prueba rewrite.so — Escribe con libertad. Envía con confianza."
     },
     "settings": {
       "title": "Configuración — rewrite.so"
@@ -287,7 +287,7 @@
     "languageSwitcher": "Idioma"
   },
   "footer": {
-    "tagline": "Doble Shift, reescritura con IA al instante en campos compatibles.",
+    "tagline": "Escribe con libertad. Envía con confianza.",
     "heading": {
       "product": "Producto",
       "account": "Cuenta",
@@ -477,7 +477,7 @@
   },
   "ext": {
     "popup": {
-      "tagline": "Doble Shift Shift en campos compatibles.",
+      "tagline": "Escribe con libertad. Envía con confianza.",
       "usageError": "Error al cargar la cuota:",
       "loading": "Cargando…",
       "remainingThisMonth": "restantes este mes",

@@ -1,14 +1,14 @@
 {
   "meta": {
     "home": {
-      "title": "rewrite.so — Shift Shift で書き換え",
+      "title": "rewrite.so — 気楽に書いて、自信を持って送る",
       "description": "入力欄レベルの AI 書き換えエンジン。3 つのスタイル、キーボードのみ、書く流れを妨げません。"
     },
     "login": {
       "title": "ログイン — rewrite.so"
     },
     "try": {
-      "title": "rewrite.so を試す — Shift Shift で書き換え"
+      "title": "rewrite.so を試す — 気楽に書いて、自信を持って送る"
     },
     "settings": {
       "title": "設定 — rewrite.so"
@@ -287,7 +287,7 @@
     "languageSwitcher": "言語"
   },
   "footer": {
-    "tagline": "Shift Shift で、対応している入力欄を瞬時に AI 書き換え。",
+    "tagline": "気楽に書いて、自信を持って送る。",
     "heading": {
       "product": "プロダクト",
       "account": "アカウント",
@@ -477,7 +477,7 @@
   },
   "ext": {
     "popup": {
-      "tagline": "対応している入力欄で Shift Shift をダブルタップ。",
+      "tagline": "気楽に書いて、自信を持って送る。",
       "usageError": "クォータの読み込みに失敗しました:",
       "loading": "読み込み中…",
       "remainingThisMonth": "今月の残り",

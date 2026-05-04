@@ -1,14 +1,14 @@
 {
   "meta": {
     "home": {
-      "title": "rewrite.so — Shift Shift로 다시 쓰기",
+      "title": "rewrite.so — 자유롭게 쓰고, 자신 있게 보내세요",
       "description": "입력란 수준 AI 재작성 엔진. 3가지 스타일, 키보드만, 작업 흐름을 끊지 않습니다."
     },
     "login": {
       "title": "로그인 — rewrite.so"
     },
     "try": {
-      "title": "rewrite.so 체험 — Shift Shift로 다시 쓰기"
+      "title": "rewrite.so 체험 — 자유롭게 쓰고, 자신 있게 보내세요"
     },
     "settings": {
       "title": "설정 — rewrite.so"
@@ -287,7 +287,7 @@
     "languageSwitcher": "언어"
   },
   "footer": {
-    "tagline": "Shift Shift만 누르면 지원되는 입력란에서 즉시 AI 재작성.",
+    "tagline": "자유롭게 쓰고, 자신 있게 보내세요.",
     "heading": {
       "product": "제품",
       "account": "계정",
@@ -477,7 +477,7 @@
   },
   "ext": {
     "popup": {
-      "tagline": "지원되는 입력란에서 Shift Shift을 두 번 누르세요.",
+      "tagline": "자유롭게 쓰고, 자신 있게 보내세요.",
       "usageError": "할당량 로딩 실패:",
       "loading": "로딩 중…",
       "remainingThisMonth": "이번 달 남은 횟수",
