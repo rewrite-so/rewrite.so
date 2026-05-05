@@ -22,7 +22,7 @@ import { sanitizeTargetLang } from '../lib/sanitize-target-lang.ts';
 import { muxToSSE } from '../lib/sse.ts';
 import { stripThinking } from '../lib/strip-thinking.ts';
 import { verifyTurnstile } from '../lib/turnstile.ts';
-import { streamCompletion } from '../lib/upstream.ts';
+import { streamCompletion, type UpstreamConfig } from '../lib/upstream.ts';
 import type { AppEnv } from '../types.ts';
 
 interface ByokConfigRow {
@@ -170,7 +170,7 @@ rewriteRoute.post('/v1/rewrite', async (c) => {
 
   // ===== 上游配置 =====
   // BYOK 用户用自己的 base_url/key/model；其他用户走平台默认
-  let upstreamConfig: { baseUrl: string; apiKey: string; model: string };
+  let upstreamConfig: UpstreamConfig;
   if (byokConfig) {
     let plainKey: string;
     try {
@@ -195,7 +195,12 @@ rewriteRoute.post('/v1/rewrite', async (c) => {
     if (!baseUrl || !apiKey || !model) {
       return c.json({ error: 'upstream_not_configured' }, 503);
     }
-    upstreamConfig = { baseUrl, apiKey, model };
+    upstreamConfig = {
+      baseUrl,
+      apiKey,
+      model,
+      extraBody: { thinking: { type: 'disabled' } },
+    };
   }
 
   // ===== 服务端目标语言判定 =====
