@@ -405,6 +405,91 @@ describe('POST /v1/rewrite', () => {
     expect(meta.data.status?.limit).toBeUndefined();
   });
 
+  it('platform upstream injects thinking-disabled into request body', async () => {
+    let capturedBody: Record<string, unknown> | null = null;
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
+      // 仅认上游 chat/completions 请求；DO 等其它 fetch 走 mock 的默认实现不会进这里
+      if (String(input).includes('upstream.test')) {
+        capturedBody = JSON.parse(String(init?.body ?? '{}')) as Record<string, unknown>;
+      }
+      return makeUpstreamSSE('ok');
+    });
+
+    const res = await app.request(
+      '/v1/rewrite',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          text: 'hi',
+          hasSelection: false,
+          lang: 'en',
+          styles: ['faithful'],
+        }),
+      },
+      MOCK_ENV,
+    );
+
+    expect(res.status).toBe(200);
+    expect(capturedBody).not.toBeNull();
+    expect(capturedBody).toMatchObject({
+      model: 'gpt-4o-mini',
+      thinking: { type: 'disabled' },
+    });
+  });
+
+  it('BYOK upstream does NOT inject thinking-disabled (vendor-neutral passthrough)', async () => {
+    mockAuthState.session = { user: { id: 'user-byok' } };
+    let capturedBody: Record<string, unknown> | null = null;
+
+    const byokDB = {
+      prepare: (sql: string) => ({
+        bind: (..._args: unknown[]) => ({
+          first: async () => {
+            if (sql.includes('FROM byok_keys')) {
+              return {
+                base_url: 'https://byok-provider.test/v1',
+                model: 'custom-model',
+                encrypted_api_key: 'encrypted',
+                iv: 'iv',
+              };
+            }
+            return null;
+          },
+          run: async () => ({ success: true }),
+          all: async () => ({ results: [], success: true }),
+        }),
+      }),
+    } as unknown as D1Database;
+
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
+      if (String(input).includes('byok-provider.test')) {
+        capturedBody = JSON.parse(String(init?.body ?? '{}')) as Record<string, unknown>;
+      }
+      return makeUpstreamSSE('ok');
+    });
+
+    const res = await app.request(
+      '/v1/rewrite',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          text: 'hi',
+          hasSelection: false,
+          lang: 'en',
+          styles: ['faithful'],
+        }),
+      },
+      { ...MOCK_ENV, DB: byokDB },
+    );
+
+    expect(res.status).toBe(200);
+    expect(capturedBody).not.toBeNull();
+    expect(capturedBody).toMatchObject({ model: 'custom-model' });
+    expect(capturedBody).not.toHaveProperty('thinking');
+  });
+
   it('requires Turnstile token for anonymous web requests when secret is configured', async () => {
     const res = await app.request(
       '/v1/rewrite',
