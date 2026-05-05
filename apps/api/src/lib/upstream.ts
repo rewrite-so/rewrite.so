@@ -7,6 +7,9 @@ import type { ChatMessage } from '@rewrite/prompts';
  * - 仅认 `choices[0].delta.content`
  * - 不为 vendor 自创字段做兼容层；BYOK 用户自担
  * - 必须支持 AbortSignal 链式：客户端断开时立即取消上游 fetch
+ *
+ * `extraBody` 仅平台默认 upstream 注入 vendor-specific 字段（如 DeepSeek 的 `thinking`）。
+ * BYOK 路径不传，避免污染用户自配的其他 vendor。spread 时置前，确保不会覆盖核心 4 字段。
  */
 
 export interface UpstreamConfig {
@@ -14,6 +17,7 @@ export interface UpstreamConfig {
   apiKey: string;
   model: string;
   timeoutMs?: number;
+  extraBody?: Record<string, unknown>;
 }
 
 export class UpstreamError extends Error {
@@ -62,6 +66,7 @@ export async function* streamCompletion(
         authorization: `Bearer ${config.apiKey}`,
       },
       body: JSON.stringify({
+        ...(config.extraBody ?? {}),
         model: config.model,
         messages,
         stream: true,
