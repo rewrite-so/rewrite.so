@@ -137,7 +137,12 @@ describe('streamCompletion — happy path', () => {
         baseUrl: 'https://api.test/v1',
         apiKey: 'k',
         model: 'real-model',
-        extraBody: { model: 'evil', stream: false, temperature: 99, thinking: { type: 'disabled' } },
+        extraBody: {
+          model: 'evil',
+          stream: false,
+          temperature: 99,
+          thinking: { type: 'disabled' },
+        },
       },
       [{ role: 'user', content: 'hi' }],
       new AbortController().signal,
