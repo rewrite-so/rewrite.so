@@ -11,8 +11,8 @@ BYOK is configured:
 
 A standard **OpenAI-compatible Chat Completions** endpoint:
 
-- An HTTPS base URL (e.g. `https://api.openai.com/v1`, `https://api.deepseek.com`, your self-hosted vLLM, etc.).
-- A model name (e.g. `gpt-4o-mini`, `claude-3-5-sonnet-20241022`).
+- An HTTPS base URL (e.g. `https://api.deepseek.com/v1`, `https://api.openai.com/v1`, your self-hosted vLLM, etc.).
+- A model name (e.g. `deepseek-v4-flash`, `gpt-4o-mini`).
 - An API key your provider issued.
 
 Your provider must implement:

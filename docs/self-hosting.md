@@ -61,9 +61,9 @@ Set Worker secrets via `wrangler secret put`:
 
 ```bash
 # In apps/api/
-wrangler secret put OPENAI_BASE_URL          # https://api.openai.com/v1 (or your provider)
+wrangler secret put OPENAI_BASE_URL          # https://api.deepseek.com/v1 (or any OpenAI-compatible endpoint)
 wrangler secret put OPENAI_API_KEY            # your provider key
-wrangler secret put OPENAI_MODEL              # e.g. gpt-4o-mini
+wrangler secret put OPENAI_MODEL              # e.g. deepseek-v4-flash, gpt-4o-mini
 wrangler secret put BYOK_MASTER_KEY           # base64(openssl rand 32)
 wrangler secret put BETTER_AUTH_SECRET        # any 32+ char random string
 wrangler secret put BETTER_AUTH_URL           # https://api.yourname.com

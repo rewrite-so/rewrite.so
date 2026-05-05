@@ -73,6 +73,14 @@
   `service-worker.ts` 的 extras 解析、`port-client.ts` 的 detailObj 重建。
   避免再起额外请求（如 `/v1/me`）来拿这些状态——0 额外网络往返。
 - **上游协议严格 OpenAI Chat Completions SSE**：仅认 `choices[0].delta.content`，不为 vendor 自创字段做兼容层。BYOK 用户用其它 vendor 自担兼容性。
+- **平台默认 upstream = DeepSeek V4-Flash + thinking disabled**：`apps/api/src/routes/rewrite.ts`
+  平台路径通过 `UpstreamConfig.extraBody` 注入 `{ thinking: { type: 'disabled' } }`。原因：
+  V4-Flash 默认 thinking enabled，思考链通过 SSE delta 的 `reasoning_content` 单独返回——
+  `upstream.ts` 只读 `content` 不会污染输出，但 reasoning token 计费 + 首字延迟 +1-3s，改写
+  场景不需要。**BYOK 路径不注入**（用户可能配 OpenAI / Anthropic / 其它 vendor，强塞
+  deepseek-only 字段会破坏兼容性）。`UpstreamConfig.extraBody` 在 body spread 时**置前**，
+  确保不会覆盖核心 4 字段（model / messages / stream / temperature）。变量名仍叫
+  `OPENAI_*` 是因为表达的是协议族不是 vendor。
 - **D1 不支持 RETURNING * 的全部场景**：用先 `INSERT` 后 `SELECT by id`，不要假设 RETURNING 总能用。
 - **drizzle 仅给 better-auth 4 张表用**：业务表保持裸 SQL，这是"D1 不用 ORM"原则的唯一例外。不要顺手把业务表也搬到 drizzle。
 - **D1 不用 ORM 迁移工具**：手写 `migrations/NNNN_xxx.sql`，文件名严格按 4 位数字编号。
@@ -260,6 +268,6 @@
 
 ## 环境变量
 
-`OPENAI_BASE_URL` / `OPENAI_API_KEY` / `OPENAI_MODEL`（**无内置默认值**）/ `BYOK_MASTER_KEY` / `CREEM_*` / `RESEND_API_KEY` / `GOOGLE_OAUTH_*` / `TURNSTILE_*` / `BETTER_AUTH_*` / `NEXT_PUBLIC_SITE_ORIGIN`（i18n hreflang/sitemap 绝对 URL，默认 `https://rewrite.so`）。
+`OPENAI_BASE_URL` / `OPENAI_API_KEY` / `OPENAI_MODEL`（代码无内置默认 fallback——三个变量缺一就 503；文档推荐默认值 `https://api.deepseek.com/v1` + `deepseek-v4-flash`）/ `BYOK_MASTER_KEY` / `CREEM_*` / `RESEND_API_KEY` / `GOOGLE_OAUTH_*` / `TURNSTILE_*` / `BETTER_AUTH_*` / `NEXT_PUBLIC_SITE_ORIGIN`（i18n hreflang/sitemap 绝对 URL，默认 `https://rewrite.so`）。
 
 详见 `.env.example`。

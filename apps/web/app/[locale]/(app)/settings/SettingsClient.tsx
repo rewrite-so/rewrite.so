@@ -689,13 +689,13 @@ function ByokSection({
             label={t('baseUrl')}
             value={baseUrl}
             onChange={withTestReset(setBaseUrl)}
-            placeholder="https://api.openai.com/v1"
+            placeholder="https://api.deepseek.com/v1"
           />
           <Field
             label={t('model')}
             value={model}
             onChange={withTestReset(setModel)}
-            placeholder="gpt-4o-mini"
+            placeholder="deepseek-v4-flash"
           />
           <Field
             label={t('apiKey')}

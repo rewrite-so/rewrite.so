@@ -99,6 +99,79 @@ describe('streamCompletion — happy path', () => {
         { role: 'user', content: 'u' },
       ],
     });
+    // 未传 extraBody 时 body 不应含任何 vendor-specific 字段
+    expect(body).not.toHaveProperty('thinking');
+  });
+
+  it('merges extraBody into request body (e.g. DeepSeek thinking flag)', async () => {
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(mockSSEResponse(['data: [DONE]\n\n']));
+    const iter = streamCompletion(
+      {
+        baseUrl: 'https://api.test/v1',
+        apiKey: 'k',
+        model: 'deepseek-v4-flash',
+        extraBody: { thinking: { type: 'disabled' } },
+      },
+      [{ role: 'user', content: 'hi' }],
+      new AbortController().signal,
+    );
+    for await (const _ of iter) void _;
+
+    const [, init] = fetchSpy.mock.calls[0] ?? [];
+    const body = JSON.parse((init as RequestInit).body as string);
+    expect(body).toMatchObject({
+      model: 'deepseek-v4-flash',
+      stream: true,
+      thinking: { type: 'disabled' },
+    });
+  });
+
+  it('extraBody cannot override core fields (model / stream / temperature)', async () => {
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(mockSSEResponse(['data: [DONE]\n\n']));
+    const iter = streamCompletion(
+      {
+        baseUrl: 'https://api.test/v1',
+        apiKey: 'k',
+        model: 'real-model',
+        extraBody: {
+          model: 'evil',
+          stream: false,
+          temperature: 99,
+          thinking: { type: 'disabled' },
+        },
+      },
+      [{ role: 'user', content: 'hi' }],
+      new AbortController().signal,
+    );
+    for await (const _ of iter) void _;
+
+    const [, init] = fetchSpy.mock.calls[0] ?? [];
+    const body = JSON.parse((init as RequestInit).body as string);
+    expect(body.model).toBe('real-model');
+    expect(body.stream).toBe(true);
+    expect(body.temperature).toBe(0.7);
+    // 非核心字段照常合并
+    expect(body.thinking).toEqual({ type: 'disabled' });
+  });
+
+  it('treats empty extraBody as undefined (no extra keys)', async () => {
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(mockSSEResponse(['data: [DONE]\n\n']));
+    const iter = streamCompletion(
+      { baseUrl: 'https://api.test/v1', apiKey: 'k', model: 'm', extraBody: {} },
+      [{ role: 'user', content: 'hi' }],
+      new AbortController().signal,
+    );
+    for await (const _ of iter) void _;
+
+    const [, init] = fetchSpy.mock.calls[0] ?? [];
+    const body = JSON.parse((init as RequestInit).body as string);
+    expect(Object.keys(body).sort()).toEqual(['messages', 'model', 'stream', 'temperature']);
   });
 });
 
