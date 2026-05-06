@@ -173,6 +173,26 @@
 
 ## 基础设施
 
+- **扩展身份信任 = `EXTENSION_ALLOWED_ORIGINS` 白名单**（`apps/api/src/lib/extension-origin.ts`）：
+  生产 API 仅信任白名单里的 `chrome-extension://<id>` origin 发起的扩展请求；不在白名单
+  → 403 invalid_client（`apps/api/src/routes/rewrite.ts` 的 `isExtensionRewriteRequest`）。
+  本地 wrangler dev 走 isLocalApi 路径放行任意扩展 origin（unpacked 调试用）。
+  
+  **本地 unpacked 装的扩展打到生产 API 必须有稳定 ID**：`apps/extension/src/manifest.config.ts`
+  在非 store 构建时注入 `DEV_PUBLIC_KEY`（私钥见 `apps/extension/.dev-keys/dev.pem`，
+  gitignore），固定本地 unpacked ID = `nfjhbfpolpfddniebgjnfpmndpcpaadg`，已在
+  `EXTENSION_ALLOWED_ORIGINS` 中与 store ID 共存。
+  
+  **Store 上架构建必须置 `EXT_STORE_BUILD=1`**：跳过 manifest.key 注入，让 Chrome Web
+  Store 沿用其分配的 publisher key（保留现有 ID `gheiendipgcgiligfmbimbbffkkfiamk`）。
+  release workflow `.github/workflows/release-extension.yml` 已配置该 env，正常 `ext-v*`
+  tag 触发的发布走 CI 是安全的。**手动上架场景**（如绕开 CI 直接拖 zip 到 store
+  console）必须本地显式 `EXT_STORE_BUILD=1 pnpm --filter @rewrite/extension package`。
+  漏设会让带 dev key 的 zip 被 store 拒收（"Manifest key does not match existing item"），
+  不会覆盖线上版，但需要删 release/重跑修复。
+  
+  新增协作者要本地测试需各自生成 dev key + 把 ID 加到 `EXTENSION_ALLOWED_ORIGINS`，
+  或共享同一份 dev key（私钥须经安全渠道传递，不入仓库）。
 - **Cloudflare Workers Paid plan（$5/月）必须**：Free 不支持 Durable Objects，且 CPU > 10ms 会被切。这是开发前置假设。
 - **OpenNext 部署目标是 Workers，不是 Pages**：2025 起 Pages 进入维护，新功能只进 Workers Static Assets。`wrangler.toml` 中 `assets.directory = ".open-next/assets"`。
 - **DO 名字 `ip:<sha256(ip + daily_salt)>`**：salt 每天轮换，避免 IP 跨天关联（GDPR 风险）。
