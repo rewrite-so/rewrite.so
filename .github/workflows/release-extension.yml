@@ -41,6 +41,11 @@ jobs:
         env:
           VITE_API_BASE: https://api.rewrite.so
           VITE_WEB_BASE: https://rewrite.so
+          # 跳过 manifest.key 注入：让 Chrome Web Store 沿用 publisher key
+          # （上架版扩展 ID 不变）。漏设此 env 会导致 zip 带 dev key，
+          # store 上传时被拒 "Manifest key does not match existing item"。
+          # 见 apps/extension/src/manifest.config.ts。
+          EXT_STORE_BUILD: '1'
         run: pnpm build
 
       - name: Compute version label

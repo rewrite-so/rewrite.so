@@ -1,15 +1,27 @@
 import { defineManifest } from '@crxjs/vite-plugin';
 import pkg from '../package.json' with { type: 'json' };
 
-declare const process: { env?: { NODE_ENV?: string } };
+declare const process: { env?: { NODE_ENV?: string; EXT_STORE_BUILD?: string } };
 
 const isProduction = process.env?.NODE_ENV === 'production';
+// 任何走 vite build 的扩展构建（pnpm build / pnpm package / CI）默认注入 dev key，
+// 让本地 unpacked 安装拿到稳定 ID 用于联调/测试。store 上架必须显式置 EXT_STORE_BUILD=1
+// 跳过 key 注入，让 Chrome Web Store 沿用 publisher key（上架 ID 不变）。release workflow
+// `.github/workflows/release-extension.yml` 已配置该 env；手动上架才需要本地显式 export。
+const isStoreBuild = process.env?.EXT_STORE_BUILD === '1';
 
 // 开发期 wrangler dev API endpoint，生产包不带（Chrome 商店最小权限审查）。
 const devHostPermissions = ['http://localhost:8787/*', 'http://127.0.0.1:8787/*'];
 
+// dev public key（DER, base64）。对应 ID: nfjhbfpolpfddniebgjnfpmndpcpaadg
+// 私钥见 apps/extension/.dev-keys/dev.pem（不入仓库；丢失需重新生成 key + 更新这里 +
+// 更新 wrangler.toml 的 EXTENSION_ALLOWED_ORIGINS）。
+const DEV_PUBLIC_KEY =
+  'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoDF7P+J2Nz5oBuRzHO6MUGwYkg1EQ4GmuCzgyOQ9LN9SOF4lONdgCSB54CMlP2wI8iiglzXvZoy0SBtm5TudxncVxbtUpcD68hXAba43TELKFiv1+EwuaGW0hGJJddUBZkaPx2AXQtsfa/LCaI/fWPAkwQtjw26gcfM0kZiq5MoC+QP5Sy/G/1+eovuGNz0Gs3iiB/eodQUihkmSH+9AitO5vSAPbCJPjv+pHIbVLbkv8a4y8Vbykh0A+YryQG3IG5Z04cKdkOOOx0WBrN0jU6w5oOyIIqFxcDbYq3s8TsB3JhL/ltkJtfT6V2vZU543msg+ZAvgGZ0Nre/IUQ8IOwIDAQAB';
+
 export default defineManifest({
   manifest_version: 3,
+  ...(isStoreBuild ? {} : { key: DEV_PUBLIC_KEY }),
   name: 'rewrite.so — Write freely. Send confidently.',
   version: pkg.version,
   description:

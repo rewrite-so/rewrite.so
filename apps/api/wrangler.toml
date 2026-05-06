@@ -11,10 +11,14 @@ routes = [
 [observability]
 enabled = true
 
-# CORS 白名单：Chrome Web Store 正式扩展 ID（gheiendipgcgiligfmbimbbffkkfiamk）。
-# 逗号分隔可加多个；本地 unpacked dev 不受此限（isLocalApi 路径放行）。
+# 扩展身份白名单（403 invalid_client gate；CORS 另在 cors.ts 配置）：
+# Chrome Web Store 正式扩展 ID（gheiendipgcgiligfmbimbbffkkfiamk）+ 本地 unpacked
+# 测试稳定 ID（nfjhbfpolpfddniebgjnfpmndpcpaadg，由 apps/extension/src/manifest.config.ts
+# 的 DEV_PUBLIC_KEY 决定；store 上架构建走 EXT_STORE_BUILD=1 路径不注入 key，不影响
+# 线上扩展 ID）。逗号分隔可加多个；本地 unpacked + wrangler dev 时 isLocalApi 路径
+# 放行任意扩展 origin 不受此限。
 [vars]
-EXTENSION_ALLOWED_ORIGINS = "chrome-extension://gheiendipgcgiligfmbimbbffkkfiamk"
+EXTENSION_ALLOWED_ORIGINS = "chrome-extension://gheiendipgcgiligfmbimbbffkkfiamk,chrome-extension://nfjhbfpolpfddniebgjnfpmndpcpaadg"
 
 # Cron Trigger: 每天 09:00 UTC 跑一次 onboarding 邮件 dispatcher。
 # dispatcher 内部按 user_email_state 列幂等，重跑不会重发。
