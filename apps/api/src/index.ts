@@ -6,6 +6,7 @@ import { createAuth } from './lib/auth.ts';
 import { isAllowedExtensionOrigin } from './lib/extension-origin.ts';
 import { log } from './lib/log.ts';
 import { banCheckMiddleware } from './middleware/ban-check.ts';
+import { announcementsRoute } from './routes/announcements.ts';
 import { billingRoute } from './routes/billing.ts';
 import { meRoute } from './routes/me.ts';
 import { rewriteRoute } from './routes/rewrite.ts';
@@ -113,6 +114,8 @@ app.on(['GET', 'POST'], '/api/auth/*', (c) => {
 // Phase 4: 订阅 + Webhook
 app.route('/', billingRoute);
 app.route('/', webhookRoute);
+// Public announcements feed (web/extension consume)
+app.route('/', announcementsRoute);
 // Phase 5: onboarding email unsubscribe
 app.route('/', unsubscribeRoute);
 

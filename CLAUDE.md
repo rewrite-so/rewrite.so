@@ -246,6 +246,29 @@
   `suppressHydrationWarning` 仅抑制这些**属性级别**警告，**不会**掩盖 React 树内部
   真实的 hydration bug（后者照样报）。不要因"看着像调试障眼法"就移除。
 
+## D1 migrations 编号区间约定
+
+为支持闭源 admin worker（rewrite-so/admin private repo）独立演进 schema，D1
+migration 文件名编号空间按仓库分治：
+
+- **本仓库 `apps/api/src/db/migrations/`**：`0001 ~ 7999`
+- **闭源 admin 仓库 `apps/admin/src/db/migrations/`**：`8000 ~ 9999`
+
+两边各自跑 `wrangler d1 migrations apply rewrite-so --remote`，wrangler 用
+`d1_migrations` 表按文件名幂等去重，已应用的跳过，新加的按字典序执行。
+
+**严禁**：
+- 在本仓库新加 migration ≥ 8000（会与 admin 仓库的 migration 冲突）
+- 修改已部署过的 migration（已记录在 `d1_migrations` 表，wrangler 会跳过你的修改；
+  schema 错了请新增 `00NN_fix_*.sql` 纠正）
+
+**业务表（`users` / `subscriptions` / `usage_monthly` / `byok_keys` /
+`user_settings` / `user_email_state`）字段变更须在 PR 描述里明确通知 admin
+维护者**——admin worker 直接读这些表，主仓库改字段会让 admin 看板/写操作崩。
+同步通知机制是非自动化的，靠 review 纪律。
+
+详见 `docs/admin-rollout-plan.md`。
+
 ## 已知不支持场景
 
 不要被 "修一下就好" 的 PR 误导：
