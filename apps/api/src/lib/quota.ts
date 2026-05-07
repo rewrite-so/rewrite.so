@@ -195,17 +195,105 @@ async function upsertUsage(
     .run();
 }
 
+/** KV 缓存层：admin_user_overrides 命中 / 缺失（sentinel）的 5min TTL，避免热路径双 D1 SELECT。 */
+const OVERRIDE_CACHE_PREFIX = 'override:';
+const OVERRIDE_CACHE_TTL_SEC = 300;
+const OVERRIDE_NONE_SENTINEL = '__none__';
+
+interface OverrideRow {
+  force_tier: 'pro' | 'free';
+  expires_at: number | null;
+}
+
 /**
- * 根据 subscriptions 表决定登录用户的 tier。
- *
- * 'pro' 条件：
- * - status IN ('active', 'trialing', 'paused')   — 正常订阅
- * - status = 'canceled' AND current_period_end > now  — 用户取消但已付到周期末
- *
- * 否则：'free'（包括 expired / past_due / 未订阅）。
+ * 查 admin_user_overrides 缓存。命中 sentinel 返 null（无 override），
+ * 命中真实行返 row，未命中返 undefined（caller 走 D1）。
  */
-export async function resolveUserTier(db: D1Database, userId: string): Promise<Tier> {
+async function readOverrideCache(
+  kv: KVNamespace | undefined,
+  userId: string,
+): Promise<OverrideRow | null | undefined> {
+  if (!kv || typeof kv.get !== 'function') return undefined;
+  let cached: string | null;
+  try {
+    cached = await kv.get(`${OVERRIDE_CACHE_PREFIX}${userId}`);
+  } catch {
+    // KV outage / serialization error → treat as cache miss, fall through to D1
+    return undefined;
+  }
+  if (cached === null) return undefined;
+  if (cached === OVERRIDE_NONE_SENTINEL) return null;
+  try {
+    return JSON.parse(cached) as OverrideRow;
+  } catch {
+    return undefined;
+  }
+}
+
+async function writeOverrideCache(
+  kv: KVNamespace | undefined,
+  userId: string,
+  value: OverrideRow | null,
+): Promise<void> {
+  if (!kv || typeof kv.put !== 'function') return;
+  const body = value === null ? OVERRIDE_NONE_SENTINEL : JSON.stringify(value);
+  try {
+    await kv.put(`${OVERRIDE_CACHE_PREFIX}${userId}`, body, {
+      expirationTtl: OVERRIDE_CACHE_TTL_SEC,
+    });
+  } catch {
+    // best-effort cache write
+  }
+}
+
+/**
+ * 根据 admin_user_overrides + subscriptions 表决定登录用户的 tier。
+ *
+ * 优先级（高 → 低）：
+ * 1. admin_user_overrides 中存在且未过期的 force_tier — 运营手术性调档
+ * 2. subscriptions 状态：
+ *    - 'active' / 'trialing' / 'paused' → 'pro'
+ *    - 'canceled' 且 current_period_end > now → 'pro'（已付到周期末）
+ *    - 否则 → 'free'（含 expired / past_due / 未订阅）
+ *
+ * KV 缓存（仅当 kv 传入时）：admin_user_overrides 行数极少且写入低频；
+ * miss 后写 5min TTL；NULL 也缓存 sentinel 防穿透。admin worker 写表后
+ * KV.delete('override:'+user_id) 立即失效。
+ */
+export async function resolveUserTier(
+  db: D1Database,
+  userId: string,
+  kv?: KVNamespace,
+): Promise<Tier> {
   const now = Date.now();
+
+  // ===== Step 1: admin override 优先 =====
+  let override = await readOverrideCache(kv, userId);
+  if (override === undefined) {
+    const row = await db
+      .prepare(
+        `SELECT force_tier, expires_at FROM admin_user_overrides WHERE user_id = ? LIMIT 1`,
+      )
+      .bind(userId)
+      .first<{ force_tier: string; expires_at: number | null }>();
+    if (row && (row.force_tier === 'pro' || row.force_tier === 'free')) {
+      override = { force_tier: row.force_tier, expires_at: row.expires_at };
+    } else {
+      override = null;
+    }
+    // 不阻塞主路径：缓存写失败也无所谓
+    await writeOverrideCache(kv, userId, override).catch(() => undefined);
+  }
+  if (override) {
+    const expiresMs = override.expires_at == null ? null : override.expires_at * 1000;
+    if (expiresMs == null || expiresMs > now) {
+      return override.force_tier;
+    }
+    // 已过期：fall through 到 subscriptions 查询。不主动清缓存（TTL 自然过期），
+    // 时间判断在每次 read 都跑一遍，不会误返已过期的 override。
+  }
+
+  // ===== Step 2: subscriptions =====
   const row = await db
     .prepare(
       `SELECT status, current_period_end FROM subscriptions

@@ -49,7 +49,7 @@ meRoute.get('/v1/me/usage', async (c) => {
 
   if (userId) {
     subject = { kind: 'user', id: userId };
-    tier = await resolveUserTier(c.env.DB, userId);
+    tier = await resolveUserTier(c.env.DB, userId, c.env.KV);
     kind = tier === 'pro' ? 'pro' : 'free';
   } else if (installId) {
     subject = { kind: 'install', id: installId };
@@ -101,7 +101,7 @@ meRoute.get('/v1/me', async (c) => {
       cancel_at_period_end: number;
     }>();
 
-  const tier = await resolveUserTier(c.env.DB, session.user.id);
+  const tier = await resolveUserTier(c.env.DB, session.user.id, c.env.KV);
 
   return c.json({
     user: {

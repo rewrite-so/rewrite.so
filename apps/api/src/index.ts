@@ -5,6 +5,7 @@ import { processOnboardingEmails } from './emails/dispatcher.ts';
 import { createAuth } from './lib/auth.ts';
 import { isAllowedExtensionOrigin } from './lib/extension-origin.ts';
 import { log } from './lib/log.ts';
+import { banCheckMiddleware } from './middleware/ban-check.ts';
 import { billingRoute } from './routes/billing.ts';
 import { meRoute } from './routes/me.ts';
 import { rewriteRoute } from './routes/rewrite.ts';
@@ -88,6 +89,15 @@ app.get('/health/deep', async (c) => {
   const allOk = Object.values(checks).every((c) => c.ok);
   return c.json({ ok: allOk, ts: Date.now(), checks }, allOk ? 200 : 503);
 });
+
+// Ban check: 拦在所有需要登录态的业务前缀。/v1/rewrite 同时支持匿名+登录，
+// middleware 内会判 session 是否存在；匿名 path 直接放行（详见 ban-check.ts）。
+// /api/auth/* (better-auth) 不挂 ban —— 用户被封了仍允许登出 / 重置密码。
+// webhook / unsubscribe / health 也不挂 —— 不持有用户 session。
+app.use('/v1/rewrite', banCheckMiddleware());
+app.use('/v1/me', banCheckMiddleware());
+app.use('/v1/me/*', banCheckMiddleware());
+app.use('/v1/billing/*', banCheckMiddleware());
 
 // Phase 1: POST /v1/rewrite (SSE)
 app.route('/', rewriteRoute);

@@ -91,7 +91,7 @@ rewriteRoute.post('/v1/rewrite', async (c) => {
   let anonymousIp: string | null = null;
   if (userId) {
     subject = { kind: 'user', id: userId };
-    tier = await resolveUserTier(c.env.DB, userId);
+    tier = await resolveUserTier(c.env.DB, userId, c.env.KV);
     // 拿账号偏好的 target_lang，登录用户优先用账号设置覆盖客户端 lang
     const prefs = await c.env.DB.prepare('SELECT target_lang FROM user_settings WHERE user_id = ?')
       .bind(userId)
