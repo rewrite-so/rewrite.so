@@ -39,6 +39,13 @@ migrations_dir = "src/db/migrations"
 binding = "KV"
 id = "b089e54c9b274495a16ab5f62d146715"
 
+# ===== Analytics Engine: /v1/rewrite 请求级 metrics =====
+# 中性维度（tier / style / lang / latency / status / error_code），零原文。
+# 看板消费（admin worker）通过 Cloudflare Analytics SQL API 读取。
+[[analytics_engine_datasets]]
+binding = "METRICS"
+dataset = "rewrite_requests"
+
 # ===== Durable Object: 限流（秒级 burst） =====
 [[durable_objects.bindings]]
 name = "RATE_LIMITER"

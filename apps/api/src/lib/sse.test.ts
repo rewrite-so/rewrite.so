@@ -1,5 +1,5 @@
 import { parseSSEStream, type SSEEvent } from '@rewrite/shared';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { muxToSSE } from './sse.ts';
 
 async function* gen(values: string[]): AsyncIterable<string> {
@@ -145,3 +145,123 @@ async function* slowGen(values: string[]): AsyncIterable<string> {
     yield v;
   }
 }
+
+describe('muxToSSE — lifecycle hooks', () => {
+  it('fires onFirstByte exactly once on first non-empty delta across all streams', async () => {
+    const onFirstByte = vi.fn();
+    const stream = muxToSSE(
+      {
+        requestId: 'r1',
+        langDetected: 'en',
+        streams: [
+          { style: 'faithful', iter: gen(['', 'A', 'B']) },
+          { style: 'casual', iter: gen(['X', 'Y']) },
+          { style: 'formal', iter: gen(['Z']) },
+        ],
+        lifecycle: { onFirstByte },
+      },
+      new AbortController().signal,
+    );
+    await collect(stream);
+    expect(onFirstByte).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not fire onFirstByte if all streams produce only empty deltas', async () => {
+    const onFirstByte = vi.fn();
+    const stream = muxToSSE(
+      {
+        requestId: 'r1',
+        langDetected: 'en',
+        streams: [
+          { style: 'faithful', iter: gen(['']) },
+          { style: 'casual', iter: gen(['']) },
+          { style: 'formal', iter: gen(['']) },
+        ],
+        lifecycle: { onFirstByte },
+      },
+      new AbortController().signal,
+    );
+    await collect(stream);
+    expect(onFirstByte).not.toHaveBeenCalled();
+  });
+
+  it('fires onComplete after end frame (happy path)', async () => {
+    const onComplete = vi.fn();
+    const onAbort = vi.fn();
+    const stream = muxToSSE(
+      {
+        requestId: 'r1',
+        langDetected: 'en',
+        streams: [{ style: 'faithful', iter: gen(['A']) }],
+        lifecycle: { onComplete, onAbort },
+      },
+      new AbortController().signal,
+    );
+    await collect(stream);
+    expect(onComplete).toHaveBeenCalledTimes(1);
+    expect(onAbort).not.toHaveBeenCalled();
+  });
+
+  it('fires onAbort and not onComplete when aborted', async () => {
+    const onComplete = vi.fn();
+    const onAbort = vi.fn();
+    const ac = new AbortController();
+    const stream = muxToSSE(
+      {
+        requestId: 'r1',
+        langDetected: 'en',
+        streams: [
+          { style: 'faithful', iter: slowGen(['A', 'B', 'C']) },
+          { style: 'casual', iter: slowGen(['X']) },
+        ],
+        lifecycle: { onComplete, onAbort },
+      },
+      ac.signal,
+    );
+    setTimeout(() => ac.abort(), 5);
+    await collect(stream);
+    expect(onAbort).toHaveBeenCalledTimes(1);
+    expect(onComplete).not.toHaveBeenCalled();
+  });
+
+  it('fires onStreamError per failing stream', async () => {
+    const onStreamError = vi.fn();
+    const stream = muxToSSE(
+      {
+        requestId: 'r1',
+        langDetected: 'en',
+        streams: [
+          { style: 'faithful', iter: gen(['ok']) },
+          { style: 'casual', iter: throwingGen([], new Error('boom1')) },
+          { style: 'formal', iter: throwingGen([], new Error('boom2')) },
+        ],
+        lifecycle: { onStreamError },
+      },
+      new AbortController().signal,
+    );
+    await collect(stream);
+    expect(onStreamError).toHaveBeenCalledTimes(2);
+    // each call passes a stable error code
+    expect(onStreamError.mock.calls.every((c) => typeof c[0] === 'string')).toBe(true);
+  });
+
+  it('a throwing lifecycle hook does not break the stream', async () => {
+    const events = await collect(
+      muxToSSE(
+        {
+          requestId: 'r1',
+          langDetected: 'en',
+          streams: [{ style: 'faithful', iter: gen(['A']) }],
+          lifecycle: {
+            onFirstByte: () => {
+              throw new Error('hook failure');
+            },
+          },
+        },
+        new AbortController().signal,
+      ),
+    );
+    // end frame should still arrive
+    expect(events.at(-1)?.event).toBe('end');
+  });
+});

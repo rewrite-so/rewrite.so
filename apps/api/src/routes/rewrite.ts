@@ -5,12 +5,19 @@ import {
   RewriteRequestSchema,
   type Style,
 } from '@rewrite/shared';
-import { Hono } from 'hono';
+import { type Context, Hono } from 'hono';
 import { BURST_BUCKETS, consume } from '../do/rate-limiter.ts';
 import { createAuth } from '../lib/auth.ts';
 import { decryptApiKey } from '../lib/crypto.ts';
 import { isAllowedExtensionOrigin } from '../lib/extension-origin.ts';
 import { log } from '../lib/log.ts';
+import {
+  hashUserId,
+  isCustomTargetLang,
+  type RequestMetric,
+  type RewriteStatus,
+  writeRequestEvent,
+} from '../lib/metrics.ts';
 import {
   checkAndIncrement,
   hashIp,
@@ -153,6 +160,21 @@ rewriteRoute.post('/v1/rewrite', async (c) => {
   // BYOK 用户：不查月配额，仅记 byok_count；DO burst 仍生效作为反代滥用底线
   const quota = await checkAndIncrement(c.env.DB, subject, tier, isBYOK);
   if (!quota.allowed) {
+    // 配额耗尽：埋点 status='quota_exceeded'，再返 4xx
+    dispatchMetric(
+      c,
+      buildAndWriteMetric(c.env, {
+        tier,
+        styles: req.styles,
+        targetLangRaw: req.lang,
+        inputLength: req.text.length,
+        upstream: isBYOK ? 'byok' : 'platform',
+        status: 'quota_exceeded',
+        userId,
+        subjectKind: subject.kind,
+        subjectIdRaw: subject.id,
+      }),
+    );
     // 把 authed/tier 带入 4xx body，让客户端 setGlobalError 决定 CTA：
     // 登录用户 → "Configure BYOK or upgrade"，匿名 → "Sign in for more"
     return c.json(
@@ -242,7 +264,59 @@ rewriteRoute.post('/v1/rewrite', async (c) => {
     ...(isBYOK ? {} : { used: quota.used, limit: quota.limit }),
     ...(userTargetLangRaw !== null ? { userTargetLang: userTargetLangRaw } : {}),
   };
-  const sse = muxToSSE({ streams, requestId, langDetected: targetLang, status }, signal);
+
+  // ===== Analytics Engine 埋点 =====
+  // 仅写中性维度，零原文 / 输出 / 邮箱 / 完整 IP（隐私铁律）。
+  // 字段映射详见 lib/metrics.ts。三个时点：onFirstByte（ms_to_first_byte）/
+  // onComplete（status='ok' + ms_total）/ onStreamError + onAbort（异常分支）。
+  const tStart = Date.now();
+  let firstByteMs: number | undefined;
+  let firstStreamErrorCode: string | undefined;
+
+  const emitMetric = (status: RewriteStatus, errorCode?: string) => {
+    dispatchMetric(
+      c,
+      buildAndWriteMetric(c.env, {
+        tier,
+        styles: req.styles,
+        targetLangRaw: req.lang,
+        inputLength: req.text.length,
+        upstream: isBYOK ? 'byok' : 'platform',
+        status,
+        errorCode,
+        msToFirstByte: firstByteMs,
+        msTotal: Date.now() - tStart,
+        userId,
+        subjectKind: subject.kind,
+        subjectIdRaw: subject.id,
+      }),
+    );
+  };
+
+  const sse = muxToSSE(
+    {
+      streams,
+      requestId,
+      langDetected: targetLang,
+      status,
+      lifecycle: {
+        onFirstByte: () => {
+          firstByteMs = Date.now() - tStart;
+        },
+        onComplete: () => {
+          // 任何 stream 出错过 → status=upstream_error；否则 ok
+          emitMetric(firstStreamErrorCode ? 'upstream_error' : 'ok', firstStreamErrorCode);
+        },
+        onStreamError: (code) => {
+          if (!firstStreamErrorCode) firstStreamErrorCode = code;
+        },
+        onAbort: () => {
+          emitMetric('aborted');
+        },
+      },
+    },
+    signal,
+  );
 
   return new Response(sse, {
     status: 200,
@@ -256,3 +330,75 @@ rewriteRoute.post('/v1/rewrite', async (c) => {
     },
   });
 });
+
+/**
+ * c.executionCtx.waitUntil 在真实 Workers runtime 总是可用，但 Hono test
+ * `app.request(path, init, env)` 不注入 ExecutionContext，访问会抛错。把
+ * waitUntil 调用包一层 try/catch；测试环境下 promise 失败也不冒泡到主响应。
+ */
+function dispatchMetric(c: Context<AppEnv>, p: Promise<void>): void {
+  try {
+    c.executionCtx.waitUntil(p);
+  } catch {
+    // test env or no execution ctx — swallow promise rejections to avoid noise
+    p.catch(() => undefined);
+  }
+}
+
+interface MetricInput {
+  tier: Tier;
+  /** zod 验证后的 styles，运行时是 'faithful' | 'casual' | 'formal' 之一 */
+  styles: readonly string[];
+  /** 客户端原始 lang（含 'auto' / 标准 locale / 自定义短语）；构造 metric 时 sanitize */
+  targetLangRaw: string;
+  inputLength: number;
+  upstream: 'platform' | 'byok';
+  status: RewriteStatus;
+  errorCode?: string;
+  msToFirstByte?: number;
+  msTotal?: number;
+  userId: string | undefined;
+  subjectKind: Subject['kind'];
+  /** 登录用户 = userId；install/ip subject = 已 hash 过的 id（不需要再 hash） */
+  subjectIdRaw: string;
+}
+
+async function buildAndWriteMetric(
+  env: AppEnv['Bindings'],
+  input: MetricInput,
+): Promise<void> {
+  // 构造 user_id_hash：
+  // - 登录用户：hashUserId(user_id) → 16 hex
+  // - install/ip 匿名：subject.id 已是 hash 形态（hashIp 在前面跑过；installId 是客户端 UUID
+  //   不算 PII），直接传入但同样截断 16 字符避免可识别长度
+  let subjectId: string | undefined;
+  if (input.userId) {
+    subjectId = await hashUserId(input.userId);
+  } else if (input.subjectKind === 'ip') {
+    subjectId = input.subjectIdRaw.slice(0, 16);
+  } else if (input.subjectKind === 'install') {
+    // installId 是客户端生成的 uuid，不是 PII，但仍 hash 一遍保持 16 hex 一致格式
+    subjectId = await hashUserId(input.subjectIdRaw);
+  }
+
+  const metric: RequestMetric = {
+    tier: input.tier,
+    styles: input.styles,
+    targetLang: input.targetLangRaw,
+    targetLangIsCustom: isCustomTargetLang(input.targetLangRaw),
+    inputLength: input.inputLength,
+    upstream: input.upstream,
+    status: input.status,
+    ...(input.errorCode ? { errorCode: input.errorCode } : {}),
+    ...(input.msToFirstByte !== undefined ? { msToFirstByte: input.msToFirstByte } : {}),
+    ...(input.msTotal !== undefined ? { msTotal: input.msTotal } : {}),
+    ...(subjectId ? { subjectId } : {}),
+  };
+
+  try {
+    writeRequestEvent(env.METRICS, metric);
+  } catch (err) {
+    // Analytics Engine 写入失败不能影响主流程；仅留 warning（log.ts 不记原文）
+    log.warn('metrics.write_failed', { err: String(err).slice(0, 200) });
+  }
+}

@@ -21,15 +21,41 @@ export interface MuxOptions {
   langDetected: string;
   /** 浮窗状态信息，透传到 meta event payload 让客户端 panel.setStatus 消费 */
   status?: MetaStatus;
+  /**
+   * 生命周期回调（可选）。调用方用于发 metrics、tracing 等 side-effect。
+   * 不应抛出，不能阻塞主流程；实现内部用 try/catch 包住调用。
+   */
+  lifecycle?: {
+    /** 第一路 delta 实际 enqueue 时触发；abort 前未触发说明用户没看到任何字节 */
+    onFirstByte?: () => void;
+    /** 所有路结束、end 帧 enqueue 后触发；最常见的成功收尾点 */
+    onComplete?: () => void;
+    /** 任意一路 stream 抛错时触发（可能多次，每路各一次） */
+    onStreamError?: (errorCode: string) => void;
+    /** signal abort 触发；用户/客户端主动断开 */
+    onAbort?: () => void;
+  };
 }
 
 export function muxToSSE(opts: MuxOptions, signal: AbortSignal): ReadableStream<Uint8Array> {
   const encoder = new TextEncoder();
   const styles = opts.streams.map((s) => s.style);
+  const lifecycle = opts.lifecycle;
+
+  // 安全调用 lifecycle hook：不抛、不阻塞
+  const safeCall = (fn?: () => void) => {
+    if (!fn) return;
+    try {
+      fn();
+    } catch {
+      // 静默吞掉；hook 失败不影响 SSE 主流程
+    }
+  };
 
   return new ReadableStream<Uint8Array>({
     async start(controller) {
       let closed = false;
+      let firstByteFired = false;
       const enqueue = (s: string) => {
         if (closed || signal.aborted) return;
         try {
@@ -52,9 +78,9 @@ export function muxToSSE(opts: MuxOptions, signal: AbortSignal): ReadableStream<
         }),
       );
 
-      // 一路完成时累积 final text
       const onAbort = () => {
         closed = true;
+        safeCall(lifecycle?.onAbort);
         try {
           controller.close();
         } catch {
@@ -72,11 +98,22 @@ export function muxToSSE(opts: MuxOptions, signal: AbortSignal): ReadableStream<
             if (!text) continue;
             seq++;
             final += text;
+            if (!firstByteFired) {
+              firstByteFired = true;
+              safeCall(lifecycle?.onFirstByte);
+            }
             enqueue(encodeSSEFrame({ event: 'delta', data: { style, text, seq } }));
           }
           enqueue(encodeSSEFrame({ event: 'done', data: { style, finalText: final } }));
         } catch (err) {
           const code = classifyError(err);
+          if (lifecycle?.onStreamError) {
+            try {
+              lifecycle.onStreamError(code);
+            } catch {
+              // ignore
+            }
+          }
           enqueue(
             encodeSSEFrame({
               event: 'error',
@@ -90,12 +127,14 @@ export function muxToSSE(opts: MuxOptions, signal: AbortSignal): ReadableStream<
 
       if (!closed && !signal.aborted) {
         enqueue(encodeSSEFrame({ event: 'end', data: { requestId: opts.requestId } }));
+        safeCall(lifecycle?.onComplete);
         try {
           controller.close();
         } catch {
           // already closed
         }
       }
+      // abort 路径：onAbort 已在 signal listener 中触发；此处不再 onComplete
       signal.removeEventListener('abort', onAbort);
     },
     cancel() {

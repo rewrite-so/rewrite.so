@@ -26,6 +26,12 @@ export interface Bindings {
   DB: D1Database;
   KV: KVNamespace;
   RATE_LIMITER: DurableObjectNamespace;
+  /**
+   * Analytics Engine dataset for /v1/rewrite request-level metrics.
+   * Optional in TypeScript so local wrangler dev (without binding) compiles.
+   * See lib/metrics.ts for the field contract.
+   */
+  METRICS?: AnalyticsEngineDataset;
 }
 
 export type AppEnv = {
