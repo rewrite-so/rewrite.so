@@ -2,7 +2,6 @@
 
 import { createWebApiClient, mount } from '@rewrite/core';
 import {
-  DEFAULT_EXTENSION_INSTALL_URL,
   type Locale,
   QUOTA,
   REWRITE_TARGET_LABELS,
@@ -12,13 +11,12 @@ import {
 import { useLocale, useTranslations } from 'next-intl';
 import { type RefObject, useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from '../../../../i18n/navigation.ts';
+import { getExtensionInstallUrl } from '../../../../lib/extension-install-url.ts';
 
 // 留空让 fetch 走 same-origin（Next rewrites 代理到 wrangler dev）
 // 这样 better-auth session cookie 是 web origin 的，不需跨域
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? '';
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? '';
-const EXTENSION_INSTALL_URL =
-  process.env.NEXT_PUBLIC_EXTENSION_INSTALL_URL || DEFAULT_EXTENSION_INSTALL_URL;
 
 const TARGET_LANG_STORAGE = 'rewrite-so-try-target-lang-v1';
 // /try 上累计的成功改写次数，跨 session 持久化。仅匿名用户用作转化 nudge
@@ -84,7 +82,7 @@ export function TryClient() {
       // 超配额 CTA 跳 /billing（营销页直接列定价/Subscribe 按钮），不跳 /settings 配置页
       upgradeUrl: '/billing?from=quota_exceeded',
       onInstallClick: () => {
-        window.open(EXTENSION_INSTALL_URL, '_blank');
+        window.open(getExtensionInstallUrl(), '_blank');
       },
       getTurnstileToken,
       onOpenSettings: () => {
