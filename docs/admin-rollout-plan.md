@@ -131,8 +131,11 @@ CREATE INDEX idx_announcements_window ON announcements(starts_at, ends_at);
   resolves the tier via the existing `resolveUserTier()` helper. Anonymous
   callers see only rows with `tier_filter IS NULL`. This prevents a third
   party from probing `?tier=pro` to discover Pro-only operational content.
-- KV-cached for 60s with a key built from `(locale, surface, resolved_tier)`;
-  bypassed by an internal cache invalidation.
+- **No server-side cache.** The `announcements` table has very few active rows
+  (operationally hand-written, on the order of single digits per month), so
+  every GET hits D1 directly. This means admin writes take effect on the next
+  read — no invalidation protocol to maintain. The response carries
+  `Cache-Control: max-age=60` so browsers (web/extension) cache it client-side.
 
 The web/extension consumption (rendering banners) is not part of this rollout
 and will land in a separate change.

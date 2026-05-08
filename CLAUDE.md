@@ -269,6 +269,23 @@ migration 文件名编号空间按仓库分治：
 
 详见 `docs/admin-rollout-plan.md`。
 
+## 跨仓库 KV cache 失效协议
+
+主仓库读、admin 仓库写的两张表（`admin_user_overrides`、`user_bans`）走 KV
+缓存（5min TTL + `__none__` 负缓存防穿透）减少热路径 D1 读。admin worker
+**写表后必须立即** `KV.delete()` 对应 key 让缓存失效，否则用户会在最坏 5min
+内拿到旧 tier / ban 状态：
+
+| 表 | KV key 公式 | 失效时机 |
+|---|---|---|
+| `admin_user_overrides` | `override:<user_id>` | INSERT / UPDATE / DELETE 后 |
+| `user_bans` | `ban:<user_id>` | INSERT / DELETE 后 |
+
+`announcements` 表**不走服务端 KV cache**（行数极少，每次直查 D1）；admin 写表
+对所有读路径立即生效，`Cache-Control: max-age=60` 仅是客户端浏览器层缓存。
+
+新加共享 KV key 时同步更新此表 + admin 仓库 README，避免一边改了另一边没感知。
+
 ## 已知不支持场景
 
 不要被 "修一下就好" 的 PR 误导：
