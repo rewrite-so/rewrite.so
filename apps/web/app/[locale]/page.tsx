@@ -2,6 +2,7 @@ import { PRO_PRICE, QUOTA } from '@rewrite/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { Link } from '../../i18n/navigation.ts';
+import { getExtensionInstallUrl } from '../../lib/extension-install-url.ts';
 import styles from './HomePage.module.css';
 import { HomeRewriteDemo } from './HomeRewriteDemo.tsx';
 
@@ -56,15 +57,23 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 {t('hero.ctaPrimary')}
               </Link>
               <a
-                href="https://github.com/rewrite-so/rewrite.so"
+                href={getExtensionInstallUrl()}
                 className={styles.secondaryButton}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {t('hero.ctaSecondary')}
+                {t('hero.ctaInstall')}
               </a>
             </div>
             <p className={styles.fineprint}>{t('hero.fineprint', { count: QUOTA.loggedInFree })}</p>
+            <a
+              href="https://github.com/rewrite-so/rewrite.so"
+              className={styles.heroGithubLink}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {t('hero.ctaGithub')}
+            </a>
           </div>
 
           <HomeRewriteDemo copy={demoCopy} />

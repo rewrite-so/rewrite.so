@@ -282,6 +282,7 @@
     "pricing": "Precios",
     "github": "GitHub",
     "signIn": "Iniciar sesión",
+    "install": "Instalar extensión",
     "tryFree": "Probar gratis",
     "settings": "Mi cuenta",
     "languageSwitcher": "Idioma"
@@ -296,6 +297,7 @@
     },
     "link": {
       "home": "Inicio",
+      "install": "Instalar la extensión",
       "tryIt": "Probar",
       "pricing": "Precios",
       "signIn": "Iniciar sesión",
@@ -322,7 +324,9 @@
       "polyglot": "Cualquier idioma entra. Cualquier idioma sale.",
       "intro": "Pulsa <kbd>Shift</kbd> dos veces en un campo web compatible. La IA te da tres maneras de decirlo. Elige una con <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> y envía.",
       "ctaPrimary": "Probar gratis →",
+      "ctaInstall": "Instalar la extensión →",
       "ctaSecondary": "⭐ Estrella en GitHub",
+      "ctaGithub": "Ver en GitHub →",
       "fineprint": "{count} reescrituras gratis al mes · Sin tarjeta · BYOK para uso ilimitado"
     },
     "scenarios": {

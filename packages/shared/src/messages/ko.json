@@ -282,6 +282,7 @@
     "pricing": "요금",
     "github": "GitHub",
     "signIn": "로그인",
+    "install": "확장 프로그램 설치",
     "tryFree": "무료 체험",
     "settings": "내 계정",
     "languageSwitcher": "언어"
@@ -296,6 +297,7 @@
     },
     "link": {
       "home": "홈",
+      "install": "확장 프로그램 설치",
       "tryIt": "체험",
       "pricing": "요금",
       "signIn": "로그인",
@@ -322,7 +324,9 @@
       "polyglot": "어떤 언어로 입력하든, 어떤 언어로든 출력.",
       "intro": "지원되는 웹 입력란에서 <kbd>Shift</kbd>를 두 번 누르세요. AI가 세 가지 표현을 보여줍니다. <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd>으로 골라 바로 보내세요.",
       "ctaPrimary": "무료 체험 →",
+      "ctaInstall": "확장 프로그램 설치 →",
       "ctaSecondary": "⭐ GitHub Star",
+      "ctaGithub": "GitHub에서 보기 →",
       "fineprint": "월 {count}회 무료 · 카드 불필요 · BYOK로 무제한"
     },
     "scenarios": {

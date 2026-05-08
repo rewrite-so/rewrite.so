@@ -282,6 +282,7 @@
     "pricing": "Pricing",
     "github": "GitHub",
     "signIn": "Sign in",
+    "install": "Install extension",
     "tryFree": "Try free",
     "settings": "Settings",
     "languageSwitcher": "Language"
@@ -296,6 +297,7 @@
     },
     "link": {
       "home": "Home",
+      "install": "Install extension",
       "tryIt": "Try it",
       "pricing": "Pricing",
       "signIn": "Sign in",
@@ -322,7 +324,9 @@
       "polyglot": "Any language in. Any language out.",
       "intro": "Double-tap <kbd>Shift</kbd> in a supported web text field. AI gives you three ways to say it. Pick one with <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> and send.",
       "ctaPrimary": "Try it free →",
+      "ctaInstall": "Install extension →",
       "ctaSecondary": "⭐ Star on GitHub",
+      "ctaGithub": "View on GitHub →",
       "fineprint": "{count} free rewrites/month · No card · Bring your own API key for unlimited"
     },
     "scenarios": {

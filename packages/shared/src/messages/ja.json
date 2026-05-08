@@ -282,6 +282,7 @@
     "pricing": "料金",
     "github": "GitHub",
     "signIn": "ログイン",
+    "install": "拡張機能をインストール",
     "tryFree": "無料で試す",
     "settings": "マイページ",
     "languageSwitcher": "言語"
@@ -296,6 +297,7 @@
     },
     "link": {
       "home": "ホーム",
+      "install": "拡張機能をインストール",
       "tryIt": "試す",
       "pricing": "料金",
       "signIn": "ログイン",
@@ -322,7 +324,9 @@
       "polyglot": "どの言語で書いても、どの言語でも出力。",
       "intro": "対応しているウェブ入力欄で <kbd>Shift</kbd> をダブルタップ。AI が 3 つの言い方を提示。<kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> で選んでそのまま送信。",
       "ctaPrimary": "無料で試す →",
+      "ctaInstall": "拡張機能をインストール →",
       "ctaSecondary": "⭐ GitHub で Star",
+      "ctaGithub": "GitHub で見る →",
       "fineprint": "月 {count} 回まで無料 · カード不要 · BYOK で無制限"
     },
     "scenarios": {
