@@ -34,6 +34,37 @@ export interface Bindings {
   METRICS?: AnalyticsEngineDataset;
 }
 
+/**
+ * Subset of better-auth's session.user that route handlers actually consume.
+ * Centralised so we can cache it on the Hono context without leaking the
+ * full better-auth Session shape.
+ */
+export interface SessionUser {
+  id: string;
+  email: string;
+  name?: string | null;
+  image?: string | null;
+}
+
+/**
+ * Hono context Variables used to share computed-once values across middleware
+ * and route handlers within a single request. Currently only sessionUser,
+ * which lets ban-check middleware avoid duplicating the better-auth getSession
+ * round-trip that route handlers will do anyway.
+ *
+ * The presence/absence of the key is meaningful:
+ * - undefined (key never set): nothing has resolved the session yet
+ * - null: session was checked and the request is anonymous
+ * - SessionUser: session was checked and the user is known
+ *
+ * Route handlers should read via getOrResolveSessionUser() (lib/session-cache.ts)
+ * to enforce the "check the cache first, fall back to better-auth" pattern.
+ */
+export interface AppVariables {
+  sessionUser?: SessionUser | null;
+}
+
 export type AppEnv = {
   Bindings: Bindings;
+  Variables: AppVariables;
 };

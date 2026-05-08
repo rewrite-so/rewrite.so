@@ -1,7 +1,6 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { BURST_BUCKETS, consume } from '../do/rate-limiter.ts';
-import { createAuth } from '../lib/auth.ts';
 import { encryptApiKey } from '../lib/crypto.ts';
 import { log } from '../lib/log.ts';
 import {
@@ -13,6 +12,7 @@ import {
   type Tier,
 } from '../lib/quota.ts';
 import { sanitizeTargetLang } from '../lib/sanitize-target-lang.ts';
+import { getOrResolveSessionUser } from '../lib/session-cache.ts';
 import type { AppEnv } from '../types.ts';
 
 export const meRoute = new Hono<AppEnv>();
@@ -38,9 +38,8 @@ const SettingsPatchSchema = z
  * Query: ?installId=xxx （扩展未登录时带上）
  */
 meRoute.get('/v1/me/usage', async (c) => {
-  const auth = createAuth(c.env);
-  const session = await auth.api.getSession({ headers: c.req.raw.headers });
-  const userId = session?.user.id;
+  const sessionUser = await getOrResolveSessionUser(c);
+  const userId = sessionUser?.id;
   const installId = c.req.query('installId');
 
   let subject: Subject;
@@ -82,9 +81,8 @@ meRoute.get('/v1/me/usage', async (c) => {
  * 返回当前登录用户信息 + 当前订阅摘要（未登录返 user:null）。
  */
 meRoute.get('/v1/me', async (c) => {
-  const auth = createAuth(c.env);
-  const session = await auth.api.getSession({ headers: c.req.raw.headers });
-  if (!session) return c.json({ user: null, subscription: null });
+  const sessionUser = await getOrResolveSessionUser(c);
+  if (!sessionUser) return c.json({ user: null, subscription: null });
 
   const sub = await c.env.DB.prepare(
     `SELECT plan, status, current_period_end, cancel_at_period_end
@@ -93,7 +91,7 @@ meRoute.get('/v1/me', async (c) => {
       ORDER BY updated_at DESC
       LIMIT 1`,
   )
-    .bind(session.user.id)
+    .bind(sessionUser.id)
     .first<{
       plan: string;
       status: string;
@@ -101,14 +99,14 @@ meRoute.get('/v1/me', async (c) => {
       cancel_at_period_end: number;
     }>();
 
-  const tier = await resolveUserTier(c.env.DB, session.user.id, c.env.KV);
+  const tier = await resolveUserTier(c.env.DB, sessionUser.id, c.env.KV);
 
   return c.json({
     user: {
-      id: session.user.id,
-      email: session.user.email,
-      name: session.user.name,
-      image: session.user.image,
+      id: sessionUser.id,
+      email: sessionUser.email,
+      name: sessionUser.name,
+      image: sessionUser.image,
     },
     tier, // 'free' | 'pro'
     subscription: sub
@@ -128,14 +126,13 @@ meRoute.get('/v1/me', async (c) => {
  * 未登录返 401 unauthorized。
  */
 meRoute.get('/v1/me/settings', async (c) => {
-  const auth = createAuth(c.env);
-  const session = await auth.api.getSession({ headers: c.req.raw.headers });
-  if (!session) return c.json({ error: 'unauthorized' }, 401);
+  const sessionUser = await getOrResolveSessionUser(c);
+  if (!sessionUser) return c.json({ error: 'unauthorized' }, 401);
 
   const row = await c.env.DB.prepare(
     'SELECT target_lang, ui_locale FROM user_settings WHERE user_id = ?',
   )
-    .bind(session.user.id)
+    .bind(sessionUser.id)
     .first<UserSettingsRow>();
 
   // Lazy sanitize 老数据：v0.1.x 之前的 SettingsClient 用 hardcoded 8 项下拉，
@@ -153,9 +150,8 @@ meRoute.get('/v1/me/settings', async (c) => {
  * 增量更新偏好。未登录返 401。
  */
 meRoute.patch('/v1/me/settings', async (c) => {
-  const auth = createAuth(c.env);
-  const session = await auth.api.getSession({ headers: c.req.raw.headers });
-  if (!session) return c.json({ error: 'unauthorized' }, 401);
+  const sessionUser = await getOrResolveSessionUser(c);
+  if (!sessionUser) return c.json({ error: 'unauthorized' }, 401);
 
   let body: unknown;
   try {
@@ -172,7 +168,7 @@ meRoute.patch('/v1/me/settings', async (c) => {
   const current = await c.env.DB.prepare(
     'SELECT target_lang, ui_locale FROM user_settings WHERE user_id = ?',
   )
-    .bind(session.user.id)
+    .bind(sessionUser.id)
     .first<UserSettingsRow>();
 
   // sanitize 任何即将写入 DB 并最终注入 prompt 的 targetLang —— 自定义自然语言
@@ -194,7 +190,7 @@ meRoute.patch('/v1/me/settings', async (c) => {
        ui_locale = excluded.ui_locale,
        updated_at = excluded.updated_at`,
   )
-    .bind(session.user.id, targetLang, uiLocale, now)
+    .bind(sessionUser.id, targetLang, uiLocale, now)
     .run();
 
   return c.json({ targetLang, uiLocale });
@@ -220,14 +216,13 @@ const ClaimInstallSchema = z
  * 以前没有这一步，匿名扩展用户用完 5/5 → 注册 → 拿到全新 30/30，是绕匿名档位的滥用通道。
  */
 meRoute.post('/v1/me/claim-install', async (c) => {
-  const auth = createAuth(c.env);
-  const session = await auth.api.getSession({ headers: c.req.raw.headers });
-  if (!session) return c.json({ error: 'unauthorized' }, 401);
+  const sessionUser = await getOrResolveSessionUser(c);
+  if (!sessionUser) return c.json({ error: 'unauthorized' }, 401);
 
   // 防止脚本用随机 installId 灌 usage_claims 表（5 req/min/user）。每个登录用户
   // 每月理论只该调 1-2 次（首次登录 + 跨月）；正常 bootstrap 重复调因服务端 PK 幂等
   // 不写新行但仍会消耗 token bucket。容量足够多个 tab 同时启动，但拦得住脚本滥用。
-  const subject: Subject = { kind: 'user', id: session.user.id };
+  const subject: Subject = { kind: 'user', id: sessionUser.id };
   const burst = await consume(c.env.RATE_LIMITER, subject, BURST_BUCKETS.claimInstall);
   if (!burst.allowed) {
     return c.json({ error: 'rate_limit', retryAfterMs: burst.retryAfterMs }, 429, {
@@ -246,7 +241,7 @@ meRoute.post('/v1/me/claim-install', async (c) => {
     return c.json({ error: 'invalid_input', detail: parsed.error.issues[0]?.message }, 400);
   }
 
-  const result = await claimAnonymousUsage(c.env.DB, session.user.id, {
+  const result = await claimAnonymousUsage(c.env.DB, sessionUser.id, {
     kind: 'install',
     id: parsed.data.installId,
   });
@@ -304,14 +299,13 @@ interface ByokRow {
  * 没配过返 { configured: false }。
  */
 meRoute.get('/v1/me/byok', async (c) => {
-  const auth = createAuth(c.env);
-  const session = await auth.api.getSession({ headers: c.req.raw.headers });
-  if (!session) return c.json({ error: 'unauthorized' }, 401);
+  const sessionUser = await getOrResolveSessionUser(c);
+  if (!sessionUser) return c.json({ error: 'unauthorized' }, 401);
 
   const row = await c.env.DB.prepare(
     'SELECT base_url, model, key_mask, updated_at FROM byok_keys WHERE user_id = ?',
   )
-    .bind(session.user.id)
+    .bind(sessionUser.id)
     .first<ByokRow>();
 
   if (!row) return c.json({ configured: false });
@@ -331,9 +325,8 @@ meRoute.get('/v1/me/byok', async (c) => {
  * apiKey 仅传输不存明文，AES-GCM 加密后存。
  */
 meRoute.put('/v1/me/byok', async (c) => {
-  const auth = createAuth(c.env);
-  const session = await auth.api.getSession({ headers: c.req.raw.headers });
-  if (!session) return c.json({ error: 'unauthorized' }, 401);
+  const sessionUser = await getOrResolveSessionUser(c);
+  if (!sessionUser) return c.json({ error: 'unauthorized' }, 401);
 
   // 任何登录用户均可配 BYOK（产品决策）；Pro 的差异化是 hosted model（2000/月）+
   // 不用管 key + Priority，而非"是否能用 BYOK"
@@ -371,7 +364,7 @@ meRoute.put('/v1/me/byok', async (c) => {
        key_mask = excluded.key_mask,
        updated_at = excluded.updated_at`,
   )
-    .bind(session.user.id, baseUrl, model, enc.encrypted, enc.iv, enc.mask, now, now)
+    .bind(sessionUser.id, baseUrl, model, enc.encrypted, enc.iv, enc.mask, now, now)
     .run();
 
   return c.json({ configured: true, baseUrl, model, keyMask: enc.mask });
@@ -383,11 +376,10 @@ meRoute.put('/v1/me/byok', async (c) => {
  * 删除 BYOK 配置。删除后 /v1/rewrite 自动回到平台默认 upstream + 计入月配额。
  */
 meRoute.delete('/v1/me/byok', async (c) => {
-  const auth = createAuth(c.env);
-  const session = await auth.api.getSession({ headers: c.req.raw.headers });
-  if (!session) return c.json({ error: 'unauthorized' }, 401);
+  const sessionUser = await getOrResolveSessionUser(c);
+  if (!sessionUser) return c.json({ error: 'unauthorized' }, 401);
 
-  await c.env.DB.prepare('DELETE FROM byok_keys WHERE user_id = ?').bind(session.user.id).run();
+  await c.env.DB.prepare('DELETE FROM byok_keys WHERE user_id = ?').bind(sessionUser.id).run();
   return c.json({ configured: false });
 });
 
@@ -409,13 +401,12 @@ const ByokTestSchema = z
   .strict();
 
 meRoute.post('/v1/me/byok/test', async (c) => {
-  const auth = createAuth(c.env);
-  const session = await auth.api.getSession({ headers: c.req.raw.headers });
-  if (!session) return c.json({ error: 'unauthorized' }, 401);
+  const sessionUser = await getOrResolveSessionUser(c);
+  if (!sessionUser) return c.json({ error: 'unauthorized' }, 401);
 
   // 比生产严格的 rate limit：10 req/min/user —— 配置态不该频繁打，且
   // 防止登录用户用我们 worker IP 做 SSRF / DDoS amplification（任意 baseUrl 都能 fetch）
-  const subject: Subject = { kind: 'user', id: session.user.id };
+  const subject: Subject = { kind: 'user', id: sessionUser.id };
   const burst = await consume(c.env.RATE_LIMITER, subject, BURST_BUCKETS.byokTest);
   if (!burst.allowed) {
     return c.json({ error: 'rate_limit', retryAfterMs: burst.retryAfterMs }, 429, {

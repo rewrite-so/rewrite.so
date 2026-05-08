@@ -11,8 +11,8 @@
  * KV 缓存（5min TTL，sentinel 防穿透；admin worker 写表后 KV.delete 失效）：
  * 减少热路径多一次 D1 SELECT 的开销。低基数表（封禁用户极少）+ 低写入频率 → 缓存安全。
  */
-import type { Context, MiddlewareHandler } from 'hono';
-import { createAuth } from '../lib/auth.ts';
+import type { MiddlewareHandler } from 'hono';
+import { getOrResolveUserId } from '../lib/session-cache.ts';
 import type { AppEnv } from '../types.ts';
 
 const BAN_CACHE_PREFIX = 'ban:';
@@ -93,10 +93,13 @@ export async function isUserBanned(
  * Hono middleware：要求当前请求已通过 better-auth 解析出 user，否则放行（说明是
  * 匿名/未登录路径，不属于 ban 治理范围；比如 /v1/me/usage?installId=... 走匿名分支
  * 时无 session）。session 内有 user_id 时查 user_bans，命中返 401。
+ *
+ * 通过 getOrResolveUserId 解析 userId，结果会被缓存到 c.var.sessionUserId 上。
+ * 后续路由 handler 用同一 helper 读取，避免重复打 better-auth sessions 表。
  */
 export function banCheckMiddleware(): MiddlewareHandler<AppEnv> {
   return async (c, next) => {
-    const userId = await tryGetUserId(c);
+    const userId = await getOrResolveUserId(c);
     if (!userId) return next();
 
     const ban = await isUserBanned(c.env.DB, c.env.KV, userId);
@@ -105,16 +108,4 @@ export function banCheckMiddleware(): MiddlewareHandler<AppEnv> {
     }
     return next();
   };
-}
-
-async function tryGetUserId(c: Context<AppEnv>): Promise<string | null> {
-  try {
-    const auth = createAuth(c.env);
-    const session = await auth.api.getSession({ headers: c.req.raw.headers });
-    return session?.user.id ?? null;
-  } catch {
-    // Session resolution failure should not bypass ban; treat as anonymous and let
-    // downstream route reject if it needs auth.
-    return null;
-  }
 }

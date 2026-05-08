@@ -15,8 +15,8 @@
  */
 import { LOCALES } from '@rewrite/shared';
 import { Hono } from 'hono';
-import { createAuth } from '../lib/auth.ts';
 import { resolveUserTier } from '../lib/quota.ts';
+import { getOrResolveUserId } from '../lib/session-cache.ts';
 import type { AppEnv } from '../types.ts';
 
 export const announcementsRoute = new Hono<AppEnv>();
@@ -61,15 +61,10 @@ announcementsRoute.get('/v1/announcements', async (c) => {
   }
 
   // ===== 服务端解析 tier（绝不信任 client） =====
+  // getOrResolveUserId 复用本请求生命周期内已缓存的 session 结果（如果挂在前面的
+  // middleware 跑过的话）；announcements 端点目前没挂 ban-check，第一次调用会真去查。
   let resolvedTier: 'anonymous' | 'free' | 'pro' = 'anonymous';
-  let userId: string | undefined;
-  try {
-    const auth = createAuth(c.env);
-    const session = await auth.api.getSession({ headers: c.req.raw.headers });
-    userId = session?.user.id;
-  } catch {
-    // 无 session / better-auth 异常 → 当作匿名访问
-  }
+  const userId = await getOrResolveUserId(c);
   if (userId) {
     const tier = await resolveUserTier(c.env.DB, userId, c.env.KV);
     resolvedTier = tier === 'pro' ? 'pro' : 'free';

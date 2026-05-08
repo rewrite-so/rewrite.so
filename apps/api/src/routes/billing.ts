@@ -1,6 +1,5 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { createAuth } from '../lib/auth.ts';
 import {
   createCheckoutSession,
   createPortalSession,
@@ -8,6 +7,7 @@ import {
   fetchCheckout,
 } from '../lib/creem.ts';
 import { log } from '../lib/log.ts';
+import { getOrResolveSessionUser } from '../lib/session-cache.ts';
 import type { AppEnv } from '../types.ts';
 import { upsertSubscriptionFromObject } from './webhook.ts';
 
@@ -33,9 +33,8 @@ interface SubscriptionRow {
  * 我们不在这里写 subscriptions 表 — 等 webhook 的 subscription.active 来落库。
  */
 billingRoute.post('/v1/billing/checkout', async (c) => {
-  const auth = createAuth(c.env);
-  const session = await auth.api.getSession({ headers: c.req.raw.headers });
-  if (!session) return c.json({ error: 'unauthorized' }, 401);
+  const sessionUser = await getOrResolveSessionUser(c);
+  if (!sessionUser) return c.json({ error: 'unauthorized' }, 401);
 
   let body: unknown;
   try {
@@ -60,11 +59,11 @@ billingRoute.post('/v1/billing/checkout', async (c) => {
     const checkout = await createCheckoutSession({
       apiKey: c.env.CREEM_API_KEY,
       productId,
-      requestId: session.user.id,
+      requestId: sessionUser.id,
       successUrl: successUrl ?? defaultSuccess,
-      customerEmail: session.user.email,
+      customerEmail: sessionUser.email,
       metadata: {
-        user_id: session.user.id,
+        user_id: sessionUser.id,
         plan,
       },
     });
@@ -83,7 +82,7 @@ billingRoute.post('/v1/billing/checkout', async (c) => {
  * - 不等 webhook（可能延迟几秒到几分钟），但 webhook 仍会发，靠 creem_subscription_id PK 幂等
  *
  * 不验证签名（因为是用户带着 session 主动调；恶意用户最多触发"自己订阅落库"——
- * Creem 不会让别人付钱给你）。但严格校验 checkout.metadata.user_id == session.user.id
+ * Creem 不会让别人付钱给你）。但严格校验 checkout.metadata.user_id == sessionUser.id
  * 防止伪造 checkout_id 把别人的订阅落到自己名下。
  */
 const VerifyCheckoutSchema = z
@@ -93,9 +92,8 @@ const VerifyCheckoutSchema = z
   .strict();
 
 billingRoute.post('/v1/billing/verify-checkout', async (c) => {
-  const auth = createAuth(c.env);
-  const session = await auth.api.getSession({ headers: c.req.raw.headers });
-  if (!session) return c.json({ error: 'unauthorized' }, 401);
+  const sessionUser = await getOrResolveSessionUser(c);
+  if (!sessionUser) return c.json({ error: 'unauthorized' }, 401);
 
   let body: unknown;
   try {
@@ -121,10 +119,10 @@ billingRoute.post('/v1/billing/verify-checkout', async (c) => {
 
   // 严格校验 metadata.user_id 防伪造
   const checkoutUserId = extractUserIdFromMetadata(checkout);
-  if (checkoutUserId !== session.user.id) {
+  if (checkoutUserId !== sessionUser.id) {
     log.warn('billing.verify_user_mismatch', {
       checkoutId: parsed.data.checkoutId,
-      sessionUserId: session.user.id,
+      sessionUserId: sessionUser.id,
       checkoutUserId,
     });
     return c.json({ error: 'user_mismatch' }, 403);
@@ -161,14 +159,13 @@ billingRoute.post('/v1/billing/verify-checkout', async (c) => {
  * 没订阅过的用户走这条路会 404 — 前端应只对有 subscription 的用户展示 "Manage" 按钮。
  */
 billingRoute.get('/v1/billing/portal', async (c) => {
-  const auth = createAuth(c.env);
-  const session = await auth.api.getSession({ headers: c.req.raw.headers });
-  if (!session) return c.json({ error: 'unauthorized' }, 401);
+  const sessionUser = await getOrResolveSessionUser(c);
+  if (!sessionUser) return c.json({ error: 'unauthorized' }, 401);
 
   const row = await c.env.DB.prepare(
     'SELECT creem_customer_id FROM subscriptions WHERE user_id = ? ORDER BY updated_at DESC LIMIT 1',
   )
-    .bind(session.user.id)
+    .bind(sessionUser.id)
     .first<SubscriptionRow>();
 
   if (!row?.creem_customer_id) {

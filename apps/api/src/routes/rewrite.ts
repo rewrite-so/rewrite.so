@@ -7,7 +7,6 @@ import {
 } from '@rewrite/shared';
 import { type Context, Hono } from 'hono';
 import { BURST_BUCKETS, consume } from '../do/rate-limiter.ts';
-import { createAuth } from '../lib/auth.ts';
 import { decryptApiKey } from '../lib/crypto.ts';
 import { isAllowedExtensionOrigin } from '../lib/extension-origin.ts';
 import { log } from '../lib/log.ts';
@@ -26,6 +25,7 @@ import {
   type Tier,
 } from '../lib/quota.ts';
 import { sanitizeTargetLang } from '../lib/sanitize-target-lang.ts';
+import { getOrResolveUserId } from '../lib/session-cache.ts';
 import { muxToSSE } from '../lib/sse.ts';
 import { stripThinking } from '../lib/strip-thinking.ts';
 import { verifyTurnstile } from '../lib/turnstile.ts';
@@ -76,9 +76,9 @@ rewriteRoute.post('/v1/rewrite', async (c) => {
 
   // ===== Subject 选择 =====
   // 优先级: 登录用户 (user) > 扩展未登录 (install) > 匿名 IP (ip)
-  const auth = createAuth(c.env);
-  const session = await auth.api.getSession({ headers: c.req.raw.headers });
-  const userId = session?.user.id;
+  // ban-check middleware 已挂在 /v1/rewrite，命中已 401；这里 getOrResolveUserId
+  // 直接复用 c.var.sessionUserId，无第二次 better-auth getSession 往返。
+  const userId = (await getOrResolveUserId(c)) ?? undefined;
 
   let subject: Subject;
   let tier: Tier;
