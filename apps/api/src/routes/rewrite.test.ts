@@ -52,7 +52,8 @@ const MOCK_ENV = {
   RESEND_API_KEY: '',
   RESEND_FROM_EMAIL: '',
   TURNSTILE_SECRET: '',
-  EXTENSION_INSTALL_URL: 'https://github.com/rewrite-so/rewrite.so/releases/latest',
+  EXTENSION_INSTALL_URL:
+    'https://chromewebstore.google.com/detail/gheiendipgcgiligfmbimbbffkkfiamk',
   DB: fakeDB,
   KV: fakeKV,
   RATE_LIMITER: fakeRateLimiter,

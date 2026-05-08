@@ -64,5 +64,5 @@ new_sqlite_classes = ["RateLimiter"]
 # CREEM_API_KEY / CREEM_WEBHOOK_SECRET
 # CREEM_PRO_MONTHLY_PRODUCT_ID / CREEM_PRO_YEARLY_PRODUCT_ID
 # TURNSTILE_SECRET
-# EXTENSION_INSTALL_URL 可用 [vars] 配置；未配置时回退 GitHub latest release。
+# EXTENSION_INSTALL_URL 可用 [vars] 配置；未配置时回退 Chrome Web Store listing。
 # EXTENSION_ALLOWED_ORIGINS 可用 [vars] 配置；逗号分隔 Chrome extension origin / ID。
