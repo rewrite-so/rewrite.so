@@ -26,4 +26,4 @@ API_BASE_URL = "https://api.rewrite.so"
 # client-side（NEXT_PUBLIC_）：留空让 fetch 走相对路径（same-origin via rewrites）
 NEXT_PUBLIC_API_BASE = ""
 NEXT_PUBLIC_TURNSTILE_SITE_KEY = ""
-NEXT_PUBLIC_EXTENSION_INSTALL_URL = "https://github.com/rewrite-so/rewrite.so/releases/latest"
+NEXT_PUBLIC_EXTENSION_INSTALL_URL = "https://chromewebstore.google.com/detail/gheiendipgcgiligfmbimbbffkkfiamk"
