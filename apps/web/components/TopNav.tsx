@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '../i18n/navigation.ts';
+import { getExtensionInstallUrl } from '../lib/extension-install-url.ts';
 import { LanguageSwitcher } from './LanguageSwitcher.tsx';
 
 const NAV_LINK = {
@@ -17,6 +18,17 @@ const NAV_LINK_PRIMARY = {
   textDecoration: 'none',
   padding: '7px 14px',
   borderRadius: 6,
+  fontWeight: 500,
+};
+
+const NAV_LINK_OUTLINE = {
+  fontSize: 14,
+  color: '#111',
+  background: '#fff',
+  textDecoration: 'none',
+  padding: '6px 13px',
+  borderRadius: 6,
+  border: '1px solid #111',
   fontWeight: 500,
 };
 
@@ -128,14 +140,32 @@ export async function TopNav() {
         {/* Right: language switcher + CTAs（按登录态分支） */}
         <LanguageSwitcher />
         {isAuthed ? (
-          <Link href="/settings" style={{ ...NAV_LINK_PRIMARY, marginLeft: 8 }}>
-            {t('settings')}
-          </Link>
+          <>
+            <a
+              href={getExtensionInstallUrl()}
+              style={{ ...NAV_LINK_OUTLINE, marginLeft: 8 }}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {t('install')}
+            </a>
+            <Link href="/settings" style={{ ...NAV_LINK_PRIMARY, marginLeft: 8 }}>
+              {t('settings')}
+            </Link>
+          </>
         ) : (
           <>
             <Link href="/login" style={{ ...NAV_LINK, marginLeft: 4 }}>
               {t('signIn')}
             </Link>
+            <a
+              href={getExtensionInstallUrl()}
+              style={{ ...NAV_LINK_OUTLINE, marginLeft: 8 }}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {t('install')}
+            </a>
             <Link href="/try" style={{ ...NAV_LINK_PRIMARY, marginLeft: 8 }}>
               {t('tryFree')}
             </Link>

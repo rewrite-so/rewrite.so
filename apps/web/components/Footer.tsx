@@ -1,5 +1,6 @@
 import { useTranslations } from 'next-intl';
 import { Link } from '../i18n/navigation.ts';
+import { getExtensionInstallUrl } from '../lib/extension-install-url.ts';
 
 const COL_HEADING = {
   fontSize: 12,
@@ -63,6 +64,9 @@ export function Footer() {
           <Link href="/" style={LINK}>
             {t('link.home')}
           </Link>
+          <a href={getExtensionInstallUrl()} style={LINK} target="_blank" rel="noopener noreferrer">
+            {t('link.install')}
+          </a>
           <Link href="/try" style={LINK}>
             {t('link.tryIt')}
           </Link>

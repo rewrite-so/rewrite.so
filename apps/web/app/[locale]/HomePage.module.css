@@ -133,6 +133,18 @@
   font-size: 0.82rem;
 }
 
+.heroGithubLink {
+  display: inline-block;
+  margin-top: 8px;
+  color: #6a6a61;
+  font-size: 0.82rem;
+  text-decoration: none;
+}
+
+.heroGithubLink:hover {
+  color: #11110f;
+}
+
 .demoShell {
   border: 1px solid rgba(17, 17, 15, 0.12);
   border-radius: 8px;
