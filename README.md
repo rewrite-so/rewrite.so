@@ -93,10 +93,20 @@ Deploys are automated via GitHub Actions in `.github/workflows/`:
 - `CLOUDFLARE_ACCOUNT_ID`
 
 **Release the extension:**
+
+The extension is published on the Chrome Web Store:
+[chromewebstore.google.com/detail/gheiendipgcgiligfmbimbbffkkfiamk](https://chromewebstore.google.com/detail/gheiendipgcgiligfmbimbbffkkfiamk).
+
+To cut a new version:
+
 ```bash
 git tag ext-v0.1.0 && git push --tags
 ```
-The action builds a zip and creates a Release. Upload the zip manually to the Chrome Web Store for review.
+
+The action builds a zip and creates a GitHub Release. Each new version still
+needs to be uploaded manually to the [Chrome Web Store Developer
+Dashboard](https://chrome.google.com/webstore/devconsole) for review — the
+GitHub Release artifact is the source zip you upload there.
 
 **Manual deploy (bypass CI):**
 ```bash
