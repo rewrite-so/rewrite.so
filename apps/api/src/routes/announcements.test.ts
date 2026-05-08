@@ -74,10 +74,7 @@ function makeDb(fx: FixtureState): D1Database {
             const localeParam = (hasTierParam ? args[3] : args[2]) as string;
             const filtered = fx.seeds
               .filter((s) => matches(s, nowSec, tierParam, localeParam))
-              .sort(
-                (a, b) =>
-                  (b.priority ?? 0) - (a.priority ?? 0) || b.starts_at - a.starts_at,
-              )
+              .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0) || b.starts_at - a.starts_at)
               .map((s) => ({
                 id: s.id,
                 kind: s.kind,
@@ -278,11 +275,7 @@ describe('GET /v1/announcements — locale & surface filtering', () => {
       announcementSelects: 0,
     };
     mockSession = null;
-    const res = await app.request(
-      '/v1/announcements?locale=ru&surface=web',
-      {},
-      buildEnv(fx),
-    );
+    const res = await app.request('/v1/announcements?locale=ru&surface=web', {}, buildEnv(fx));
     expect(res.status).toBe(400);
   });
 
@@ -294,11 +287,7 @@ describe('GET /v1/announcements — locale & surface filtering', () => {
       announcementSelects: 0,
     };
     mockSession = null;
-    const res = await app.request(
-      '/v1/announcements?locale=en&surface=ios',
-      {},
-      buildEnv(fx),
-    );
+    const res = await app.request('/v1/announcements?locale=en&surface=ios', {}, buildEnv(fx));
     expect(res.status).toBe(400);
   });
 });

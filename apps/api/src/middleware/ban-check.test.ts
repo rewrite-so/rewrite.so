@@ -102,6 +102,7 @@ describe('isUserBanned', () => {
     await isUserBanned(makeDb(fx), kv, 'u1');
     const cached = store['ban:u1'];
     expect(cached).not.toBe('__none__');
-    expect(JSON.parse(cached!)).toEqual({ reason: 'r', expires_at: null });
+    expect(cached).toBeDefined();
+    expect(JSON.parse(cached ?? '')).toEqual({ reason: 'r', expires_at: null });
   });
 });

@@ -103,11 +103,7 @@ announcementsRoute.get('/v1/announcements', async (c) => {
     .filter((x): x is AnnouncementResponseItem => x !== null);
 
   // 客户端可缓存 60s（公告时效粒度足够），admin 改动等下次浏览器请求即可读到。
-  return c.json(
-    { items },
-    200,
-    { 'cache-control': `public, max-age=${RESPONSE_MAX_AGE_SEC}` },
-  );
+  return c.json({ items }, 200, { 'cache-control': `public, max-age=${RESPONSE_MAX_AGE_SEC}` });
 });
 
 function surfaceMatches(surfacesJson: string, target: string): boolean {

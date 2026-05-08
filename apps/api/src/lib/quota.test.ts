@@ -113,7 +113,11 @@ function makeKv(initial: Record<string, string> = {}): {
 
 describe('resolveUserTier', () => {
   it('returns free when no override and no subscription', async () => {
-    const fx: FakeFixture = { override: null, sub: null, selects: { override: 0, subscriptions: 0 } };
+    const fx: FakeFixture = {
+      override: null,
+      sub: null,
+      selects: { override: 0, subscriptions: 0 },
+    };
     const tier = await resolveUserTier(makeDb(fx), 'u1');
     expect(tier).toBe('free');
     expect(fx.selects.override).toBe(1);

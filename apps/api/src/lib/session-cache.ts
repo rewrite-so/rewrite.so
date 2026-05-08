@@ -21,9 +21,7 @@ import { createAuth } from './auth.ts';
  * miss so subsequent callers in the same request see the cached value
  * (including null for confirmed-anonymous).
  */
-export async function getOrResolveSessionUser(
-  c: Context<AppEnv>,
-): Promise<SessionUser | null> {
+export async function getOrResolveSessionUser(c: Context<AppEnv>): Promise<SessionUser | null> {
   const cached = c.get('sessionUser');
   if (cached !== undefined) return cached;
 

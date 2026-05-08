@@ -271,9 +271,7 @@ export async function resolveUserTier(
   let override = await readOverrideCache(kv, userId);
   if (override === undefined) {
     const row = await db
-      .prepare(
-        `SELECT force_tier, expires_at FROM admin_user_overrides WHERE user_id = ? LIMIT 1`,
-      )
+      .prepare(`SELECT force_tier, expires_at FROM admin_user_overrides WHERE user_id = ? LIMIT 1`)
       .bind(userId)
       .first<{ force_tier: string; expires_at: number | null }>();
     if (row && (row.force_tier === 'pro' || row.force_tier === 'free')) {

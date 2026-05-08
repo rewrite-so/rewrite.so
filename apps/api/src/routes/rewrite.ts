@@ -363,10 +363,7 @@ interface MetricInput {
   subjectIdRaw: string;
 }
 
-async function buildAndWriteMetric(
-  env: AppEnv['Bindings'],
-  input: MetricInput,
-): Promise<void> {
+async function buildAndWriteMetric(env: AppEnv['Bindings'], input: MetricInput): Promise<void> {
   // 构造 user_id_hash：
   // - 登录用户：hashUserId(user_id) → 16 hex
   // - install/ip 匿名：subject.id 已是 hash 形态（hashIp 在前面跑过；installId 是客户端 UUID
