@@ -100,26 +100,6 @@ function makeDb(fx: FixtureState): D1Database {
   } as unknown as D1Database;
 }
 
-function makeKv(): {
-  kv: KVNamespace;
-  store: Record<string, string>;
-  ops: { get: number; put: number };
-} {
-  const store: Record<string, string> = {};
-  const ops = { get: 0, put: 0 };
-  const kv = {
-    get: async (k: string) => {
-      ops.get++;
-      return store[k] ?? null;
-    },
-    put: async (k: string, v: string) => {
-      ops.put++;
-      store[k] = v;
-    },
-  } as unknown as KVNamespace;
-  return { kv, store, ops };
-}
-
 const fakeRateLimiter = {
   idFromName: () => ({}) as DurableObjectId,
   get: () =>
@@ -129,7 +109,7 @@ const fakeRateLimiter = {
     }) as unknown as DurableObjectStub,
 } as unknown as DurableObjectNamespace;
 
-function buildEnv(fx: FixtureState, kv?: KVNamespace) {
+function buildEnv(fx: FixtureState) {
   return {
     OPENAI_BASE_URL: 'https://upstream.test/v1',
     OPENAI_API_KEY: 'sk-test',
@@ -143,7 +123,7 @@ function buildEnv(fx: FixtureState, kv?: KVNamespace) {
     CREEM_PRO_YEARLY_PRODUCT_ID: 'prod_yearly',
     WEB_ORIGIN: 'https://rewrite.so',
     DB: makeDb(fx),
-    KV: kv ?? ({} as unknown as KVNamespace),
+    KV: {} as unknown as KVNamespace,
     RATE_LIMITER: fakeRateLimiter,
   } as const;
 }
@@ -353,8 +333,8 @@ describe('GET /v1/announcements — i18n projection', () => {
   });
 });
 
-describe('GET /v1/announcements — KV cache', () => {
-  it('cache miss writes a body, cache hit serves it back without re-querying D1', async () => {
+describe('GET /v1/announcements — caching', () => {
+  it('emits Cache-Control: max-age=60 so clients (web/extension) cache by themselves', async () => {
     const fx: FixtureState = {
       seeds: [ACTIVE_GENERAL],
       overrides: {},
@@ -362,16 +342,25 @@ describe('GET /v1/announcements — KV cache', () => {
       announcementSelects: 0,
     };
     mockSession = null;
-    const { kv, ops } = makeKv();
-    const env = buildEnv(fx, kv);
+    const res = await app.request('/v1/announcements?locale=en&surface=web', {}, buildEnv(fx));
+    expect(res.headers.get('cache-control')).toContain('max-age=60');
+  });
 
-    const res1 = await app.request('/v1/announcements?locale=en&surface=web', {}, env);
-    expect(res1.headers.get('x-rs-cache')).toBe('miss');
-    expect(fx.announcementSelects).toBe(1);
-    expect(ops.put).toBe(1);
-
-    const res2 = await app.request('/v1/announcements?locale=en&surface=web', {}, env);
-    expect(res2.headers.get('x-rs-cache')).toBe('hit');
-    expect(fx.announcementSelects).toBe(1); // no extra D1 query
+  it('hits D1 on every request (no server-side cache)', async () => {
+    // Decision: announcements table has very few active rows (~handful per month),
+    // and admin worker writes need to take effect immediately. So every GET hits
+    // D1 directly rather than going through KV.
+    const fx: FixtureState = {
+      seeds: [ACTIVE_GENERAL],
+      overrides: {},
+      subscriptions: {},
+      announcementSelects: 0,
+    };
+    mockSession = null;
+    const env = buildEnv(fx);
+    await app.request('/v1/announcements?locale=en&surface=web', {}, env);
+    await app.request('/v1/announcements?locale=en&surface=web', {}, env);
+    await app.request('/v1/announcements?locale=en&surface=web', {}, env);
+    expect(fx.announcementSelects).toBe(3);
   });
 });

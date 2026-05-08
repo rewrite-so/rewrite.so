@@ -9,10 +9,11 @@
  *   任意访客可探测 'pro' 专属公告，泄露运营策略。
  * - locale / surface 接受 client 参数（locale 是 UI 语言，surface 是来源
  *   'web'/'extension'，无泄露风险）。
- * - KV 缓存 60s（key 含 locale + surface + resolved_tier + 当前 5min 时间桶
- *   防 stale 公告时间窗外渗透）。admin 仓库 CRUD 后 KV.delete('announcements:*')
- *   即可强失效——但 60s 窗口内的请求允许 stale。
+ * - **不缓存**：announcements 表 active 行极少（运营手动写公告，月度计），D1
+ *   单次查询 O(active_rows) 即可，不需要 KV cache。这样 admin 写表后立即对所有
+ *   读路径生效，无需任何 cache invalidation 协议。
  */
+import { LOCALES } from '@rewrite/shared';
 import { Hono } from 'hono';
 import { createAuth } from '../lib/auth.ts';
 import { resolveUserTier } from '../lib/quota.ts';
@@ -44,18 +45,9 @@ interface AnnouncementResponseItem {
   priority: number;
 }
 
-const CACHE_TTL_SEC = 60;
-const CACHE_PREFIX = 'announcements:';
-const SUPPORTED_LOCALES = new Set([
-  'en',
-  'zh-CN',
-  'ja',
-  'ko',
-  'es',
-  'fr',
-  'de',
-]);
+const SUPPORTED_LOCALES = new Set<string>(LOCALES);
 const SUPPORTED_SURFACES = new Set(['web', 'extension']);
+const RESPONSE_MAX_AGE_SEC = 60;
 
 announcementsRoute.get('/v1/announcements', async (c) => {
   // ===== 解析 query 参数 =====
@@ -81,30 +73,6 @@ announcementsRoute.get('/v1/announcements', async (c) => {
   if (userId) {
     const tier = await resolveUserTier(c.env.DB, userId, c.env.KV);
     resolvedTier = tier === 'pro' ? 'pro' : 'free';
-  }
-
-  // ===== KV 缓存 =====
-  // 5min bucket 让缓存自然包含「公告刚刚开始/结束」的边界（结合 60s TTL）
-  const bucket = Math.floor(Date.now() / (5 * 60_000));
-  const cacheKey = `${CACHE_PREFIX}${locale}:${surface}:${resolvedTier}:${bucket}`;
-
-  let cached: string | null = null;
-  if (c.env.KV && typeof c.env.KV.get === 'function') {
-    try {
-      cached = await c.env.KV.get(cacheKey);
-    } catch {
-      // cache miss
-    }
-  }
-  if (cached !== null) {
-    return new Response(cached, {
-      status: 200,
-      headers: {
-        'content-type': 'application/json',
-        'cache-control': `public, max-age=${CACHE_TTL_SEC}`,
-        'x-rs-cache': 'hit',
-      },
-    });
   }
 
   // ===== D1 查询 =====
@@ -139,25 +107,12 @@ announcementsRoute.get('/v1/announcements', async (c) => {
     .map((r) => projectForLocale(r, locale))
     .filter((x): x is AnnouncementResponseItem => x !== null);
 
-  const body = JSON.stringify({ items });
-
-  // 写缓存（best-effort）
-  if (c.env.KV && typeof c.env.KV.put === 'function') {
-    try {
-      await c.env.KV.put(cacheKey, body, { expirationTtl: CACHE_TTL_SEC });
-    } catch {
-      // ignore
-    }
-  }
-
-  return new Response(body, {
-    status: 200,
-    headers: {
-      'content-type': 'application/json',
-      'cache-control': `public, max-age=${CACHE_TTL_SEC}`,
-      'x-rs-cache': 'miss',
-    },
-  });
+  // 客户端可缓存 60s（公告时效粒度足够），admin 改动等下次浏览器请求即可读到。
+  return c.json(
+    { items },
+    200,
+    { 'cache-control': `public, max-age=${RESPONSE_MAX_AGE_SEC}` },
+  );
 });
 
 function surfaceMatches(surfacesJson: string, target: string): boolean {
