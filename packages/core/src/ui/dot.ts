@@ -36,6 +36,7 @@ export function createDot(root: ShadowRoot, locale: Locale): DotController {
 
   let currentTarget: HTMLElement | null = null;
   let rafId = 0;
+  let currentResizeObserver: ResizeObserver | null = null;
 
   const updatePosition = () => {
     rafId = 0;
@@ -75,6 +76,14 @@ export function createDot(root: ShadowRoot, locale: Locale): DotController {
       currentTarget = target;
       window.addEventListener('scroll', onScrollOrResize, { capture: true, passive: true });
       window.addEventListener('resize', onScrollOrResize, { passive: true });
+      // Track target's own size changes — textareas auto-grow as the user types,
+      // contenteditable rich editors reflow on newline, etc. Without this the
+      // dot stays glued to the original right-bottom and visibly drifts.
+      currentResizeObserver?.disconnect();
+      if (typeof ResizeObserver !== 'undefined') {
+        currentResizeObserver = new ResizeObserver(() => requestUpdate());
+        currentResizeObserver.observe(target);
+      }
       requestUpdate();
     },
     hide() {
@@ -83,6 +92,8 @@ export function createDot(root: ShadowRoot, locale: Locale): DotController {
       tooltip.classList.remove('visible');
       window.removeEventListener('scroll', onScrollOrResize, { capture: true });
       window.removeEventListener('resize', onScrollOrResize);
+      currentResizeObserver?.disconnect();
+      currentResizeObserver = null;
     },
     destroy() {
       this.hide();
