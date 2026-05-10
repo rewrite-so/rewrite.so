@@ -312,6 +312,10 @@ export const SHADOW_STYLES = `
   line-height: 1.45;
   white-space: pre-wrap;
   word-break: break-word;
+  /* Reserve space for the absolute-positioned .card-action (regen ↻ /
+   * spinner) anchored at right:10 bottom:8 — without this the last line of
+   * a long rewrite overlaps the icon. 18px button + 8px breathing room. */
+  padding-right: 26px;
 }
 .text.dim { color: light-dark(rgba(0,0,0,0.4), rgba(255,255,255,0.4)); }
 
