@@ -40,6 +40,23 @@ function setup() {
 }
 
 describe('createCandidates', () => {
+  it('renders the rewrite.so brand label in the panel header', () => {
+    const { factory, target, root } = setup();
+    factory.open({ target, locale: 'en', targetLang: 'en' });
+    const brand = root.querySelector('.brand-label') as HTMLElement;
+    expect(brand).not.toBeNull();
+    expect(brand.textContent).toBe('rewrite.so');
+  });
+
+  it('brand label is locale-independent (no i18n key — same text everywhere)', () => {
+    for (const locale of ['en', 'zh-CN', 'ja', 'ko', 'es', 'fr', 'de'] as const) {
+      const { factory, target, root } = setup();
+      factory.open({ target, locale, targetLang: 'en' });
+      expect((root.querySelector('.brand-label') as HTMLElement).textContent).toBe('rewrite.so');
+      destroyShadowRoot();
+    }
+  });
+
   it('renders 3 cards in fixed order on open', () => {
     const { factory, target, root } = setup();
     factory.open({ target, locale: 'zh-CN', targetLang: 'en' });
@@ -398,6 +415,34 @@ describe('createCandidates', () => {
     }
   });
 
+  // Regression: previously hand-wired `if (locale === 'zh-CN')`; now goes
+  // through tCore so ja/ko/es/fr/de no longer fall back to English.
+  it('setGlobalError quota_exceeded sub-text uses i18n catalog (zh-CN)', () => {
+    const { factory, target, root } = setup();
+    const handle = factory.open({ target, locale: 'zh-CN', targetLang: 'en' });
+    handle.setGlobalError('quota_exceeded', { authed: true, used: 5, limit: 30 });
+    const sub = root.querySelector('.global-error-sub') as HTMLElement;
+    expect(sub.textContent).toBe('已用 5 / 30，下个月初重置。');
+  });
+
+  it('setGlobalError quota_exceeded sub-text honors ja locale (no English fallback)', () => {
+    const { factory, target, root } = setup();
+    const handle = factory.open({ target, locale: 'ja', targetLang: 'en' });
+    handle.setGlobalError('quota_exceeded', { authed: true, used: 5, limit: 30 });
+    const sub = root.querySelector('.global-error-sub') as HTMLElement;
+    expect(sub.textContent).toContain('5 / 30');
+    expect(sub.textContent).toContain('使用済み');
+  });
+
+  it('setGlobalError rate_limit sub-text honors fr locale', () => {
+    const { factory, target, root } = setup();
+    const handle = factory.open({ target, locale: 'fr', targetLang: 'en' });
+    handle.setGlobalError('rate_limit', { retryAfterMs: 5000 });
+    const sub = root.querySelector('.global-error-sub') as HTMLElement;
+    expect(sub.textContent).toContain('5s');
+    expect(sub.textContent).toContain('Réessayez');
+  });
+
   it('setGlobalError does NOT show Retry for non-retryable errors (quota_exceeded)', () => {
     const { factory, target, root } = setup();
     const handle = factory.open({ target, locale: 'en', targetLang: 'en', loginUrl: '/login' });
@@ -438,7 +483,7 @@ describe('createCandidates', () => {
     expect(chip.classList.contains('warn')).toBe(true);
   });
 
-  it('setStatus shows quota chip without .warn class at >=50% but <80% (gray)', () => {
+  it('setStatus shows quota chip without .warn class below 80% (gray)', () => {
     const { factory, target, root } = setup();
     const handle = factory.open({ target, locale: 'en', targetLang: 'en' });
     handle.setStatus({ authed: true, tier: 'free', isBYOK: false, used: 18, limit: 30 });
@@ -448,10 +493,32 @@ describe('createCandidates', () => {
     expect(chip.classList.contains('warn')).toBe(false);
   });
 
-  it('setStatus hides quota chip below 50% threshold', () => {
+  // Regression: previously gated by >=50% threshold; now shows at any usage so
+  // users can see their monthly count whenever the panel is open.
+  it('setStatus shows quota chip below 50% (no threshold)', () => {
     const { factory, target, root } = setup();
     const handle = factory.open({ target, locale: 'en', targetLang: 'en' });
-    handle.setStatus({ authed: true, tier: 'free', isBYOK: false, used: 10, limit: 30 });
+    handle.setStatus({ authed: true, tier: 'free', isBYOK: false, used: 14, limit: 30 });
+    const chip = root.querySelector('.quota-chip') as HTMLElement;
+    expect(chip.style.display).toBe('');
+    expect(chip.textContent).toBe('14/30');
+    expect(chip.classList.contains('warn')).toBe(false);
+  });
+
+  it('setStatus shows quota chip at 0/N boundary', () => {
+    const { factory, target, root } = setup();
+    const handle = factory.open({ target, locale: 'en', targetLang: 'en' });
+    handle.setStatus({ authed: true, tier: 'free', isBYOK: false, used: 0, limit: 30 });
+    const chip = root.querySelector('.quota-chip') as HTMLElement;
+    expect(chip.style.display).toBe('');
+    expect(chip.textContent).toBe('0/30');
+    expect(chip.classList.contains('warn')).toBe(false);
+  });
+
+  it('setStatus hides quota chip when used/limit are missing', () => {
+    const { factory, target, root } = setup();
+    const handle = factory.open({ target, locale: 'en', targetLang: 'en' });
+    handle.setStatus({ authed: true, tier: 'free', isBYOK: false });
     expect((root.querySelector('.quota-chip') as HTMLElement).style.display).toBe('none');
   });
 

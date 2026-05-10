@@ -188,12 +188,19 @@ function openPanel(
     ev.preventDefault();
   });
 
-  // 顶部 header：[BYOK badge?] [quota chip?] [target chip] [⚙]
+  // 顶部 header：[brand] [BYOK badge?] [quota chip?] [target chip] [⚙]
+  // brand 永远显示并用 margin-right:auto 把其它 chip 推到右侧；
   // BYOK badge 和 quota chip 在 setStatus 收到 meta event 后插入；初始不显示
   const header = document.createElement('div');
   header.className = 'panel-header';
 
-  // BYOK badge 占位（永远在最前；setStatus 决定 display）
+  // brand label（永远显示在最左）
+  const brand = document.createElement('div');
+  brand.className = 'brand-label';
+  brand.textContent = 'rewrite.so';
+  header.appendChild(brand);
+
+  // BYOK badge 占位（在 brand 后；setStatus 决定 display）
   const byokBadge = document.createElement('div');
   byokBadge.className = 'byok-badge';
   byokBadge.textContent = t('core.byokBadge', opts.locale);
@@ -542,15 +549,14 @@ function openPanel(
       // BYOK badge：仅 BYOK 模式显示
       byokBadge.style.display = status.isBYOK ? '' : 'none';
 
-      // quota chip：BYOK 模式不显示；其它两段显示——
-      //   >=50% 显示灰色（用 .quota-chip 默认样式），引起轻度注意
-      //   >=80% 加 .warn 变琥珀色，明显警告"快用完"
+      // quota chip：BYOK 模式不显示；其它情况只要 used/limit 是有效数字就始终显示
+      // （含 0/N 边界），让用户每次打开浮窗都能看到本月用量。≥80% 加 .warn 变琥珀色
+      // 明显警告"快用完"。
       if (
         !status.isBYOK &&
         typeof status.used === 'number' &&
         typeof status.limit === 'number' &&
-        status.limit > 0 &&
-        status.used / status.limit >= 0.5
+        status.limit > 0
       ) {
         quotaChip.textContent = `${status.used}/${status.limit}`;
         quotaChip.classList.toggle('warn', status.used / status.limit >= 0.8);
@@ -704,16 +710,16 @@ function describeErrorDetail(
     const used = typeof detail.used === 'number' ? detail.used : null;
     const limit = typeof detail.limit === 'number' ? detail.limit : null;
     if (used != null && limit != null) {
-      return locale === 'zh-CN'
-        ? `已用 ${used} / ${limit}，下个月初重置。`
-        : `Used ${used} / ${limit}. Resets at the start of next month.`;
+      return t('error.quotaExceededDetail', locale)
+        .replace('{used}', String(used))
+        .replace('{limit}', String(limit));
     }
   }
   if (code === 'rate_limit') {
     const ms = typeof detail.retryAfterMs === 'number' ? detail.retryAfterMs : null;
     if (ms != null) {
       const sec = Math.max(1, Math.ceil(ms / 1000));
-      return locale === 'zh-CN' ? `请 ${sec} 秒后重试。` : `Try again in ${sec}s.`;
+      return t('error.rateLimitRetryAfter', locale).replace('{sec}', String(sec));
     }
   }
   // upstream_error / unauthorized / 等：透传上游/服务端的 message + status，让用户能 debug

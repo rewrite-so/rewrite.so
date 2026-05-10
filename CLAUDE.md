@@ -222,6 +222,15 @@
   新增 button 时不需要单独处理，panel 容器级 listener 已覆盖。
 - **contenteditable 替换**：先 `dispatchEvent(InputEvent('beforeinput', { inputType: 'insertReplacementText', data }))`，被框架（ProseMirror/Lexical/Slate）preventDefault 后我们就不要再写 DOM；否则降级到 `document.execCommand('insertText')`（已废弃但唯一保留 undo 栈）。
 - **chrome.storage 所有 key 带 `_v: 1`**：方便将来跨版本兼容时新字段读旧值。MVP 不写迁移层但保留版本字段习惯。
+- **dot 首次自动 popup tooltip**（onboarding 教学）：扩展端通过
+  `UserPrefs.hasSeenDotTooltip` flag 控制——dot 第一次出现时自动 popup tooltip
+  ("Shift Shift to rewrite.so") 4 秒，然后只 hover 才显示。**popup 触发瞬间立即落
+  flag**（不等 4s 淡出），避免 4s 内 unmount/remount 让 tooltip 显示两次。
+  **web /try 模式不开启**——/try 是匿名快速试用页，浮层底部已有 install hint，
+  不需要 dot tooltip onboarding；MountOptions 默认 `showFirstDotTooltip` 不传即 OFF。
+- **浮窗 quota chip 始终显示**（无 ≥50% 阈值，0/N 也显示）：让用户每次打开浮窗都
+  能看到本月用量。BYOK 模式仍不显示（key 是用户的，无月配额概念）；used/limit
+  缺失也不显示。
 
 ## 基础设施
 

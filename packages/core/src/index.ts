@@ -42,6 +42,15 @@ export interface MountOptions {
    */
   onUserPrefsSync?: (prefs: { targetLang: string }) => void;
   /**
+   * true → 扩展端 dot 在用户首次聚焦输入框、dot 出现时自动 popup tooltip
+   * 4 秒（onboarding 提示，"Shift Shift to rewrite.so"）。host 应通过
+   * onFirstDotTooltipShown 回调持久化 flag，避免下次 mount 再次 popup。
+   * web /try 模式不传（已有底部 install hint，不需要 dot onboarding）。
+   */
+  showFirstDotTooltip?: boolean;
+  /** dot 首次 popup 触发时立即调（不等淡出），让 host 落 flag。 */
+  onFirstDotTooltipShown?: () => void;
+  /**
    * 用户接受了某个候选改写后调用（panel close、editable 替换之后）。
    * 给 host 一个统计/转化埋点（如 web /try 用 onAccepted 累计匿名用户成功
    * 改写次数，触发"登录解锁更多"引导）。可选，扩展端不需实现。
@@ -72,7 +81,15 @@ export function mount(opts: MountOptions): MountHandle {
   const userPrefLang = opts.userPrefLang ?? 'auto';
 
   const { root } = createShadowRoot(shadowMode);
-  const dot = createDot(root, uiLocale);
+  // dot.onActivate is wired below to handleTrigger (declared further down)
+  // via a forward closure — handleTrigger isn't in scope yet.
+  const dot = createDot(root, uiLocale, {
+    showFirstTooltip: opts.showFirstDotTooltip,
+    onFirstTooltipShown: opts.onFirstDotTooltipShown,
+    onActivate: () => {
+      void handleTrigger();
+    },
+  });
 
   let activeEditable: HTMLElement | null = null;
   // 浮层打开期间锁定的 target editable —— 即使输入框失焦或被切换，浮层关闭前

@@ -7,6 +7,7 @@ import {
   getOrCreateInstallId,
   getUserPrefs,
   onPrefsChanged,
+  patchUserPrefs,
   type UserPrefs,
 } from '../lib/storage.ts';
 import { createPortApiClient } from './port-client.ts';
@@ -99,6 +100,12 @@ async function bootstrap(): Promise<void> {
     // 走 sendMessage → background SW 代为打开
     onOpenSettings: () => {
       chrome.runtime.sendMessage({ type: 'open-options' });
+    },
+    // 首次聚焦输入框时让 dot 自动 popup tooltip 介绍快捷键 + 品牌；popup 触发瞬间
+    // 立即落 flag（不等 4s 淡出），避免 4s 内 unmount/remount 让 tooltip 显示两次。
+    showFirstDotTooltip: !p.hasSeenDotTooltip,
+    onFirstDotTooltipShown: () => {
+      void patchUserPrefs({ hasSeenDotTooltip: true });
     },
   });
 

@@ -50,6 +50,10 @@ apps/extension/.dev-keys/
 # Temp
 *.tmp
 
-# Claude scheduled tasks lock
-.claude/
+# Claude local state (cron locks, caches, transient artifacts) — local only.
+# Use .claude/* (not .claude/) so git still descends into the dir; otherwise
+# the negation below is silently ignored.
+.claude/*
+# …but project-level skills are shared with the team and must be tracked.
+!.claude/skills/
 

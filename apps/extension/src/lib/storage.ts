@@ -22,6 +22,8 @@ export interface UserPrefs {
   triggerEnabled: boolean;
   /** onboarding 完成与否 */
   hasCompletedOnboarding: boolean;
+  /** dot 首次自动 popup tooltip 是否已展示过；用一次后置 true */
+  hasSeenDotTooltip: boolean;
 }
 
 export const DEFAULT_PREFS: UserPrefs = {
@@ -30,6 +32,7 @@ export const DEFAULT_PREFS: UserPrefs = {
   uiLocale: 'auto',
   triggerEnabled: true,
   hasCompletedOnboarding: false,
+  hasSeenDotTooltip: false,
 };
 
 interface InstallIdRecord {

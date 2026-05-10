@@ -14,39 +14,40 @@ export const SHADOW_STYLES = `
 
 .dot {
   position: fixed;
-  width: 10px;
-  height: 10px;
-  border-radius: 4px;
+  width: 5px;
+  height: 5px;
+  border-radius: 1.5px;
   background: #20C7B5;
+  border: 0.5px solid light-dark(rgba(255, 255, 255, 0.4), rgba(0, 0, 0, 0.1));
   pointer-events: auto;
-  cursor: default;
+  cursor: pointer;
   z-index: 2147483646;
   transition: transform 160ms cubic-bezier(0.4, 0, 0.2, 1),
     opacity 160ms ease,
     box-shadow 160ms ease;
   opacity: 0;
-  transform: scale(0.9);
-  box-shadow:
-    0 0 0 1px light-dark(rgba(255, 255, 255, 0.82), rgba(21, 26, 31, 0.88)),
-    0 1px 5px rgba(0, 0, 0, 0.16);
+  transform: scale(1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+@keyframes rs-dot-breathe {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50% { opacity: 0.65; transform: scale(0.9); }
 }
 .dot.visible {
-  opacity: 0.76;
-  transform: scale(1);
-  animation: rs-dot-breathe 3s ease-in-out infinite;
+  opacity: 0.85;
+  animation: rs-dot-breathe 4s ease-in-out infinite;
 }
-.dot:hover {
-  opacity: 0.95;
-  transform: scale(1.2);
-  animation: none;
+/* Hover keeps the breathing animation running on top of the scale(2)
+ * transform — intentional, so the hovered dot still feels alive.
+ * Scoped to .visible so a dot that's been hide()d while the cursor
+ * lingers won't re-emerge at scale(2) with no breathing animation
+ * running to cap its transform. */
+.dot.visible:hover {
+  opacity: 1;
+  transform: scale(2); /* Scale up to 10px on hover for easier clicking */
   box-shadow:
-    0 0 0 1.5px light-dark(rgba(255, 255, 255, 0.92), rgba(21, 26, 31, 0.92)),
-    0 2px 8px rgba(0, 0, 0, 0.22);
-}
-
-@keyframes rs-dot-breathe {
-  0%, 100% { opacity: 0.76; }
-  50% { opacity: 0.58; }
+    0 0 0 1px light-dark(rgba(255, 255, 255, 0.7), rgba(21, 26, 31, 0.5)),
+    0 2px 6px rgba(32, 199, 181, 0.25);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -84,11 +85,15 @@ export const SHADOW_STYLES = `
   position: fixed;
   min-width: 320px;
   max-width: 560px;
-  background: light-dark(#fff, #1c1c1e);
+  background: light-dark(rgba(255, 255, 255, 0.75), rgba(28, 28, 30, 0.75));
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   color: light-dark(#1f1f1f, #f5f5f5);
-  border: 1px solid light-dark(rgba(0,0,0,0.08), rgba(255,255,255,0.1));
-  border-radius: 12px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  border: 1px solid light-dark(rgba(0,0,0,0.05), rgba(255,255,255,0.1));
+  border-radius: 16px;
+  box-shadow: 
+    0 12px 48px rgba(0, 0, 0, 0.12),
+    0 0 0 1px light-dark(rgba(0,0,0,0.05), rgba(255,255,255,0.05));
   padding: 8px;
   z-index: 2147483647;
   pointer-events: auto;
@@ -102,7 +107,20 @@ export const SHADOW_STYLES = `
   align-items: center;
   justify-content: flex-end;
   gap: 6px;
-  padding: 2px 4px 6px;
+  padding: 4px 6px 8px;
+}
+
+/* brand label：低调显示在 header 最左侧，让用户每次打开浮窗都能看到品牌；
+ * margin-right:auto 把其它 chip / 齿轮推到右侧（panel-header 是 flex 容器） */
+.brand-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: light-dark(rgba(0,0,0,0.5), rgba(255,255,255,0.5));
+  margin-right: auto;
+  pointer-events: none;
+  user-select: none;
+  font-feature-settings: "tnum";
 }
 
 .target-chip {
@@ -178,14 +196,14 @@ export const SHADOW_STYLES = `
   display: flex;
   align-items: stretch;
   gap: 10px;
-  padding: 10px 12px;
-  border-radius: 8px;
+  padding: 12px 14px;
+  border-radius: 10px;
   cursor: pointer;
   transition: background 80ms ease;
   position: relative;
 }
 .card:hover, .card.focused {
-  background: light-dark(rgba(0,0,0,0.04), rgba(255,255,255,0.06));
+  background: light-dark(rgba(0,0,0,0.06), rgba(255,255,255,0.1));
 }
 .card.error {
   opacity: 0.85;
@@ -299,6 +317,10 @@ export const SHADOW_STYLES = `
   line-height: 1.45;
   white-space: pre-wrap;
   word-break: break-word;
+  /* Reserve space for the absolute-positioned .card-action (regen ↻ /
+   * spinner) anchored at right:10 bottom:8 — without this the last line of
+   * a long rewrite overlaps the icon. 18px button + 8px breathing room. */
+  padding-right: 26px;
 }
 .text.dim { color: light-dark(rgba(0,0,0,0.4), rgba(255,255,255,0.4)); }
 

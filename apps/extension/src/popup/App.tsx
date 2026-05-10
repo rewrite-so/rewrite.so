@@ -50,7 +50,7 @@ export function App() {
   }, []);
 
   return (
-    <div style={{ width: 280, padding: 16, fontFamily: 'system-ui, sans-serif' }}>
+    <div style={{ width: 320, padding: 20, fontFamily: 'system-ui, sans-serif' }}>
       <header style={{ marginBottom: 12 }}>
         <h2 style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>rewrite.so</h2>
         <p style={{ margin: '4px 0 0', fontSize: 12, color: '#666' }}>{t('ext.popup.tagline')}</p>
@@ -166,17 +166,19 @@ function UsageDisplay({ usage }: { usage: Usage }) {
 }
 
 const cardStyle = {
-  padding: '10px 12px',
-  border: '1px solid #e4e4e7',
-  borderRadius: 8,
-  background: '#fafafa',
+  padding: '16px',
+  border: '1px solid #f0f0f0',
+  borderRadius: 12,
+  background: '#fff',
+  boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
 };
 const btnStyle = {
   flex: 1,
-  padding: '8px 12px',
+  padding: '10px 14px',
   fontSize: 12,
+  fontWeight: 500,
   border: '1px solid #d4d4d8',
-  borderRadius: 6,
+  borderRadius: 8,
   background: '#fff',
   cursor: 'pointer',
   fontFamily: 'inherit',
