@@ -86,6 +86,32 @@ describe('POST /v1/billing/verify-checkout', () => {
     expect(res.status).toBe(400);
   });
 
+  it('calls Creem with /v1/checkouts?checkout_id=... query-param URL (not path-param)', async () => {
+    // Creem OpenAPI: GET /v1/checkouts?checkout_id=xxx；写成 path param 一律 404。
+    // 来源 https://docs.creem.io/api-reference/openapi.json operationId=retrieveCheckout
+    mockSession = { user: { id: 'u1', email: 'u1@test.com' } };
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(
+        Response.json({ id: 'ck_abc', status: 'pending', metadata: { user_id: 'u1' } }),
+      );
+    await app.request(
+      '/v1/billing/verify-checkout',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ checkoutId: 'ck_abc' }),
+      },
+      MOCK_ENV,
+    );
+    const calledUrl = fetchSpy.mock.calls[0]?.[0];
+    expect(typeof calledUrl).toBe('string');
+    expect(calledUrl).toContain('/checkouts?');
+    expect(calledUrl).toContain('checkout_id=ck_abc');
+    // 防回归：path-param 形态绝不能出现
+    expect(calledUrl).not.toMatch(/\/checkouts\/ck_abc/);
+  });
+
   it('returns 502 when Creem fetch fails', async () => {
     mockSession = { user: { id: 'u1', email: 'u1@test.com' } };
     vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response('boom', { status: 500 }));

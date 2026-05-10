@@ -87,13 +87,14 @@ export async function fetchCheckout(input: {
   apiKey: string;
   checkoutId: string;
 }): Promise<CreemCheckoutObject> {
-  const res = await fetch(
-    `${creemBase(input.apiKey)}/checkouts/${encodeURIComponent(input.checkoutId)}`,
-    {
-      method: 'GET',
-      headers: { 'x-api-key': input.apiKey },
-    },
-  );
+  // 单查 endpoint 用 query param，不是 path param。写错路径一律 404。
+  // OpenAPI: https://docs.creem.io/api-reference/openapi.json operationId=retrieveCheckout
+  const params = new URLSearchParams({ checkout_id: input.checkoutId });
+  const url = `${creemBase(input.apiKey)}/checkouts?${params}`;
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: { 'x-api-key': input.apiKey },
+  });
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`Creem fetchCheckout failed: ${res.status} ${text}`);
