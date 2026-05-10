@@ -113,14 +113,28 @@ Path filter excludes `CLAUDE.md` and `.github/` — those are internal
 and never belong in user-facing release notes.
 
 Show the result to the user and help them rewrite it as **end-user**
-copy for the Web Store "What's new" field. Conventional-commit subjects
-are CI-friendly but useless to actual users.
+copy. Conventional-commit subjects are CI-friendly but useless to
+actual users.
 
 Bad:  `feat(core): clicking the trigger dot kicks off rewrite`
 Good: `New: click the green dot in the corner to rewrite — same as Shift Shift.`
 
-Save the rewritten copy somewhere the user can paste later (chat output
-is fine; do not commit a CHANGELOG file unless they ask).
+Where this copy lands — the Chrome Web Store has **no** per-version
+"What's new" field (common misconception; do not promise the user one):
+
+- **Canonical**: the GitHub Release body for `ext-v$NEW`.
+  `softprops/action-gh-release@v2` in `release-extension.yml`
+  auto-generates a basic body from commits. After the workflow goes
+  green you can `gh release edit ext-v$NEW --notes "$(cat <<'EOF' ... EOF)"`
+  to replace it with richer end-user copy.
+- **Optional**: prefix the same copy to the top of Web Store
+  **Store listing → Description** (e.g. "What's new in 0.2.0: …").
+  Low-leverage — most listing visitors don't read the description —
+  so skip unless this release has a headline feature worth surfacing
+  to install-page traffic.
+
+Save the rewritten copy in chat output for the user to paste later.
+Do not commit a CHANGELOG file unless they ask.
 
 ## Step 3 — Commit the version bump
 
@@ -229,12 +243,16 @@ Then tell the user, in plain numbered steps:
 2. Open <https://chrome.google.com/webstore/devconsole/> and select the
    rewrite.so item (store ID `gheiendipgcgiligfmbimbbffkkfiamk`).
 3. **Package tab → Upload new package** → drop in the zip.
-4. **Store listing tab → "What's new"** → paste the changelog from Step 2.
-5. **Submit for review.** Typical review time: 24–72h. Until reviewed,
+4. **Submit for review.** Typical review time: 24–72h. Until reviewed,
    users still see the previous version.
-6. Optional but recommended: under **Distribution → Rollout**, choose a
+5. Optional but recommended: under **Distribution → Rollout**, choose a
    percentage (e.g. 20% → 50% → 100%) so a regression doesn't hit
    everyone at once.
+6. Optional: if this release has a feature worth surfacing to listing
+   visitors, paste the Step-2 changelog at the top of **Store listing
+   → Description**. There is **no** per-version "What's new" field on
+   the Web Store; the GitHub release body is the canonical changelog
+   instead.
 
 Remind the user to **install the unpacked dev build and smoke-test the
 core flows** (double-Shift, dot click, panel header brand, quota chip,
