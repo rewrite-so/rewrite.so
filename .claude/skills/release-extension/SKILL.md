@@ -1,7 +1,7 @@
 ---
 name: release-extension
 description: Cut a new versioned release of the rewrite.so Chrome extension. Use when the user asks to "release"/"publish"/"ship"/"发版"/"发布扩展"/"发布新版"/"打 tag 发版"/"上 Chrome 商店". Bumps version, pushes main, tags, monitors CI build, and hands off to the manual Web Store upload step.
-allowed-tools: Bash(git:*), Bash(gh:*), Bash(pnpm:*), Bash(node:*), Read, Edit
+allowed-tools: Bash(git:*), Bash(gh:*), Bash(pnpm:*), Bash(node:*), Read, Edit, AskUserQuestion
 ---
 
 # Release the rewrite.so Chrome Extension
@@ -11,24 +11,36 @@ into a Chrome Web Store-ready zip via the `release-extension.yml`
 workflow. The skill stops short of the actual Web Store upload — that
 remains a deliberate human step (see "Why we don't auto-publish" below).
 
-## Preflight (must pass before any tag is pushed)
+## Step 0 — Preflight (must pass before any tag is pushed)
 
 Run all of these. If any fails, stop and ask the user — do not silently
 fix dirty trees, lockfile drift, or merge conflicts.
 
 ```bash
-git status                                # clean working tree
-git rev-parse --abbrev-ref HEAD           # must be 'main'
-git fetch origin && git status -sb        # in sync with origin/main
-pnpm install --frozen-lockfile            # lockfile is honest
-pnpm lint                                 # biome (CI gate)
-pnpm typecheck                            # all 6 packages
-pnpm test                                 # full suite
-gh auth status                            # needed for `gh run watch`
+git rev-parse --abbrev-ref HEAD               # must be 'main'
+git status --porcelain                        # empty output = clean
+git fetch origin
+git rev-list --count origin/main..HEAD        # local-only commits
+git rev-list --count HEAD..origin/main        # remote-only commits
+pnpm install --frozen-lockfile                # lockfile is honest
+pnpm lint                                     # biome (CI gate)
+pnpm typecheck                                # all packages
+pnpm test                                     # full suite
+gh auth status                                # needed for `gh run watch`
 ```
 
-If `git status` is dirty: ask the user whether to commit, stash, or
-abort. Never `git stash` or `--force` anything without confirmation.
+Interpret the four `git` checks together:
+
+| Local ahead | Local behind | Working tree | Action |
+|---|---|---|---|
+| 0 | 0 | clean | OK, proceed. |
+| ≥1 | 0 | clean | OK — typical case (user committed locally then ran the skill). The push happens in Step 4. |
+| any | ≥1 | any | Abort. `git pull --rebase origin main` first; do NOT auto-rebase. |
+| any | any | dirty | Ask the user: commit, stash, or abort. Never `git stash` or `--force` anything without confirmation. |
+
+A non-zero exit from `pnpm lint` / `pnpm typecheck` / `pnpm test` is a
+hard stop — do not proceed and tag a build that the local toolchain
+already says is broken.
 
 ## Step 1 — Decide the new version
 
@@ -58,9 +70,11 @@ Apply Conventional Commits → SemVer mapping:
 | Otherwise (only `fix` / `chore` / `docs` / `style` / `refactor` / `perf` / `test` / `polish`) | **patch** |
 | No commits in scope at all | abort — nothing to release |
 
-If the repo has no prior `ext-v*` tag (first release ever), default the
-recommendation to **minor** unless the user says otherwise — `0.1.0` is
-typical for an established but pre-1.0 product.
+If the repo has no prior `ext-v*` tag (first time this skill runs after
+the initial Web Store listing), still apply the table above. The
+package.json version is already on disk; the bump is from there. There
+is no "first release" exception — apply Conventional Commits → SemVer
+the same way every time.
 
 ### Present the choice with the recommendation pinned first
 
@@ -92,8 +106,11 @@ Only `apps/extension/package.json` gets bumped — `@rewrite/core` /
 ```bash
 LAST_TAG=$(git tag -l 'ext-v*' --sort=-v:refname | head -1)
 git log ${LAST_TAG:+$LAST_TAG..}HEAD --oneline \
-  -- apps/extension packages/core packages/shared CLAUDE.md
+  -- apps/extension packages/core packages/shared
 ```
+
+Path filter excludes `CLAUDE.md` and `.github/` — those are internal
+and never belong in user-facing release notes.
 
 Show the result to the user and help them rewrite it as **end-user**
 copy for the Web Store "What's new" field. Conventional-commit subjects
@@ -119,40 +136,86 @@ Do not amend earlier commits, do not reword history.
 
 ## Step 4 — Push main, then tag
 
+Before pushing, summarize what's about to land for the user — the local
+branch may have many unpushed commits, and they should see the list in
+case any of them shouldn't go to `main` yet:
+
+```bash
+git log origin/main..HEAD --oneline
+```
+
+If the list is non-trivial (>3 commits), surface it to the user and
+confirm before pushing. Don't skip this; surprises here can ship
+unrelated work to production.
+
+Then push:
+
 ```bash
 git push origin main
 git tag "ext-v$NEW"
 git push origin "ext-v$NEW"
 ```
 
-Path filters trigger automatically:
-- `main` push → `deploy-api` + `deploy-web` (because `packages/**` change).
-- `ext-v$NEW` tag → `release-extension.yml` (builds zip, creates GitHub Release).
+Workflow triggers (path-filtered, all in `.github/workflows/`):
 
-## Step 5 — Wait for the release build
+- `main` push → `deploy-api.yml` + `deploy-web.yml` ONLY if the push
+  touched `apps/api/**`, `apps/web/**`, `packages/**`, or
+  `pnpm-lock.yaml`. A bump-only push (just `apps/extension/package.json`)
+  triggers neither.
+- `ext-v$NEW` tag → `release-extension.yml` (builds zip, creates GitHub
+  Release).
+
+## Step 5 — Wait for the release build (and any deploys)
+
+Pin the specific run by ID instead of relying on "the latest one":
 
 ```bash
-gh run list --workflow=release-extension.yml --limit 1
-gh run watch --exit-status        # blocks until the run finishes
+RUN_ID=$(gh run list --workflow=release-extension.yml --limit 1 \
+  --json databaseId -q '.[0].databaseId')
+gh run watch "$RUN_ID" --exit-status
 ```
 
-Expected: ~3–5 min. Common failures and how to handle them:
+If Step 4's push also touched `packages/**` / `apps/api/**` /
+`apps/web/**` / `pnpm-lock.yaml`, also check `deploy-api.yml` and
+`deploy-web.yml` from the same commit — a green release tag with a red
+deploy is a regression on rewrite.so itself, not on the extension:
 
-| Failure | Cause | Recovery |
-|---|---|---|
-| `pnpm install --frozen-lockfile` fails | lockfile drift since last green CI | Delete tag, regenerate lockfile, re-tag same version |
-| biome / typecheck fails in CI | preflight (Step 0) was skipped or partial | Same as above — re-run preflight, fix forward, re-tag |
-| zip step fails | rare; usually missing dist files | Check `apps/extension/vite.config.ts` build output |
+```bash
+gh run list --branch main --limit 5
+```
 
-To delete a tag (only with user confirmation — destructive, visible):
+Expected `release-extension.yml` duration: ~3–5 min.
+
+### Recovery
+
+The right recovery depends on whether the bump commit has already been
+pushed to `main` (Step 4). Tag-only failures and main-pushed failures
+need different paths:
+
+| Failure | Cause | Bump committed to main? | Recovery |
+|---|---|---|---|
+| `pnpm install --frozen-lockfile` fails | lockfile drift since last green CI | No (you're between Step 3 and Step 4) | Delete the local tag, regenerate the lockfile, re-tag same version. Nothing was pushed. |
+| Same | Same | Yes (Step 4 already ran) | Fix-forward with `ext-v<next-patch>` — never rewrite a published main. |
+| biome / typecheck fails in CI | Step 0 preflight was skipped or partial | Either | Re-run preflight, fix locally, then either re-tag (if not pushed) or fix-forward (if pushed). |
+| zip step fails | rare; usually missing dist files | Either | Inspect `apps/extension/vite.config.ts` build output and the failed run's logs. Usually a CRXJS / Rollup quirk surfaced by an env diff between local and CI. |
+
+To delete the **local-only** tag (only when the bump commit is also
+local-only — no main push happened yet):
+
+```bash
+git tag -d "ext-v$NEW"
+```
+
+To delete a **pushed** tag (destructive, visible — only with explicit
+user confirmation, and only when nothing else depends on it):
 
 ```bash
 git push --delete origin "ext-v$NEW"
 git tag -d "ext-v$NEW"
 ```
 
-Prefer "fix forward" with `ext-v$NEW+1` over deleting tags whenever
-commits have already been pushed to `main` between attempts.
+**Default to fix-forward.** A small empty-bump-commit + new tag is
+cheaper than the social cost of "where did ext-v0.X.Y go?"
 
 ## Step 6 — Hand off to manual Web Store upload
 
@@ -175,8 +238,10 @@ Then tell the user, in plain numbered steps:
 
 Remind the user to **install the unpacked dev build and smoke-test the
 core flows** (double-Shift, dot click, panel header brand, quota chip,
-tooltip first-popup) before clicking Submit. Once submitted, only a new
-version can fix a regression.
+tooltip first-popup) before clicking Submit. Submitted-but-pending
+versions can still be cancelled in the dashboard, but **once approved
+and rolled out, only a new version can fix a regression** — so the
+smoke test really is the last gate.
 
 ## Why we don't auto-publish (yet)
 
