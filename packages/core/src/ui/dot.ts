@@ -10,10 +10,29 @@ export interface DotController {
   destroy(): void;
 }
 
+export interface DotOptions {
+  /**
+   * true → 在 dot 第一次 show() 时自动 popup tooltip 4 秒（onboarding 提示），
+   * 之后只 hover 才显示。host 应通过 onFirstTooltipShown 回调持久化 flag。
+   */
+  showFirstTooltip?: boolean;
+  /**
+   * dot 首次自动 popup 触发时立即调（**不等 4 秒淡出**）。在开始时调能让 host
+   * 的持久化写入与 popup 显示并行进行——若 4 秒内发生 unmount/remount，host 已
+   * 经把 flag 落盘，新 mount 不会再 popup 一次。
+   */
+  onFirstTooltipShown?: () => void;
+}
+
 const DOT_SIZE = 10;
 const DOT_OFFSET = 6; // 右下角偏移 px
+const FIRST_TOOLTIP_DURATION_MS = 4000;
 
-export function createDot(root: ShadowRoot, locale: Locale): DotController {
+export function createDot(
+  root: ShadowRoot,
+  locale: Locale,
+  options: DotOptions = {},
+): DotController {
   const dot = document.createElement('div');
   dot.className = 'dot';
   dot.setAttribute('aria-hidden', 'true');
@@ -38,6 +57,8 @@ export function createDot(root: ShadowRoot, locale: Locale): DotController {
   let currentTarget: HTMLElement | null = null;
   let rafId = 0;
   let currentResizeObserver: ResizeObserver | null = null;
+  let pendingFirstShow = options.showFirstTooltip === true;
+  let firstTooltipTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   const updatePosition = () => {
     rafId = 0;
@@ -86,6 +107,24 @@ export function createDot(root: ShadowRoot, locale: Locale): DotController {
         currentResizeObserver.observe(target);
       }
       requestUpdate();
+
+      // First-show onboarding: auto-popup the tooltip so the user sees the
+      // brand + shortcut hint without having to discover hover. Persisting
+      // the flag is the host's job; we fire onFirstTooltipShown immediately
+      // (not on the 4s timeout) so a same-tick remount doesn't re-pop.
+      if (pendingFirstShow) {
+        pendingFirstShow = false;
+        // Wait one frame for layout so onDotMouseEnter can compute tooltip
+        // position from a real bounding rect.
+        requestAnimationFrame(() => {
+          onDotMouseEnter();
+        });
+        options.onFirstTooltipShown?.();
+        firstTooltipTimeoutId = setTimeout(() => {
+          tooltip.classList.remove('visible');
+          firstTooltipTimeoutId = null;
+        }, FIRST_TOOLTIP_DURATION_MS);
+      }
     },
     hide() {
       currentTarget = null;
@@ -98,6 +137,10 @@ export function createDot(root: ShadowRoot, locale: Locale): DotController {
     },
     destroy() {
       this.hide();
+      if (firstTooltipTimeoutId !== null) {
+        clearTimeout(firstTooltipTimeoutId);
+        firstTooltipTimeoutId = null;
+      }
       dot.removeEventListener('mouseenter', onDotMouseEnter);
       dot.removeEventListener('mouseleave', onDotMouseLeave);
       dot.remove();

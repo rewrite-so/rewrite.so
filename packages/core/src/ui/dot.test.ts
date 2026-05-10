@@ -173,6 +173,58 @@ describe('createDot', () => {
     }
   });
 
+  it('showFirstTooltip auto-pops the tooltip and fires onFirstTooltipShown immediately', async () => {
+    const { root, target } = setup();
+    const onShown = vi.fn();
+    const dot = createDot(root, 'en', { showFirstTooltip: true, onFirstTooltipShown: onShown });
+    dot.show(target);
+    // Callback fires synchronously when popup is initiated
+    expect(onShown).toHaveBeenCalledTimes(1);
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    const tooltipEl = root.querySelector('.dot-tooltip') as HTMLElement;
+    expect(tooltipEl.classList.contains('visible')).toBe(true);
+  });
+
+  it('first-tooltip popup fades after 4s and only fires once across multiple show() calls', async () => {
+    vi.useFakeTimers();
+    const { root, target } = setup();
+    const onShown = vi.fn();
+    const dot = createDot(root, 'en', { showFirstTooltip: true, onFirstTooltipShown: onShown });
+    dot.show(target);
+    expect(onShown).toHaveBeenCalledTimes(1);
+    // advance past the 4s fade timer
+    vi.advanceTimersByTime(4000);
+    const tooltipEl = root.querySelector('.dot-tooltip') as HTMLElement;
+    expect(tooltipEl.classList.contains('visible')).toBe(false);
+    // second show() in the same lifetime: no second popup, no second callback
+    dot.hide();
+    dot.show(target);
+    expect(onShown).toHaveBeenCalledTimes(1);
+    vi.useRealTimers();
+  });
+
+  it('does NOT auto-pop when showFirstTooltip is false / undefined', () => {
+    const { root, target } = setup();
+    const onShown = vi.fn();
+    const dot = createDot(root, 'en', { onFirstTooltipShown: onShown });
+    dot.show(target);
+    const tooltipEl = root.querySelector('.dot-tooltip') as HTMLElement;
+    expect(tooltipEl.classList.contains('visible')).toBe(false);
+    expect(onShown).not.toHaveBeenCalled();
+    dot.destroy();
+  });
+
+  it('destroy() clears the pending first-tooltip fade timer', () => {
+    vi.useFakeTimers();
+    const { root, target } = setup();
+    const dot = createDot(root, 'en', { showFirstTooltip: true });
+    dot.show(target);
+    dot.destroy();
+    // tooltip is detached; advancing timers must not throw
+    expect(() => vi.advanceTimersByTime(4000)).not.toThrow();
+    vi.useRealTimers();
+  });
+
   it('falls back gracefully when ResizeObserver is unavailable', async () => {
     delete (globalThis as unknown as { ResizeObserver?: unknown }).ResizeObserver;
     const { root, target } = setup();
