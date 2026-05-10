@@ -81,32 +81,70 @@ webhookRoute.post('/webhooks/creem', async (c) => {
   return c.json({ ok: true });
 });
 
+/**
+ * 事件 → D1 落库参数映射。
+ *
+ * 关键约束：D1 status 由 eventType 决定（除 subscription.update 外），**不读
+ * object.status**。原因：subscription.expired 事件的 object.status 实测仍是
+ * "active"（Creem 文档样例如此），如果信 object.status 会让 expired 事件误落成
+ * active。同理 paid 续费时 object.status 也是 active；status 终态以 eventType 为准。
+ *
+ * scheduled_cancel 单独路径：D1 status='active'（让 resolveUserTier 仍认 pro
+ * 直到 expired 事件来），cancel_at_period_end=1（让 UI 显示"将于 X 月 Y 日结束"）。
+ *
+ * 来源：docs.creem.io/code/webhooks + docs.creem.io/llms-full.txt sample payloads
+ */
 async function routeEvent(env: AppEnv['Bindings'], evt: CreemEventEnvelope): Promise<void> {
   switch (evt.eventType) {
     case 'subscription.active':
-    case 'subscription.trialing':
+    case 'subscription.paid':
     case 'subscription.resumed':
-      await upsertSubscription(env, evt, mapStatusFromEvent(evt.eventType));
+      // paid 是 Creem 推荐的开权事件（续费只发 paid 不发 active）
+      await upsertSubscription(env, evt, 'active');
+      return;
+
+    case 'subscription.trialing':
+      await upsertSubscription(env, evt, 'trialing');
       return;
 
     case 'subscription.paused':
-      // paused = 暂时停止计费但保留访问权限。我们当 'active' 处理（继续给配额），
-      // 但 status 字段记录 'paused'，便于运维识别。
+      // paused = 暂时停止计费但保留访问权限。我们当 'paused' 落 D1，resolveUserTier
+      // 仍会按 'paused' → pro 处理（继续给配额）。
       await upsertSubscription(env, evt, 'paused');
       return;
 
     case 'subscription.canceled':
-      // 立即取消 OR 周期末取消，由 object 里的 cancelAtPeriodEnd 决定。
-      // 我们在数据库存 status='canceled'；查询时若 current_period_end > now 仍认为有 Pro 配额。
+      // 用户主动立即取消 OR 周期末已到期。落 status='canceled'；resolveUserTier
+      // 会用 current_period_end > now 决定是否仍给 Pro 配额。
       await upsertSubscription(env, evt, 'canceled');
       return;
 
+    case 'subscription.scheduled_cancel':
+      // 用户点了"周期末取消"——D1 status 仍 active 让 resolveUserTier 给 Pro，
+      // cancel_at_period_end=true 让 UI 显示"将结束"。期末后 Creem 会发
+      // subscription.canceled / expired 真正终止。
+      await upsertSubscription(env, evt, 'active', { cancelAtPeriodEnd: true });
+      return;
+
+    case 'subscription.past_due':
+      // 付款失败（renewal 扣款不成功）。Creem 后续会重试，成功后发 subscription.paid。
+      await upsertSubscription(env, evt, 'past_due');
+      return;
+
     case 'subscription.expired':
+      // ⚠️ 实测 expired 事件 object.status 仍是 "active"，必须按 eventType 决定 'expired'。
       await upsertSubscription(env, evt, 'expired');
       return;
 
+    case 'subscription.update':
+      // update = plan 切换 / period 推进 / 任何字段变更。语义上 status 可能变化，
+      // 用 object.status 推导（scheduled_cancel 走 cancel_at_period_end 分支）。
+      await upsertFromUpdate(env, evt);
+      return;
+
     case 'transaction.failed':
-      // 标 past_due（如果能找到对应 subscription）。Creem 会在恢复后发 subscription.active。
+      // 历史路径：标 past_due（如能找到对应 subscription）。新增的 subscription.past_due
+      // 是更直接的信号，但保留这条作为补强。
       await markPastDue(env, evt);
       return;
 
@@ -123,10 +161,36 @@ async function routeEvent(env: AppEnv['Bindings'], evt: CreemEventEnvelope): Pro
 
 type SubscriptionStatus = 'trialing' | 'active' | 'past_due' | 'paused' | 'canceled' | 'expired';
 
-function mapStatusFromEvent(t: string): SubscriptionStatus {
-  if (t === 'subscription.trialing') return 'trialing';
-  // active / resumed → active
-  return 'active';
+/**
+ * subscription.update 专用：从 object.status 决定 D1 status。
+ * scheduled_cancel 特殊处理（D1 active + cancelAtPeriodEnd=true）。
+ * 未识别 status 兜底 'active'（保守地保留访问权，等下个明确事件）。
+ */
+async function upsertFromUpdate(env: AppEnv['Bindings'], evt: CreemEventEnvelope): Promise<void> {
+  const obj = evt.object as Record<string, unknown> | undefined;
+  if (!obj) {
+    log.warn('webhook.missing_object', { eventId: evt.id });
+    return;
+  }
+  const rawStatus = typeof obj.status === 'string' ? obj.status : 'active';
+  if (rawStatus === 'scheduled_cancel') {
+    await upsertSubscriptionFromObject(env, obj, 'active', evt.id, { cancelAtPeriodEnd: true });
+    return;
+  }
+  const status: SubscriptionStatus = (() => {
+    if (
+      rawStatus === 'active' ||
+      rawStatus === 'trialing' ||
+      rawStatus === 'paused' ||
+      rawStatus === 'past_due' ||
+      rawStatus === 'canceled' ||
+      rawStatus === 'expired'
+    ) {
+      return rawStatus;
+    }
+    return 'active'; // unknown / 'unpaid' 等保守兜底
+  })();
+  await upsertSubscriptionFromObject(env, obj, status, evt.id);
 }
 
 interface SubscriptionRow {
@@ -137,13 +201,14 @@ async function upsertSubscription(
   env: AppEnv['Bindings'],
   evt: CreemEventEnvelope,
   status: SubscriptionStatus,
+  opts?: { cancelAtPeriodEnd?: boolean },
 ): Promise<void> {
   const obj = evt.object as Record<string, unknown> | undefined;
   if (!obj) {
     log.warn('webhook.missing_object', { eventId: evt.id });
     return;
   }
-  await upsertSubscriptionFromObject(env, obj, status, evt.id);
+  await upsertSubscriptionFromObject(env, obj, status, evt.id, opts);
 }
 
 /**

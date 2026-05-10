@@ -199,11 +199,15 @@ export type CreemEventType =
   | 'checkout.completed'
   | 'checkout.abandoned'
   | 'subscription.active'
+  | 'subscription.paid'
   | 'subscription.trialing'
   | 'subscription.paused'
   | 'subscription.resumed'
   | 'subscription.canceled'
+  | 'subscription.scheduled_cancel'
+  | 'subscription.past_due'
   | 'subscription.expired'
+  | 'subscription.update'
   | 'transaction.completed'
   | 'transaction.failed';
 
