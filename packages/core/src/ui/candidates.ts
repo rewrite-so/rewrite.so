@@ -542,15 +542,14 @@ function openPanel(
       // BYOK badge：仅 BYOK 模式显示
       byokBadge.style.display = status.isBYOK ? '' : 'none';
 
-      // quota chip：BYOK 模式不显示；其它两段显示——
-      //   >=50% 显示灰色（用 .quota-chip 默认样式），引起轻度注意
-      //   >=80% 加 .warn 变琥珀色，明显警告"快用完"
+      // quota chip：BYOK 模式不显示；其它情况只要 used/limit 是有效数字就始终显示
+      // （含 0/N 边界），让用户每次打开浮窗都能看到本月用量。≥80% 加 .warn 变琥珀色
+      // 明显警告"快用完"。
       if (
         !status.isBYOK &&
         typeof status.used === 'number' &&
         typeof status.limit === 'number' &&
-        status.limit > 0 &&
-        status.used / status.limit >= 0.5
+        status.limit > 0
       ) {
         quotaChip.textContent = `${status.used}/${status.limit}`;
         quotaChip.classList.toggle('warn', status.used / status.limit >= 0.8);

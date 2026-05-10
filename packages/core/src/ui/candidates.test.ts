@@ -438,7 +438,7 @@ describe('createCandidates', () => {
     expect(chip.classList.contains('warn')).toBe(true);
   });
 
-  it('setStatus shows quota chip without .warn class at >=50% but <80% (gray)', () => {
+  it('setStatus shows quota chip without .warn class below 80% (gray)', () => {
     const { factory, target, root } = setup();
     const handle = factory.open({ target, locale: 'en', targetLang: 'en' });
     handle.setStatus({ authed: true, tier: 'free', isBYOK: false, used: 18, limit: 30 });
@@ -448,10 +448,32 @@ describe('createCandidates', () => {
     expect(chip.classList.contains('warn')).toBe(false);
   });
 
-  it('setStatus hides quota chip below 50% threshold', () => {
+  // Regression: previously gated by >=50% threshold; now shows at any usage so
+  // users can see their monthly count whenever the panel is open.
+  it('setStatus shows quota chip below 50% (no threshold)', () => {
     const { factory, target, root } = setup();
     const handle = factory.open({ target, locale: 'en', targetLang: 'en' });
-    handle.setStatus({ authed: true, tier: 'free', isBYOK: false, used: 10, limit: 30 });
+    handle.setStatus({ authed: true, tier: 'free', isBYOK: false, used: 14, limit: 30 });
+    const chip = root.querySelector('.quota-chip') as HTMLElement;
+    expect(chip.style.display).toBe('');
+    expect(chip.textContent).toBe('14/30');
+    expect(chip.classList.contains('warn')).toBe(false);
+  });
+
+  it('setStatus shows quota chip at 0/N boundary', () => {
+    const { factory, target, root } = setup();
+    const handle = factory.open({ target, locale: 'en', targetLang: 'en' });
+    handle.setStatus({ authed: true, tier: 'free', isBYOK: false, used: 0, limit: 30 });
+    const chip = root.querySelector('.quota-chip') as HTMLElement;
+    expect(chip.style.display).toBe('');
+    expect(chip.textContent).toBe('0/30');
+    expect(chip.classList.contains('warn')).toBe(false);
+  });
+
+  it('setStatus hides quota chip when used/limit are missing', () => {
+    const { factory, target, root } = setup();
+    const handle = factory.open({ target, locale: 'en', targetLang: 'en' });
+    handle.setStatus({ authed: true, tier: 'free', isBYOK: false });
     expect((root.querySelector('.quota-chip') as HTMLElement).style.display).toBe('none');
   });
 
