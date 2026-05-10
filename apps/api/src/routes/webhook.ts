@@ -4,6 +4,7 @@ import {
   type CreemPlan,
   extractCustomerId,
   extractPeriodEnd,
+  extractPeriodStart,
   extractProductId,
   extractUserIdFromMetadata,
   planFromProductId,
@@ -152,6 +153,10 @@ async function upsertSubscription(
  * 幂等：以 creem_subscription_id 为去重键；同 sub 多次调（webhook + verify 都跑）会
  * UPDATE 而不是重复 INSERT。
  *
+ * `opts.cancelAtPeriodEnd` 由调用方按 eventType / status 显式推导
+ * （Creem SubscriptionEntity 没有该字段——取消语义靠 status='scheduled_cancel' 表达），
+ * 默认 false。详见 CLAUDE.md "Creem 没有 cancel_at_period_end 字段" 规则。
+ *
  * 返回 true=实际落库；false=因字段缺失或产品 id 未识别等原因 skip（已记 warn 日志）。
  * verify 端点用返回值决定是否给客户端返 applied=true，避免静默 fail 但 UI 显示成功。
  */
@@ -160,6 +165,7 @@ export async function upsertSubscriptionFromObject(
   obj: Record<string, unknown>,
   status: SubscriptionStatus,
   ctxId: string, // 日志关联用（webhook eventId / verify checkoutId）
+  opts?: { cancelAtPeriodEnd?: boolean },
 ): Promise<boolean> {
   const userId = extractUserIdFromMetadata(obj);
   const customerId = extractCustomerId(obj);
@@ -187,17 +193,12 @@ export async function upsertSubscriptionFromObject(
     return false;
   }
 
-  const periodStartIso = pickIsoDate(obj, 'currentPeriodStart', 'current_period_start');
+  const periodStartIso = extractPeriodStart(obj);
   const periodEndIso = extractPeriodEnd(obj);
   const periodStart = periodStartIso ? Date.parse(periodStartIso) : Date.now();
   const periodEnd = periodEndIso ? Date.parse(periodEndIso) : Date.now() + 31 * 86400_000;
 
-  const cancelAtPeriodEnd =
-    typeof obj.cancelAtPeriodEnd === 'boolean'
-      ? obj.cancelAtPeriodEnd
-      : typeof obj.cancel_at_period_end === 'boolean'
-        ? obj.cancel_at_period_end
-        : false;
+  const cancelAtPeriodEnd = opts?.cancelAtPeriodEnd ?? false;
 
   const now = Date.now();
 
@@ -278,12 +279,4 @@ async function markPastDue(env: AppEnv['Bindings'], evt: CreemEventEnvelope): Pr
   )
     .bind(Date.now(), subId)
     .run();
-}
-
-function pickIsoDate(o: Record<string, unknown>, ...keys: string[]): string | null {
-  for (const k of keys) {
-    const v = o[k];
-    if (typeof v === 'string') return v;
-  }
-  return null;
 }

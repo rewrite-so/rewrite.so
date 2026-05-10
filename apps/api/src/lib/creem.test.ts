@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   extractCustomerId,
   extractPeriodEnd,
+  extractPeriodStart,
   extractProductId,
   extractUserIdFromMetadata,
   planFromProductId,
@@ -117,14 +118,34 @@ describe('planFromProductId', () => {
 });
 
 describe('extractPeriodEnd', () => {
-  it('reads camelCase', () => {
-    expect(extractPeriodEnd({ currentPeriodEnd: '2026-06-15T00:00:00Z' })).toBe(
+  // Creem SubscriptionEntity.current_period_end_date 是带 _date 后缀的 ISO string。
+  // 旧字段名 `currentPeriodEnd` / `current_period_end` 在实测 payload 中**永远不会出现**——
+  // OpenAPI 全文 snake_case 也没声明，保留 fallback 是死代码。
+  // 来源：https://docs.creem.io/api-reference/openapi.json SubscriptionEntity
+  it('reads current_period_end_date (ISO string)', () => {
+    expect(extractPeriodEnd({ current_period_end_date: '2026-06-15T00:00:00Z' })).toBe(
       '2026-06-15T00:00:00Z',
     );
   });
-  it('reads snake_case', () => {
-    expect(extractPeriodEnd({ current_period_end: '2026-06-15T00:00:00Z' })).toBe(
-      '2026-06-15T00:00:00Z',
+  it('returns null for legacy field names (camelCase or no _date suffix)', () => {
+    // 防回归：删掉的旧 fallback 不能被悄悄加回
+    expect(extractPeriodEnd({ currentPeriodEnd: '2026-06-15T00:00:00Z' })).toBeNull();
+    expect(extractPeriodEnd({ current_period_end: '2026-06-15T00:00:00Z' })).toBeNull();
+  });
+  it('returns null when absent', () => {
+    expect(extractPeriodEnd({})).toBeNull();
+    expect(extractPeriodEnd(null)).toBeNull();
+  });
+});
+
+describe('extractPeriodStart', () => {
+  it('reads current_period_start_date', () => {
+    expect(extractPeriodStart({ current_period_start_date: '2026-05-10T00:00:00Z' })).toBe(
+      '2026-05-10T00:00:00Z',
     );
+  });
+  it('returns null for legacy field names', () => {
+    expect(extractPeriodStart({ currentPeriodStart: '2026-05-10T00:00:00Z' })).toBeNull();
+    expect(extractPeriodStart({ current_period_start: '2026-05-10T00:00:00Z' })).toBeNull();
   });
 });

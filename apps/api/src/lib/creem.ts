@@ -207,34 +207,83 @@ export type CreemEventType =
   | 'transaction.completed'
   | 'transaction.failed';
 
+/**
+ * Webhook envelope 顶层结构。
+ * 命名混合：`id` / `eventType`(camelCase) / `created_at`(snake, number epoch ms) /
+ * `object`。注意 envelope 顶层 `created_at` 是 number，envelope.object 内
+ * `created_at` 是 ISO string——同名不同类型。
+ * 来源：实测 evt_6zB7KdtiwxUvGg8tu8KUV5 + docs.creem.io/llms-full.txt sample
+ */
 export interface CreemEventEnvelope<T = unknown> {
   id: string;
   eventType: CreemEventType;
-  createdAt: string;
+  created_at: number;
   object: T;
 }
 
+/**
+ * SubscriptionEntity（webhook envelope.object 形态 + retrieveSubscription response）。
+ * 字段命名严格 snake_case 与 OpenAPI 一致。
+ *
+ * 注意：
+ * - period 字段带 `_date` 后缀（ISO string），不是 `current_period_*`
+ * - 没有 `cancel_at_period_end` 字段——取消语义靠 `status='scheduled_cancel'`
+ *   表达，落 D1 时由 webhook routeEvent 显式按 status 推导 cancelAtPeriodEnd
+ *   传给 upsertSubscriptionFromObject(opts)
+ * - `metadata` 在 OpenAPI schema 未声明但 webhook payload 实测出现（每个 event 都带）
+ *
+ * 来源：https://docs.creem.io/api-reference/openapi.json SubscriptionEntity
+ */
 export interface CreemSubscriptionObject {
   id: string;
-  customerId?: string;
-  customer?: string | { id: string; email?: string };
-  productId?: string;
-  product?: string | { id: string };
-  status: string; // 'active' | 'trialing' | 'paused' | 'canceled' | 'expired' | ...
-  currentPeriodStart?: string;
-  currentPeriodEnd?: string;
-  current_period_start?: string;
-  current_period_end?: string;
-  cancelAtPeriodEnd?: boolean;
+  mode?: string;
+  object?: 'subscription';
+  status: string; // 'active'|'canceled'|'unpaid'|'paused'|'trialing'|'scheduled_cancel'|'past_due'(payload only)|'expired'(payload only)
+  customer: string | { id: string; email?: string };
+  product: string | { id: string };
+  items?: unknown[];
+  collection_method?: string;
+  last_transaction_id?: string;
+  last_transaction?: CreemTransactionObject;
+  last_transaction_date?: string;
+  next_transaction_date?: string;
+  current_period_start_date?: string;
+  current_period_end_date?: string;
+  canceled_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
   metadata?: Record<string, string>;
+}
+
+/**
+ * TransactionEntity. 注意字段类型与 SubscriptionEntity 不同：
+ * `period_start / period_end / created_at` 都是 epoch ms number，**不是 ISO string**；
+ * `subscription / customer` 都是 string id 或 null（不像 SubscriptionEntity 是 oneOf）。
+ * OpenAPI 没声明 metadata 字段。
+ * 来源：https://docs.creem.io/api-reference/openapi.json TransactionEntity
+ */
+export interface CreemTransactionObject {
+  id: string;
+  object?: 'transaction';
+  amount: number;
+  amount_paid?: number | null;
+  currency: string;
+  type?: string;
+  status: string;
+  subscription?: string | null;
+  customer?: string | null;
+  description?: string;
+  period_start?: number;
+  period_end?: number;
+  created_at?: number;
+  mode?: string;
 }
 
 export interface CreemCheckoutObject {
   id: string;
   customer?: string | { id: string; email?: string };
-  customerId?: string;
   subscription?: string | CreemSubscriptionObject;
-  status: string;
+  status: string; // 'pending' | 'processing' | 'completed' | 'expired'
   metadata?: Record<string, string>;
   request_id?: string;
 }
@@ -291,11 +340,26 @@ export function extractProductId(obj: unknown): string | null {
   return null;
 }
 
+/**
+ * 从 SubscriptionEntity 捞 `current_period_end_date`（ISO string）。
+ * Creem 实际字段名带 `_date` 后缀；旧的 `current_period_end / currentPeriodEnd`
+ * 实测 payload 中**永远不会出现**——OpenAPI 全文 snake_case 也没声明。
+ * 不再保留旧字段名兜底分支（死代码）。
+ */
 export function extractPeriodEnd(obj: unknown): string | null {
   if (!obj || typeof obj !== 'object') return null;
   const o = obj as Record<string, unknown>;
-  if (typeof o.currentPeriodEnd === 'string') return o.currentPeriodEnd;
-  if (typeof o.current_period_end === 'string') return o.current_period_end;
+  if (typeof o.current_period_end_date === 'string') return o.current_period_end_date;
+  return null;
+}
+
+/**
+ * 与 extractPeriodEnd 对称——读 `current_period_start_date`。
+ */
+export function extractPeriodStart(obj: unknown): string | null {
+  if (!obj || typeof obj !== 'object') return null;
+  const o = obj as Record<string, unknown>;
+  if (typeof o.current_period_start_date === 'string') return o.current_period_start_date;
   return null;
 }
 
