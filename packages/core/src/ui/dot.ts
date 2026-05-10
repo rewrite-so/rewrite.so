@@ -158,13 +158,16 @@ export function createDot(
       window.removeEventListener('resize', onScrollOrResize);
       currentResizeObserver?.disconnect();
       currentResizeObserver = null;
-    },
-    destroy() {
-      this.hide();
+      // Cancel the pending first-tooltip fade. Without this, switching
+      // focus across inputs within the 4s window leaves a stray timer
+      // that later strips .visible off the *next* target's hover tooltip.
       if (firstTooltipTimeoutId !== null) {
         clearTimeout(firstTooltipTimeoutId);
         firstTooltipTimeoutId = null;
       }
+    },
+    destroy() {
+      this.hide();
       dot.removeEventListener('mousedown', onDotMouseDown);
       dot.removeEventListener('click', onDotClick);
       dot.removeEventListener('mouseenter', onDotMouseEnter);

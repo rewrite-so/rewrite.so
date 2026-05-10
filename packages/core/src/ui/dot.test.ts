@@ -214,6 +214,31 @@ describe('createDot', () => {
     dot.destroy();
   });
 
+  it('hide() cancels the pending first-tooltip fade so a future hover tooltip is not snapped away', async () => {
+    vi.useFakeTimers();
+    const { root, target } = setup();
+    const dot = createDot(root, 'en', { showFirstTooltip: true });
+    dot.show(target);
+    // Flush the rAF that schedules onDotMouseEnter inside the first-show path
+    await vi.advanceTimersByTimeAsync(16);
+    const tooltipEl = root.querySelector('.dot-tooltip') as HTMLElement;
+    expect(tooltipEl.classList.contains('visible')).toBe(true);
+    // Switch focus before the 4s fade fires (still 3984ms left on it)
+    dot.hide();
+    // Re-appear (simulates user focusing a different input within 4s)
+    dot.show(target);
+    // User now hovers the new dot — tooltip becomes visible again
+    const dotEl = root.querySelector('.dot') as HTMLElement;
+    dotEl.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+    expect(tooltipEl.classList.contains('visible')).toBe(true);
+    // Advancing past the original 4s timer must NOT strip .visible from
+    // the now-active hover tooltip — hide() should have cleared it.
+    await vi.advanceTimersByTimeAsync(4000);
+    expect(tooltipEl.classList.contains('visible')).toBe(true);
+    dot.destroy();
+    vi.useRealTimers();
+  });
+
   it('destroy() clears the pending first-tooltip fade timer', () => {
     vi.useFakeTimers();
     const { root, target } = setup();
