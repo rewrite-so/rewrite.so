@@ -261,6 +261,34 @@ describe('routeEvent — subscription event mapping', () => {
     expect(writes).toHaveLength(0);
     expect(insertedEventIds).toEqual(['evt_test']);
   });
+
+  it('K: unhandled eventType throws → 500 + no webhook_events idempotency row', async () => {
+    // 行为变更：未识别事件不再 default-warn-then-write-idempotency。改为 throw 让
+    // Creem 自动重试，给运维 4 次重试窗口去识别新事件类型扩 CreemEventType union。
+    // 来源：docs.creem.io/llms-full.txt 行 2445 + 5663 (retry policy 30s/1min/5min/1h)
+    const { db, writes, insertedEventIds } = makeDB();
+    const res = await postWebhook(
+      envelope('subscription.future_unknown_event' as string, subFixture()),
+      makeEnv(db),
+    );
+    expect(res.status).toBe(500);
+    expect(writes).toHaveLength(0); // 没落 subscriptions
+    expect(insertedEventIds).toEqual([]); // 关键：没写幂等键，Creem 会 retry
+  });
+
+  it('L: informational checkout.completed → 200, no subscriptions write, but writes idempotency', async () => {
+    // 区别于 unhandled：informational 是已知不需要落 subscriptions 表的事件
+    // （subscription.* 才是真理）。显式列入 noop case + 写幂等键避免 Creem 持续重试
+    // 一个我们故意不处理的事件。
+    const { db, writes, insertedEventIds } = makeDB();
+    const res = await postWebhook(
+      envelope('checkout.completed', { id: 'ck_x', status: 'completed' }),
+      makeEnv(db),
+    );
+    expect(res.status).toBe(200);
+    expect(writes).toHaveLength(0);
+    expect(insertedEventIds).toEqual(['evt_test']); // 幂等键写了
+  });
 });
 
 beforeEach(() => {

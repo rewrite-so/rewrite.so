@@ -155,7 +155,14 @@ async function routeEvent(env: AppEnv['Bindings'], evt: CreemEventEnvelope): Pro
       return;
 
     default:
-      log.warn('webhook.unhandled', { eventType: evt.eventType });
+      // 未识别事件类型不能默默吞——历史教训：subscription.paid 漏识别 + default 静默
+      // 写幂等键 = Creem 不重发，付费用户掉档没人发现。
+      // 现在改为 throw 让外层 catch 返 500 + 不写 webhook_events，触发 Creem 自动
+      // 重试（30s/1min/5min/1h，4 次后停）+ Cloudflare Logs 出现 webhook.handler_error
+      // 警报，运维有时间识别新事件类型扩展 case。
+      // 来源：docs.creem.io/llms-full.txt 行 2445 / 5663（重试策略）
+      log.warn('webhook.unhandled', { eventType: evt.eventType, eventId: evt.id });
+      throw new Error(`unhandled webhook event type: ${evt.eventType}`);
   }
 }
 
