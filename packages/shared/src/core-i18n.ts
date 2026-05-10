@@ -4,6 +4,8 @@ const CORE_MESSAGES: Record<Locale, Record<string, string>> = {
   en: {
     'hint.tryOnAnyInput': 'Install the extension to use it on supported sites',
     'cta.installExtension': 'Install extension →',
+    'dot.title': 'Shift Shift to rewrite.so',
+    'dot.tooltipBrand': ' to rewrite.so',
     'core.regen': 'Regenerate',
     'core.retry': 'Retry',
     'core.shortcuts': '{accept} accept · {regen} regenerate · {cancel} close',
@@ -25,6 +27,8 @@ const CORE_MESSAGES: Record<Locale, Record<string, string>> = {
   'zh-CN': {
     'hint.tryOnAnyInput': '安装扩展，在支持的网站使用',
     'cta.installExtension': '安装扩展 →',
+    'dot.title': '双击 Shift · rewrite.so',
+    'dot.tooltipBrand': ' · rewrite.so',
     'core.regen': '重新生成',
     'core.retry': '重试',
     'core.shortcuts': '{accept} 选用 · {regen} 重生成 · {cancel} 关闭',
@@ -46,6 +50,8 @@ const CORE_MESSAGES: Record<Locale, Record<string, string>> = {
   ja: {
     'hint.tryOnAnyInput': '拡張機能を入れると対応サイトで使えます',
     'cta.installExtension': '拡張機能をインストール →',
+    'dot.title': 'Shift Shift で rewrite.so',
+    'dot.tooltipBrand': ' で rewrite.so',
     'core.regen': '再生成',
     'core.retry': '再試行',
     'core.shortcuts': '{accept} で選択 · {regen} 再生成 · {cancel} 閉じる',
@@ -67,6 +73,8 @@ const CORE_MESSAGES: Record<Locale, Record<string, string>> = {
   ko: {
     'hint.tryOnAnyInput': '확장 프로그램을 설치하면 지원되는 사이트에서 사용할 수 있습니다',
     'cta.installExtension': '확장 프로그램 설치 →',
+    'dot.title': 'Shift Shift 로 rewrite.so',
+    'dot.tooltipBrand': ' 로 rewrite.so',
     'core.regen': '다시 생성',
     'core.retry': '재시도',
     'core.shortcuts': '{accept} 선택 · {regen} 다시 생성 · {cancel} 닫기',
@@ -88,6 +96,8 @@ const CORE_MESSAGES: Record<Locale, Record<string, string>> = {
   es: {
     'hint.tryOnAnyInput': 'Instala la extensión para usarlo en sitios compatibles',
     'cta.installExtension': 'Instalar extensión →',
+    'dot.title': 'Shift Shift para rewrite.so',
+    'dot.tooltipBrand': ' para rewrite.so',
     'core.regen': 'Regenerar',
     'core.retry': 'Reintentar',
     'core.shortcuts': '{accept} aceptar · {regen} regenerar · {cancel} cerrar',
@@ -109,6 +119,8 @@ const CORE_MESSAGES: Record<Locale, Record<string, string>> = {
   fr: {
     'hint.tryOnAnyInput': "Installez l'extension pour l'utiliser sur les sites pris en charge",
     'cta.installExtension': "Installer l'extension →",
+    'dot.title': 'Shift Shift pour rewrite.so',
+    'dot.tooltipBrand': ' pour rewrite.so',
     'core.regen': 'Régénérer',
     'core.retry': 'Réessayer',
     'core.shortcuts': '{accept} choisir · {regen} régénérer · {cancel} fermer',
@@ -130,6 +142,8 @@ const CORE_MESSAGES: Record<Locale, Record<string, string>> = {
   de: {
     'hint.tryOnAnyInput': 'Installiere die Erweiterung, um sie auf unterstützten Seiten zu nutzen',
     'cta.installExtension': 'Erweiterung installieren →',
+    'dot.title': 'Shift Shift für rewrite.so',
+    'dot.tooltipBrand': ' für rewrite.so',
     'core.regen': 'Neu generieren',
     'core.retry': 'Erneut versuchen',
     'core.shortcuts': '{accept} übernehmen · {regen} neu generieren · {cancel} schließen',

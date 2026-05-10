@@ -1,3 +1,4 @@
+import { tCore as t } from '@rewrite/shared/core-i18n';
 import type { Locale } from '@rewrite/shared/locales';
 
 export interface DotController {
@@ -16,7 +17,7 @@ export function createDot(root: ShadowRoot, locale: Locale): DotController {
   const dot = document.createElement('div');
   dot.className = 'dot';
   dot.setAttribute('aria-hidden', 'true');
-  dot.title = locale === 'zh-CN' ? '双击 Shift 改写' : 'Double-Shift to rewrite';
+  dot.title = t('dot.title', locale);
 
   const tooltip = document.createElement('div');
   tooltip.className = 'dot-tooltip';
@@ -25,7 +26,7 @@ export function createDot(root: ShadowRoot, locale: Locale): DotController {
   kbd1.textContent = 'Shift';
   const kbd2 = document.createElement('kbd');
   kbd2.textContent = 'Shift';
-  const txt = document.createTextNode(locale === 'zh-CN' ? ' 改写' : ' to rewrite');
+  const txt = document.createTextNode(t('dot.tooltipBrand', locale));
   tooltip.appendChild(kbd1);
   tooltip.appendChild(document.createTextNode(' '));
   tooltip.appendChild(kbd2);

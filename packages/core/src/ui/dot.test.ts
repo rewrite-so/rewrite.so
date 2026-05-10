@@ -154,6 +154,25 @@ describe('createDot', () => {
     expect(observer?.disconnect).toHaveBeenCalled();
   });
 
+  it('tooltip carries the rewrite.so brand for en/zh-CN/ja (i18n catalog wired)', () => {
+    const cases: Array<[Parameters<typeof createDot>[1], string]> = [
+      ['en', 'Shift Shift to rewrite.so'],
+      ['zh-CN', '双击 Shift · rewrite.so'],
+      ['ja', 'Shift Shift で rewrite.so'],
+    ];
+    for (const [locale, expectedTitle] of cases) {
+      const { root } = setup();
+      const dot = createDot(root, locale);
+      const dotEl = root.querySelector('.dot') as HTMLElement;
+      const tooltipEl = root.querySelector('.dot-tooltip') as HTMLElement;
+      expect(dotEl.title).toBe(expectedTitle);
+      // tooltip body always contains the brand string regardless of locale
+      expect(tooltipEl.textContent).toContain('rewrite.so');
+      dot.destroy();
+      destroyShadowRoot();
+    }
+  });
+
   it('falls back gracefully when ResizeObserver is unavailable', async () => {
     delete (globalThis as unknown as { ResizeObserver?: unknown }).ResizeObserver;
     const { root, target } = setup();
