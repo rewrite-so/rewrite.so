@@ -334,13 +334,14 @@ export interface CreemCheckoutObject {
 }
 
 /**
- * 从 envelope.object 里捞 customerId（不同事件类型字段名可能不一致）。
+ * 从 envelope.object 里捞 customer id。
+ * SubscriptionEntity.customer / CheckoutEntity.customer 都是 oneOf [string, CustomerEntity]。
+ * 旧的顶层 `customerId` / `customer_id` 字段在 OpenAPI 中不存在——实测 payload 也无；
+ * 不再保留死代码 fallback。与 extractPeriodEnd 同期对齐。
  */
 export function extractCustomerId(obj: unknown): string | null {
   if (!obj || typeof obj !== 'object') return null;
   const o = obj as Record<string, unknown>;
-  if (typeof o.customerId === 'string') return o.customerId;
-  if (typeof o.customer_id === 'string') return o.customer_id;
   const cust = o.customer;
   if (typeof cust === 'string') return cust;
   if (cust && typeof cust === 'object') {
@@ -369,13 +370,14 @@ export function extractUserIdFromMetadata(obj: unknown): string | null {
 }
 
 /**
- * 从订阅 object 里捞 productId，以决定 plan = monthly | yearly。
+ * 从订阅 object 里捞 product id，以决定 plan = monthly | yearly。
+ * SubscriptionEntity.product 是 oneOf [string, ProductEntity]。
+ * 旧的顶层 `productId` / `product_id` 字段在 OpenAPI 中不存在——实测 payload 也无；
+ * 不再保留死代码 fallback。
  */
 export function extractProductId(obj: unknown): string | null {
   if (!obj || typeof obj !== 'object') return null;
   const o = obj as Record<string, unknown>;
-  if (typeof o.productId === 'string') return o.productId;
-  if (typeof o.product_id === 'string') return o.product_id;
   const prod = o.product;
   if (typeof prod === 'string') return prod;
   if (prod && typeof prod === 'object') {

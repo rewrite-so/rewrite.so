@@ -59,17 +59,18 @@ describe('verifyWebhookSignature', () => {
 });
 
 describe('extractCustomerId', () => {
-  it('reads customerId field', () => {
-    expect(extractCustomerId({ customerId: 'cust_1' })).toBe('cust_1');
-  });
-  it('reads customer_id field', () => {
-    expect(extractCustomerId({ customer_id: 'cust_2' })).toBe('cust_2');
-  });
+  // SubscriptionEntity.customer / CheckoutEntity.customer 是 oneOf [string, CustomerEntity]——
+  // 旧顶层 customerId / customer_id 字段 OpenAPI 不声明且实测 payload 不出现，
+  // 不再保留 fallback（与 extractPeriodEnd 对齐）。
   it('reads string customer field', () => {
     expect(extractCustomerId({ customer: 'cust_3' })).toBe('cust_3');
   });
   it('reads nested customer.id field', () => {
     expect(extractCustomerId({ customer: { id: 'cust_4', email: 'a@b.com' } })).toBe('cust_4');
+  });
+  it('returns null for legacy top-level customerId / customer_id (regression guard)', () => {
+    expect(extractCustomerId({ customerId: 'cust_1' })).toBeNull();
+    expect(extractCustomerId({ customer_id: 'cust_2' })).toBeNull();
   });
   it('returns null when absent', () => {
     expect(extractCustomerId({ status: 'active' })).toBeNull();
@@ -93,14 +94,17 @@ describe('extractUserIdFromMetadata', () => {
 });
 
 describe('extractProductId', () => {
-  it('reads productId', () => {
-    expect(extractProductId({ productId: 'prod_1' })).toBe('prod_1');
-  });
-  it('reads product_id', () => {
-    expect(extractProductId({ product_id: 'prod_2' })).toBe('prod_2');
+  // SubscriptionEntity.product 是 oneOf [string, ProductEntity]——同 extractCustomerId
+  // 一样删了 productId / product_id fallback（OpenAPI 不声明，实测 payload 不出现）。
+  it('reads string product field', () => {
+    expect(extractProductId({ product: 'prod_str' })).toBe('prod_str');
   });
   it('reads nested product.id', () => {
     expect(extractProductId({ product: { id: 'prod_3' } })).toBe('prod_3');
+  });
+  it('returns null for legacy top-level productId / product_id (regression guard)', () => {
+    expect(extractProductId({ productId: 'prod_1' })).toBeNull();
+    expect(extractProductId({ product_id: 'prod_2' })).toBeNull();
   });
 });
 
