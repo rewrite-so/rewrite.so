@@ -225,6 +225,29 @@ describe('createDot', () => {
     vi.useRealTimers();
   });
 
+  it('clicking the dot fires onActivate (semantically equivalent to double-Shift)', () => {
+    const { root, target } = setup();
+    const onActivate = vi.fn();
+    const dot = createDot(root, 'en', { onActivate });
+    dot.show(target);
+    const dotEl = root.querySelector('.dot') as HTMLElement;
+    dotEl.click();
+    expect(onActivate).toHaveBeenCalledTimes(1);
+    dot.destroy();
+  });
+
+  it('mousedown is preventDefault-ed so clicking the dot keeps the editable focused', () => {
+    const { root, target } = setup();
+    const dot = createDot(root, 'en');
+    dot.show(target);
+    const dotEl = root.querySelector('.dot') as HTMLElement;
+    const ev = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
+    const result = dotEl.dispatchEvent(ev);
+    expect(ev.defaultPrevented).toBe(true);
+    expect(result).toBe(false);
+    dot.destroy();
+  });
+
   it('falls back gracefully when ResizeObserver is unavailable', async () => {
     delete (globalThis as unknown as { ResizeObserver?: unknown }).ResizeObserver;
     const { root, target } = setup();

@@ -81,9 +81,14 @@ export function mount(opts: MountOptions): MountHandle {
   const userPrefLang = opts.userPrefLang ?? 'auto';
 
   const { root } = createShadowRoot(shadowMode);
+  // dot.onActivate is wired below to handleTrigger (declared further down)
+  // via a forward closure — handleTrigger isn't in scope yet.
   const dot = createDot(root, uiLocale, {
     showFirstTooltip: opts.showFirstDotTooltip,
     onFirstTooltipShown: opts.onFirstDotTooltipShown,
+    onActivate: () => {
+      void handleTrigger();
+    },
   });
 
   let activeEditable: HTMLElement | null = null;

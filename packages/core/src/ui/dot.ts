@@ -22,6 +22,12 @@ export interface DotOptions {
    * 经把 flag 落盘，新 mount 不会再 popup 一次。
    */
   onFirstTooltipShown?: () => void;
+  /**
+   * 用户点击 dot 时调用。语义等同于双击 Shift —— host 通常把它接到 handleTrigger
+   * 上。dot 自身已经做了 mousedown preventDefault 保住输入框焦点，回调里直接拿
+   * activeEditable 即可。
+   */
+  onActivate?: () => void;
 }
 
 const DOT_SIZE = 10;
@@ -90,14 +96,21 @@ export function createDot(
     tooltip.classList.remove('visible');
   };
 
-  // The dot is a passive visual hint, not a button — clicking it shouldn't
-  // do anything. Without preventDefault, mousedown steals focus from the
-  // input, which trips onFocusOut → dot.hide() and breaks the panel flow.
+  // mousedown preventDefault keeps the editable's focus — without it,
+  // clicking the dot would steal focus, trip onFocusOut → dot.hide(), and
+  // also leave activeEditable null so onActivate's downstream work has no
+  // target. preventDefault on mousedown does NOT block the subsequent
+  // click event, so onActivate still fires.
   const onDotMouseDown = (ev: Event) => {
     ev.preventDefault();
   };
+  const onDotClick = (ev: Event) => {
+    ev.stopPropagation();
+    options.onActivate?.();
+  };
 
   dot.addEventListener('mousedown', onDotMouseDown);
+  dot.addEventListener('click', onDotClick);
   dot.addEventListener('mouseenter', onDotMouseEnter);
   dot.addEventListener('mouseleave', onDotMouseLeave);
 
@@ -150,6 +163,7 @@ export function createDot(
         firstTooltipTimeoutId = null;
       }
       dot.removeEventListener('mousedown', onDotMouseDown);
+      dot.removeEventListener('click', onDotClick);
       dot.removeEventListener('mouseenter', onDotMouseEnter);
       dot.removeEventListener('mouseleave', onDotMouseLeave);
       dot.remove();
