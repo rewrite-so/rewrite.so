@@ -105,6 +105,19 @@ export const SHADOW_STYLES = `
   padding: 2px 4px 6px;
 }
 
+/* brand label：低调显示在 header 最左侧，让用户每次打开浮窗都能看到品牌；
+ * margin-right:auto 把其它 chip / 齿轮推到右侧（panel-header 是 flex 容器） */
+.brand-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: light-dark(rgba(0,0,0,0.5), rgba(255,255,255,0.5));
+  margin-right: auto;
+  pointer-events: none;
+  user-select: none;
+  font-feature-settings: "tnum";
+}
+
 .target-chip {
   font-size: 10px;
   font-weight: 600;

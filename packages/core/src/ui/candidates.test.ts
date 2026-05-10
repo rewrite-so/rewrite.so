@@ -40,6 +40,23 @@ function setup() {
 }
 
 describe('createCandidates', () => {
+  it('renders the rewrite.so brand label in the panel header', () => {
+    const { factory, target, root } = setup();
+    factory.open({ target, locale: 'en', targetLang: 'en' });
+    const brand = root.querySelector('.brand-label') as HTMLElement;
+    expect(brand).not.toBeNull();
+    expect(brand.textContent).toBe('rewrite.so');
+  });
+
+  it('brand label is locale-independent (no i18n key — same text everywhere)', () => {
+    for (const locale of ['en', 'zh-CN', 'ja', 'ko', 'es', 'fr', 'de'] as const) {
+      const { factory, target, root } = setup();
+      factory.open({ target, locale, targetLang: 'en' });
+      expect((root.querySelector('.brand-label') as HTMLElement).textContent).toBe('rewrite.so');
+      destroyShadowRoot();
+    }
+  });
+
   it('renders 3 cards in fixed order on open', () => {
     const { factory, target, root } = setup();
     factory.open({ target, locale: 'zh-CN', targetLang: 'en' });

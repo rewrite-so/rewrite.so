@@ -188,12 +188,19 @@ function openPanel(
     ev.preventDefault();
   });
 
-  // 顶部 header：[BYOK badge?] [quota chip?] [target chip] [⚙]
+  // 顶部 header：[brand] [BYOK badge?] [quota chip?] [target chip] [⚙]
+  // brand 永远显示并用 margin-right:auto 把其它 chip 推到右侧；
   // BYOK badge 和 quota chip 在 setStatus 收到 meta event 后插入；初始不显示
   const header = document.createElement('div');
   header.className = 'panel-header';
 
-  // BYOK badge 占位（永远在最前；setStatus 决定 display）
+  // brand label（永远显示在最左）
+  const brand = document.createElement('div');
+  brand.className = 'brand-label';
+  brand.textContent = 'rewrite.so';
+  header.appendChild(brand);
+
+  // BYOK badge 占位（在 brand 后；setStatus 决定 display）
   const byokBadge = document.createElement('div');
   byokBadge.className = 'byok-badge';
   byokBadge.textContent = t('core.byokBadge', opts.locale);
