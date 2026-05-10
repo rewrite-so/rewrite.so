@@ -158,6 +158,58 @@
 - **BYOK_MASTER_KEY 是 base64 编码的 32 字节 AES-GCM key**（`openssl rand -base64 32` 生成）。
   改 master key 会让所有 byok_keys 失效。`key_version` 字段保留给将来多 key 轮换用，MVP v=1。
 
+### Creem 契约（实测 + OpenAPI 严格 cross-check）
+
+支付路径多次踩坑后留下的硬规则。每条都附文档来源，新加 Creem 集成代码前**先看这段**。
+
+- **开权事件以 `subscription.paid` 为准**（不是 `subscription.active`）。首次订阅
+  Creem 同时发 `active` + `paid`，但**续费只发 `paid`**——只听 `active` 会让续费
+  用户在期末掉档。`subscription.update` / `scheduled_cancel` / `past_due` 也必须
+  route 到 `upsertSubscriptionFromObject`。新增事件类型时同步扩
+  `lib/creem.ts:CreemEventType` union。
+  来源：https://docs.creem.io/code/webhooks（"we encourage using subscription.paid
+  for activating access"）
+- **`CheckoutEntity.subscription` 是 `oneOf [string, SubscriptionEntity]`**：
+  Creem `GET /v1/checkouts?checkout_id=...` 返回的 `subscription` 字段两种都合法。
+  `/v1/billing/verify-checkout` 必须支持 string 退化——调
+  `fetchSubscription({subscriptionId})` 拉完整 object 再 upsert，**不能直接放弃**
+  落库（webhook 是兜底，verify 是用户即时反馈通道）。fetchSubscription 抛错时
+  显式返 502 而非静默 `applied:false`。
+  来源：https://docs.creem.io/api-reference/openapi.json `CheckoutEntity.subscription`
+- **Creem 单查 endpoint 用 query param 不是 path param**：
+  `GET /v1/checkouts?checkout_id=...` / `GET /v1/subscriptions?subscription_id=...`。
+  写成 path 形态（`/v1/checkouts/{id}`）一律 404。
+  来源：OpenAPI operationId=retrieveCheckout / retrieveSubscription
+- **列订阅用 `/v1/subscriptions/search`**，仅支持 `page_number` / `page_size`，
+  **不支持 `created_after` filter**——cron reconcile 必须客户端按 `created_at`
+  ISO string 过滤 cutoff。response shape 是 `{ items, pagination }`，**不是**
+  `{ data }` / `{ subscriptions }`。
+  来源：OpenAPI SubscriptionListEntity
+- **Creem 没有 `cancel_at_period_end` 字段**：取消语义靠 `status='scheduled_cancel'`
+  表达。落 D1 时由 webhook routeEvent 显式按 eventType 推导
+  `cancelAtPeriodEnd` 传给 `upsertSubscriptionFromObject(opts)`。读 obj 的
+  `cancelAtPeriodEnd / cancel_at_period_end` 字段是死代码——Creem 永远不发。
+  来源：OpenAPI SubscriptionEntity 仅含 `canceled_at`(nullable)
+- **`SubscriptionEntity` period 字段是 `current_period_*_date` 后缀**（ISO string）。
+  `TransactionEntity` 内的 `period_start / period_end / created_at` 是 epoch ms
+  number——两者命名 + 类型都不同。`extractPeriodStart / End` 只读 `_date` 后缀；
+  新增字段时对照 OpenAPI + 实测 payload 双重验证。
+  来源：OpenAPI SubscriptionEntity vs TransactionEntity
+- **D1 status 由 webhook eventType 决定，不读 object.status**（`subscription.update`
+  事件除外，因其语义就是状态可能变化）。**实测 `subscription.expired` 事件 object.status
+  仍是 "active"**——信 object.status 会让 expired 事件误落成 active。
+  来源：docs.creem.io/llms-full.txt 行 6210 expired sample payload
+- **Webhook envelope 顶层混合命名**：`id` / `eventType`(camelCase) / `created_at`
+  (snake_case, **number epoch ms**) / `object`。envelope.object 内 `created_at` 是
+  ISO string——同名字段在两层不同类型。`CreemEventEnvelope` interface 必须
+  反映这一点。
+- **Webhook handler default 分支必须 throw**（让 Creem 自动重试 30s → 1min →
+  5min → 1h，4 次后停），**不写 webhook_events 幂等键**，让运维通过
+  `webhook.handler_error` 日志识别新事件类型。informational 事件
+  （`checkout.completed` / `checkout.abandoned` / `transaction.completed`）
+  显式列入 noop case 写幂等键，避免持续重试我们故意不处理的事件。
+  来源：docs.creem.io/llms-full.txt 行 2445 + 5663（重试策略）
+
 ## 前端实现要点
 
 - **content script 不要引入 React/Vue 等框架**：`packages/core` 浮层 UI 用纯 vanilla DOM，bundle gzip < 30KB。扩展自己的 popup/options 才用 Preact。

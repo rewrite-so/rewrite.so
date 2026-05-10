@@ -86,6 +86,32 @@ describe('POST /v1/billing/verify-checkout', () => {
     expect(res.status).toBe(400);
   });
 
+  it('calls Creem with /v1/checkouts?checkout_id=... query-param URL (not path-param)', async () => {
+    // Creem OpenAPI: GET /v1/checkouts?checkout_id=xxx；写成 path param 一律 404。
+    // 来源 https://docs.creem.io/api-reference/openapi.json operationId=retrieveCheckout
+    mockSession = { user: { id: 'u1', email: 'u1@test.com' } };
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(
+        Response.json({ id: 'ck_abc', status: 'pending', metadata: { user_id: 'u1' } }),
+      );
+    await app.request(
+      '/v1/billing/verify-checkout',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ checkoutId: 'ck_abc' }),
+      },
+      MOCK_ENV,
+    );
+    const calledUrl = fetchSpy.mock.calls[0]?.[0];
+    expect(typeof calledUrl).toBe('string');
+    expect(calledUrl).toContain('/checkouts?');
+    expect(calledUrl).toContain('checkout_id=ck_abc');
+    // 防回归：path-param 形态绝不能出现
+    expect(calledUrl).not.toMatch(/\/checkouts\/ck_abc/);
+  });
+
   it('returns 502 when Creem fetch fails', async () => {
     mockSession = { user: { id: 'u1', email: 'u1@test.com' } };
     vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response('boom', { status: 500 }));
@@ -219,16 +245,49 @@ describe('POST /v1/billing/verify-checkout', () => {
     expect(await res.json()).toMatchObject({ status: 'completed', applied: false });
   });
 
-  it('completed checkout but subscription is just an id string → applied=false (webhook fallback)', async () => {
+  it('completed checkout with subscription as string id → fetchSubscription fills in object, applied=true', async () => {
+    // CheckoutEntity.subscription is oneOf [string, SubscriptionEntity]; when it
+    // arrives as a bare id, verify-checkout must call retrieveSubscription before
+    // upserting. Source: docs.creem.io/api-reference/openapi.json CheckoutEntity.subscription
     mockSession = { user: { id: 'u1', email: 'u1@test.com' } };
-    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
-      Response.json({
-        id: 'ck_123',
-        status: 'completed',
-        metadata: { user_id: 'u1' },
-        subscription: 'sub_456', // 仅 id 不带 object
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(
+        // 1st call: GET /checkouts (verify) — sub 是 string id
+        Response.json({
+          id: 'ck_123',
+          status: 'completed',
+          metadata: { user_id: 'u1' },
+          subscription: 'sub_456',
+        }),
+      )
+      .mockResolvedValueOnce(
+        // 2nd call: GET /subscriptions?subscription_id=sub_456 — 拿到完整 object
+        Response.json({
+          id: 'sub_456',
+          status: 'active',
+          customer: { id: 'cust_789' },
+          product: { id: 'prod_monthly' },
+          current_period_start_date: '2026-05-04T00:00:00Z',
+          current_period_end_date: '2026-06-04T00:00:00Z',
+          metadata: { user_id: 'u1' },
+        }),
+      );
+
+    const writes: string[] = [];
+    const stubDB = {
+      prepare: (sql: string) => ({
+        bind: (..._args: unknown[]) => ({
+          first: async () => null,
+          run: async () => {
+            if (sql.includes('INSERT INTO subscriptions')) writes.push('insert');
+            return { success: true };
+          },
+          all: async () => ({ results: [], success: true }),
+        }),
       }),
-    );
+    } as unknown as D1Database;
+
     const res = await app.request(
       '/v1/billing/verify-checkout',
       {
@@ -236,9 +295,98 @@ describe('POST /v1/billing/verify-checkout', () => {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ checkoutId: 'ck_123' }),
       },
-      MOCK_ENV,
+      { ...MOCK_ENV, DB: stubDB },
     );
     expect(res.status).toBe(200);
-    expect(await res.json()).toMatchObject({ status: 'completed', applied: false });
+    expect(await res.json()).toEqual({ status: 'completed', applied: true });
+    expect(writes).toEqual(['insert']);
+    // 第二次 fetch 必须打到 retrieveSubscription endpoint
+    const secondCallUrl = fetchSpy.mock.calls[1]?.[0];
+    expect(typeof secondCallUrl).toBe('string');
+    expect(secondCallUrl).toContain('/subscriptions?');
+    expect(secondCallUrl).toContain('subscription_id=sub_456');
+  });
+
+  it('completed checkout with inline subscription object → no fetchSubscription call (spy assertion)', async () => {
+    mockSession = { user: { id: 'u1', email: 'u1@test.com' } };
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+      Response.json({
+        id: 'ck_123',
+        status: 'completed',
+        metadata: { user_id: 'u1' },
+        subscription: {
+          id: 'sub_456',
+          status: 'active',
+          customer: { id: 'cust_789' },
+          product: { id: 'prod_monthly' },
+          current_period_start_date: '2026-05-04T00:00:00Z',
+          current_period_end_date: '2026-06-04T00:00:00Z',
+          metadata: { user_id: 'u1' },
+        },
+      }),
+    );
+
+    const stubDB = {
+      prepare: (_sql: string) => ({
+        bind: (..._args: unknown[]) => ({
+          first: async () => null,
+          run: async () => ({ success: true }),
+          all: async () => ({ results: [], success: true }),
+        }),
+      }),
+    } as unknown as D1Database;
+
+    const res = await app.request(
+      '/v1/billing/verify-checkout',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ checkoutId: 'ck_123' }),
+      },
+      { ...MOCK_ENV, DB: stubDB },
+    );
+    expect(res.status).toBe(200);
+    // 仅 1 次 fetch（GET /checkouts），不应额外调 retrieveSubscription
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('fetchSubscription throws → 502, no DB write', async () => {
+    mockSession = { user: { id: 'u1', email: 'u1@test.com' } };
+    vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(
+        Response.json({
+          id: 'ck_123',
+          status: 'completed',
+          metadata: { user_id: 'u1' },
+          subscription: 'sub_456',
+        }),
+      )
+      .mockResolvedValueOnce(new Response('upstream gone', { status: 500 }));
+
+    const writes: string[] = [];
+    const stubDB = {
+      prepare: (sql: string) => ({
+        bind: (..._args: unknown[]) => ({
+          first: async () => null,
+          run: async () => {
+            if (sql.includes('INSERT INTO subscriptions')) writes.push('insert');
+            return { success: true };
+          },
+          all: async () => ({ results: [], success: true }),
+        }),
+      }),
+    } as unknown as D1Database;
+
+    const res = await app.request(
+      '/v1/billing/verify-checkout',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ checkoutId: 'ck_123' }),
+      },
+      { ...MOCK_ENV, DB: stubDB },
+    );
+    expect(res.status).toBe(502);
+    expect(writes).toEqual([]);
   });
 });

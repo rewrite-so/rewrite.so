@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   extractCustomerId,
   extractPeriodEnd,
+  extractPeriodStart,
   extractProductId,
   extractUserIdFromMetadata,
   planFromProductId,
@@ -58,17 +59,18 @@ describe('verifyWebhookSignature', () => {
 });
 
 describe('extractCustomerId', () => {
-  it('reads customerId field', () => {
-    expect(extractCustomerId({ customerId: 'cust_1' })).toBe('cust_1');
-  });
-  it('reads customer_id field', () => {
-    expect(extractCustomerId({ customer_id: 'cust_2' })).toBe('cust_2');
-  });
+  // SubscriptionEntity.customer / CheckoutEntity.customer 是 oneOf [string, CustomerEntity]——
+  // 旧顶层 customerId / customer_id 字段 OpenAPI 不声明且实测 payload 不出现，
+  // 不再保留 fallback（与 extractPeriodEnd 对齐）。
   it('reads string customer field', () => {
     expect(extractCustomerId({ customer: 'cust_3' })).toBe('cust_3');
   });
   it('reads nested customer.id field', () => {
     expect(extractCustomerId({ customer: { id: 'cust_4', email: 'a@b.com' } })).toBe('cust_4');
+  });
+  it('returns null for legacy top-level customerId / customer_id (regression guard)', () => {
+    expect(extractCustomerId({ customerId: 'cust_1' })).toBeNull();
+    expect(extractCustomerId({ customer_id: 'cust_2' })).toBeNull();
   });
   it('returns null when absent', () => {
     expect(extractCustomerId({ status: 'active' })).toBeNull();
@@ -92,14 +94,17 @@ describe('extractUserIdFromMetadata', () => {
 });
 
 describe('extractProductId', () => {
-  it('reads productId', () => {
-    expect(extractProductId({ productId: 'prod_1' })).toBe('prod_1');
-  });
-  it('reads product_id', () => {
-    expect(extractProductId({ product_id: 'prod_2' })).toBe('prod_2');
+  // SubscriptionEntity.product 是 oneOf [string, ProductEntity]——同 extractCustomerId
+  // 一样删了 productId / product_id fallback（OpenAPI 不声明，实测 payload 不出现）。
+  it('reads string product field', () => {
+    expect(extractProductId({ product: 'prod_str' })).toBe('prod_str');
   });
   it('reads nested product.id', () => {
     expect(extractProductId({ product: { id: 'prod_3' } })).toBe('prod_3');
+  });
+  it('returns null for legacy top-level productId / product_id (regression guard)', () => {
+    expect(extractProductId({ productId: 'prod_1' })).toBeNull();
+    expect(extractProductId({ product_id: 'prod_2' })).toBeNull();
   });
 });
 
@@ -117,14 +122,34 @@ describe('planFromProductId', () => {
 });
 
 describe('extractPeriodEnd', () => {
-  it('reads camelCase', () => {
-    expect(extractPeriodEnd({ currentPeriodEnd: '2026-06-15T00:00:00Z' })).toBe(
+  // Creem SubscriptionEntity.current_period_end_date 是带 _date 后缀的 ISO string。
+  // 旧字段名 `currentPeriodEnd` / `current_period_end` 在实测 payload 中**永远不会出现**——
+  // OpenAPI 全文 snake_case 也没声明，保留 fallback 是死代码。
+  // 来源：https://docs.creem.io/api-reference/openapi.json SubscriptionEntity
+  it('reads current_period_end_date (ISO string)', () => {
+    expect(extractPeriodEnd({ current_period_end_date: '2026-06-15T00:00:00Z' })).toBe(
       '2026-06-15T00:00:00Z',
     );
   });
-  it('reads snake_case', () => {
-    expect(extractPeriodEnd({ current_period_end: '2026-06-15T00:00:00Z' })).toBe(
-      '2026-06-15T00:00:00Z',
+  it('returns null for legacy field names (camelCase or no _date suffix)', () => {
+    // 防回归：删掉的旧 fallback 不能被悄悄加回
+    expect(extractPeriodEnd({ currentPeriodEnd: '2026-06-15T00:00:00Z' })).toBeNull();
+    expect(extractPeriodEnd({ current_period_end: '2026-06-15T00:00:00Z' })).toBeNull();
+  });
+  it('returns null when absent', () => {
+    expect(extractPeriodEnd({})).toBeNull();
+    expect(extractPeriodEnd(null)).toBeNull();
+  });
+});
+
+describe('extractPeriodStart', () => {
+  it('reads current_period_start_date', () => {
+    expect(extractPeriodStart({ current_period_start_date: '2026-05-10T00:00:00Z' })).toBe(
+      '2026-05-10T00:00:00Z',
     );
+  });
+  it('returns null for legacy field names', () => {
+    expect(extractPeriodStart({ currentPeriodStart: '2026-05-10T00:00:00Z' })).toBeNull();
+    expect(extractPeriodStart({ current_period_start: '2026-05-10T00:00:00Z' })).toBeNull();
   });
 });

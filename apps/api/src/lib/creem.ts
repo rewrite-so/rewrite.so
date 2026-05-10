@@ -2,13 +2,25 @@
  * Creem 计费客户端。
  *
  * 文档参考：
- * - Checkout:  POST https://api.creem.io/v1/checkouts          → returns { checkout_url }
- * - Portal:    POST https://api.creem.io/v1/customers/billing  → returns { customer_portal_link }
- * - Webhook:   header `creem-signature` 是 raw body 用 webhook secret 算的 HMAC-SHA256（hex）。
- *   事件信封：{ id, eventType, createdAt, object: {...} }
- *   订阅相关 eventType: subscription.active / .trialing / .paused / .resumed / .canceled / .expired
- *   支付相关：transaction.completed / .failed
- *   checkout：checkout.completed / .abandoned
+ * - Create checkout:    POST https://api.creem.io/v1/checkouts                    → returns CheckoutEntity
+ * - Retrieve checkout:  GET  https://api.creem.io/v1/checkouts?checkout_id=...    → returns CheckoutEntity
+ * - Retrieve sub:       GET  https://api.creem.io/v1/subscriptions?subscription_id=... → SubscriptionEntity
+ * - List subs:          GET  https://api.creem.io/v1/subscriptions/search          → { items, pagination }
+ * - Portal:             POST https://api.creem.io/v1/customers/billing             → returns { customer_portal_link }
+ * - Webhook:            header `creem-signature` = HMAC-SHA256(raw body, webhook_secret) hex.
+ *
+ * Webhook 事件信封（顶层混合命名）：
+ *   { id: string, eventType: <camelCase>, created_at: number(epoch ms), object: ... }
+ *   注意：envelope.created_at 是 number；envelope.object.created_at 是 ISO string——同名不同类型。
+ *
+ * 订阅事件（status 由 eventType 决定，不读 object.status）：
+ *   subscription.active / paid / trialing / paused / resumed / canceled / scheduled_cancel
+ *   subscription.past_due / expired / update
+ * 支付：transaction.completed / failed
+ * Checkout：checkout.completed / abandoned
+ *
+ * 详见 CLAUDE.md "Creem 契约" 段。所有 endpoint / 字段名 / 事件类型对照
+ * https://docs.creem.io/api-reference/openapi.json 实测验证。
  */
 
 // Creem test mode 走 test-api.creem.io；生产走 api.creem.io。
@@ -75,25 +87,29 @@ export interface CreatePortalOutput {
 }
 
 /**
- * GET /v1/checkouts/{id} —— 主动查询 checkout 状态。
+ * GET /v1/checkouts?checkout_id=xxx —— 主动查询 checkout 状态。
  *
  * 用途：用户从 Creem 跳回 web /settings?billing=ok 后，web 立即调
  * /v1/billing/verify-checkout 让我们这边查一次 Creem，把 subscription 直接落库——
  * 不等 webhook（可能延迟数秒到数分钟）。webhook 仍会发，靠 PK 幂等。
  *
- * Creem 文档：返回的 checkout 完成后 object 里会带 subscription / customer 字段。
+ * Creem 文档：返回 CheckoutEntity，subscription 字段是 oneOf [string,
+ * SubscriptionEntity]——string 形态需再调 fetchSubscription 拿完整 object。
+ *
+ * 来源：https://docs.creem.io/api-reference/openapi.json operationId=retrieveCheckout
  */
 export async function fetchCheckout(input: {
   apiKey: string;
   checkoutId: string;
 }): Promise<CreemCheckoutObject> {
-  const res = await fetch(
-    `${creemBase(input.apiKey)}/checkouts/${encodeURIComponent(input.checkoutId)}`,
-    {
-      method: 'GET',
-      headers: { 'x-api-key': input.apiKey },
-    },
-  );
+  // 单查 endpoint 用 query param，不是 path param。写错路径一律 404。
+  // OpenAPI: https://docs.creem.io/api-reference/openapi.json operationId=retrieveCheckout
+  const params = new URLSearchParams({ checkout_id: input.checkoutId });
+  const url = `${creemBase(input.apiKey)}/checkouts?${params}`;
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: { 'x-api-key': input.apiKey },
+  });
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`Creem fetchCheckout failed: ${res.status} ${text}`);
@@ -102,27 +118,53 @@ export async function fetchCheckout(input: {
 }
 
 /**
- * GET /v1/subscriptions —— 列订阅，给 reconcile cron 用。
+ * GET /v1/subscriptions?subscription_id=xxx —— 按 id 拉单个订阅。
+ *
+ * verify-checkout 用：当 GET /checkouts 返回的 subscription 字段是 string id 时
+ * （`CheckoutEntity.subscription` 是 oneOf [string, SubscriptionEntity]，文档明确两种都
+ * 合法），必须再调一次本接口拿到完整 SubscriptionEntity 才能 upsert 到 D1。
+ *
+ * 来源：https://docs.creem.io/api-reference/openapi.json operationId=retrieveSubscription
+ */
+export async function fetchSubscription(input: {
+  apiKey: string;
+  subscriptionId: string;
+}): Promise<CreemSubscriptionObject> {
+  const params = new URLSearchParams({ subscription_id: input.subscriptionId });
+  const url = `${creemBase(input.apiKey)}/subscriptions?${params}`;
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: { 'x-api-key': input.apiKey },
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Creem fetchSubscription failed: ${res.status} ${text.slice(0, 200)}`);
+  }
+  return (await res.json()) as CreemSubscriptionObject;
+}
+
+/**
+ * GET /v1/subscriptions/search —— 列订阅，给 reconcile cron 用。
  *
  * 用途：webhook miss 兜底。如果 Creem webhook 因为网络/CF 抽风没到达，订阅状态在 D1
  * 永远不会更新。每天 cron 跑一次，列最近 N 小时内的 subs，对比 D1 缺的补上。
  *
- * **Creem API 假设**（待用户实际部署后用 prod key 验证）：
- * - endpoint 是 `/v1/subscriptions`
- * - 支持 query `created_after` (ISO-8601) 过滤
- * - 返回 `{ data: CreemSubscriptionObject[] }` 或类似分页结构
+ * Creem 实际契约（OpenAPI 验证）：
+ * - endpoint 是 `/v1/subscriptions/search`（**不是** `/v1/subscriptions`，那个是单查必传 subscription_id）
+ * - 仅支持 query `page_number` / `page_size`（**不支持** `created_after` filter，要客户端过滤）
+ * - response shape 是 `{ items: CreemSubscriptionObject[], pagination: ... }`
  *
- * 如果 Creem API 不支持上述，cron 会拿到非预期 response → log warn 并 no-op，
- * 不影响其它功能。verify-checkout 端点（用户主动触发）是更可靠的恢复路径。
+ * 来源：https://docs.creem.io/api-reference/openapi.json SubscriptionListEntity
  */
 export async function listSubscriptions(input: {
   apiKey: string;
-  /** ISO-8601 string；只列在此时间之后创建/更新的订阅 */
-  createdAfter?: string;
+  pageNumber?: number;
+  pageSize?: number;
 }): Promise<CreemSubscriptionObject[]> {
   const params = new URLSearchParams();
-  if (input.createdAfter) params.set('created_after', input.createdAfter);
-  const url = `${creemBase(input.apiKey)}/subscriptions${params.size > 0 ? `?${params}` : ''}`;
+  params.set('page_number', String(input.pageNumber ?? 1));
+  params.set('page_size', String(input.pageSize ?? 100));
+  const url = `${creemBase(input.apiKey)}/subscriptions/search?${params}`;
   const res = await fetch(url, {
     method: 'GET',
     headers: { 'x-api-key': input.apiKey },
@@ -131,12 +173,8 @@ export async function listSubscriptions(input: {
     const text = await res.text();
     throw new Error(`Creem listSubscriptions failed: ${res.status} ${text.slice(0, 200)}`);
   }
-  const body = (await res.json()) as
-    | CreemSubscriptionObject[]
-    | { data?: CreemSubscriptionObject[]; subscriptions?: CreemSubscriptionObject[] };
-  // Creem 可能返数组直接，也可能 { data: [...] } 或 { subscriptions: [...] }。兜底处理
-  if (Array.isArray(body)) return body;
-  return body.data ?? body.subscriptions ?? [];
+  const body = (await res.json()) as { items?: CreemSubscriptionObject[]; pagination?: unknown };
+  return body.items ?? [];
 }
 
 export async function createPortalSession(input: CreatePortalInput): Promise<CreatePortalOutput> {
@@ -202,54 +240,108 @@ export type CreemEventType =
   | 'checkout.completed'
   | 'checkout.abandoned'
   | 'subscription.active'
+  | 'subscription.paid'
   | 'subscription.trialing'
   | 'subscription.paused'
   | 'subscription.resumed'
   | 'subscription.canceled'
+  | 'subscription.scheduled_cancel'
+  | 'subscription.past_due'
   | 'subscription.expired'
+  | 'subscription.update'
   | 'transaction.completed'
   | 'transaction.failed';
 
+/**
+ * Webhook envelope 顶层结构。
+ * 命名混合：`id` / `eventType`(camelCase) / `created_at`(snake, number epoch ms) /
+ * `object`。注意 envelope 顶层 `created_at` 是 number，envelope.object 内
+ * `created_at` 是 ISO string——同名不同类型。
+ * 来源：实测 evt_6zB7KdtiwxUvGg8tu8KUV5 + docs.creem.io/llms-full.txt sample
+ */
 export interface CreemEventEnvelope<T = unknown> {
   id: string;
   eventType: CreemEventType;
-  createdAt: string;
+  created_at: number;
   object: T;
 }
 
+/**
+ * SubscriptionEntity（webhook envelope.object 形态 + retrieveSubscription response）。
+ * 字段命名严格 snake_case 与 OpenAPI 一致。
+ *
+ * 注意：
+ * - period 字段带 `_date` 后缀（ISO string），不是 `current_period_*`
+ * - 没有 `cancel_at_period_end` 字段——取消语义靠 `status='scheduled_cancel'`
+ *   表达，落 D1 时由 webhook routeEvent 显式按 status 推导 cancelAtPeriodEnd
+ *   传给 upsertSubscriptionFromObject(opts)
+ * - `metadata` 在 OpenAPI schema 未声明但 webhook payload 实测出现（每个 event 都带）
+ *
+ * 来源：https://docs.creem.io/api-reference/openapi.json SubscriptionEntity
+ */
 export interface CreemSubscriptionObject {
   id: string;
-  customerId?: string;
-  customer?: string | { id: string; email?: string };
-  productId?: string;
-  product?: string | { id: string };
-  status: string; // 'active' | 'trialing' | 'paused' | 'canceled' | 'expired' | ...
-  currentPeriodStart?: string;
-  currentPeriodEnd?: string;
-  current_period_start?: string;
-  current_period_end?: string;
-  cancelAtPeriodEnd?: boolean;
+  mode?: string;
+  object?: 'subscription';
+  status: string; // 'active'|'canceled'|'unpaid'|'paused'|'trialing'|'scheduled_cancel'|'past_due'(payload only)|'expired'(payload only)
+  customer: string | { id: string; email?: string };
+  product: string | { id: string };
+  items?: unknown[];
+  collection_method?: string;
+  last_transaction_id?: string;
+  last_transaction?: CreemTransactionObject;
+  last_transaction_date?: string;
+  next_transaction_date?: string;
+  current_period_start_date?: string;
+  current_period_end_date?: string;
+  canceled_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
   metadata?: Record<string, string>;
+}
+
+/**
+ * TransactionEntity. 注意字段类型与 SubscriptionEntity 不同：
+ * `period_start / period_end / created_at` 都是 epoch ms number，**不是 ISO string**；
+ * `subscription / customer` 都是 string id 或 null（不像 SubscriptionEntity 是 oneOf）。
+ * OpenAPI 没声明 metadata 字段。
+ * 来源：https://docs.creem.io/api-reference/openapi.json TransactionEntity
+ */
+export interface CreemTransactionObject {
+  id: string;
+  object?: 'transaction';
+  amount: number;
+  amount_paid?: number | null;
+  currency: string;
+  type?: string;
+  status: string;
+  subscription?: string | null;
+  customer?: string | null;
+  description?: string;
+  period_start?: number;
+  period_end?: number;
+  created_at?: number;
+  mode?: string;
 }
 
 export interface CreemCheckoutObject {
   id: string;
   customer?: string | { id: string; email?: string };
-  customerId?: string;
   subscription?: string | CreemSubscriptionObject;
-  status: string;
+  status: string; // 'pending' | 'processing' | 'completed' | 'expired'
   metadata?: Record<string, string>;
   request_id?: string;
 }
 
 /**
- * 从 envelope.object 里捞 customerId（不同事件类型字段名可能不一致）。
+ * 从 envelope.object 里捞 customer id。
+ * SubscriptionEntity.customer / CheckoutEntity.customer 都是 oneOf [string, CustomerEntity]。
+ * 旧的顶层 `customerId` / `customer_id` 字段在 OpenAPI 中不存在——实测 payload 也无；
+ * 不再保留死代码 fallback。与 extractPeriodEnd 同期对齐。
  */
 export function extractCustomerId(obj: unknown): string | null {
   if (!obj || typeof obj !== 'object') return null;
   const o = obj as Record<string, unknown>;
-  if (typeof o.customerId === 'string') return o.customerId;
-  if (typeof o.customer_id === 'string') return o.customer_id;
   const cust = o.customer;
   if (typeof cust === 'string') return cust;
   if (cust && typeof cust === 'object') {
@@ -278,13 +370,14 @@ export function extractUserIdFromMetadata(obj: unknown): string | null {
 }
 
 /**
- * 从订阅 object 里捞 productId，以决定 plan = monthly | yearly。
+ * 从订阅 object 里捞 product id，以决定 plan = monthly | yearly。
+ * SubscriptionEntity.product 是 oneOf [string, ProductEntity]。
+ * 旧的顶层 `productId` / `product_id` 字段在 OpenAPI 中不存在——实测 payload 也无；
+ * 不再保留死代码 fallback。
  */
 export function extractProductId(obj: unknown): string | null {
   if (!obj || typeof obj !== 'object') return null;
   const o = obj as Record<string, unknown>;
-  if (typeof o.productId === 'string') return o.productId;
-  if (typeof o.product_id === 'string') return o.product_id;
   const prod = o.product;
   if (typeof prod === 'string') return prod;
   if (prod && typeof prod === 'object') {
@@ -294,11 +387,26 @@ export function extractProductId(obj: unknown): string | null {
   return null;
 }
 
+/**
+ * 从 SubscriptionEntity 捞 `current_period_end_date`（ISO string）。
+ * Creem 实际字段名带 `_date` 后缀；旧的 `current_period_end / currentPeriodEnd`
+ * 实测 payload 中**永远不会出现**——OpenAPI 全文 snake_case 也没声明。
+ * 不再保留旧字段名兜底分支（死代码）。
+ */
 export function extractPeriodEnd(obj: unknown): string | null {
   if (!obj || typeof obj !== 'object') return null;
   const o = obj as Record<string, unknown>;
-  if (typeof o.currentPeriodEnd === 'string') return o.currentPeriodEnd;
-  if (typeof o.current_period_end === 'string') return o.current_period_end;
+  if (typeof o.current_period_end_date === 'string') return o.current_period_end_date;
+  return null;
+}
+
+/**
+ * 与 extractPeriodEnd 对称——读 `current_period_start_date`。
+ */
+export function extractPeriodStart(obj: unknown): string | null {
+  if (!obj || typeof obj !== 'object') return null;
+  const o = obj as Record<string, unknown>;
+  if (typeof o.current_period_start_date === 'string') return o.current_period_start_date;
   return null;
 }
 

@@ -52,25 +52,30 @@ describe('reconcileSubscriptions', () => {
   });
 
   it('skips subscriptions already in D1; reconciles missing ones', async () => {
+    const recentISO = new Date(Date.now() - 60_000).toISOString(); // 1min ago，落入 LOOKBACK 内
     vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
-      Response.json([
-        {
-          id: 'sub_existing',
-          status: 'active',
-          customer: { id: 'cust_1' },
-          product: { id: 'prod_monthly' },
-          metadata: { user_id: 'u1' },
-          current_period_end: '2026-06-04T00:00:00Z',
-        },
-        {
-          id: 'sub_missing',
-          status: 'active',
-          customer: { id: 'cust_2' },
-          product: { id: 'prod_monthly' },
-          metadata: { user_id: 'u2' },
-          current_period_end: '2026-06-04T00:00:00Z',
-        },
-      ]),
+      Response.json({
+        items: [
+          {
+            id: 'sub_existing',
+            status: 'active',
+            customer: { id: 'cust_1' },
+            product: { id: 'prod_monthly' },
+            metadata: { user_id: 'u1' },
+            current_period_end: '2026-06-04T00:00:00Z',
+            created_at: recentISO,
+          },
+          {
+            id: 'sub_missing',
+            status: 'active',
+            customer: { id: 'cust_2' },
+            product: { id: 'prod_monthly' },
+            metadata: { user_id: 'u2' },
+            current_period_end: '2026-06-04T00:00:00Z',
+            created_at: recentISO,
+          },
+        ],
+      }),
     );
 
     const inserted: string[] = [];
@@ -102,21 +107,13 @@ describe('reconcileSubscriptions', () => {
     expect(inserted).toEqual(['sub_missing']);
   });
 
-  it('handles { data: [] } envelope from Creem', async () => {
-    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
-      Response.json({
-        data: [
-          {
-            id: 'sub_x',
-            status: 'active',
-            customer: { id: 'cust_x' },
-            product: { id: 'prod_monthly' },
-            metadata: { user_id: 'u_x' },
-            current_period_end: '2026-06-04T00:00:00Z',
-          },
-        ],
-      }),
-    );
+  it('calls Creem with /v1/subscriptions/search?page_number=1&page_size=100 (not /subscriptions)', async () => {
+    // Creem 列订阅 endpoint 是 /search 后缀；旧代码错用 /subscriptions（那是单查必传 subscription_id）。
+    // response shape 必须是 { items: [...] }（不是 { data } 或 { subscriptions }）。
+    // 来源：https://docs.creem.io/api-reference/openapi.json SubscriptionListEntity
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(Response.json({ items: [], pagination: {} }));
 
     const stubDB = {
       prepare: (_sql: string) => ({
@@ -128,24 +125,85 @@ describe('reconcileSubscriptions', () => {
       }),
     } as unknown as D1Database;
 
+    await reconcileSubscriptions(makeEnv(stubDB));
+
+    const calledUrl = fetchSpy.mock.calls[0]?.[0];
+    expect(typeof calledUrl).toBe('string');
+    expect(calledUrl).toContain('/subscriptions/search');
+    expect(calledUrl).toContain('page_number=1');
+    expect(calledUrl).toContain('page_size=100');
+    // 防回归：旧的 created_after / 单查路径绝不能出现
+    expect(calledUrl).not.toContain('created_after');
+    expect(calledUrl).not.toMatch(/\/subscriptions\?/);
+  });
+
+  it('client-side filter excludes subs older than LOOKBACK_HOURS', async () => {
+    // Creem /search 不支持 created_after filter，靠客户端 created_at 比对 cutoff 过滤
+    const recent = new Date(Date.now() - 60_000).toISOString(); // 1min ago，应处理
+    const ancient = new Date(Date.now() - 5 * 24 * 3600_000).toISOString(); // 5d ago，应跳过
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+      Response.json({
+        items: [
+          {
+            id: 'sub_recent',
+            status: 'active',
+            customer: { id: 'cust_r' },
+            product: { id: 'prod_monthly' },
+            metadata: { user_id: 'u_r' },
+            current_period_end: '2026-06-04T00:00:00Z',
+            created_at: recent,
+          },
+          {
+            id: 'sub_ancient',
+            status: 'active',
+            customer: { id: 'cust_a' },
+            product: { id: 'prod_monthly' },
+            metadata: { user_id: 'u_a' },
+            current_period_end: '2026-06-04T00:00:00Z',
+            created_at: ancient,
+          },
+        ],
+      }),
+    );
+
+    const inserted: string[] = [];
+    const stubDB = {
+      prepare: (sql: string) => ({
+        bind: (...args: unknown[]) => ({
+          first: async () => null,
+          run: async () => {
+            if (sql.includes('INSERT INTO subscriptions')) {
+              inserted.push(args[2] as string);
+            }
+            return { success: true };
+          },
+          all: async () => ({ results: [], success: true }),
+        }),
+      }),
+    } as unknown as D1Database;
+
     const result = await reconcileSubscriptions(makeEnv(stubDB));
-    expect(result.scanned).toBe(1);
-    expect(result.reconciled).toBe(1);
+    expect(result.scanned).toBe(1); // ancient 被过滤，scanned 不计
+    expect(inserted).toEqual(['sub_recent']);
   });
 
   it('skips entries without sub.id', async () => {
+    const recentISO = new Date(Date.now() - 60_000).toISOString();
     vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
-      Response.json([
-        { status: 'active' }, // 缺 id
-        {
-          id: 'sub_ok',
-          status: 'active',
-          customer: { id: 'cust_ok' },
-          product: { id: 'prod_monthly' },
-          metadata: { user_id: 'u_ok' },
-          current_period_end: '2026-06-04T00:00:00Z',
-        },
-      ]),
+      Response.json({
+        items: [
+          { status: 'active', created_at: recentISO }, // 缺 id
+          {
+            id: 'sub_ok',
+            status: 'active',
+            customer: { id: 'cust_ok' },
+            product: { id: 'prod_monthly' },
+            metadata: { user_id: 'u_ok' },
+            current_period_end: '2026-06-04T00:00:00Z',
+            created_at: recentISO,
+          },
+        ],
+      }),
     );
 
     const stubDB = {
