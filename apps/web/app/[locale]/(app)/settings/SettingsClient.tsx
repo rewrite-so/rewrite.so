@@ -6,6 +6,7 @@ import { useFormatter, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { Link, usePathname, useRouter } from '../../../../i18n/navigation.ts';
 import { getExtensionInstallUrl } from '../../../../lib/extension-install-url.ts';
+import { performSignOut } from '../../../../lib/sign-out.ts';
 
 // 一次性 dismiss flag（参考 packages/core/src/ui/candidates.ts L18-31 模式）。
 // 老用户 deploy 后会看到一次 WelcomeCard，dismiss 后永久消失，无 created_at gate。
@@ -281,8 +282,19 @@ export function SettingsClient() {
 
   async function signOut() {
     setSigningOut(true);
-    await fetch('/api/auth/sign-out', { method: 'POST', credentials: 'include' });
-    location.href = '/';
+    const result = await performSignOut();
+    if (result.status === 'ok') {
+      // 成功：导航走 location.href，期间按钮保持 disabled，不复位 state
+      // 避免 "Signing..." 闪回 "Sign out" 再消失。
+      location.href = '/';
+      return;
+    }
+    if (result.status === 'failed') {
+      console.error('[signOut] failed', result.httpStatus, result.detail);
+    } else {
+      console.error('[signOut] network error', result.error);
+    }
+    setSigningOut(false);
   }
 
   if (!me) {
