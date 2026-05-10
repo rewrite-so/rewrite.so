@@ -32,22 +32,57 @@ abort. Never `git stash` or `--force` anything without confirmation.
 
 ## Step 1 — Decide the new version
 
+Read current state:
+
 ```bash
 node -p "require('./apps/extension/package.json').version"
 git tag -l 'ext-v*' --sort=-v:refname | head -3
 ```
 
-Ask the user (AskUserQuestion) which bump:
+### Recommend a bump from the commit log
 
-- **patch** (X.Y.Z → X.Y.Z+1) — bug fixes / copy / styling only
-- **minor** (X.Y.Z → X.Y+1.0) — new user-visible features, backwards-compatible
-- **major** (X.Y.Z → X+1.0.0) — breaking UX changes (rare)
-- **explicit** — let the user type a version
+Find the last released tag, then categorize commits since it:
 
-Reject (`exit early`) if `git tag -l "ext-v$NEW"` already exists.
+```bash
+LAST_TAG=$(git tag -l 'ext-v*' --sort=-v:refname | head -1)
+git log ${LAST_TAG:+$LAST_TAG..}HEAD --pretty=format:'%s%n%b%n---' \
+  -- apps/extension packages/core packages/shared
+```
 
-Reject if `$NEW` is lower than the current `package.json` version (the
-Chrome Web Store rejects same-or-lower version uploads).
+Apply Conventional Commits → SemVer mapping:
+
+| Commit signal in the range above | Implied bump |
+|---|---|
+| Any subject with `!` after the type (`feat!:`, `fix!:`) **or** any body containing `BREAKING CHANGE:` | **major** |
+| Otherwise, any subject starting with `feat(...)` or `feat:` | **minor** |
+| Otherwise (only `fix` / `chore` / `docs` / `style` / `refactor` / `perf` / `test` / `polish`) | **patch** |
+| No commits in scope at all | abort — nothing to release |
+
+If the repo has no prior `ext-v*` tag (first release ever), default the
+recommendation to **minor** unless the user says otherwise — `0.1.0` is
+typical for an established but pre-1.0 product.
+
+### Present the choice with the recommendation pinned first
+
+Use AskUserQuestion. The recommended option goes first with "(Recommended)"
+in the label. State the reason in the question text so the user can sanity-check:
+
+> "Since the last release I see N feat / M fix / K other commits — recommending **minor** (X.Y.Z → X.Y+1.0). Pick a bump:"
+
+Options:
+1. **`<recommended>` (Recommended)** — e.g. "minor (0.1.0 → 0.2.0)"
+2. The other two SemVer levels in plain order
+3. **explicit** — let the user type a version
+
+### Validation gates (after the user picks)
+
+Before proceeding, fail loudly if any of these hold:
+
+- `git tag -l "ext-v$NEW"` returns non-empty → tag already exists.
+- `$NEW` ≤ current `package.json` version → Chrome Web Store rejects
+  same-or-lower uploads.
+- `$NEW` doesn't match `^\d+\.\d+\.\d+$` → manifest_version 3 requires
+  three numeric segments (no pre-release suffixes for store builds).
 
 Only `apps/extension/package.json` gets bumped — `@rewrite/core` /
 `@rewrite/shared` are workspace-internal and don't ship to a store.
