@@ -176,7 +176,7 @@ function Section({ title, children }: { title: string; children: ComponentChildr
 
 const pageStyle = {
   minHeight: '100vh',
-  background: '#fafafa',
+  background: '#f4f4f5',
   display: 'flex',
   alignItems: 'flex-start',
   justifyContent: 'center',
@@ -186,19 +186,19 @@ const pageStyle = {
 const shellStyle = {
   width: 540,
   background: '#fff',
-  border: '1px solid #e4e4e7',
-  borderRadius: 12,
-  padding: 32,
-  boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+  border: '1px solid #f0f0f0',
+  borderRadius: 16,
+  padding: 40,
+  boxShadow: '0 12px 48px rgba(0,0,0,0.06)',
 };
 const h2Style = { margin: '0 0 8px', fontSize: 14, fontWeight: 600, color: '#111' };
 const hintStyle = { margin: '8px 0 0', color: '#888', fontSize: 12, lineHeight: 1.5 };
 const selectStyle = {
   width: '100%',
-  padding: '10px 12px',
+  padding: '12px 14px',
   fontSize: 14,
-  border: '1px solid #d4d4d8',
-  borderRadius: 8,
+  border: '1px solid #e4e4e7',
+  borderRadius: 10,
   fontFamily: 'inherit',
-  background: '#fff',
+  background: '#fafafa',
 };
