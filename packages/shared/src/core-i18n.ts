@@ -23,6 +23,8 @@ const CORE_MESSAGES: Record<Locale, Record<string, string>> = {
     'error.invalidInput': 'Invalid input',
     'error.unauthorized': 'Please sign in first',
     'error.network': 'Network error',
+    'error.quotaExceededDetail': 'Used {used} / {limit}. Resets at the start of next month.',
+    'error.rateLimitRetryAfter': 'Try again in {sec}s.',
   },
   'zh-CN': {
     'hint.tryOnAnyInput': '安装扩展，在支持的网站使用',
@@ -46,6 +48,8 @@ const CORE_MESSAGES: Record<Locale, Record<string, string>> = {
     'error.invalidInput': '输入不合法',
     'error.unauthorized': '请登录后再试',
     'error.network': '网络异常',
+    'error.quotaExceededDetail': '已用 {used} / {limit}，下个月初重置。',
+    'error.rateLimitRetryAfter': '请 {sec} 秒后重试。',
   },
   ja: {
     'hint.tryOnAnyInput': '拡張機能を入れると対応サイトで使えます',
@@ -69,6 +73,8 @@ const CORE_MESSAGES: Record<Locale, Record<string, string>> = {
     'error.invalidInput': '無効な入力です',
     'error.unauthorized': '先にログインしてください',
     'error.network': 'ネットワークエラー',
+    'error.quotaExceededDetail': '使用済み {used} / {limit}。来月初にリセットされます。',
+    'error.rateLimitRetryAfter': '{sec} 秒後にもう一度お試しください。',
   },
   ko: {
     'hint.tryOnAnyInput': '확장 프로그램을 설치하면 지원되는 사이트에서 사용할 수 있습니다',
@@ -92,6 +98,8 @@ const CORE_MESSAGES: Record<Locale, Record<string, string>> = {
     'error.invalidInput': '잘못된 입력',
     'error.unauthorized': '먼저 로그인해주세요',
     'error.network': '네트워크 오류',
+    'error.quotaExceededDetail': '{used} / {limit} 사용. 다음 달 초에 초기화됩니다.',
+    'error.rateLimitRetryAfter': '{sec}초 후 다시 시도하세요.',
   },
   es: {
     'hint.tryOnAnyInput': 'Instala la extensión para usarlo en sitios compatibles',
@@ -115,6 +123,9 @@ const CORE_MESSAGES: Record<Locale, Record<string, string>> = {
     'error.invalidInput': 'Entrada no válida',
     'error.unauthorized': 'Inicia sesión primero',
     'error.network': 'Error de red',
+    'error.quotaExceededDetail':
+      'Usado {used} / {limit}. Se reinicia el primer día del próximo mes.',
+    'error.rateLimitRetryAfter': 'Vuelve a intentarlo en {sec}s.',
   },
   fr: {
     'hint.tryOnAnyInput': "Installez l'extension pour l'utiliser sur les sites pris en charge",
@@ -138,6 +149,9 @@ const CORE_MESSAGES: Record<Locale, Record<string, string>> = {
     'error.invalidInput': 'Entrée invalide',
     'error.unauthorized': "Connectez-vous d'abord",
     'error.network': 'Erreur réseau',
+    'error.quotaExceededDetail':
+      'Utilisé {used} / {limit}. Réinitialisé au début du mois prochain.',
+    'error.rateLimitRetryAfter': 'Réessayez dans {sec}s.',
   },
   de: {
     'hint.tryOnAnyInput': 'Installiere die Erweiterung, um sie auf unterstützten Seiten zu nutzen',
@@ -161,6 +175,8 @@ const CORE_MESSAGES: Record<Locale, Record<string, string>> = {
     'error.invalidInput': 'Ungültige Eingabe',
     'error.unauthorized': 'Bitte zuerst anmelden',
     'error.network': 'Netzwerkfehler',
+    'error.quotaExceededDetail': 'Verwendet {used} / {limit}. Wird zum Monatsanfang zurückgesetzt.',
+    'error.rateLimitRetryAfter': 'Versuche es in {sec}s erneut.',
   },
 };
 

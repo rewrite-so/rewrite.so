@@ -398,6 +398,34 @@ describe('createCandidates', () => {
     }
   });
 
+  // Regression: previously hand-wired `if (locale === 'zh-CN')`; now goes
+  // through tCore so ja/ko/es/fr/de no longer fall back to English.
+  it('setGlobalError quota_exceeded sub-text uses i18n catalog (zh-CN)', () => {
+    const { factory, target, root } = setup();
+    const handle = factory.open({ target, locale: 'zh-CN', targetLang: 'en' });
+    handle.setGlobalError('quota_exceeded', { authed: true, used: 5, limit: 30 });
+    const sub = root.querySelector('.global-error-sub') as HTMLElement;
+    expect(sub.textContent).toBe('已用 5 / 30，下个月初重置。');
+  });
+
+  it('setGlobalError quota_exceeded sub-text honors ja locale (no English fallback)', () => {
+    const { factory, target, root } = setup();
+    const handle = factory.open({ target, locale: 'ja', targetLang: 'en' });
+    handle.setGlobalError('quota_exceeded', { authed: true, used: 5, limit: 30 });
+    const sub = root.querySelector('.global-error-sub') as HTMLElement;
+    expect(sub.textContent).toContain('5 / 30');
+    expect(sub.textContent).toContain('使用済み');
+  });
+
+  it('setGlobalError rate_limit sub-text honors fr locale', () => {
+    const { factory, target, root } = setup();
+    const handle = factory.open({ target, locale: 'fr', targetLang: 'en' });
+    handle.setGlobalError('rate_limit', { retryAfterMs: 5000 });
+    const sub = root.querySelector('.global-error-sub') as HTMLElement;
+    expect(sub.textContent).toContain('5s');
+    expect(sub.textContent).toContain('Réessayez');
+  });
+
   it('setGlobalError does NOT show Retry for non-retryable errors (quota_exceeded)', () => {
     const { factory, target, root } = setup();
     const handle = factory.open({ target, locale: 'en', targetLang: 'en', loginUrl: '/login' });

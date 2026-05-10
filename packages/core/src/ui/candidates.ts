@@ -703,16 +703,16 @@ function describeErrorDetail(
     const used = typeof detail.used === 'number' ? detail.used : null;
     const limit = typeof detail.limit === 'number' ? detail.limit : null;
     if (used != null && limit != null) {
-      return locale === 'zh-CN'
-        ? `已用 ${used} / ${limit}，下个月初重置。`
-        : `Used ${used} / ${limit}. Resets at the start of next month.`;
+      return t('error.quotaExceededDetail', locale)
+        .replace('{used}', String(used))
+        .replace('{limit}', String(limit));
     }
   }
   if (code === 'rate_limit') {
     const ms = typeof detail.retryAfterMs === 'number' ? detail.retryAfterMs : null;
     if (ms != null) {
       const sec = Math.max(1, Math.ceil(ms / 1000));
-      return locale === 'zh-CN' ? `请 ${sec} 秒后重试。` : `Try again in ${sec}s.`;
+      return t('error.rateLimitRetryAfter', locale).replace('{sec}', String(sec));
     }
   }
   // upstream_error / unauthorized / 等：透传上游/服务端的 message + status，让用户能 debug
