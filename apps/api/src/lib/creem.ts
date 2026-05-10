@@ -2,13 +2,25 @@
  * Creem 计费客户端。
  *
  * 文档参考：
- * - Checkout:  POST https://api.creem.io/v1/checkouts          → returns { checkout_url }
- * - Portal:    POST https://api.creem.io/v1/customers/billing  → returns { customer_portal_link }
- * - Webhook:   header `creem-signature` 是 raw body 用 webhook secret 算的 HMAC-SHA256（hex）。
- *   事件信封：{ id, eventType, createdAt, object: {...} }
- *   订阅相关 eventType: subscription.active / .trialing / .paused / .resumed / .canceled / .expired
- *   支付相关：transaction.completed / .failed
- *   checkout：checkout.completed / .abandoned
+ * - Create checkout:    POST https://api.creem.io/v1/checkouts                    → returns CheckoutEntity
+ * - Retrieve checkout:  GET  https://api.creem.io/v1/checkouts?checkout_id=...    → returns CheckoutEntity
+ * - Retrieve sub:       GET  https://api.creem.io/v1/subscriptions?subscription_id=... → SubscriptionEntity
+ * - List subs:          GET  https://api.creem.io/v1/subscriptions/search          → { items, pagination }
+ * - Portal:             POST https://api.creem.io/v1/customers/billing             → returns { customer_portal_link }
+ * - Webhook:            header `creem-signature` = HMAC-SHA256(raw body, webhook_secret) hex.
+ *
+ * Webhook 事件信封（顶层混合命名）：
+ *   { id: string, eventType: <camelCase>, created_at: number(epoch ms), object: ... }
+ *   注意：envelope.created_at 是 number；envelope.object.created_at 是 ISO string——同名不同类型。
+ *
+ * 订阅事件（status 由 eventType 决定，不读 object.status）：
+ *   subscription.active / paid / trialing / paused / resumed / canceled / scheduled_cancel
+ *   subscription.past_due / expired / update
+ * 支付：transaction.completed / failed
+ * Checkout：checkout.completed / abandoned
+ *
+ * 详见 CLAUDE.md "Creem 契约" 段。所有 endpoint / 字段名 / 事件类型对照
+ * https://docs.creem.io/api-reference/openapi.json 实测验证。
  */
 
 // Creem test mode 走 test-api.creem.io；生产走 api.creem.io。
@@ -75,13 +87,16 @@ export interface CreatePortalOutput {
 }
 
 /**
- * GET /v1/checkouts/{id} —— 主动查询 checkout 状态。
+ * GET /v1/checkouts?checkout_id=xxx —— 主动查询 checkout 状态。
  *
  * 用途：用户从 Creem 跳回 web /settings?billing=ok 后，web 立即调
  * /v1/billing/verify-checkout 让我们这边查一次 Creem，把 subscription 直接落库——
  * 不等 webhook（可能延迟数秒到数分钟）。webhook 仍会发，靠 PK 幂等。
  *
- * Creem 文档：返回的 checkout 完成后 object 里会带 subscription / customer 字段。
+ * Creem 文档：返回 CheckoutEntity，subscription 字段是 oneOf [string,
+ * SubscriptionEntity]——string 形态需再调 fetchSubscription 拿完整 object。
+ *
+ * 来源：https://docs.creem.io/api-reference/openapi.json operationId=retrieveCheckout
  */
 export async function fetchCheckout(input: {
   apiKey: string;

@@ -48,10 +48,8 @@ export async function reconcileSubscriptions(env: Bindings): Promise<{
   }
 
   // 客户端按 created_at 过滤近 LOOKBACK_HOURS 小时——SubscriptionEntity.created_at 是 ISO string。
-  // 字段未来在 commit 3 加入 interface；当前用宽松访问保持本 commit 自包含。
   const subs = allSubs.filter((s) => {
-    const createdAt = (s as { created_at?: unknown }).created_at;
-    const ts = typeof createdAt === 'string' ? Date.parse(createdAt) : 0;
+    const ts = s.created_at ? Date.parse(s.created_at) : 0;
     return ts > cutoffMs;
   });
 
@@ -68,13 +66,12 @@ export async function reconcileSubscriptions(env: Bindings): Promise<{
       .first<{ id: string }>();
     if (existing) continue;
 
-    // 缺：补落库
+    // 缺：补落库。status 用 sub.status 字符串映射（保守值未知 → 'active'，给用户访问权，
+    // 后续 webhook 真理事件会用同 PK update 修正）。
     try {
       const wrote = await upsertSubscriptionFromObject(
         env,
         sub as unknown as Record<string, unknown>,
-        // status 暂时先按 'active' 落（webhook 后续 active 事件会用同 PK update）
-        // 这里用 sub.status 字符串映射可能更准，但增量价值低 —— webhook 总会修正
         mapCreemStatusToDbStatus(sub.status),
         `reconcile-${subId}`,
       );
