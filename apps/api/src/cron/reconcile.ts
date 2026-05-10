@@ -28,22 +28,32 @@ export async function reconcileSubscriptions(env: Bindings): Promise<{
   failed: number;
 }> {
   const t0 = Date.now();
-  const createdAfter = new Date(Date.now() - LOOKBACK_HOURS * 3600_000).toISOString();
+  const cutoffMs = Date.now() - LOOKBACK_HOURS * 3600_000;
 
   let scanned = 0;
   let reconciled = 0;
   let failed = 0;
 
-  let subs: Awaited<ReturnType<typeof listSubscriptions>>;
+  let allSubs: Awaited<ReturnType<typeof listSubscriptions>>;
   try {
-    subs = await listSubscriptions({
+    // Creem /v1/subscriptions/search 不支持 created_after filter，客户端过滤。
+    // page_size=100 应足够覆盖 48h 内单产品的新订阅；超出再加分页循环。
+    allSubs = await listSubscriptions({
       apiKey: env.CREEM_API_KEY,
-      createdAfter,
+      pageSize: 100,
     });
   } catch (err) {
-    log.warn('cron.reconcile.list_failed', { err, createdAfter });
+    log.warn('cron.reconcile.list_failed', { err, cutoffMs });
     return { scanned: 0, reconciled: 0, failed: 1 };
   }
+
+  // 客户端按 created_at 过滤近 LOOKBACK_HOURS 小时——SubscriptionEntity.created_at 是 ISO string。
+  // 字段未来在 commit 3 加入 interface；当前用宽松访问保持本 commit 自包含。
+  const subs = allSubs.filter((s) => {
+    const createdAt = (s as { created_at?: unknown }).created_at;
+    const ts = typeof createdAt === 'string' ? Date.parse(createdAt) : 0;
+    return ts > cutoffMs;
+  });
 
   for (const sub of subs) {
     const subId = typeof sub.id === 'string' ? sub.id : null;

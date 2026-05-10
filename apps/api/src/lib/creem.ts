@@ -103,27 +103,27 @@ export async function fetchCheckout(input: {
 }
 
 /**
- * GET /v1/subscriptions —— 列订阅，给 reconcile cron 用。
+ * GET /v1/subscriptions/search —— 列订阅，给 reconcile cron 用。
  *
  * 用途：webhook miss 兜底。如果 Creem webhook 因为网络/CF 抽风没到达，订阅状态在 D1
  * 永远不会更新。每天 cron 跑一次，列最近 N 小时内的 subs，对比 D1 缺的补上。
  *
- * **Creem API 假设**（待用户实际部署后用 prod key 验证）：
- * - endpoint 是 `/v1/subscriptions`
- * - 支持 query `created_after` (ISO-8601) 过滤
- * - 返回 `{ data: CreemSubscriptionObject[] }` 或类似分页结构
+ * Creem 实际契约（OpenAPI 验证）：
+ * - endpoint 是 `/v1/subscriptions/search`（**不是** `/v1/subscriptions`，那个是单查必传 subscription_id）
+ * - 仅支持 query `page_number` / `page_size`（**不支持** `created_after` filter，要客户端过滤）
+ * - response shape 是 `{ items: CreemSubscriptionObject[], pagination: ... }`
  *
- * 如果 Creem API 不支持上述，cron 会拿到非预期 response → log warn 并 no-op，
- * 不影响其它功能。verify-checkout 端点（用户主动触发）是更可靠的恢复路径。
+ * 来源：https://docs.creem.io/api-reference/openapi.json SubscriptionListEntity
  */
 export async function listSubscriptions(input: {
   apiKey: string;
-  /** ISO-8601 string；只列在此时间之后创建/更新的订阅 */
-  createdAfter?: string;
+  pageNumber?: number;
+  pageSize?: number;
 }): Promise<CreemSubscriptionObject[]> {
   const params = new URLSearchParams();
-  if (input.createdAfter) params.set('created_after', input.createdAfter);
-  const url = `${creemBase(input.apiKey)}/subscriptions${params.size > 0 ? `?${params}` : ''}`;
+  params.set('page_number', String(input.pageNumber ?? 1));
+  params.set('page_size', String(input.pageSize ?? 100));
+  const url = `${creemBase(input.apiKey)}/subscriptions/search?${params}`;
   const res = await fetch(url, {
     method: 'GET',
     headers: { 'x-api-key': input.apiKey },
@@ -132,12 +132,8 @@ export async function listSubscriptions(input: {
     const text = await res.text();
     throw new Error(`Creem listSubscriptions failed: ${res.status} ${text.slice(0, 200)}`);
   }
-  const body = (await res.json()) as
-    | CreemSubscriptionObject[]
-    | { data?: CreemSubscriptionObject[]; subscriptions?: CreemSubscriptionObject[] };
-  // Creem 可能返数组直接，也可能 { data: [...] } 或 { subscriptions: [...] }。兜底处理
-  if (Array.isArray(body)) return body;
-  return body.data ?? body.subscriptions ?? [];
+  const body = (await res.json()) as { items?: CreemSubscriptionObject[]; pagination?: unknown };
+  return body.items ?? [];
 }
 
 export async function createPortalSession(input: CreatePortalInput): Promise<CreatePortalOutput> {
