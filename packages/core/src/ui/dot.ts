@@ -106,6 +106,9 @@ export function createDot(
   };
   const onDotClick = (ev: Event) => {
     ev.stopPropagation();
+    // Once the user actually triggers via click, the "Shift Shift" tooltip
+    // is moot — hide it so it doesn't linger next to the panel.
+    tooltip.classList.remove('visible');
     options.onActivate?.();
   };
 

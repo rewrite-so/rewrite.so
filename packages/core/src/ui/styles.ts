@@ -20,7 +20,7 @@ export const SHADOW_STYLES = `
   background: #20C7B5;
   border: 0.5px solid light-dark(rgba(255, 255, 255, 0.4), rgba(0, 0, 0, 0.1));
   pointer-events: auto;
-  cursor: default;
+  cursor: pointer;
   z-index: 2147483646;
   transition: transform 160ms cubic-bezier(0.4, 0, 0.2, 1),
     opacity 160ms ease,

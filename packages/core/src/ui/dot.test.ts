@@ -248,6 +248,33 @@ describe('createDot', () => {
     dot.destroy();
   });
 
+  it('end-to-end: mousedown.preventDefault does not block the subsequent click → onActivate still fires', () => {
+    const { root, target } = setup();
+    const onActivate = vi.fn();
+    const dot = createDot(root, 'en', { onActivate });
+    dot.show(target);
+    const dotEl = root.querySelector('.dot') as HTMLElement;
+    dotEl.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+    dotEl.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true }));
+    dotEl.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    expect(onActivate).toHaveBeenCalledTimes(1);
+    dot.destroy();
+  });
+
+  it('clicking the dot hides any visible tooltip so it does not linger next to the panel', () => {
+    const { root, target } = setup();
+    const dot = createDot(root, 'en', { onActivate: () => {} });
+    dot.show(target);
+    const dotEl = root.querySelector('.dot') as HTMLElement;
+    const tooltipEl = root.querySelector('.dot-tooltip') as HTMLElement;
+    // simulate hover-then-click
+    dotEl.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+    expect(tooltipEl.classList.contains('visible')).toBe(true);
+    dotEl.click();
+    expect(tooltipEl.classList.contains('visible')).toBe(false);
+    dot.destroy();
+  });
+
   it('falls back gracefully when ResizeObserver is unavailable', async () => {
     delete (globalThis as unknown as { ResizeObserver?: unknown }).ResizeObserver;
     const { root, target } = setup();
