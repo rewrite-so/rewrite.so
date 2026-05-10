@@ -103,6 +103,32 @@ export async function fetchCheckout(input: {
 }
 
 /**
+ * GET /v1/subscriptions?subscription_id=xxx —— 按 id 拉单个订阅。
+ *
+ * verify-checkout 用：当 GET /checkouts 返回的 subscription 字段是 string id 时
+ * （`CheckoutEntity.subscription` 是 oneOf [string, SubscriptionEntity]，文档明确两种都
+ * 合法），必须再调一次本接口拿到完整 SubscriptionEntity 才能 upsert 到 D1。
+ *
+ * 来源：https://docs.creem.io/api-reference/openapi.json operationId=retrieveSubscription
+ */
+export async function fetchSubscription(input: {
+  apiKey: string;
+  subscriptionId: string;
+}): Promise<CreemSubscriptionObject> {
+  const params = new URLSearchParams({ subscription_id: input.subscriptionId });
+  const url = `${creemBase(input.apiKey)}/subscriptions?${params}`;
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: { 'x-api-key': input.apiKey },
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Creem fetchSubscription failed: ${res.status} ${text.slice(0, 200)}`);
+  }
+  return (await res.json()) as CreemSubscriptionObject;
+}
+
+/**
  * GET /v1/subscriptions/search —— 列订阅，给 reconcile cron 用。
  *
  * 用途：webhook miss 兜底。如果 Creem webhook 因为网络/CF 抽风没到达，订阅状态在 D1

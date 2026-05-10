@@ -5,6 +5,7 @@ import {
   createPortalSession,
   extractUserIdFromMetadata,
   fetchCheckout,
+  fetchSubscription,
 } from '../lib/creem.ts';
 import { log } from '../lib/log.ts';
 import { getOrResolveSessionUser } from '../lib/session-cache.ts';
@@ -133,18 +134,44 @@ billingRoute.post('/v1/billing/verify-checkout', async (c) => {
     return c.json({ status: checkout.status, applied: false });
   }
 
-  // checkout.subscription 是订阅对象（或 string id；后者无法落库，交给 webhook）
+  // CheckoutEntity.subscription 是 oneOf [string, SubscriptionEntity]，两种都合法。
+  // 必须双分支处理——string 形态走 fetchSubscription 拉完整 object 再落库；
+  // null/undefined 让 webhook 兜底。
+  // 来源：https://docs.creem.io/api-reference/openapi.json CheckoutEntity.subscription
   const sub = checkout.subscription;
-  if (!sub || typeof sub !== 'object') {
+  let subObject: Record<string, unknown> | null = null;
+  if (typeof sub === 'string') {
+    try {
+      subObject = (await fetchSubscription({
+        apiKey: c.env.CREEM_API_KEY,
+        subscriptionId: sub,
+      })) as unknown as Record<string, unknown>;
+    } catch (err) {
+      log.error('billing.verify_fetch_subscription_error', {
+        err,
+        checkoutId: parsed.data.checkoutId,
+        subscriptionId: sub,
+      });
+      // 显式 502 而非静默 applied:false——webhook 路径已被多次失败教训证明不可
+      // 完全依赖；让用户看到失败比假成功好（前端可让用户刷新重试）。
+      return c.json({ error: 'creem_error' }, 502);
+    }
+  } else if (sub && typeof sub === 'object') {
+    subObject = sub as unknown as Record<string, unknown>;
+  }
+
+  if (!subObject) {
+    // sub 缺失（极少；让 webhook 兜底）
     return c.json({ status: checkout.status, applied: false });
   }
 
-  // active 状态落库（trialing / paused 等会由后续 webhook 修正；新购通常是 active）
+  // active 状态落库（trialing / paused 等会由后续 webhook 修正；新购通常是 active）。
+  // cancelAtPeriodEnd=false：新购 checkout 不会带 scheduled_cancel 状态。
   // 返回值告诉我们 sub 字段是否齐全到能落库——不齐全时不要骗客户端 applied=true，
   // 让 webhook 兜底
   const wrote = await upsertSubscriptionFromObject(
     c.env,
-    sub as unknown as Record<string, unknown>,
+    subObject,
     'active',
     `verify-${parsed.data.checkoutId}`,
   );
