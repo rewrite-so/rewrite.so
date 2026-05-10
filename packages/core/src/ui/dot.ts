@@ -90,6 +90,14 @@ export function createDot(
     tooltip.classList.remove('visible');
   };
 
+  // The dot is a passive visual hint, not a button — clicking it shouldn't
+  // do anything. Without preventDefault, mousedown steals focus from the
+  // input, which trips onFocusOut → dot.hide() and breaks the panel flow.
+  const onDotMouseDown = (ev: Event) => {
+    ev.preventDefault();
+  };
+
+  dot.addEventListener('mousedown', onDotMouseDown);
   dot.addEventListener('mouseenter', onDotMouseEnter);
   dot.addEventListener('mouseleave', onDotMouseLeave);
 
@@ -141,6 +149,7 @@ export function createDot(
         clearTimeout(firstTooltipTimeoutId);
         firstTooltipTimeoutId = null;
       }
+      dot.removeEventListener('mousedown', onDotMouseDown);
       dot.removeEventListener('mouseenter', onDotMouseEnter);
       dot.removeEventListener('mouseleave', onDotMouseLeave);
       dot.remove();

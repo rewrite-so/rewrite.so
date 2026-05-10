@@ -38,8 +38,11 @@ export const SHADOW_STYLES = `
   animation: rs-dot-breathe 4s ease-in-out infinite;
 }
 /* Hover keeps the breathing animation running on top of the scale(2)
- * transform — intentional, so the hovered dot still feels alive. */
-.dot:hover {
+ * transform — intentional, so the hovered dot still feels alive.
+ * Scoped to .visible so a dot that's been hide()d while the cursor
+ * lingers won't re-emerge at scale(2) with no breathing animation
+ * running to cap its transform. */
+.dot.visible:hover {
   opacity: 1;
   transform: scale(2); /* Scale up to 10px on hover for easier clicking */
   box-shadow:
