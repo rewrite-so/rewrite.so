@@ -4,6 +4,7 @@ import type { CSSProperties, KeyboardEvent } from 'react';
 import { useEffect, useState } from 'react';
 import { sliceForStream } from '../../lib/sliceForStream.ts';
 import styles from './HomePage.module.css';
+import { PlatformIcon, type PlatformName } from './PlatformIcon.tsx';
 
 type DemoCandidate = {
   style: 'faithful' | 'casual' | 'formal';
@@ -14,6 +15,9 @@ type DemoCandidate = {
 type DemoExample = {
   key: string;
   badge: string;
+  // platform 是该 example 关联的真实平台,在 demo chrome bar 显示对应 logo + 平台名,
+  // 暗示扩展在这些平台都工作。anyInput 保留作为屏读器 fallback。
+  platform: PlatformName;
   input: string;
   candidates: DemoCandidate[];
 };
@@ -204,7 +208,12 @@ export function HomeRewriteDemo({ copy }: { copy: HomeRewriteDemoCopy }) {
         <span className={styles.demoDot} />
         <span className={styles.demoDot} />
         <span className={styles.demoDot} />
-        <span>{copy.anyInput}</span>
+        {example?.platform && (
+          <span className={styles.demoPlatform}>
+            <PlatformIcon name={example.platform} />
+            <span>{example.platform}</span>
+          </span>
+        )}
       </div>
 
       <div className={styles.demoInputWrap}>

@@ -182,6 +182,14 @@
   background: #5e9b72;
 }
 
+.demoPlatform {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  color: #22221e;
+  font-weight: 500;
+}
+
 .demoInputWrap {
   padding: 18px 18px 0;
 }
