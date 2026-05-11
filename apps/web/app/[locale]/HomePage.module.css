@@ -182,6 +182,14 @@
   background: #5e9b72;
 }
 
+.demoPlatform {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  color: #22221e;
+  font-weight: 500;
+}
+
 .demoInputWrap {
   padding: 18px 18px 0;
 }
@@ -247,6 +255,21 @@
 .demoInputAccepted {
   border-color: rgba(58, 111, 85, 0.42);
   background: #f6fbf8;
+}
+
+.demoCaret {
+  /* 输入光标:typing 阶段紧跟已输入文本闪烁,渲染为 0.7s 周期硬切换(step-end)。
+     reduce-motion 路径下 phase 直接跳 accepted,光标不渲染,无需特殊处理。 */
+  margin-left: 1px;
+  color: rgba(23, 23, 19, 0.78);
+  font-weight: 500;
+  animation: demoCaretBlink 0.7s step-end infinite;
+}
+
+@keyframes demoCaretBlink {
+  50% {
+    opacity: 0;
+  }
 }
 
 .demoShortcut {
@@ -335,7 +358,7 @@
   background: #fff;
   color: inherit;
   cursor: pointer;
-  opacity: 0.2;
+  opacity: 0;
   padding: 9px 10px;
   text-align: left;
   transform: translateY(5px);

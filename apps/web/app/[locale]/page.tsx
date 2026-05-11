@@ -5,9 +5,17 @@ import { Link } from '../../i18n/navigation.ts';
 import { getExtensionInstallUrl } from '../../lib/extension-install-url.ts';
 import styles from './HomePage.module.css';
 import { HomeRewriteDemo } from './HomeRewriteDemo.tsx';
+import type { PlatformName } from './PlatformIcon.tsx';
 
 const STYLE_KEYS = ['faithful', 'casual', 'formal'] as const;
-const DEMO_EXAMPLE_KEYS = ['chinglish', 'zhToEn', 'jaToEn', 'tone'] as const;
+// 每个 example 关联一个真实平台,demo chrome bar 显示对应 logo + 平台名,
+// 暗示扩展在这些平台都工作。新加 platform 时确认扩展实际支持(参考 CLAUDE.md 不支持清单)。
+const DEMO_EXAMPLES: ReadonlyArray<{ key: string; platform: PlatformName }> = [
+  { key: 'chinglish', platform: 'X' },
+  { key: 'zhToEn', platform: 'Slack' },
+  { key: 'jaToEn', platform: 'Reddit' },
+  { key: 'tone', platform: 'GitHub' },
+];
 const USE_CASE_KEYS = ['useCase1', 'useCase2', 'useCase3', 'useCase4'] as const;
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
@@ -21,14 +29,15 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     streams: t('demo.streams'),
     accepted: t('demo.accepted'),
     selectHint: t('demo.selectHint'),
-    examples: DEMO_EXAMPLE_KEYS.map((example) => ({
-      key: example,
-      badge: t(`demo.examples.${example}.badge`),
-      input: t(`demo.examples.${example}.input`),
+    examples: DEMO_EXAMPLES.map(({ key, platform }) => ({
+      key,
+      platform,
+      badge: t(`demo.examples.${key}.badge`),
+      input: t(`demo.examples.${key}.input`),
       candidates: STYLE_KEYS.map((style) => ({
         style,
         label: t(`demo.label.${style}`),
-        text: t(`demo.examples.${example}.candidate.${style}`),
+        text: t(`demo.examples.${key}.candidate.${style}`),
       })),
     })),
   };

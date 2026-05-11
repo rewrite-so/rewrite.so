@@ -2,7 +2,9 @@
 
 import type { CSSProperties, KeyboardEvent } from 'react';
 import { useEffect, useState } from 'react';
+import { sliceForStream } from '../../lib/sliceForStream.ts';
 import styles from './HomePage.module.css';
+import { PlatformIcon, type PlatformName } from './PlatformIcon.tsx';
 
 type DemoCandidate = {
   style: 'faithful' | 'casual' | 'formal';
@@ -13,6 +15,9 @@ type DemoCandidate = {
 type DemoExample = {
   key: string;
   badge: string;
+  // platform 是该 example 关联的真实平台,在 demo chrome bar 显示对应 logo + 平台名,
+  // 暗示扩展在这些平台都工作。anyInput 保留作为屏读器 fallback。
+  platform: PlatformName;
   input: string;
   candidates: DemoCandidate[];
 };
@@ -31,21 +36,42 @@ type DemoPhase = 'typing' | 'triggering' | 'streaming' | 'accepted';
 const PHASE_DURATION_MS: Record<DemoPhase, number> = {
   typing: 1100,
   triggering: 720,
-  streaming: 1500,
+  // streaming = STREAM_TOTAL_MS(2200) + 400ms 完整态停顿,让用户在切下一 example 前看清成品
+  streaming: 2600,
   accepted: 2600,
 };
+
+// typing 阶段的输入框打字机时间轴。TYPING_TOTAL_MS 是 rAF 推进窗口;
+// PHASE_DURATION_MS.typing(1100ms) - TYPING_TOTAL_MS(1000ms) = 100ms 完整态停顿,
+// 让用户看清完整输入后再 Shift Shift 触发。input 长度 20-39 字符 ⇒ 26-50ms/char。
+const TYPING_TOTAL_MS = 1000;
+
+// streaming 阶段的打字机时间轴。STREAM_TOTAL_MS 是 rAF 推进窗口;
+// 单卡在 STREAM_CARD_OFFSET_BASE + i*STREAM_CARD_OFFSET_STEP 起步,流 STREAM_CARD_DURATION 占比。
+// 最长候选 96 字符 / 1430ms ≈ 14.9ms/char,接近真实 SSE 体感。
+const STREAM_TOTAL_MS = 2200;
+const STREAM_CARD_OFFSET_BASE = 0.08;
+const STREAM_CARD_OFFSET_STEP = 0.06;
+const STREAM_CARD_DURATION = 0.65;
 
 export function HomeRewriteDemo({ copy }: { copy: HomeRewriteDemoCopy }) {
   const [exampleIndex, setExampleIndex] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [phase, setPhase] = useState<DemoPhase>('typing');
   const [isPaused, setIsPaused] = useState(false);
+  const [streamProgress, setStreamProgress] = useState(0);
+  const [inputProgress, setInputProgress] = useState(0);
   const example = copy.examples[exampleIndex] ?? copy.examples[0];
   const exampleCount = copy.examples.length;
+  const fullInput = example?.input ?? '';
+  // typing 阶段:按 inputProgress 一字一字流入,模拟用户键入。
+  // triggering/streaming 阶段:显示完整 input。accepted 阶段:切到选中的 candidate text。
   const displayedText =
     phase === 'accepted'
-      ? (example?.candidates[selectedIndex]?.text ?? example?.input ?? '')
-      : (example?.input ?? '');
+      ? (example?.candidates[selectedIndex]?.text ?? fullInput)
+      : phase === 'typing'
+        ? sliceForStream(fullInput, inputProgress)
+        : fullInput;
   const statusText =
     phase === 'streaming' ? copy.streams : phase === 'accepted' ? copy.accepted : copy.youTyped;
 
@@ -97,6 +123,54 @@ export function HomeRewriteDemo({ copy }: { copy: HomeRewriteDemoCopy }) {
     return () => window.clearTimeout(timeout);
   }, [copy.examples, exampleCount, exampleIndex, isPaused, phase]);
 
+  // typing phase 的输入框打字机时间轴 —— 同款 rAF 续上模式(详见下方 streaming effect 注释)。
+  // biome-ignore lint/correctness/useExhaustiveDependencies: inputProgress 是起始锚点的陈旧快照,故意不进 deps
+  useEffect(() => {
+    if (phase !== 'typing') {
+      setInputProgress(0);
+      return;
+    }
+    if (isPaused) {
+      return;
+    }
+    let raf = 0;
+    const start = performance.now() - inputProgress * TYPING_TOTAL_MS;
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - start) / TYPING_TOTAL_MS);
+      setInputProgress(p);
+      if (p < 1) {
+        raf = requestAnimationFrame(tick);
+      }
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [phase, isPaused]);
+
+  // streaming phase 的打字机时间轴。rAF 推进,hover/focus 暂停时保留 progress、
+  // 恢复时反推 start 续上,避免文字打到一半重头开始。
+  // streamProgress 故意不进 deps —— 只在 mount/phase/isPaused 切换时读一次起始快照。
+  // biome-ignore lint/correctness/useExhaustiveDependencies: streamProgress 是起始锚点的陈旧快照,故意不进 deps
+  useEffect(() => {
+    if (phase !== 'streaming') {
+      setStreamProgress(0);
+      return;
+    }
+    if (isPaused) {
+      return;
+    }
+    let raf = 0;
+    const start = performance.now() - streamProgress * STREAM_TOTAL_MS;
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - start) / STREAM_TOTAL_MS);
+      setStreamProgress(p);
+      if (p < 1) {
+        raf = requestAnimationFrame(tick);
+      }
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [phase, isPaused]);
+
   function accept(index: number) {
     setSelectedIndex(index);
     setPhase('accepted');
@@ -134,7 +208,12 @@ export function HomeRewriteDemo({ copy }: { copy: HomeRewriteDemoCopy }) {
         <span className={styles.demoDot} />
         <span className={styles.demoDot} />
         <span className={styles.demoDot} />
-        <span>{copy.anyInput}</span>
+        {example?.platform && (
+          <span className={styles.demoPlatform}>
+            <PlatformIcon name={example.platform} />
+            <span>{example.platform}</span>
+          </span>
+        )}
       </div>
 
       <div className={styles.demoInputWrap}>
@@ -155,6 +234,18 @@ export function HomeRewriteDemo({ copy }: { copy: HomeRewriteDemoCopy }) {
             .join(' ')}
         >
           {displayedText}
+          {/* 光标始终显示在已渲染文本末尾闪烁,模拟输入框 focus 态。
+              typing/triggering/streaming 阶段位于 input 末尾,accepted 阶段位于 candidate text 末尾。 */}
+          <span className={styles.demoCaret} aria-hidden="true">
+            |
+          </span>
+          {phase === 'typing' && displayedText.length < fullInput.length && (
+            // invisible placeholder 撑住完整 input 的高度,防止 typing 阶段从 0 字 → 满文本时
+            // demoInput 行数变化。slice 接续点合法:sliceForStream 按 code point 切。
+            <span style={{ visibility: 'hidden' }} aria-hidden="true">
+              {fullInput.slice(displayedText.length)}
+            </span>
+          )}
         </div>
       </div>
 
@@ -187,6 +278,19 @@ export function HomeRewriteDemo({ copy }: { copy: HomeRewriteDemoCopy }) {
         {example?.candidates.map((candidate, index) => {
           const isVisible = phase === 'streaming' || phase === 'accepted';
           const isSelected = phase === 'accepted' && selectedIndex === index;
+
+          // streaming 阶段:按 cardOffset 错峰,文字逐字流入。其它阶段渲染完整 text
+          // (typing/triggering 时卡片 opacity 0 不可见但仍撑满高度;accepted 立即完整)。
+          let visibleText = candidate.text;
+          if (phase === 'streaming') {
+            const cardOffset = STREAM_CARD_OFFSET_BASE + index * STREAM_CARD_OFFSET_STEP;
+            const cardProgress = Math.max(
+              0,
+              Math.min(1, (streamProgress - cardOffset) / STREAM_CARD_DURATION),
+            );
+            visibleText = sliceForStream(candidate.text, cardProgress);
+          }
+
           return (
             <button
               type="button"
@@ -204,7 +308,17 @@ export function HomeRewriteDemo({ copy }: { copy: HomeRewriteDemoCopy }) {
             >
               <span className={styles.demoCandidateIndex}>{index + 1}</span>
               <span className={styles.demoCandidateLabel}>{candidate.label}</span>
-              <span className={styles.demoCandidateText}>{candidate.text}</span>
+              <span className={styles.demoCandidateText}>
+                {visibleText}
+                {phase === 'streaming' && visibleText.length < candidate.text.length && (
+                  // invisible placeholder 撑高度,防 streaming 开头单行→多行的高度抖动。
+                  // visibleText.length(UTF-16 单元)与 slice(visibleText.length)接续合法 ——
+                  // sliceForStream 按 code point 切,保证不会切到 surrogate pair 中间。
+                  <span style={{ visibility: 'hidden' }} aria-hidden="true">
+                    {candidate.text.slice(visibleText.length)}
+                  </span>
+                )}
+              </span>
             </button>
           );
         })}
