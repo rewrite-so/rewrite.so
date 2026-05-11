@@ -2,6 +2,7 @@
 
 import type { CSSProperties, KeyboardEvent } from 'react';
 import { useEffect, useState } from 'react';
+import { sliceForStream } from '../../lib/sliceForStream.ts';
 import styles from './HomePage.module.css';
 
 type DemoCandidate = {
@@ -31,15 +32,25 @@ type DemoPhase = 'typing' | 'triggering' | 'streaming' | 'accepted';
 const PHASE_DURATION_MS: Record<DemoPhase, number> = {
   typing: 1100,
   triggering: 720,
-  streaming: 1500,
+  // streaming = STREAM_TOTAL_MS(2200) + 400ms 完整态停顿,让用户在切下一 example 前看清成品
+  streaming: 2600,
   accepted: 2600,
 };
+
+// streaming 阶段的打字机时间轴。STREAM_TOTAL_MS 是 rAF 推进窗口;
+// 单卡在 STREAM_CARD_OFFSET_BASE + i*STREAM_CARD_OFFSET_STEP 起步,流 STREAM_CARD_DURATION 占比。
+// 最长候选 96 字符 / 1430ms ≈ 14.9ms/char,接近真实 SSE 体感。
+const STREAM_TOTAL_MS = 2200;
+const STREAM_CARD_OFFSET_BASE = 0.08;
+const STREAM_CARD_OFFSET_STEP = 0.06;
+const STREAM_CARD_DURATION = 0.65;
 
 export function HomeRewriteDemo({ copy }: { copy: HomeRewriteDemoCopy }) {
   const [exampleIndex, setExampleIndex] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [phase, setPhase] = useState<DemoPhase>('typing');
   const [isPaused, setIsPaused] = useState(false);
+  const [streamProgress, setStreamProgress] = useState(0);
   const example = copy.examples[exampleIndex] ?? copy.examples[0];
   const exampleCount = copy.examples.length;
   const displayedText =
@@ -96,6 +107,31 @@ export function HomeRewriteDemo({ copy }: { copy: HomeRewriteDemoCopy }) {
 
     return () => window.clearTimeout(timeout);
   }, [copy.examples, exampleCount, exampleIndex, isPaused, phase]);
+
+  // streaming phase 的打字机时间轴。rAF 推进,hover/focus 暂停时保留 progress、
+  // 恢复时反推 start 续上,避免文字打到一半重头开始。
+  // streamProgress 故意不进 deps —— 只在 mount/phase/isPaused 切换时读一次起始快照。
+  // biome-ignore lint/correctness/useExhaustiveDependencies: streamProgress 是起始锚点的陈旧快照,故意不进 deps
+  useEffect(() => {
+    if (phase !== 'streaming') {
+      setStreamProgress(0);
+      return;
+    }
+    if (isPaused) {
+      return;
+    }
+    let raf = 0;
+    const start = performance.now() - streamProgress * STREAM_TOTAL_MS;
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - start) / STREAM_TOTAL_MS);
+      setStreamProgress(p);
+      if (p < 1) {
+        raf = requestAnimationFrame(tick);
+      }
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [phase, isPaused]);
 
   function accept(index: number) {
     setSelectedIndex(index);
@@ -187,6 +223,19 @@ export function HomeRewriteDemo({ copy }: { copy: HomeRewriteDemoCopy }) {
         {example?.candidates.map((candidate, index) => {
           const isVisible = phase === 'streaming' || phase === 'accepted';
           const isSelected = phase === 'accepted' && selectedIndex === index;
+
+          // streaming 阶段:按 cardOffset 错峰,文字逐字流入。其它阶段渲染完整 text
+          // (typing/triggering 时卡片 opacity 0 不可见但仍撑满高度;accepted 立即完整)。
+          let visibleText = candidate.text;
+          if (phase === 'streaming') {
+            const cardOffset = STREAM_CARD_OFFSET_BASE + index * STREAM_CARD_OFFSET_STEP;
+            const cardProgress = Math.max(
+              0,
+              Math.min(1, (streamProgress - cardOffset) / STREAM_CARD_DURATION),
+            );
+            visibleText = sliceForStream(candidate.text, cardProgress);
+          }
+
           return (
             <button
               type="button"
@@ -204,7 +253,17 @@ export function HomeRewriteDemo({ copy }: { copy: HomeRewriteDemoCopy }) {
             >
               <span className={styles.demoCandidateIndex}>{index + 1}</span>
               <span className={styles.demoCandidateLabel}>{candidate.label}</span>
-              <span className={styles.demoCandidateText}>{candidate.text}</span>
+              <span className={styles.demoCandidateText}>
+                {visibleText}
+                {phase === 'streaming' && visibleText.length < candidate.text.length && (
+                  // invisible placeholder 撑高度,防 streaming 开头单行→多行的高度抖动。
+                  // visibleText.length(UTF-16 单元)与 slice(visibleText.length)接续合法 ——
+                  // sliceForStream 按 code point 切,保证不会切到 surrogate pair 中间。
+                  <span style={{ visibility: 'hidden' }} aria-hidden="true">
+                    {candidate.text.slice(visibleText.length)}
+                  </span>
+                )}
+              </span>
             </button>
           );
         })}
