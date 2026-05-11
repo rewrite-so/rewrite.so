@@ -249,6 +249,21 @@
   background: #f6fbf8;
 }
 
+.demoCaret {
+  /* 输入光标:typing 阶段紧跟已输入文本闪烁,渲染为 0.7s 周期硬切换(step-end)。
+     reduce-motion 路径下 phase 直接跳 accepted,光标不渲染,无需特殊处理。 */
+  margin-left: 1px;
+  color: rgba(23, 23, 19, 0.78);
+  font-weight: 500;
+  animation: demoCaretBlink 0.7s step-end infinite;
+}
+
+@keyframes demoCaretBlink {
+  50% {
+    opacity: 0;
+  }
+}
+
 .demoShortcut {
   display: flex;
   gap: 7px;
