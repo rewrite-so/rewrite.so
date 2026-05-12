@@ -142,6 +142,17 @@ describe('init / setEventsEnabled', () => {
     flush();
     expect(env.fetchMock).not.toHaveBeenCalled();
   });
+
+  it('second init() does not resurrect a disabled kill switch', () => {
+    // Mirrors the AnalyticsBootstrap locale-change effect, which re-calls
+    // init({ locale, eventsEnabled: true }) without re-fetching /v1/me.
+    // Bootstrap saw the kill switch on; locale change must not flip it off.
+    installBrowserGlobals();
+    init({ locale: 'en', eventsEnabled: false });
+    expect(isEnabled()).toBe(false);
+    init({ locale: 'zh-CN', eventsEnabled: true });
+    expect(isEnabled()).toBe(false);
+  });
 });
 
 describe('visitor_id management', () => {

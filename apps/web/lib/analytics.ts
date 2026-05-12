@@ -135,13 +135,22 @@ export interface InitOptions {
 }
 
 /**
- * Wire the sender to the page. Safe to call multiple times — second call
- * is a no-op (avoids re-binding pagehide listeners on locale change).
+ * Wire the sender to the page. Safe to call multiple times.
+ *
+ * Second-call semantics matter: callers in locale-change effects pass a fresh
+ * `locale` plus an `eventsEnabled` they can't actually re-derive (no second
+ * `/v1/me` fetch). We only honor the kill-switch result from the *first*
+ * call so a locale switch can never resurrect a disabled SDK.
+ * Re-enabling the SDK is intentionally not a runtime knob — flip the env
+ * var and reload.
  */
 export function init({ locale, eventsEnabled }: InitOptions): void {
   currentLocale = locale;
+  if (initialized || typeof window === 'undefined') {
+    // Don't touch `enabled` on re-entry — that's the kill-switch latch.
+    return;
+  }
   enabled = eventsEnabled;
-  if (initialized || typeof window === 'undefined') return;
   initialized = true;
   contextSnapshot = captureContext();
 
