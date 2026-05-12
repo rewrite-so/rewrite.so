@@ -31,6 +31,7 @@ import {
   type EventTier,
   hashSubjectId,
   validateEventProps,
+  validateTopLevelField,
   writeEventPoint,
 } from '../lib/event-metrics.ts';
 import { log } from '../lib/log.ts';
@@ -99,6 +100,28 @@ eventsRoute.post('/v1/events', async (c) => {
   };
   const prepared: PreparedEvent[] = [];
   for (const ev of events) {
+    // Top-level string fields ride directly into AE blobs without going through
+    // validateEventProps, so they must be checked here. A malicious client could
+    // otherwise smuggle PII into page / referrer_host / utm.* / visitor_id —
+    // the zod schema only caps their length, not their content.
+    const topFieldChecks: Array<
+      [string, 'page' | 'referrer_host' | 'visitor_id' | 'utm', string | undefined]
+    > = [
+      ['page', 'page', ev.page],
+      ['referrer_host', 'referrer_host', ev.referrer_host],
+      ['visitor_id', 'visitor_id', ev.visitor_id],
+      ['utm.source', 'utm', ev.utm?.source],
+      ['utm.medium', 'utm', ev.utm?.medium],
+      ['utm.campaign', 'utm', ev.utm?.campaign],
+    ];
+    for (const [fieldName, rule, value] of topFieldChecks) {
+      const r = validateTopLevelField(rule, value);
+      if (!r.ok) {
+        log.warn('events.invalid_field', { field: fieldName, reason: r.error, name: ev.name });
+        return c.json({ error: 'invalid_field', field: fieldName, reason: r.error }, 400);
+      }
+    }
+
     const propsResult = validateEventProps(ev.props);
     if (!propsResult.ok) {
       // Strict: a single bad event fails the whole batch. The client gets a

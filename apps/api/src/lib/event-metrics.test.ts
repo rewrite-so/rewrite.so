@@ -3,6 +3,7 @@ import {
   type EventMetric,
   hashSubjectId,
   validateEventProps,
+  validateTopLevelField,
   writeEventPoint,
 } from './event-metrics.ts';
 import { hashUserId } from './metrics.ts';
@@ -143,6 +144,84 @@ describe('validateEventProps', () => {
     const props: Record<string, string> = {};
     for (let i = 0; i < 8; i++) props[`k${i}`] = 'x'.repeat(50);
     expect(validateEventProps(props)).toEqual({ ok: false, error: 'props_json_too_large' });
+  });
+});
+
+describe('validateTopLevelField', () => {
+  it('treats undefined / empty as ok', () => {
+    expect(validateTopLevelField('page', undefined)).toEqual({ ok: true });
+    expect(validateTopLevelField('page', '')).toEqual({ ok: true });
+  });
+
+  it.each([
+    ['/'],
+    ['/try'],
+    ['/billing/checkout'],
+    ['/contact'],
+    ['/foo-bar/_baz.html'],
+  ])('page accepts %s', (path) => {
+    expect(validateTopLevelField('page', path)).toEqual({ ok: true });
+  });
+
+  it.each([
+    ['no-leading-slash'],
+    ['/has space'],
+    ['/has?query=1'], // attacker tries to smuggle a query string
+    ['/has#frag'],
+    ['/has=email'],
+    ['/has@x.com'],
+    ['/has{brace}'],
+  ])('page rejects %s', (path) => {
+    expect(validateTopLevelField('page', path).ok).toBe(false);
+  });
+
+  it.each([
+    ['google.com'],
+    ['sub.example.co.uk'],
+    ['localhost:3000'],
+    ['127.0.0.1:8080'],
+  ])('referrer_host accepts %s', (host) => {
+    expect(validateTopLevelField('referrer_host', host)).toEqual({ ok: true });
+  });
+
+  it.each([
+    ['google.com/path'], // has a slash
+    ['google.com?q=1'], // has a query
+    ['has space.com'],
+    ['<script>'],
+    ['user@example.com'], // looks like an email being smuggled
+  ])('referrer_host rejects %s', (host) => {
+    expect(validateTopLevelField('referrer_host', host).ok).toBe(false);
+  });
+
+  it.each([['twitter'], ['summer_2024'], ['v1.0'], ['utm-source']])('utm accepts %s', (val) => {
+    expect(validateTopLevelField('utm', val)).toEqual({ ok: true });
+  });
+
+  it.each([
+    ['foo=bar'], // querystring fragment
+    ['foo bar'],
+    ['user@x.com'],
+    ['hello;DROP TABLE'],
+  ])('utm rejects %s', (val) => {
+    expect(validateTopLevelField('utm', val).ok).toBe(false);
+  });
+
+  it.each([
+    ['018f5c64-9a4d-7f5e-8001-fe8c9c54f0e1'], // UUID v7-ish
+    ['vid_abc123'],
+    ['ABCDEFghijkl'],
+  ])('visitor_id accepts %s', (vid) => {
+    expect(validateTopLevelField('visitor_id', vid)).toEqual({ ok: true });
+  });
+
+  it.each([
+    ['has space'],
+    ['foo@x.com'],
+    ['<>'],
+    ['x'.repeat(65)],
+  ])('visitor_id rejects %s', (vid) => {
+    expect(validateTopLevelField('visitor_id', vid).ok).toBe(false);
   });
 });
 

@@ -249,6 +249,72 @@ describe('POST /v1/events — invalid payload', () => {
     expect(body.reason).toBe('forbidden_key');
   });
 
+  it('400 when page field tries to smuggle a query string', async () => {
+    // PII smuggling vector: zod only checks max(200) on `page`, so without
+    // the per-field pattern allow-list the server would write
+    // `?email=foo@bar.com` straight into blob2.
+    const res = await app.request(
+      '/v1/events',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          events: [makeEvent({ page: '/try?email=leak@x.com' })],
+        }),
+      },
+      makeEnv(),
+    );
+    expect(res.status).toBe(400);
+    const body = (await res.json()) as { error: string; field: string };
+    expect(body.error).toBe('invalid_field');
+    expect(body.field).toBe('page');
+  });
+
+  it('400 when referrer_host carries an email-shaped string', async () => {
+    const res = await app.request(
+      '/v1/events',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          events: [makeEvent({ referrer_host: 'user@evil.com' })],
+        }),
+      },
+      makeEnv(),
+    );
+    expect(res.status).toBe(400);
+  });
+
+  it('400 when utm.source has a forbidden character', async () => {
+    const res = await app.request(
+      '/v1/events',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          events: [makeEvent({ utm: { source: 'name=value' } })],
+        }),
+      },
+      makeEnv(),
+    );
+    expect(res.status).toBe(400);
+  });
+
+  it('400 when visitor_id contains spaces / non-UUID chars', async () => {
+    const res = await app.request(
+      '/v1/events',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          events: [makeEvent({ visitor_id: 'has space and @' })],
+        }),
+      },
+      makeEnv(),
+    );
+    expect(res.status).toBe(400);
+  });
+
   it('400 when a single string prop exceeds 50 chars', async () => {
     const res = await app.request(
       '/v1/events',

@@ -101,6 +101,50 @@ const KEY_REGEX = /^[a-z][a-z0-9_]*$/;
 const FORBIDDEN_VALUE_CHARS = /[\x00-\x1f\x7f"\\<>{}[\]]/;
 
 /**
+ * Per-field allow-list patterns for top-level event fields. These run *in
+ * addition to* the zod length caps so a malicious or buggy client cannot
+ * smuggle a query string (`?email=foo@x.com&apikey=sk-...`), CRLF injection,
+ * or raw PII into page / referrer_host / utm / visitor_id.
+ *
+ * Choose narrow positive patterns rather than negative substring scans:
+ * substring lists like FORBIDDEN_KEY_SUBSTRINGS over-flag legitimate routes
+ * (e.g. /contact contains 'content'). The strings these fields can carry are
+ * always machine-generated, so we can demand a strict character set.
+ */
+export const TOP_LEVEL_FIELD_RULES = {
+  /** Path only — pathname is stripped of locale + query by the client SDK. */
+  page: { max: 200, pattern: /^\/[A-Za-z0-9/_\-.]*$/ },
+  /** Bare host (no path, no scheme); optional port suffix. */
+  referrer_host: { max: 200, pattern: /^[A-Za-z0-9.-]+(?::\d+)?$/ },
+  /** UUID v4 or short random id. */
+  visitor_id: { max: 64, pattern: /^[A-Za-z0-9_-]+$/ },
+  /** All utm_* tags share the same shape: marketing tooling normalises these. */
+  utm: { max: 100, pattern: /^[A-Za-z0-9_\-.]+$/ },
+} as const;
+
+export type TopLevelFieldName = keyof typeof TOP_LEVEL_FIELD_RULES;
+
+export type FieldValidationResult = { ok: true } | { ok: false; error: string };
+
+/**
+ * Validate a single top-level string field. Returns ok if undefined.
+ *
+ * The field name is the *rule* key (one of `'page' | 'referrer_host' |
+ * 'visitor_id' | 'utm'`), not the source field's exact name — utm.source,
+ * utm.medium, utm.campaign all share the 'utm' rule.
+ */
+export function validateTopLevelField(
+  rule: TopLevelFieldName,
+  value: string | undefined,
+): FieldValidationResult {
+  if (value === undefined || value.length === 0) return { ok: true };
+  const spec = TOP_LEVEL_FIELD_RULES[rule];
+  if (value.length > spec.max) return { ok: false, error: 'value_too_long' };
+  if (!spec.pattern.test(value)) return { ok: false, error: 'invalid_format' };
+  return { ok: true };
+}
+
+/**
  * Strict server-side validation. Returns the canonical JSON string ready to
  * stash in blob13, or an error code explaining why we rejected the payload.
  *
