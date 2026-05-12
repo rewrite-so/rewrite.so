@@ -51,6 +51,48 @@
   不能因 PR 简化而删减，这是用户隐私底线。
 - **Shadow DOM 用 `closed` mode**：阻止宿主页脚本枚举我们的浮层（隐私 + 防广告拦截器误杀）。
 
+## 用户行为分析（events）
+
+- **唯一通道是 `POST /v1/events` + binding `EVENTS` (dataset `web_events`)**：禁止
+  接入 GA / PostHog / Mixpanel / Plausible / Vercel Analytics 等任何第三方 analytics，
+  Privacy Policy 对外已承诺 "no third-party tracking"。后端内部事件（webhook /
+  me/byok / billing/verify-checkout）直接调 `writeEventPoint`，不走 HTTP 端点。
+- **事件白名单**在 `packages/shared/src/events.ts`（`EVENT_NAMES`）。新加事件必须
+  先扩白名单。**字段禁用**（前端 zod `EventPayloadSchema` + 后端 `validateEventProps`
+  双重拒收）：键名含 `text/content/prompt/output/email/ip/password/secret/token/apikey`、
+  键名非 `[a-z][a-z0-9_]*`、字符串 value > 50 字、值含控制字符 / 引号 / 反斜杠 /
+  尖括号 / 大括号 / 方括号、props 总键数 > 8、props JSON 序列化总字节 > 200、嵌套
+  对象 / 数组 / 布尔 / null 值。原文 / 输出 / 邮箱 / 完整 IP 永远禁止落 events。
+- **匿名标识用 sessionStorage UUID `rs_vid`**（不写 cookie）。Privacy Policy 据此
+  宣称 "no tracking cookies"。跨会话匿名漏斗不可见是有意为之；登录用户靠
+  `hashUserId(userId)` 与 `rewrite_requests` 表 subject_id 串联。
+- **subject_id hash 公式**：登录用户用 `hashUserId(userId)` **不加额外前缀**，
+  与 `apps/api/src/lib/metrics.ts` rewrite 埋点公式完全一致，admin 看板可跨表 JOIN；
+  匿名用 `hashUserId('visitor_v1:'+rs_vid)` 独立 namespace 确保两类 hash 不串。
+  改 namespace 需 bump 版本号且接受历史数据失联。
+- **visitor → user 跨会话关联**：仅靠 `signin_success` 事件 props 里的
+  `linked_visitor_id`（登录时把当前 `rs_vid` 一并发送）一处锚点。admin 看板按此
+  JOIN 同 visitor_id 的匿名期事件即可倒推 UTM/首访页面。**不要**做 "双 subject 双发"
+  （写 AE 体积 ×2 成本 ×2 不划算）。
+- **`checkout_start` 从前端 sender 发**（不从后端 `/v1/billing/checkout` 发）：语义
+  是 "用户点了订阅按钮"，前端能同时带 visitor_id + UTM，比后端纯 server-side
+  truth 更贴产品意图。后端内部事件（`subscription_paid` / `subscription_canceled` /
+  `byok_save`）不带 visitor_id（webhook 无浏览器上下文）。
+- **Kill switch**：`apps/api/wrangler.toml [vars] EVENTS_DISABLED='1'` 全局关停。
+  前端 sender 通过 `GET /v1/me` 响应 `eventsEnabled` 字段拿状态，false → SDK 整个
+  降级 no-op；后端路由直接返 204、不计 rate limit、不写 AE。改值仅需
+  `wrangler deploy`（< 30s 生效）。
+- **AE binding 上限**：1 index + 20 blobs + 20 doubles 每次 writeDataPoint，单
+  blob ≤ 16KB。我们用 1 个 index（event_name）+ 13 个 blob（event_name / page_path /
+  locale / referrer_host / utm × 3 / country / device_type / tier / subject_kind /
+  subject_id_hash / event_props_json）+ 1 个 double。blob14-20 / double2-20 保留扩展。
+  来源：<https://developers.cloudflare.com/analytics/analytics-engine/limits/>
+- **Rate limit 独立桶**：`/v1/events` 走 `consumeEventsIp`（DO 名 `events:ip:<hashed>`，
+  30 req/min/ip），**不**与 rewrite 的 `ip` 桶共享 —— 高频 events 不会噬伤 rewrite
+  反爆刷配额（反之亦然）。
+- **容错硬契约**：sender / 后端 emit / writeEventPoint 任何失败都必须静默吞，绝不
+  让用户请求受影响。同 `metrics.ts:writeRequestEvent` 策略。
+
 ## 后端实现要点
 
 - **SSE delta 帧 data 必须整行 JSON.parse**：上游 chunk 含换行须转义为 `\n`，前端解析器逐行处理。
@@ -389,6 +431,9 @@ migration 文件名编号空间按仓库分治：
 
 ## 环境变量
 
-`OPENAI_BASE_URL` / `OPENAI_API_KEY` / `OPENAI_MODEL`（代码无内置默认 fallback——三个变量缺一就 503；文档推荐默认值 `https://api.deepseek.com/v1` + `deepseek-v4-flash`）/ `BYOK_MASTER_KEY` / `CREEM_*` / `RESEND_API_KEY` / `GOOGLE_OAUTH_*` / `TURNSTILE_*` / `BETTER_AUTH_*` / `NEXT_PUBLIC_SITE_ORIGIN`（i18n hreflang/sitemap 绝对 URL，默认 `https://rewrite.so`）。
+`OPENAI_BASE_URL` / `OPENAI_API_KEY` / `OPENAI_MODEL`（代码无内置默认 fallback——三个变量缺一就 503；文档推荐默认值 `https://api.deepseek.com/v1` + `deepseek-v4-flash`）/ `BYOK_MASTER_KEY` / `CREEM_*` / `RESEND_API_KEY` / `GOOGLE_OAUTH_*` / `TURNSTILE_*` / `BETTER_AUTH_*` / `NEXT_PUBLIC_SITE_ORIGIN`（i18n hreflang/sitemap 绝对 URL，默认 `https://rewrite.so`）/ `EVENTS_DISABLED`（可选，`'1'` 关停整条用户行为分析管线；详见「用户行为分析（events）」段）。
+
+Analytics Engine bindings 在 `apps/api/wrangler.toml` 静态配置（`METRICS` /
+`EVENTS`），不走 secret。
 
 详见 `.env.example`。
