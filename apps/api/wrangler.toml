@@ -46,6 +46,17 @@ id = "b089e54c9b274495a16ab5f62d146715"
 binding = "METRICS"
 dataset = "rewrite_requests"
 
+# ===== Analytics Engine: Web 用户行为事件 =====
+# page_view / cta_click / try_* / settings_change / signin_* /
+# checkout_start / subscription_paid / subscription_canceled / byok_save。
+# 隐私契约同上：零原文、零邮箱、零完整 IP，subject_id 已 hash。
+# 字段映射详见 apps/api/src/lib/event-metrics.ts；事件白名单在
+# packages/shared/src/events.ts。
+# Kill switch: 在 [vars] 设 EVENTS_DISABLED='1' 即可临时关停整条管线。
+[[analytics_engine_datasets]]
+binding = "EVENTS"
+dataset = "web_events"
+
 # ===== Durable Object: 限流（秒级 burst） =====
 [[durable_objects.bindings]]
 name = "RATE_LIMITER"

@@ -21,6 +21,14 @@ export interface Bindings {
   EXTENSION_INSTALL_URL?: string;
   /** Comma-separated Chrome extension origins or IDs allowed to use installId quota. */
   EXTENSION_ALLOWED_ORIGINS?: string;
+  /**
+   * Kill switch for the web analytics event pipeline. When set to the literal
+   * string '1' the POST /v1/events route returns 204, internal writeEventPoint
+   * calls no-op, and clients querying /v1/me see eventsEnabled=false (drop to
+   * no-op SDK). Flip with `wrangler deploy` (< 30s propagation); no restart
+   * needed. Any other value (or absent) means events are enabled.
+   */
+  EVENTS_DISABLED?: string;
 
   // ===== Bindings =====
   DB: D1Database;
@@ -32,6 +40,13 @@ export interface Bindings {
    * See lib/metrics.ts for the field contract.
    */
   METRICS?: AnalyticsEngineDataset;
+  /**
+   * Analytics Engine dataset for web user-behavior events (page_view, cta_click,
+   * try_*, signin_*, checkout_start, subscription_*, byok_save).
+   * Optional so local wrangler dev compiles without the binding configured.
+   * Field contract: see lib/event-metrics.ts.
+   */
+  EVENTS?: AnalyticsEngineDataset;
 }
 
 /**
