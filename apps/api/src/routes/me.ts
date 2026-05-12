@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { BURST_BUCKETS, consume } from '../do/rate-limiter.ts';
 import { encryptApiKey } from '../lib/crypto.ts';
-import { hashSubjectId, writeEventPoint } from '../lib/event-metrics.ts';
+import { hashSubjectId, validateEventProps, writeEventPoint } from '../lib/event-metrics.ts';
 import { log } from '../lib/log.ts';
 import {
   claimAnonymousUsage,
@@ -388,17 +388,22 @@ meRoute.put('/v1/me/byok', async (c) => {
   // "容错硬契约"; matches metrics.ts:writeRequestEvent strategy).
   if (c.env.EVENTS_DISABLED !== '1') {
     try {
-      const tier = await resolveUserTier(c.env.DB, sessionUser.id, c.env.KV);
-      const subjectIdHash = await hashSubjectId('user', sessionUser.id);
-      writeEventPoint(c.env.EVENTS, {
-        eventName: 'byok_save',
-        pagePath: '',
-        locale: '',
-        tier: tier === 'pro' ? 'pro' : 'byok',
-        subjectKind: 'user',
-        subjectIdHash,
-        propsJson: JSON.stringify({ has_been_set_before: existed ? 1 : 0 }),
-      });
+      const propsResult = validateEventProps({ has_been_set_before: existed ? 1 : 0 });
+      if (propsResult.ok) {
+        const tier = await resolveUserTier(c.env.DB, sessionUser.id, c.env.KV);
+        const subjectIdHash = await hashSubjectId('user', sessionUser.id);
+        writeEventPoint(c.env.EVENTS, {
+          eventName: 'byok_save',
+          pagePath: '',
+          locale: '',
+          tier: tier === 'pro' ? 'pro' : 'byok',
+          subjectKind: 'user',
+          subjectIdHash,
+          propsJson: propsResult.json || undefined,
+        });
+      } else {
+        log.warn('events.byok_props_invalid', { reason: propsResult.error });
+      }
     } catch (err) {
       log.warn('events.byok_emit_failed', { err });
     }

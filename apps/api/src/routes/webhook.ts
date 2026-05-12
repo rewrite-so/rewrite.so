@@ -10,7 +10,7 @@ import {
   planFromProductId,
   verifyWebhookSignature,
 } from '../lib/creem.ts';
-import { hashSubjectId, writeEventPoint } from '../lib/event-metrics.ts';
+import { hashSubjectId, validateEventProps, writeEventPoint } from '../lib/event-metrics.ts';
 import { log } from '../lib/log.ts';
 import type { AppEnv } from '../types.ts';
 
@@ -39,6 +39,15 @@ async function emitSubscriptionWebEvent(
 ): Promise<void> {
   if (env.EVENTS_DISABLED === '1') return;
   try {
+    // Route props through validateEventProps so CLAUDE.md's "双重拒收"
+    // claim holds for server-side emits too. `plan` is a hardcoded enum
+    // today, but a future addition of dynamic props would otherwise skip
+    // the defense-in-depth checks.
+    const propsResult = validateEventProps({ plan });
+    if (!propsResult.ok) {
+      log.warn('events.internal_props_invalid', { kind, reason: propsResult.error });
+      return;
+    }
     const subjectIdHash = await hashSubjectId('user', userId);
     writeEventPoint(env.EVENTS, {
       eventName: kind === 'paid' ? 'subscription_paid' : 'subscription_canceled',
@@ -47,7 +56,7 @@ async function emitSubscriptionWebEvent(
       tier: 'pro',
       subjectKind: 'user',
       subjectIdHash,
-      propsJson: JSON.stringify({ plan }),
+      propsJson: propsResult.json || undefined,
     });
   } catch (err) {
     // Telemetry failure is non-fatal — log and move on.
