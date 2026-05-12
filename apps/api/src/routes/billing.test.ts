@@ -206,6 +206,15 @@ describe('POST /v1/billing/verify-checkout', () => {
       }),
     } as unknown as D1Database;
 
+    // Record events so we can assert verify-checkout emits the same
+    // subscription_paid signal a webhook-driven activation would.
+    const eventsWritten: Array<{ indexes: string[]; blobs: string[]; doubles: number[] }> = [];
+    const EVENTS = {
+      writeDataPoint: (p: { indexes: string[]; blobs: string[]; doubles: number[] }) => {
+        eventsWritten.push(p);
+      },
+    } as unknown as AnalyticsEngineDataset;
+
     const res = await app.request(
       '/v1/billing/verify-checkout',
       {
@@ -213,11 +222,64 @@ describe('POST /v1/billing/verify-checkout', () => {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ checkoutId: 'ck_123' }),
       },
-      { ...MOCK_ENV, DB: stubDB },
+      { ...MOCK_ENV, DB: stubDB, EVENTS },
     );
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ status: 'completed', applied: true });
     expect(writes).toEqual(['insert']);
+    // verify-checkout must emit subscription_paid so the funnel sees this
+    // even when the webhook arrives late or fails entirely.
+    expect(eventsWritten).toHaveLength(1);
+    expect(eventsWritten[0]?.indexes).toEqual(['subscription_paid']);
+    expect(eventsWritten[0]?.blobs[12]).toContain('"plan":"monthly"');
+  });
+
+  it('EVENTS_DISABLED=1 suppresses subscription_paid emission from verify-checkout', async () => {
+    mockSession = { user: { id: 'u1', email: 'u1@test.com' } };
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+      Response.json({
+        id: 'ck_123',
+        status: 'completed',
+        metadata: { user_id: 'u1' },
+        subscription: {
+          id: 'sub_456',
+          status: 'active',
+          customer: { id: 'cust_789' },
+          product: { id: 'prod_monthly' },
+          current_period_start: '2026-05-04T00:00:00Z',
+          current_period_end: '2026-06-04T00:00:00Z',
+          metadata: { user_id: 'u1' },
+        },
+      }),
+    );
+
+    const stubDB = {
+      prepare: () => ({
+        bind: () => ({
+          first: async () => null,
+          run: async () => ({ success: true }),
+          all: async () => ({ results: [], success: true }),
+        }),
+      }),
+    } as unknown as D1Database;
+    const eventsWritten: unknown[] = [];
+    const EVENTS = {
+      writeDataPoint: (p: unknown) => {
+        eventsWritten.push(p);
+      },
+    } as unknown as AnalyticsEngineDataset;
+
+    const res = await app.request(
+      '/v1/billing/verify-checkout',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ checkoutId: 'ck_123' }),
+      },
+      { ...MOCK_ENV, DB: stubDB, EVENTS, EVENTS_DISABLED: '1' },
+    );
+    expect(res.status).toBe(200);
+    expect(eventsWritten).toHaveLength(0);
   });
 
   it('completed checkout but subscription object missing required fields → applied=false', async () => {
