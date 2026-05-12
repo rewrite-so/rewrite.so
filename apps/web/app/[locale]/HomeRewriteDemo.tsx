@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { sliceForStream } from '../../lib/sliceForStream.ts';
 import styles from './HomePage.module.css';
 import { PlatformIcon, type PlatformName } from './PlatformIcon.tsx';
+import { type DemoPhase, PLATFORM_META, PlatformInputSkin } from './PlatformSkin.tsx';
 
 type DemoCandidate = {
   style: 'faithful' | 'casual' | 'formal';
@@ -30,8 +31,6 @@ export type HomeRewriteDemoCopy = {
   selectHint: string;
   examples: DemoExample[];
 };
-
-type DemoPhase = 'typing' | 'triggering' | 'streaming' | 'accepted';
 
 const PHASE_DURATION_MS: Record<DemoPhase, number> = {
   typing: 1100,
@@ -205,15 +204,63 @@ export function HomeRewriteDemo({ copy }: { copy: HomeRewriteDemoCopy }) {
       aria-label={`${copy.anyInput}: ${example?.badge ?? ''}`}
     >
       <div className={styles.demoChrome}>
-        <span className={styles.demoDot} />
-        <span className={styles.demoDot} />
-        <span className={styles.demoDot} />
-        {example?.platform && (
-          <span className={styles.demoPlatform}>
-            <PlatformIcon name={example.platform} />
-            <span>{example.platform}</span>
+        {/* Chrome bar 行 1: traffic lights + 单个 tab(含 favicon + 平台名 + ×)。
+            tab 文案在移动端截断到平台名 —— demoTabLabelSuffix 用 CSS @media 隐藏。 */}
+        <div className={styles.demoChromeTopRow}>
+          <span className={styles.demoDot} />
+          <span className={styles.demoDot} />
+          <span className={styles.demoDot} />
+          {example?.platform && (
+            <div className={styles.demoTab}>
+              <span className={styles.demoTabFavicon}>
+                <PlatformIcon name={example.platform} size={12} />
+              </span>
+              <span className={styles.demoTabLabel}>
+                <span className={styles.demoTabName}>
+                  {PLATFORM_META[example.platform].tabName}
+                </span>
+                {/* suffix 在 < 880px 由 CSS 隐藏,仅留 platform 名 */}
+                <span className={styles.demoTabSuffix}>
+                  {' — '}
+                  {PLATFORM_META[example.platform].tabSuffix}
+                </span>
+              </span>
+              <span className={styles.demoTabClose} aria-hidden="true">
+                ×
+              </span>
+            </div>
+          )}
+        </div>
+        {/* Chrome bar 行 2: 导航箭头(占位,< 880px 隐藏) + 锁图标 + URL + 菜单 ⋮ */}
+        <div className={styles.demoChromeAddressRow}>
+          <span className={styles.demoChromeNav} aria-hidden="true">
+            <span>‹</span>
+            <span>›</span>
+            <span>↻</span>
           </span>
-        )}
+          <div className={styles.demoAddressBar}>
+            <svg
+              className={styles.demoAddressBarLock}
+              width={11}
+              height={11}
+              viewBox="0 0 14 14"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.4}
+              aria-hidden="true"
+            >
+              <title>secure</title>
+              <rect x="3" y="6.5" width="8" height="6" rx="1" />
+              <path d="M5 6.5 V4.5 A2 2 0 0 1 9 4.5 V6.5" />
+            </svg>
+            <span className={styles.demoAddressBarUrl}>
+              {example?.platform && PLATFORM_META[example.platform].url}
+            </span>
+            <span className={styles.demoAddressBarMenu} aria-hidden="true">
+              ⋮
+            </span>
+          </div>
+        </div>
       </div>
 
       <div className={styles.demoInputWrap}>
@@ -224,29 +271,15 @@ export function HomeRewriteDemo({ copy }: { copy: HomeRewriteDemoCopy }) {
           </span>
         </div>
         <div className={styles.demoMeta}>{statusText}</div>
-        <div
-          className={[
-            styles.demoInput,
-            phase === 'streaming' ? styles.demoInputStreaming : '',
-            phase === 'accepted' ? styles.demoInputAccepted : '',
-          ]
-            .filter(Boolean)
-            .join(' ')}
-        >
-          {displayedText}
-          {/* 光标始终显示在已渲染文本末尾闪烁,模拟输入框 focus 态。
-              typing/triggering/streaming 阶段位于 input 末尾,accepted 阶段位于 candidate text 末尾。 */}
-          <span className={styles.demoCaret} aria-hidden="true">
-            |
-          </span>
-          {phase === 'typing' && displayedText.length < fullInput.length && (
-            // invisible placeholder 撑住完整 input 的高度,防止 typing 阶段从 0 字 → 满文本时
-            // demoInput 行数变化。slice 接续点合法:sliceForStream 按 code point 切。
-            <span style={{ visibility: 'hidden' }} aria-hidden="true">
-              {fullInput.slice(displayedText.length)}
-            </span>
-          )}
-        </div>
+        {example?.platform && (
+          <PlatformInputSkin
+            platform={example.platform}
+            text={displayedText}
+            fullInput={fullInput}
+            phase={phase}
+            caretClassName={styles.demoCaret}
+          />
+        )}
       </div>
 
       <div className={styles.demoShortcut} aria-hidden="true">

@@ -11,35 +11,42 @@ import styles from './PlatformSkin.module.css';
 // 避免循环依赖。
 export type DemoPhase = 'typing' | 'triggering' | 'streaming' | 'accepted';
 
+// tabName + tabSuffix 拆开是为了移动端能用 CSS 单独隐藏 suffix(' — Post' 等),
+// 保留 tab 上的平台名;桌面端再拼接显示。
 export const PLATFORM_META: Record<
   PlatformName,
   {
-    tabLabel: string;
+    tabName: string;
+    tabSuffix: string;
     url: string;
     placeholder: string;
     primaryLabel: string;
   }
 > = {
   X: {
-    tabLabel: 'X — Post',
+    tabName: 'X',
+    tabSuffix: 'Post',
     url: 'x.com/compose/post',
     placeholder: "What's happening?",
     primaryLabel: 'Post',
   },
   Slack: {
-    tabLabel: 'Slack — design',
+    tabName: 'Slack',
+    tabSuffix: 'design',
     url: 'rewrite.slack.com/messages/design',
     placeholder: 'Message #design',
     primaryLabel: 'Send',
   },
   Reddit: {
-    tabLabel: 'Reddit — r/coding',
+    tabName: 'Reddit',
+    tabSuffix: 'r/coding',
     url: 'reddit.com/r/coding/comments',
     placeholder: 'What are your thoughts?',
     primaryLabel: 'Comment',
   },
   GitHub: {
-    tabLabel: 'GitHub — Issue #42',
+    tabName: 'GitHub',
+    tabSuffix: 'Issue #42',
     url: 'github.com/rewrite-so/rewrite.so/issues/42',
     placeholder: 'Leave a comment',
     primaryLabel: 'Comment',
@@ -254,7 +261,9 @@ export interface PlatformInputSkinProps {
   phase: DemoPhase;
   // demoCaret class 由 caller 从 HomePage.module.css 传入,复用已有的 caret 闪烁
   // 动画(@keyframes demoCaretBlink),避免在两个 module.css 里维护同一份动画。
-  caretClassName: string;
+  // 允许 undefined 是因为 tsconfig 启用了 noUncheckedIndexedAccess,
+  // CSS Module 字段访问推断为 string | undefined。
+  caretClassName: string | undefined;
 }
 
 // 决定输入区是显示 placeholder 还是用户文本。导出供 PlatformSkin.test 校验。
