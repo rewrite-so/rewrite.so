@@ -231,6 +231,28 @@ describe('PUT /v1/me/byok (Pro gate removed)', () => {
       expect(res.status).toBe(200);
       expect(written).toHaveLength(0);
     });
+
+    it('emit throw must NOT fail the BYOK save (fire-and-forget)', async () => {
+      // The BYOK row is committed *before* telemetry; a thrown error in the
+      // emit path would 500 the response even though the row is safely
+      // persisted, prompting the user to retry a save that already succeeded.
+      mockSession = { user: { id: 'u_throw', email: 'free@test.com' } };
+      const throwing = {
+        writeDataPoint: () => {
+          throw new Error('AE outage');
+        },
+      } as unknown as AnalyticsEngineDataset;
+      const res = await app.request(
+        '/v1/me/byok',
+        {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(validBody),
+        },
+        { ...MOCK_ENV, EVENTS: throwing },
+      );
+      expect(res.status).toBe(200);
+    });
   });
 });
 

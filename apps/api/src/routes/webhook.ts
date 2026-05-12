@@ -22,6 +22,14 @@ import type { AppEnv } from '../types.ts';
  * strongest identifier we have, and signin_success.linked_visitor_id is the
  * single anchor that lets admin dashboards JOIN web_events back to the
  * pre-signin visitor cohort (CLAUDE.md "用户行为分析" section).
+ *
+ * Fire-and-forget contract (CLAUDE.md "容错硬契约"): every failure inside
+ * this function is swallowed. The caller `upsertSubscriptionFromObject` is
+ * itself called from the webhook handler, and a thrown error there would
+ * trip the route's 500 path, which deliberately *does not write the
+ * idempotency key* — Creem would then retry 30s/1min/5min/1h and our
+ * subscription state machine would run again. Telemetry must never trigger
+ * that. The matching pattern is `metrics.ts:writeRequestEvent`.
  */
 async function emitSubscriptionWebEvent(
   env: AppEnv['Bindings'],
@@ -30,16 +38,21 @@ async function emitSubscriptionWebEvent(
   plan: CreemPlan,
 ): Promise<void> {
   if (env.EVENTS_DISABLED === '1') return;
-  const subjectIdHash = await hashSubjectId('user', userId);
-  writeEventPoint(env.EVENTS, {
-    eventName: kind === 'paid' ? 'subscription_paid' : 'subscription_canceled',
-    pagePath: '',
-    locale: '',
-    tier: 'pro',
-    subjectKind: 'user',
-    subjectIdHash,
-    propsJson: JSON.stringify({ plan }),
-  });
+  try {
+    const subjectIdHash = await hashSubjectId('user', userId);
+    writeEventPoint(env.EVENTS, {
+      eventName: kind === 'paid' ? 'subscription_paid' : 'subscription_canceled',
+      pagePath: '',
+      locale: '',
+      tier: 'pro',
+      subjectKind: 'user',
+      subjectIdHash,
+      propsJson: JSON.stringify({ plan }),
+    });
+  } catch (err) {
+    // Telemetry failure is non-fatal — log and move on.
+    log.warn('events.emit_failed', { kind, err });
+  }
 }
 
 export const webhookRoute = new Hono<AppEnv>();

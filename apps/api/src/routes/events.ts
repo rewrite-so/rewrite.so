@@ -143,7 +143,13 @@ eventsRoute.post('/v1/events', async (c) => {
   // adds < 1ms even for max-size batches. Doing it inline (rather than under
   // waitUntil) keeps writeEventPoint truly synchronous — important so the
   // 202 response means "we tried to write" rather than "we promised to try".
-  await Promise.all(
+  //
+  // allSettled (not all): a single hashSubjectId rejection must not poison
+  // the other events in the batch. writeEventPoint is already self-protecting
+  // (event-metrics.ts swallows writeDataPoint errors), so this only guards
+  // against a misbehaving crypto.subtle in the hash step. Anything that
+  // throws here still degrades to "this one event silently dropped".
+  await Promise.allSettled(
     prepared.map(async (p) => {
       const subjectIdHash = await hashSubjectId(p.subjectKind, p.subjectRaw);
       writeEventPoint(c.env.EVENTS, { ...p.metric, subjectIdHash });

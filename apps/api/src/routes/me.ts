@@ -381,18 +381,27 @@ meRoute.put('/v1/me/byok', async (c) => {
     .bind(sessionUser.id, baseUrl, model, enc.encrypted, enc.iv, enc.mask, now, now)
     .run();
 
+  // Fire-and-forget telemetry: a thrown error here would return 500 *after*
+  // the BYOK row was already persisted, causing the user to retry a save
+  // that has already succeeded. resolveUserTier / hashSubjectId both touch
+  // crypto + D1 and can in principle fail; swallow everything (CLAUDE.md
+  // "容错硬契约"; matches metrics.ts:writeRequestEvent strategy).
   if (c.env.EVENTS_DISABLED !== '1') {
-    const tier = await resolveUserTier(c.env.DB, sessionUser.id, c.env.KV);
-    const subjectIdHash = await hashSubjectId('user', sessionUser.id);
-    writeEventPoint(c.env.EVENTS, {
-      eventName: 'byok_save',
-      pagePath: '',
-      locale: '',
-      tier: tier === 'pro' ? 'pro' : 'byok',
-      subjectKind: 'user',
-      subjectIdHash,
-      propsJson: JSON.stringify({ has_been_set_before: existed ? 1 : 0 }),
-    });
+    try {
+      const tier = await resolveUserTier(c.env.DB, sessionUser.id, c.env.KV);
+      const subjectIdHash = await hashSubjectId('user', sessionUser.id);
+      writeEventPoint(c.env.EVENTS, {
+        eventName: 'byok_save',
+        pagePath: '',
+        locale: '',
+        tier: tier === 'pro' ? 'pro' : 'byok',
+        subjectKind: 'user',
+        subjectIdHash,
+        propsJson: JSON.stringify({ has_been_set_before: existed ? 1 : 0 }),
+      });
+    } catch (err) {
+      log.warn('events.byok_emit_failed', { err });
+    }
   }
 
   return c.json({ configured: true, baseUrl, model, keyMask: enc.mask });

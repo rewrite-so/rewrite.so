@@ -377,6 +377,59 @@ describe('routeEvent — web event emission', () => {
     expect(res.status).toBe(200);
     expect(eventsWritten).toHaveLength(0);
   });
+
+  it('writeDataPoint that throws must NOT take down the webhook (fire-and-forget)', async () => {
+    // Telemetry failure on a webhook would 500 the route, skip writing the
+    // idempotency key, and trigger a Creem retry storm. writeEventPoint is
+    // already self-protecting, but this asserts the contract.
+    const { db } = makeDB();
+    const throwingEvents = {
+      writeDataPoint: () => {
+        throw new Error('AE outage');
+      },
+    } as unknown as AnalyticsEngineDataset;
+    const env = { ...makeEnv(db), EVENTS: throwingEvents } as ReturnType<typeof makeEnv> & {
+      EVENTS: AnalyticsEngineDataset;
+    };
+    const res = await postWebhook(envelope('subscription.paid', subFixture()), env);
+    expect(res.status).toBe(200);
+  });
+
+  it('hashSubjectId failure must NOT take down the webhook either', async () => {
+    // The other half of the emit path: hashSubjectId is async crypto.subtle
+    // and could in principle reject. With the try/catch around the emit body
+    // a rejection drops the event silently and the webhook still 200s.
+    vi.doMock('../lib/event-metrics.ts', async () => {
+      const actual =
+        await vi.importActual<typeof import('../lib/event-metrics.ts')>('../lib/event-metrics.ts');
+      return {
+        ...actual,
+        hashSubjectId: async () => {
+          throw new Error('crypto.subtle.digest down');
+        },
+      };
+    });
+    // Force a fresh app instance that picks up the mock.
+    vi.resetModules();
+    const freshApp = (await import('../index.ts')).app;
+    const { db } = makeDB();
+    const { env, eventsWritten } = makeEnvWithEvents(db);
+    const body = JSON.stringify(envelope('subscription.paid', subFixture()));
+    const sig = await sign(body);
+    const res = await freshApp.request(
+      '/webhooks/creem',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'creem-signature': sig },
+        body,
+      },
+      env,
+    );
+    expect(res.status).toBe(200);
+    expect(eventsWritten).toHaveLength(0); // emit was caught
+    vi.doUnmock('../lib/event-metrics.ts');
+    vi.resetModules();
+  });
 });
 
 beforeEach(() => {
