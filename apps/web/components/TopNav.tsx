@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '../i18n/navigation.ts';
 import { getExtensionInstallUrl } from '../lib/extension-install-url.ts';
+import { CtaLink } from './CtaLink.tsx';
 import { LanguageSwitcher } from './LanguageSwitcher.tsx';
 
 const NAV_LINK = {
@@ -141,34 +142,34 @@ export async function TopNav() {
         <LanguageSwitcher />
         {isAuthed ? (
           <>
-            <a
+            <CtaLink
+              cta="install"
               href={getExtensionInstallUrl()}
+              external
               style={{ ...NAV_LINK_OUTLINE, marginLeft: 8 }}
-              target="_blank"
-              rel="noopener noreferrer"
             >
               {t('install')}
-            </a>
+            </CtaLink>
             <Link href="/settings" style={{ ...NAV_LINK_PRIMARY, marginLeft: 8 }}>
               {t('settings')}
             </Link>
           </>
         ) : (
           <>
-            <Link href="/login" style={{ ...NAV_LINK, marginLeft: 4 }}>
+            <CtaLink cta="signin" href="/login" style={{ ...NAV_LINK, marginLeft: 4 }}>
               {t('signIn')}
-            </Link>
-            <a
+            </CtaLink>
+            <CtaLink
+              cta="install"
               href={getExtensionInstallUrl()}
+              external
               style={{ ...NAV_LINK_OUTLINE, marginLeft: 8 }}
-              target="_blank"
-              rel="noopener noreferrer"
             >
               {t('install')}
-            </a>
-            <Link href="/try" style={{ ...NAV_LINK_PRIMARY, marginLeft: 8 }}>
+            </CtaLink>
+            <CtaLink cta="try_demo" href="/try" style={{ ...NAV_LINK_PRIMARY, marginLeft: 8 }}>
               {t('tryFree')}
-            </Link>
+            </CtaLink>
           </>
         )}
       </div>

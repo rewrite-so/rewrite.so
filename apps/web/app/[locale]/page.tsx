@@ -1,7 +1,7 @@
 import { PRO_PRICE, QUOTA } from '@rewrite/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { ReactNode } from 'react';
-import { Link } from '../../i18n/navigation.ts';
+import { CtaLink } from '../../components/CtaLink.tsx';
 import { getExtensionInstallUrl } from '../../lib/extension-install-url.ts';
 import styles from './HomePage.module.css';
 import { HomeRewriteDemo } from './HomeRewriteDemo.tsx';
@@ -62,27 +62,27 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               })}
             </p>
             <div className={styles.heroActions}>
-              <Link href="/try" className={styles.primaryButton}>
+              <CtaLink cta="try_demo" href="/try" className={styles.primaryButton}>
                 {t('hero.ctaPrimary')}
-              </Link>
-              <a
+              </CtaLink>
+              <CtaLink
+                cta="install"
                 href={getExtensionInstallUrl()}
+                external
                 className={styles.secondaryButton}
-                target="_blank"
-                rel="noopener noreferrer"
               >
                 {t('hero.ctaInstall')}
-              </a>
+              </CtaLink>
             </div>
             <p className={styles.fineprint}>{t('hero.fineprint', { count: QUOTA.loggedInFree })}</p>
-            <a
+            <CtaLink
+              cta="github"
               href="https://github.com/rewrite-so/rewrite.so"
+              external
               className={styles.heroGithubLink}
-              target="_blank"
-              rel="noopener noreferrer"
             >
               {t('hero.ctaGithub')}
-            </a>
+            </CtaLink>
           </div>
 
           <HomeRewriteDemo copy={demoCopy} />
@@ -252,12 +252,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           />
         </div>
         <div className={styles.pricingActions}>
-          <Link href="/pricing" className={styles.secondaryButton}>
+          <CtaLink cta="pricing" href="/pricing" className={styles.secondaryButton}>
             {t('pricing.ctaSeeFull')}
-          </Link>
-          <Link href="/try" className={styles.primaryButton}>
+          </CtaLink>
+          <CtaLink cta="try_demo" href="/try" className={styles.primaryButton}>
             {t('finalCta.primary')}
-          </Link>
+          </CtaLink>
         </div>
       </section>
     </main>

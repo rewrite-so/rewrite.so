@@ -16,7 +16,7 @@ export const EVENT_NAMES = [
   // ---- Page traffic ----
   'page_view',
   // ---- Landing / /try interactions ----
-  'cta_click', // props: { cta: 'install'|'signin'|'try_demo'|'pricing' }
+  'cta_click', // props: { cta: 'install'|'signin'|'try_demo'|'pricing'|'github' }
   'try_input', // props: { length_bucket, lang } — never the text itself
   'try_select_candidate', // props: { style, position: 1|2|3, was_regen: 0|1 }
   'try_regenerate', // props: { style }

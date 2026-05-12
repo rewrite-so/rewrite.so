@@ -3,6 +3,7 @@
 import { PRO_PRICE } from '@rewrite/shared';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
+import { track } from '../../../../lib/analytics.ts';
 
 type Plan = 'monthly' | 'yearly';
 
@@ -35,6 +36,10 @@ export function BillingClient() {
   async function checkout(p: Plan) {
     setLoading(true);
     setError(null);
+    // Fire checkout_start from the client (not the API) so the event carries
+    // visitor_id + UTM context — see plan: "checkout_start 从前端发". Even if
+    // the request below fails, the click intent is recorded for funnel math.
+    track('checkout_start', { plan: p });
     try {
       const res = await fetch('/v1/billing/checkout', {
         method: 'POST',

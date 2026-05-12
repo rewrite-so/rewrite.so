@@ -11,6 +11,7 @@ import {
 import { useLocale, useTranslations } from 'next-intl';
 import { type RefObject, useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from '../../../../i18n/navigation.ts';
+import { track } from '../../../../lib/analytics.ts';
 import { getExtensionInstallUrl } from '../../../../lib/extension-install-url.ts';
 
 // 留空让 fetch 走 same-origin（Next rewrites 代理到 wrangler dev）
@@ -82,6 +83,7 @@ export function TryClient() {
       // 超配额 CTA 跳 /billing（营销页直接列定价/Subscribe 按钮），不跳 /settings 配置页
       upgradeUrl: '/billing?from=quota_exceeded',
       onInstallClick: () => {
+        track('cta_click', { cta: 'install' });
         window.open(getExtensionInstallUrl(), '_blank');
       },
       getTurnstileToken,
@@ -94,9 +96,15 @@ export function TryClient() {
       // 用户接受候选改写后递增计数。触发"登录解锁更多"nudge 显示。
       // 仅在 onSelect 真正成功（panel close + editable 替换）后 fire，
       // abort / Esc / 失败的改写不算。localStorage 持久化在独立 effect
-      // 里 watch rewriteCount——避免在 React updater 里做 side effect
-      onAccepted: () => {
+      // 里 watch rewriteCount——避免在 React updater 里做 side effect。
+      //
+      // try_select_candidate is the closest analytics signal we can emit
+      // without expanding @rewrite/core's mount() hook surface. position
+      // and was_regen would need new hook params and a matching wire-up
+      // on the extension side; that's left for a future commit.
+      onAccepted: (style) => {
         setRewriteCount((n) => n + 1);
+        track('try_select_candidate', { style });
       },
     });
     return () => handle.unmount();
