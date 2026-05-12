@@ -230,6 +230,17 @@
   white-space: nowrap;
 }
 
+.demoTabName {
+  /* platform 名(X / Slack / Reddit / GitHub),主信息,继承 demoTab 的 22221e 字色。 */
+  font-weight: 500;
+}
+
+.demoTabSuffix {
+  /* '— Post' 类的辅助信息,色淡一档;< 880px 由媒体查询隐藏。 */
+  color: #6a6962;
+  font-weight: 400;
+}
+
 .demoTabClose {
   flex: 0 0 auto;
   color: #93928a;
