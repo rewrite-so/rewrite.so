@@ -6,52 +6,12 @@
 // 整段是纯视觉外壳,不与 packages/core mount() 集成 —— landing demo 是前端 mock。
 import type { PlatformName } from './PlatformIcon.tsx';
 import styles from './PlatformSkin.module.css';
+import { type DemoPhase, PLATFORM_META, shouldShowPlaceholder } from './platform-meta.ts';
 
-// DemoPhase 是 HomeRewriteDemo 的状态机,放在 PlatformSkin 让两边共享类型,
-// 避免循环依赖。
-export type DemoPhase = 'typing' | 'triggering' | 'streaming' | 'accepted';
-
-// tabName + tabSuffix 拆开是为了移动端能用 CSS 单独隐藏 suffix(' — Post' 等),
-// 保留 tab 上的平台名;桌面端再拼接显示。
-export const PLATFORM_META: Record<
-  PlatformName,
-  {
-    tabName: string;
-    tabSuffix: string;
-    url: string;
-    placeholder: string;
-    primaryLabel: string;
-  }
-> = {
-  X: {
-    tabName: 'X',
-    tabSuffix: 'Post',
-    url: 'x.com/compose/post',
-    placeholder: "What's happening?",
-    primaryLabel: 'Post',
-  },
-  Slack: {
-    tabName: 'Slack',
-    tabSuffix: 'design',
-    url: 'rewrite.slack.com/messages/design',
-    placeholder: 'Message #design',
-    primaryLabel: 'Send',
-  },
-  Reddit: {
-    tabName: 'Reddit',
-    tabSuffix: 'r/coding',
-    url: 'reddit.com/r/coding/comments',
-    placeholder: 'What are your thoughts?',
-    primaryLabel: 'Comment',
-  },
-  GitHub: {
-    tabName: 'GitHub',
-    tabSuffix: 'Issue #42',
-    url: 'github.com/rewrite-so/rewrite.so/issues/42',
-    placeholder: 'Leave a comment',
-    primaryLabel: 'Comment',
-  },
-};
+// Re-export so callers can keep `import { ... } from './PlatformSkin.tsx'`
+// 而不需要知道 PLATFORM_META 实际在 platform-meta.ts 里(为了让 vitest 不必
+// transform JSX 才能 import 纯数据/纯函数)。
+export { type DemoPhase, PLATFORM_META, shouldShowPlaceholder };
 
 // 工具栏每个平台保留 5 个图标,移动端只留 2 个最具辨识度的(hideOnMobile=false 的)。
 // 名字必须存在于 TOOLBAR_ICON_PATHS。
@@ -264,15 +224,6 @@ export interface PlatformInputSkinProps {
   // 允许 undefined 是因为 tsconfig 启用了 noUncheckedIndexedAccess,
   // CSS Module 字段访问推断为 string | undefined。
   caretClassName: string | undefined;
-}
-
-// 决定输入区是显示 placeholder 还是用户文本。导出供 PlatformSkin.test 校验。
-// typing 阶段 text 为空时显示 placeholder(模拟真实输入框未输入态);
-// 其它阶段(triggering / streaming / accepted)永不显示 placeholder
-// —— 因为这些阶段必定已经有完整 input 文本。
-export function shouldShowPlaceholder(text: string, phase: DemoPhase): boolean {
-  if (phase !== 'typing') return false;
-  return text.length === 0;
 }
 
 export function PlatformInputSkin({
