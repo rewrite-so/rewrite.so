@@ -16,7 +16,7 @@ export default function PrivacyPage() {
   return (
     <article>
       <h1 style={{ fontSize: 32, fontWeight: 700, margin: 0 }}>Privacy Policy</h1>
-      <p style={{ color: '#888', fontSize: 13, marginTop: 8 }}>Last updated: May 2, 2026</p>
+      <p style={{ color: '#888', fontSize: 13, marginTop: 8 }}>Last updated: May 13, 2026</p>
 
       <p style={{ marginTop: 28 }}>
         rewrite.so (&ldquo;we&rdquo;, &ldquo;us&rdquo;, the &ldquo;Service&rdquo;) is built around a
@@ -73,6 +73,18 @@ export default function PrivacyPage() {
           requested style, response status code, and your account ID or anonymized subject. These
           are needed for debugging, abuse prevention, and quota enforcement.
         </li>
+        <li>
+          <strong>Anonymized usage events.</strong> Page views, button clicks, conversion events
+          (sign-in, checkout, subscription state changes), and feature interactions on the website.
+          Each event carries the event name, the page path (without locale prefix or query
+          parameters), your interface locale, your country (derived from IP, never the IP itself), a
+          coarse device type (mobile / desktop / tablet), referrer host (cross-origin only, never
+          path or query), UTM tags from marketing links, and a hashed identifier — your account ID
+          if you are signed in, otherwise a random ID stored only in your tab&apos;s session storage
+          (cleared when you close the tab). We do not collect the text you rewrite, the AI output,
+          your IP address, your email, mouse movement, scroll position, or session replay. We do not
+          use any cookies for these events.
+        </li>
       </ul>
 
       <h2 style={H2}>Third parties we share data with</h2>
@@ -101,7 +113,10 @@ export default function PrivacyPage() {
         </li>
       </ul>
       <p>
-        We do not sell your data. We do not run third-party advertising or behavioral analytics.
+        We do not sell your data. We do not run third-party advertising or behavioral analytics (no
+        Google Analytics, PostHog, Mixpanel, Plausible, Vercel Analytics, or any similar product).
+        Our anonymized usage events live on Cloudflare Analytics Engine, the same infrastructure
+        provider that hosts the rest of the Service.
       </p>
 
       <h2 style={H2}>Cookies</h2>
@@ -126,6 +141,10 @@ export default function PrivacyPage() {
           termination, as required by tax law in our payment processor&apos;s jurisdiction.
         </li>
         <li>Operational logs: retained for at most 30 days, then permanently deleted.</li>
+        <li>
+          Anonymized usage events: Cloudflare Analytics Engine retains data points for at most 90
+          days, after which they are permanently deleted by the infrastructure provider.
+        </li>
       </ul>
 
       <h2 style={H2}>Your rights</h2>
