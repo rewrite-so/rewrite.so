@@ -1,0 +1,228 @@
+/* PlatformSkin: 4 个平台的演示输入框 skin (X / Slack / Reddit / GitHub)。
+   字体故意 override 父级 demoShell 的 monospace 回到 system sans-serif —— 真实平台
+   都不是 monospace,monospace 是 demo "代码味"叙事,但平台输入框要看着真实。 */
+
+.skin {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(17, 17, 15, 0.1);
+  border-radius: 10px;
+  background: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font-size: 0.84rem;
+  overflow: hidden;
+  transition:
+    background 220ms ease,
+    border-color 220ms ease;
+}
+
+.skinStreaming {
+  /* 复用 HomePage.module.css 的 demoStream keyframes 思路,这里用自己的命名空间。
+     绿渐变背景在 streaming 阶段提示"上游正在流式返回"。 */
+  border-color: rgba(58, 111, 85, 0.32);
+  background: linear-gradient(90deg, #fff 0%, #eef7f1 45%, #fff 90%);
+  background-size: 220% 100%;
+  animation: skinStream 1.1s ease-in-out infinite;
+}
+
+.skinAccepted {
+  border-color: rgba(58, 111, 85, 0.45);
+  background: #f6fbf8;
+}
+
+@keyframes skinStream {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+/* ─── Headers ──────────────────────────────────────────────────── */
+
+.headerSlack {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+  border-bottom: 1px solid rgba(17, 17, 15, 0.06);
+  padding: 9px 12px;
+  color: #1d1c1d;
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+
+.headerSlackHash {
+  color: #696b6c;
+  font-weight: 500;
+}
+
+.headerReddit {
+  border-bottom: 1px solid rgba(17, 17, 15, 0.06);
+  padding: 8px 12px;
+  background: #fbfbfa;
+  color: #5c5b5b;
+  font-size: 0.74rem;
+}
+
+.headerGitHub {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid rgba(17, 17, 15, 0.1);
+  padding: 6px 10px 0;
+  background: #f6f8fa;
+}
+
+.githubTab {
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: 6px 6px 0 0;
+  padding: 6px 12px;
+  color: #57606a;
+  font-size: 0.78rem;
+}
+
+.githubTabActive {
+  position: relative;
+  top: 1px;
+  border-color: rgba(17, 17, 15, 0.1);
+  border-bottom: 1px solid #fff;
+  background: #fff;
+  color: #1f2328;
+  font-weight: 500;
+}
+
+/* ─── Body (avatar + input area) ───────────────────────────────── */
+
+.body {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px;
+}
+
+.avatarX {
+  /* X 发推框左侧圆形头像 —— 蓝紫渐变占位,不真实复刻任何用户头像。 */
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #1d9bf0 0%, #794bc4 100%);
+}
+
+.inputArea {
+  flex: 1;
+  min-width: 0;
+  min-height: 28px;
+  color: #171713;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.placeholder {
+  color: #a8a7a0;
+}
+
+/* ─── Separator + toolbar ──────────────────────────────────────── */
+
+.separator {
+  margin: 0 12px;
+  border-top: 1px solid rgba(17, 17, 15, 0.06);
+}
+
+.toolbar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px 10px;
+}
+
+.toolbarIcons {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+  color: #535452;
+}
+
+.toolbarIcon {
+  display: inline-flex;
+  width: 26px;
+  height: 26px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  color: inherit;
+}
+
+.primaryButton {
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 999px;
+  padding: 6px 16px;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: default;
+  transition: opacity 180ms ease;
+}
+
+.primaryButton[aria-disabled="true"] {
+  /* aria-disabled 选择器 specificity (0,2,0) 高于 .btnX/.btnSlack/... (0,1,0),
+     无需 !important 即可覆盖 platform-specific 背景。 */
+  background: #c8c7c0;
+  opacity: 0.6;
+}
+
+.btnX {
+  background: #0f1419;
+}
+
+.btnSlack {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  border-radius: 4px;
+  padding: 5px 12px;
+  background: #007a5a;
+}
+
+.btnReddit {
+  background: #ff4500;
+}
+
+.btnGitHub {
+  border-radius: 6px;
+  padding: 5px 12px;
+  background: #2da44e;
+}
+
+/* ─── 响应式 ───────────────────────────────────────────────────── */
+
+@media (max-width: 880px) {
+  .skin {
+    font-size: 0.8rem;
+  }
+
+  .avatarX {
+    width: 30px;
+    height: 30px;
+  }
+
+  /* 工具栏图标移动端保留主按钮 + 2 个最具平台辨识度的图标(其它隐藏)。
+     具体保留列表见 PlatformSkin.tsx 的 hideOnMobile 标记。 */
+  .toolbarIconHideOnMobile {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skin {
+    transition: none;
+  }
+  .skinStreaming {
+    animation: none;
+  }
+}
