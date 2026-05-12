@@ -79,10 +79,15 @@ meRoute.get('/v1/me/usage', async (c) => {
 /**
  * GET /v1/me
  * 返回当前登录用户信息 + 当前订阅摘要（未登录返 user:null）。
+ *
+ * `eventsEnabled` 是用户行为分析管线的运维 kill switch 状态 —— 前端 sender
+ * 启动时通过此端点取，false 时整个 SDK 降级为 no-op。匿名 + 登录路径都返
+ * 该字段，因为匿名访问也会启动 sender。详见 routes/events.ts。
  */
 meRoute.get('/v1/me', async (c) => {
+  const eventsEnabled = c.env.EVENTS_DISABLED !== '1';
   const sessionUser = await getOrResolveSessionUser(c);
-  if (!sessionUser) return c.json({ user: null, subscription: null });
+  if (!sessionUser) return c.json({ user: null, subscription: null, eventsEnabled });
 
   const sub = await c.env.DB.prepare(
     `SELECT plan, status, current_period_end, cancel_at_period_end
@@ -117,6 +122,7 @@ meRoute.get('/v1/me', async (c) => {
           cancelAtPeriodEnd: sub.cancel_at_period_end === 1,
         }
       : null,
+    eventsEnabled,
   });
 });
 
