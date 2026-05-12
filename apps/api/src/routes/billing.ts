@@ -168,12 +168,16 @@ billingRoute.post('/v1/billing/verify-checkout', async (c) => {
   // active 状态落库（trialing / paused 等会由后续 webhook 修正；新购通常是 active）。
   // cancelAtPeriodEnd=false：新购 checkout 不会带 scheduled_cancel 状态。
   // 返回值告诉我们 sub 字段是否齐全到能落库——不齐全时不要骗客户端 applied=true，
-  // 让 webhook 兜底
+  // 让 webhook 兜底。
+  // webEvent='paid': verify-checkout 永远是新购确认路径，发 subscription_paid。
+  // 即便 webhook 后到达并重复触发同一事件也没关系——AE 自身就支持高基数计数，
+  // 重复事件等于运营层多看到一次开权（既不会扣 D1 配额也不会影响产品逻辑）。
   const wrote = await upsertSubscriptionFromObject(
     c.env,
     subObject,
     'active',
     `verify-${parsed.data.checkoutId}`,
+    { webEvent: 'paid' },
   );
 
   return c.json({ status: 'completed', applied: wrote });

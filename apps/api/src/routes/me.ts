@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { BURST_BUCKETS, consume } from '../do/rate-limiter.ts';
 import { encryptApiKey } from '../lib/crypto.ts';
+import { hashSubjectId, writeEventPoint } from '../lib/event-metrics.ts';
 import { log } from '../lib/log.ts';
 import {
   claimAnonymousUsage,
@@ -356,6 +357,13 @@ meRoute.put('/v1/me/byok', async (c) => {
     return c.json({ error: 'encrypt_failed' }, 500);
   }
 
+  // Check whether the user already had a BYOK row before we upsert; the
+  // has_been_set_before prop lets analytics distinguish first-time
+  // configuration from a refresh / rotation.
+  const existed = await c.env.DB.prepare('SELECT 1 FROM byok_keys WHERE user_id = ? LIMIT 1')
+    .bind(sessionUser.id)
+    .first<{ 1: number }>();
+
   const now = Date.now();
   await c.env.DB.prepare(
     `INSERT INTO byok_keys (
@@ -372,6 +380,20 @@ meRoute.put('/v1/me/byok', async (c) => {
   )
     .bind(sessionUser.id, baseUrl, model, enc.encrypted, enc.iv, enc.mask, now, now)
     .run();
+
+  if (c.env.EVENTS_DISABLED !== '1') {
+    const tier = await resolveUserTier(c.env.DB, sessionUser.id, c.env.KV);
+    const subjectIdHash = await hashSubjectId('user', sessionUser.id);
+    writeEventPoint(c.env.EVENTS, {
+      eventName: 'byok_save',
+      pagePath: '',
+      locale: '',
+      tier: tier === 'pro' ? 'pro' : 'byok',
+      subjectKind: 'user',
+      subjectIdHash,
+      propsJson: JSON.stringify({ has_been_set_before: existed ? 1 : 0 }),
+    });
+  }
 
   return c.json({ configured: true, baseUrl, model, keyMask: enc.mask });
 });

@@ -10,8 +10,37 @@ import {
   planFromProductId,
   verifyWebhookSignature,
 } from '../lib/creem.ts';
+import { hashSubjectId, writeEventPoint } from '../lib/event-metrics.ts';
 import { log } from '../lib/log.ts';
 import type { AppEnv } from '../types.ts';
+
+/**
+ * Web-events emit for server-side subscription state transitions.
+ *
+ * Why server-side: Creem webhook callbacks have no browser context, so visitor
+ * id / page / locale / device cannot be carried. The 'user' subject is the
+ * strongest identifier we have, and signin_success.linked_visitor_id is the
+ * single anchor that lets admin dashboards JOIN web_events back to the
+ * pre-signin visitor cohort (CLAUDE.md "用户行为分析" section).
+ */
+async function emitSubscriptionWebEvent(
+  env: AppEnv['Bindings'],
+  kind: 'paid' | 'canceled',
+  userId: string,
+  plan: CreemPlan,
+): Promise<void> {
+  if (env.EVENTS_DISABLED === '1') return;
+  const subjectIdHash = await hashSubjectId('user', userId);
+  writeEventPoint(env.EVENTS, {
+    eventName: kind === 'paid' ? 'subscription_paid' : 'subscription_canceled',
+    pagePath: '',
+    locale: '',
+    tier: 'pro',
+    subjectKind: 'user',
+    subjectIdHash,
+    propsJson: JSON.stringify({ plan }),
+  });
+}
 
 export const webhookRoute = new Hono<AppEnv>();
 
@@ -99,41 +128,44 @@ async function routeEvent(env: AppEnv['Bindings'], evt: CreemEventEnvelope): Pro
     case 'subscription.active':
     case 'subscription.paid':
     case 'subscription.resumed':
-      // paid 是 Creem 推荐的开权事件（续费只发 paid 不发 active）
-      await upsertSubscription(env, evt, 'active');
+      // paid 是 Creem 推荐的开权事件（续费只发 paid 不发 active）。
+      // 同步 emit subscription_paid 让运营看到每一次开权（含 renewal）。
+      await upsertSubscription(env, evt, 'active', { webEvent: 'paid' });
       return;
 
     case 'subscription.trialing':
-      await upsertSubscription(env, evt, 'trialing');
+      // 试用激活也算开权
+      await upsertSubscription(env, evt, 'trialing', { webEvent: 'paid' });
       return;
 
     case 'subscription.paused':
       // paused = 暂时停止计费但保留访问权限。我们当 'paused' 落 D1，resolveUserTier
-      // 仍会按 'paused' → pro 处理（继续给配额）。
+      // 仍会按 'paused' → pro 处理（继续给配额）。不算用户终态变更，不发 web event。
       await upsertSubscription(env, evt, 'paused');
       return;
 
     case 'subscription.canceled':
       // 用户主动立即取消 OR 周期末已到期。落 status='canceled'；resolveUserTier
       // 会用 current_period_end > now 决定是否仍给 Pro 配额。
-      await upsertSubscription(env, evt, 'canceled');
+      await upsertSubscription(env, evt, 'canceled', { webEvent: 'canceled' });
       return;
 
     case 'subscription.scheduled_cancel':
       // 用户点了"周期末取消"——D1 status 仍 active 让 resolveUserTier 给 Pro，
       // cancel_at_period_end=true 让 UI 显示"将结束"。期末后 Creem 会发
-      // subscription.canceled / expired 真正终止。
+      // subscription.canceled / expired 真正终止——届时再 emit canceled。
       await upsertSubscription(env, evt, 'active', { cancelAtPeriodEnd: true });
       return;
 
     case 'subscription.past_due':
       // 付款失败（renewal 扣款不成功）。Creem 后续会重试，成功后发 subscription.paid。
+      // 不是用户决策导致的终态变更，不发 web event 避免运营噪音。
       await upsertSubscription(env, evt, 'past_due');
       return;
 
     case 'subscription.expired':
       // ⚠️ 实测 expired 事件 object.status 仍是 "active"，必须按 eventType 决定 'expired'。
-      await upsertSubscription(env, evt, 'expired');
+      await upsertSubscription(env, evt, 'expired', { webEvent: 'canceled' });
       return;
 
     case 'subscription.update':
@@ -208,7 +240,7 @@ async function upsertSubscription(
   env: AppEnv['Bindings'],
   evt: CreemEventEnvelope,
   status: SubscriptionStatus,
-  opts?: { cancelAtPeriodEnd?: boolean },
+  opts?: { cancelAtPeriodEnd?: boolean; webEvent?: 'paid' | 'canceled' | null },
 ): Promise<void> {
   const obj = evt.object as Record<string, unknown> | undefined;
   if (!obj) {
@@ -237,7 +269,16 @@ export async function upsertSubscriptionFromObject(
   obj: Record<string, unknown>,
   status: SubscriptionStatus,
   ctxId: string, // 日志关联用（webhook eventId / verify checkoutId）
-  opts?: { cancelAtPeriodEnd?: boolean },
+  opts?: {
+    cancelAtPeriodEnd?: boolean;
+    /**
+     * Optional hint to also emit a web event after a successful upsert.
+     * - 'paid'     → subscription_paid     (active / paid / resumed / trialing)
+     * - 'canceled' → subscription_canceled (canceled / expired)
+     * - null / undefined → no event (paused / past_due / scheduled_cancel / update)
+     */
+    webEvent?: 'paid' | 'canceled' | null;
+  },
 ): Promise<boolean> {
   const userId = extractUserIdFromMetadata(obj);
   const customerId = extractCustomerId(obj);
@@ -302,6 +343,9 @@ export async function upsertSubscriptionFromObject(
         subId,
       )
       .run();
+    if (opts?.webEvent) {
+      await emitSubscriptionWebEvent(env, opts.webEvent, userId, plan);
+    }
     return true;
   }
 
@@ -329,6 +373,9 @@ export async function upsertSubscriptionFromObject(
       now,
     )
     .run();
+  if (opts?.webEvent) {
+    await emitSubscriptionWebEvent(env, opts.webEvent, userId, plan);
+  }
   return true;
 }
 
