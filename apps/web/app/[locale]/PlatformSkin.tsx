@@ -219,6 +219,7 @@ export interface PlatformInputSkinProps {
   text: string;
   fullInput: string;
   phase: DemoPhase;
+  acceptedVersion?: number;
   // demoCaret class 由 caller 从 HomePage.module.css 传入,复用已有的 caret 闪烁
   // 动画(@keyframes demoCaretBlink),避免在两个 module.css 里维护同一份动画。
   // 允许 undefined 是因为 tsconfig 启用了 noUncheckedIndexedAccess,
@@ -231,6 +232,7 @@ export function PlatformInputSkin({
   text,
   fullInput,
   phase,
+  acceptedVersion,
   caretClassName,
 }: PlatformInputSkinProps) {
   const meta = PLATFORM_META[platform];
@@ -240,6 +242,10 @@ export function PlatformInputSkin({
 
   const containerClass = [
     styles.skin,
+    // skin<Platform> modifier 用于平台特有的色调 override(如 X toolbar icons 蓝色)。
+    // 用 modifier class 而非 :has(.avatarX),避免对老版 Firefox(<121)等无 :has 支持
+    // 的浏览器掉到默认规则。
+    styles[`skin${platform}`],
     phase === 'streaming' ? styles.skinStreaming : '',
     phase === 'accepted' ? styles.skinAccepted : '',
   ]
@@ -268,20 +274,21 @@ export function PlatformInputSkin({
       {/* Body: 仅 X 有左侧头像,其它 fullwidth ─────────────────── */}
       <div className={styles.body}>
         {platform === 'X' && <div className={styles.avatarX} aria-hidden="true" />}
-        <div className={styles.inputArea}>
+        <div
+          key={phase === 'accepted' ? acceptedVersion : 'initial'}
+          className={[styles.inputArea, phase === 'accepted' ? styles.inputAreaAccepted : '']
+            .filter(Boolean)
+            .join(' ')}
+        >
           {showPlaceholder ? (
             <>
               <span className={styles.placeholder}>{meta.placeholder}</span>
-              <span className={caretClassName} aria-hidden="true">
-                |
-              </span>
+              <span className={caretClassName} aria-hidden="true" />
             </>
           ) : (
             <>
               {text}
-              <span className={caretClassName} aria-hidden="true">
-                |
-              </span>
+              <span className={caretClassName} aria-hidden="true" />
               {phase === 'typing' && text.length < fullInput.length && (
                 // invisible placeholder 撑住完整 input 高度,防 typing 阶段行数跳变。
                 // sliceForStream 按 code point 切,fullInput.slice(text.length) 接续合法。

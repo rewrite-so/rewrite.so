@@ -6,33 +6,43 @@
   display: flex;
   flex-direction: column;
   border: 1px solid rgba(17, 17, 15, 0.1);
-  border-radius: 10px;
+  border-radius: 12px;
   background: #fff;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-  font-size: 0.84rem;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.02),
+    0 4px 12px rgba(0, 0, 0, 0.03);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 0.86rem;
   overflow: hidden;
   transition:
     background 220ms ease,
-    border-color 220ms ease;
+    border-color 220ms ease,
+    box-shadow 220ms ease;
 }
 
 .skinStreaming {
   /* 复用 HomePage.module.css 的 demoStream keyframes 思路,这里用自己的命名空间。
      绿渐变背景在 streaming 阶段提示"上游正在流式返回"。 */
   border-color: rgba(58, 111, 85, 0.32);
-  background: linear-gradient(90deg, #fff 0%, #eef7f1 45%, #fff 90%);
-  background-size: 220% 100%;
-  animation: skinStream 1.1s ease-in-out infinite;
+  background: linear-gradient(90deg, #fff 0%, #f0f9f4 45%, #fff 90%);
+  background-size: 200% 100%;
+  animation: skinStream 1.5s ease-in-out infinite;
+  box-shadow:
+    0 0 0 1px rgba(58, 111, 85, 0.1),
+    0 8px 20px rgba(58, 111, 85, 0.08);
 }
 
 .skinAccepted {
-  border-color: rgba(58, 111, 85, 0.45);
-  background: #f6fbf8;
+  border-color: rgba(58, 111, 85, 0.4);
+  background: #f8fcf9;
+  transition:
+    border-color 0.4s ease,
+    background-color 0.4s ease;
 }
 
 @keyframes skinStream {
   0% {
-    background-position: 100% 0;
+    background-position: 200% 0;
   }
   100% {
     background-position: 0 0;
@@ -43,33 +53,37 @@
 
 .headerSlack {
   display: flex;
-  gap: 6px;
-  align-items: baseline;
-  border-bottom: 1px solid rgba(17, 17, 15, 0.06);
-  padding: 9px 12px;
+  gap: 8px;
+  align-items: center;
+  border-bottom: 1px solid rgba(17, 17, 15, 0.05);
+  padding: 10px 14px;
+  background: #fff;
   color: #1d1c1d;
-  font-weight: 700;
-  font-size: 0.82rem;
+  font-weight: 800;
+  font-size: 0.84rem;
+  letter-spacing: -0.2px;
 }
 
 .headerSlackHash {
-  color: #696b6c;
-  font-weight: 500;
+  color: #616061;
+  font-weight: 400;
+  font-size: 1rem;
 }
 
 .headerReddit {
-  border-bottom: 1px solid rgba(17, 17, 15, 0.06);
-  padding: 8px 12px;
-  background: #fbfbfa;
-  color: #5c5b5b;
-  font-size: 0.74rem;
+  border-bottom: 1px solid rgba(17, 17, 15, 0.05);
+  padding: 8px 14px;
+  background: #f6f7f8;
+  color: #7c7c7c;
+  font-size: 0.76rem;
+  font-weight: 500;
 }
 
 .headerGitHub {
   display: flex;
-  gap: 2px;
-  border-bottom: 1px solid rgba(17, 17, 15, 0.1);
-  padding: 6px 10px 0;
+  gap: 4px;
+  border-bottom: 1px solid rgba(17, 17, 15, 0.08);
+  padding: 8px 12px 0;
   background: #f6f8fa;
 }
 
@@ -77,126 +91,176 @@
   border: 1px solid transparent;
   border-bottom: 0;
   border-radius: 6px 6px 0 0;
-  padding: 6px 12px;
+  padding: 6px 14px;
   color: #57606a;
-  font-size: 0.78rem;
+  font-size: 0.8rem;
+  font-weight: 400;
 }
 
 .githubTabActive {
   position: relative;
   top: 1px;
-  border-color: rgba(17, 17, 15, 0.1);
+  border-color: rgba(17, 17, 15, 0.08);
   border-bottom: 1px solid #fff;
   background: #fff;
   color: #1f2328;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 /* ─── Body (avatar + input area) ───────────────────────────────── */
 
 .body {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   align-items: flex-start;
-  padding: 12px;
+  padding: 14px;
 }
 
 .avatarX {
-  /* X 发推框左侧圆形头像 —— 蓝紫渐变占位,不真实复刻任何用户头像。 */
+  /* X 发推框左侧圆形头像 —— 增加微妙的内阴影 */
   flex: 0 0 auto;
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: 999px;
   background: linear-gradient(135deg, #1d9bf0 0%, #794bc4 100%);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
 }
 
 .inputArea {
   flex: 1;
   min-width: 0;
-  min-height: 28px;
-  color: #171713;
+  min-height: 32px;
+  color: #0f1419;
   line-height: 1.5;
   white-space: pre-wrap;
   word-break: break-word;
+  padding-top: 2px;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.inputAreaAccepted {
+  /* 移除扫光特效，改为高级感十足的“消融显现”效果 */
+  animation: acceptedResolve 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes acceptedResolve {
+  0% {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translateY(2px);
+    color: #3a6f55;
+  }
+  30% {
+    opacity: 0.5;
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+    color: #0f1419;
+  }
 }
 
 .placeholder {
-  color: #a8a7a0;
+  color: #536471;
 }
 
 /* ─── Separator + toolbar ──────────────────────────────────────── */
 
 .separator {
-  margin: 0 12px;
-  border-top: 1px solid rgba(17, 17, 15, 0.06);
+  margin: 0 14px;
+  border-top: 1px solid rgba(17, 17, 15, 0.05);
 }
 
 .toolbar {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px 10px;
+  padding: 10px 14px 12px;
 }
 
 .toolbarIcons {
   display: flex;
-  gap: 2px;
+  gap: 4px;
   align-items: center;
-  color: #535452;
+  /* 默认中性灰色 —— Slack / Reddit / GitHub 沿用此色。
+     X 的 toolbar icons 改用 Twitter blue 由 .skinX 覆盖(见下方 modifier)。
+     不用 :has(.avatarX) 是因为该选择器 baseline 是 2023 Q4,老版
+     Firefox(<121) / Chrome(<105) / Safari(<15.4)会掉到默认色;modifier class
+     方案 0 兼容风险。 */
+  color: #616061;
+}
+
+.skinX .toolbarIcons {
+  color: #1d9bf0; /* X 现代 UI: action icons 沿用 Twitter blue 作为 secondary color */
 }
 
 .toolbarIcon {
   display: inline-flex;
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
+  border-radius: 999px;
   color: inherit;
+  transition: background 150ms ease;
 }
 
 .primaryButton {
   flex: 0 0 auto;
   border: 0;
   border-radius: 999px;
-  padding: 6px 16px;
+  padding: 7px 18px;
   color: #fff;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-  font-size: 0.78rem;
-  font-weight: 600;
+  font-family: inherit;
+  font-size: 0.84rem;
+  font-weight: 700;
   cursor: default;
-  transition: opacity 180ms ease;
+  transition:
+    transform 150ms ease,
+    opacity 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.primaryButton:not([aria-disabled="true"]):active {
+  transform: scale(0.96);
 }
 
 .primaryButton[aria-disabled="true"] {
-  /* aria-disabled 选择器 specificity (0,2,0) 高于 .btnX/.btnSlack/... (0,1,0),
-     无需 !important 即可覆盖 platform-specific 背景。 */
-  background: #c8c7c0;
-  opacity: 0.6;
+  background: #eff3f4;
+  color: rgba(15, 20, 25, 0.5);
+  opacity: 1;
 }
 
 .btnX {
+  /* X 改名后 Post 按钮在 x.com 上是纯深黑,Twitter blue 仅留作 secondary
+     action color(见 .skinX .toolbarIcons)。 */
   background: #0f1419;
 }
 
 .btnSlack {
   display: inline-flex;
-  gap: 4px;
+  gap: 6px;
   align-items: center;
   border-radius: 4px;
-  padding: 5px 12px;
+  padding: 6px 14px;
   background: #007a5a;
 }
 
 .btnReddit {
+  /* Reddit Orangered —— Comment submit 按钮的现代 UI 主色,#0079d3 是 hyperlink
+     旧链接蓝,不是 primary action 色。 */
   background: #ff4500;
 }
 
 .btnGitHub {
   border-radius: 6px;
-  padding: 5px 12px;
+  padding: 6px 14px;
   background: #2da44e;
+  box-shadow: 0 1px 0 rgba(27, 31, 36, 0.1);
 }
 
 /* ─── 响应式 ───────────────────────────────────────────────────── */

@@ -57,6 +57,7 @@ export function HomeRewriteDemo({ copy }: { copy: HomeRewriteDemoCopy }) {
   const [exampleIndex, setExampleIndex] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [phase, setPhase] = useState<DemoPhase>('typing');
+  const [acceptedVersion, setAcceptedVersion] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [streamProgress, setStreamProgress] = useState(0);
   const [inputProgress, setInputProgress] = useState(0);
@@ -108,6 +109,7 @@ export function HomeRewriteDemo({ copy }: { copy: HomeRewriteDemoCopy }) {
       }
       if (phase === 'streaming') {
         setPhase('accepted');
+        setAcceptedVersion((v) => v + 1);
         return;
       }
       // 切下一个 example：selectedIndex 取 nextExampleIndex % candidateCount，
@@ -173,6 +175,7 @@ export function HomeRewriteDemo({ copy }: { copy: HomeRewriteDemoCopy }) {
   function accept(index: number) {
     setSelectedIndex(index);
     setPhase('accepted');
+    setAcceptedVersion((v) => v + 1);
   }
 
   function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
@@ -277,6 +280,7 @@ export function HomeRewriteDemo({ copy }: { copy: HomeRewriteDemoCopy }) {
             text={displayedText}
             fullInput={fullInput}
             phase={phase}
+            acceptedVersion={acceptedVersion}
             caretClassName={styles.demoCaret}
           />
         )}

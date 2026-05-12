@@ -147,75 +147,87 @@
 
 .demoShell {
   border: 1px solid rgba(17, 17, 15, 0.12);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 22px 55px rgba(20, 20, 18, 0.14);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.05),
+    0 2px 4px rgba(0, 0, 0, 0.05),
+    0 4px 8px rgba(0, 0, 0, 0.05),
+    0 8px 16px rgba(0, 0, 0, 0.05),
+    0 16px 32px rgba(0, 0, 0, 0.05);
   color: #191916;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.78rem;
   overflow: hidden;
 }
 
 .demoChrome {
-  /* 两行 chrome: 行 1 = traffic lights + tab; 行 2 = 导航 + 地址栏。
-     padding 在子行各自给,不在容器级,避免与子行 padding 叠加。 */
+  /* 采用现代浏览器常用的浅灰色，营造简洁、专业的首屏印象 */
   display: flex;
   flex-direction: column;
-  border-bottom: 1px solid rgba(17, 17, 15, 0.08);
-  background: #ecebe5;
-  color: #77766f;
-  font-size: 0.7rem;
+  background: #f1f3f4;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  color: #5f6368;
+  font-size: 0.72rem;
 }
 
 .demoChromeTopRow {
   display: flex;
-  gap: 8px;
-  align-items: center;
-  padding: 9px 14px 0;
+  gap: 12px;
+  align-items: flex-end; /* 让交通灯与标签页底部对齐 */
+  padding: 0 12px;
+  height: 38px;
 }
 
 .demoChromeAddressRow {
   display: flex;
-  gap: 8px;
+  gap: 12px;
   align-items: center;
-  padding: 6px 14px 9px;
+  padding: 6px 14px 8px;
+  background: #ffffff; /* 地址栏行采用纯白，与活动标签页融为一体 */
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .demoDot {
-  width: 9px;
-  height: 9px;
-  border-radius: 999px;
-  background: #df6b59;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-bottom: 10px; /* 视觉微调，使其在标签栏居中 */
+  background: #ff5f56;
+  opacity: 0.8;
+  transition: opacity 0.2s;
 }
 
 .demoDot:nth-child(2) {
-  background: #d9ae47;
+  background: #ffbd2e;
 }
 
 .demoDot:nth-child(3) {
-  margin-right: 6px;
-  background: #5e9b72;
+  margin-right: 4px;
+  background: #27c93f;
 }
 
-/* Chrome tab(单个,跟 traffic lights 同一行)。圆角顶部模拟 Chrome 风格;
-   demo 不交互,无 hover 态。 */
+.demoShell:hover .demoDot {
+  opacity: 1;
+}
+
+/* 现代 Chrome 风格标签页 */
 .demoTab {
   display: inline-flex;
-  gap: 6px;
+  gap: 8px;
   align-items: center;
   max-width: 240px;
-  border: 1px solid rgba(17, 17, 15, 0.1);
-  border-bottom: 0;
-  border-radius: 7px 7px 0 0;
-  background: #fff;
-  padding: 5px 9px 6px;
-  color: #22221e;
-  font-size: 0.7rem;
+  height: 32px;
+  background: #ffffff;
+  border-radius: 8px 8px 0 0;
+  padding: 0 16px;
+  color: #3c4043;
+  font-size: 0.72rem;
   font-weight: 500;
-  /* tab 视觉延伸到容器底边:负 margin 让 tab 底部贴到 chrome 边框线,
-     接续视觉与 demoInputWrap 的白底连成"打开中的标签页"印象。 */
-  margin-bottom: -1px;
-  padding-bottom: 7px;
+  margin-bottom: -1px; /* 覆盖到底部边框上 */
+  box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.03);
+  position: relative;
+  z-index: 1;
 }
 
 .demoTabFavicon {
@@ -228,60 +240,73 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  letter-spacing: 0.1px;
 }
 
 .demoTabName {
-  /* platform 名(X / Slack / Reddit / GitHub),主信息,继承 demoTab 的 22221e 字色。 */
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .demoTabSuffix {
-  /* '— Post' 类的辅助信息,色淡一档;< 880px 由媒体查询隐藏。 */
-  color: #6a6962;
+  color: #70757a;
   font-weight: 400;
 }
 
 .demoTabClose {
   flex: 0 0 auto;
-  color: #93928a;
-  font-size: 0.86rem;
+  color: #bdc1c6;
+  font-size: 0.9rem;
   line-height: 1;
+  margin-left: 4px;
 }
 
-/* 导航箭头组(← → ⟳)—— 占位装饰,移动端隐藏 */
+/* 导航图标组：更轻盈的颜色和间距 */
 .demoChromeNav {
   display: inline-flex;
-  gap: 6px;
+  gap: 16px;
   align-items: center;
-  color: #93928a;
-  font-size: 0.92rem;
+  color: #9aa0a6;
+  font-size: 1.1rem;
   line-height: 1;
+  padding-right: 4px;
 }
 
 .demoChromeNav span {
   display: inline-flex;
-  width: 16px;
+  width: 18px;
   justify-content: center;
+  cursor: default;
+  transition: color 0.2s;
 }
 
-/* 地址栏 —— 圆角胶囊条 */
+.demoChromeNav span:hover {
+  color: #3c4043;
+}
+
+/* 地址栏：圆润的药丸形状，带极细微的背景 */
 .demoAddressBar {
   display: flex;
   flex: 1;
   min-width: 0;
-  gap: 6px;
+  gap: 10px;
   align-items: center;
-  border-radius: 999px;
-  background: #fff;
-  padding: 4px 10px;
-  color: #4d4d48;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.68rem;
+  height: 28px;
+  border-radius: 14px;
+  background: #f1f3f4;
+  padding: 0 16px;
+  color: #202124;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 0.72rem;
+  transition: background 0.2s;
+}
+
+.demoAddressBar:hover {
+  background: #e8eaed;
 }
 
 .demoAddressBarLock {
   flex: 0 0 auto;
-  color: #6a6962;
+  color: #1a73e8; /* 蓝色锁图标，更显安全且现代 */
 }
 
 .demoAddressBarUrl {
@@ -290,17 +315,19 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  letter-spacing: 0.2px;
+  color: #5f6368;
 }
 
 .demoAddressBarMenu {
   flex: 0 0 auto;
-  color: #93928a;
-  font-size: 0.92rem;
+  color: #9aa0a6;
+  font-size: 1rem;
   line-height: 1;
 }
 
 .demoInputWrap {
-  padding: 18px 18px 0;
+  padding: 24px 24px 0;
 }
 
 .demoScenarioRow {
@@ -345,15 +372,24 @@
    动画 / accepted 背景。这里仅保留 demoCaret(由 PlatformSkin 通过 caretClassName 引用)。 */
 
 .demoCaret {
-  /* 输入光标:typing 阶段紧跟已输入文本闪烁,渲染为 0.7s 周期硬切换(step-end)。
-     reduce-motion 路径下 phase 直接跳 accepted,光标不渲染,无需特殊处理。 */
-  margin-left: 1px;
-  color: rgba(23, 23, 19, 0.78);
-  font-weight: 500;
-  animation: demoCaretBlink 0.7s step-end infinite;
+  /* 从字符改为实心色块，允许精准控制高度和宽度 */
+  display: inline-block;
+  vertical-align: middle;
+  width: 2px;
+  height: 1.45em; /* 显著增加高度，使其略高于文本，更具引导感 */
+  background-color: #3a6f55; /* 使用品牌绿，增加辨识度 */
+  margin-left: 2px;
+  border-radius: 1px;
+  position: relative;
+  top: -0.22em; /* 进一步向上偏移，使其顶端与大写字母对齐，视觉感更自然 */
+  animation: demoCaretBlink 1s step-end infinite;
 }
 
 @keyframes demoCaretBlink {
+  0%,
+  100% {
+    opacity: 1;
+  }
   50% {
     opacity: 0;
   }
@@ -371,13 +407,14 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(17, 17, 15, 0.18);
-  border-bottom-width: 2px;
+  border: 1px solid rgba(17, 17, 15, 0.15);
+  border-bottom: 2px solid rgba(17, 17, 15, 0.25);
   border-radius: 6px;
-  background: #fff;
+  background: linear-gradient(to bottom, #ffffff 0%, #f9f9f8 100%);
   color: #22221e;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   white-space: nowrap;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
 }
 
 .demoKey {
@@ -386,11 +423,13 @@
   min-width: 54px;
   height: 28px;
   font-size: 0.68rem;
+  font-weight: 600;
   transition:
     background 180ms ease,
     border-color 180ms ease,
     color 180ms ease,
-    transform 180ms ease;
+    transform 120ms ease,
+    box-shadow 120ms ease;
 }
 
 .demoKeyTapFirst {
