@@ -145,6 +145,28 @@ describe('validateEventProps', () => {
     for (let i = 0; i < 8; i++) props[`k${i}`] = 'x'.repeat(50);
     expect(validateEventProps(props)).toEqual({ ok: false, error: 'props_json_too_large' });
   });
+
+  // FORBIDDEN_VALUE_CHARS doesn't reject non-ASCII, so byte-vs-char matters.
+  // We can only exercise this once the per-prop string cap is widened in a
+  // future revision; with MAX_PROP_STRING_LENGTH=50 chars and CJK at 3 bytes
+  // each, a single string can be at most ~150 bytes — under the 200-byte
+  // envelope budget. Test instead via the JSON envelope crossing it with
+  // multiple CJK string values.
+  it('measures props envelope in UTF-8 bytes, not chars', () => {
+    // 4 × 50-char CJK strings = 4 × 150 bytes = 600 bytes well past the
+    // 200-byte cap. But total JSON char length might be close to / over 200
+    // also — so this test is mostly about consistency: byte budget must hold.
+    // Use 2 keys to stay under MAX_PROPS_KEYS but cross the byte cap.
+    const props = { tag_a: '中'.repeat(50), tag_b: '日'.repeat(50) };
+    const r = validateEventProps(props);
+    expect(r).toEqual({ ok: false, error: 'props_json_too_large' });
+  });
+
+  it('accepts CJK props small enough in bytes', () => {
+    // Single short CJK value: 5 chars = 15 bytes; JSON envelope ~30 bytes.
+    const r = validateEventProps({ label: '中文测试值' });
+    expect(r.ok).toBe(true);
+  });
 });
 
 describe('validateTopLevelField', () => {

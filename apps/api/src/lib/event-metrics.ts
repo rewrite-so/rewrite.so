@@ -190,8 +190,11 @@ export function validateEventProps(
   }
 
   const json = JSON.stringify(props);
-  // 1 char ≈ 1 byte for the restricted alphabet we permit (ASCII + digits).
-  if (json.length > EVENT_LIMITS.MAX_PROPS_JSON_BYTES) {
+  // MAX_PROPS_JSON_BYTES is a byte cap. JS string `.length` is UTF-16 code
+  // units, which understates byte size for non-ASCII (CJK = 3 bytes, emoji
+  // = 4 bytes). Use TextEncoder so the limit holds for the values
+  // FORBIDDEN_VALUE_CHARS doesn't reject (non-ASCII letters are fine).
+  if (new TextEncoder().encode(json).byteLength > EVENT_LIMITS.MAX_PROPS_JSON_BYTES) {
     return { ok: false, error: 'props_json_too_large' };
   }
 
