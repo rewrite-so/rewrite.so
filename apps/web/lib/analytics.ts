@@ -55,6 +55,25 @@ let queue: QueuedEvent[] = [];
 let flushTimer: ReturnType<typeof setTimeout> | null = null;
 let contextSnapshot: ContextSnapshot = {};
 
+/**
+ * Buffer for track() calls that arrive before init() has resolved /v1/me.
+ * Common race: SettingsClient mounts and emits signin_success synchronously
+ * while AnalyticsBootstrap's async fetch is still in-flight. Without this
+ * buffer, the event would queue with `currentLocale='en'` default regardless
+ * of the actual route locale. init() drains this list once the real locale
+ * and context snapshot are known.
+ *
+ * Capped to keep an init-that-never-arrives from leaking memory; far above
+ * any realistic pre-init burst.
+ */
+const PENDING_TRACK_CAP = 50;
+interface PendingTrack {
+  name: EventName;
+  props?: Record<string, string | number>;
+  ts: number;
+}
+let pendingTracks: PendingTrack[] = [];
+
 /** UA-driven, deliberately coarse — we never want a fingerprintable string. */
 function detectDeviceType(): 'mobile' | 'desktop' | 'tablet' | undefined {
   if (typeof navigator === 'undefined') return undefined;
@@ -154,6 +173,17 @@ export function init({ locale, eventsEnabled }: InitOptions): void {
   initialized = true;
   contextSnapshot = captureContext();
 
+  // Drain pre-init buffer with the now-resolved locale + context snapshot.
+  // Preserve each event's original timestamp so timing analyses see when the
+  // user actually triggered the action, not when init resolved.
+  if (pendingTracks.length > 0) {
+    const drain = pendingTracks;
+    pendingTracks = [];
+    if (enabled) {
+      for (const p of drain) enqueueEvent(p.name, p.props, p.ts);
+    }
+  }
+
   // Flush queued events on tab close / nav-away. pagehide is the modern
   // replacement for beforeunload and fires consistently even on iOS.
   const handlePageHide = () => {
@@ -199,11 +229,33 @@ export function getVisitorId(): string | undefined {
  * is missing, we backfill it from the current visitor id — this is the single
  * cross-session anchor that ties the pre-signin visitor cohort to the user's
  * future logged-in activity (see plan + CLAUDE.md "用户行为分析").
+ *
+ * Pre-init callers (e.g. SettingsClient emitting signin_success the moment it
+ * mounts, while AnalyticsBootstrap's /v1/me fetch is still in-flight) are
+ * buffered into `pendingTracks` and drained inside init() with the resolved
+ * locale + context snapshot. Without that buffer the locale field defaults
+ * to 'en' regardless of the actual route locale.
  */
 export function track(name: EventName, props?: Record<string, string | number>): void {
   if (!enabled) return;
   if (typeof window === 'undefined') return;
 
+  if (!initialized) {
+    if (pendingTracks.length < PENDING_TRACK_CAP) {
+      pendingTracks.push({ name, props, ts: Date.now() });
+    }
+    return;
+  }
+
+  enqueueEvent(name, props, Date.now());
+}
+
+/** Build + queue a single event with the *current* context snapshot. */
+function enqueueEvent(
+  name: EventName,
+  props: Record<string, string | number> | undefined,
+  ts: number,
+): void {
   const visitorId = ensureVisitorId();
   let mergedProps = props;
   if (name === 'signin_success' && visitorId && (!props || !('linked_visitor_id' in props))) {
@@ -213,7 +265,7 @@ export function track(name: EventName, props?: Record<string, string | number>):
   const path = stripLocalePrefix(location.pathname || '/');
   const event: QueuedEvent = {
     name,
-    ts: Date.now(),
+    ts,
     page: path,
     locale: currentLocale,
     ...(contextSnapshot.referrerHost ? { referrer_host: contextSnapshot.referrerHost } : {}),
@@ -293,4 +345,5 @@ export function __resetForTests(): void {
     flushTimer = null;
   }
   contextSnapshot = {};
+  pendingTracks = [];
 }

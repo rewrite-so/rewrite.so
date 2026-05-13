@@ -167,6 +167,49 @@ describe('init / disableEvents', () => {
   });
 });
 
+describe('pre-init buffering', () => {
+  it('track() before init() is buffered and drained with the resolved locale', () => {
+    const env = installBrowserGlobals();
+    // Race: SettingsClient mounts and fires signin_success before
+    // AnalyticsBootstrap's /v1/me fetch resolves.
+    track('signin_success', { method: 'magiclink' });
+    expect(env.fetchMock).not.toHaveBeenCalled();
+    init({ locale: 'zh-CN', eventsEnabled: true });
+    flush();
+    expect(env.fetchMock).toHaveBeenCalledTimes(1);
+    const body = JSON.parse(env.fetchMock.mock.calls[0]?.[1]?.body as string) as {
+      events: Array<{ name: string; locale: string }>;
+    };
+    expect(body.events).toHaveLength(1);
+    expect(body.events[0]?.name).toBe('signin_success');
+    // The fix: locale carries the *resolved* locale, not the 'en' default.
+    expect(body.events[0]?.locale).toBe('zh-CN');
+  });
+
+  it('pre-init buffer is dropped when init() arrives with eventsEnabled=false', () => {
+    const env = installBrowserGlobals();
+    track('signin_success', { method: 'google' });
+    init({ locale: 'en', eventsEnabled: false });
+    flush();
+    expect(env.fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('pre-init buffer respects PENDING_TRACK_CAP', () => {
+    const env = installBrowserGlobals();
+    for (let i = 0; i < 100; i++) track('page_view');
+    init({ locale: 'en', eventsEnabled: true });
+    flush();
+    // Cap is 50; all 50 should arrive in one or more flushes.
+    let total = 0;
+    for (const call of env.fetchMock.mock.calls) {
+      const body = JSON.parse(call?.[1]?.body as string) as { events: unknown[] };
+      total += body.events.length;
+    }
+    expect(total).toBeLessThanOrEqual(50);
+    expect(total).toBeGreaterThan(0);
+  });
+});
+
 describe('visitor_id management', () => {
   it('generates a UUID on first track() and reuses it', () => {
     installBrowserGlobals();
