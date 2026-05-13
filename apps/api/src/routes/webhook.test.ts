@@ -45,7 +45,20 @@ interface DBWrite {
   sql: string;
 }
 
-function makeDB(opts: { existingSubId?: string; existingEventId?: string } = {}): {
+function makeDB(
+  opts: {
+    existingSubId?: string;
+    existingEventId?: string;
+    /**
+     * Stored current_period_end for the existing subscription row, used by
+     * the period-advancement dedupe in upsertSubscriptionFromObject. Default
+     * picks a value *less than* the fixture's period_end so an UPDATE counts
+     * as a renewal; set this to the fixture's exact period_end to simulate
+     * an active+paid race where the second event sees no advancement.
+     */
+    existingPeriodEnd?: number;
+  } = {},
+): {
   db: D1Database;
   writes: DBWrite[];
   insertedEventIds: string[];
@@ -63,7 +76,11 @@ function makeDB(opts: { existingSubId?: string; existingEventId?: string } = {})
           }
           if (sql.includes('FROM subscriptions')) {
             return opts.existingSubId && args[0] === opts.existingSubId
-              ? { id: 'existing-row' }
+              ? {
+                  id: 'existing-row',
+                  current_period_end:
+                    opts.existingPeriodEnd ?? Date.parse('2025-01-01T00:00:00Z'),
+                }
               : null;
           }
           return null;
@@ -373,6 +390,35 @@ describe('routeEvent — web event emission', () => {
   it('EVENTS_DISABLED=1 short-circuits emission even on subscription.paid', async () => {
     const { db } = makeDB();
     const { env, eventsWritten } = makeEnvWithEvents(db, { eventsDisabled: true });
+    const res = await postWebhook(envelope('subscription.paid', subFixture()), env);
+    expect(res.status).toBe(200);
+    expect(eventsWritten).toHaveLength(0);
+  });
+
+  it('renewal (UPDATE with advanced period_end) emits subscription_paid once', async () => {
+    // Existing row has period_end set well before the fixture's period_end →
+    // the upsert sees a period advance and should emit subscription_paid.
+    const { db } = makeDB({
+      existingSubId: 'sub_2jpgISCbTZv3UTlnMQkGl3',
+      existingPeriodEnd: Date.parse('2026-04-10T07:53:00.420Z'),
+    });
+    const { env, eventsWritten } = makeEnvWithEvents(db);
+    const res = await postWebhook(envelope('subscription.paid', subFixture()), env);
+    expect(res.status).toBe(200);
+    expect(eventsWritten).toHaveLength(1);
+    expect(eventsWritten[0]?.indexes).toEqual(['subscription_paid']);
+  });
+
+  it('same-period upsert (active+paid race or verify+webhook dup) emits only once', async () => {
+    // Existing row already at the fixture's period_end → no advancement; the
+    // second event in the active/paid race or webhook-after-verify dup must
+    // silently skip the web event so funnel ratios stay 1:1 per period.
+    const fixtureEndMs = Date.parse('2026-06-10T07:53:00.420Z');
+    const { db } = makeDB({
+      existingSubId: 'sub_2jpgISCbTZv3UTlnMQkGl3',
+      existingPeriodEnd: fixtureEndMs,
+    });
+    const { env, eventsWritten } = makeEnvWithEvents(db);
     const res = await postWebhook(envelope('subscription.paid', subFixture()), env);
     expect(res.status).toBe(200);
     expect(eventsWritten).toHaveLength(0);

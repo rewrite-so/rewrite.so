@@ -337,14 +337,20 @@ export async function upsertSubscriptionFromObject(
 
   const now = Date.now();
 
-  // 先查是否已有 row（按 creem_subscription_id），决定 INSERT 或 UPDATE
+  // 先查是否已有 row（按 creem_subscription_id），决定 INSERT 或 UPDATE。
+  // current_period_end 是关键的去重维度：subscription_paid web event 只
+  // 在"period 推进"时 emit，避免首购 active+paid 双事件 + verify-checkout
+  // 旁路 = 同一 sub 同一 period 触发 3 次。续费时 period_end 推进，emit；
+  // active 与 paid 的 race 中先到的 INSERT/UPDATE 把 period_end 写到新值，
+  // 后到的发现没推进，silently skip。详见 CLAUDE.md "Creem 同时发 active+paid"。
   const existing = await env.DB.prepare(
-    'SELECT id FROM subscriptions WHERE creem_subscription_id = ?',
+    'SELECT id, current_period_end FROM subscriptions WHERE creem_subscription_id = ?',
   )
     .bind(subId)
-    .first<SubscriptionRow>();
+    .first<{ id: string; current_period_end: number }>();
 
   if (existing) {
+    const isNewPeriod = periodEnd > existing.current_period_end;
     await env.DB.prepare(
       `UPDATE subscriptions
          SET status = ?, plan = ?, product_id = ?,
@@ -365,8 +371,13 @@ export async function upsertSubscriptionFromObject(
         subId,
       )
       .run();
-    if (opts?.webEvent) {
-      await emitSubscriptionWebEvent(env, opts.webEvent, userId, plan);
+    if (opts?.webEvent === 'paid') {
+      if (isNewPeriod) {
+        await emitSubscriptionWebEvent(env, 'paid', userId, plan);
+      }
+    } else if (opts?.webEvent === 'canceled') {
+      // Cancel is a one-shot user action; no period-based dedupe applies.
+      await emitSubscriptionWebEvent(env, 'canceled', userId, plan);
     }
     return true;
   }
