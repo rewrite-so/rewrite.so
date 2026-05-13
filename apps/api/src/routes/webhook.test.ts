@@ -45,7 +45,20 @@ interface DBWrite {
   sql: string;
 }
 
-function makeDB(opts: { existingSubId?: string; existingEventId?: string } = {}): {
+function makeDB(
+  opts: {
+    existingSubId?: string;
+    existingEventId?: string;
+    /**
+     * Stored current_period_end for the existing subscription row, used by
+     * the period-advancement dedupe in upsertSubscriptionFromObject. Default
+     * picks a value *less than* the fixture's period_end so an UPDATE counts
+     * as a renewal; set this to the fixture's exact period_end to simulate
+     * an active+paid race where the second event sees no advancement.
+     */
+    existingPeriodEnd?: number;
+  } = {},
+): {
   db: D1Database;
   writes: DBWrite[];
   insertedEventIds: string[];
@@ -63,7 +76,10 @@ function makeDB(opts: { existingSubId?: string; existingEventId?: string } = {})
           }
           if (sql.includes('FROM subscriptions')) {
             return opts.existingSubId && args[0] === opts.existingSubId
-              ? { id: 'existing-row' }
+              ? {
+                  id: 'existing-row',
+                  current_period_end: opts.existingPeriodEnd ?? Date.parse('2025-01-01T00:00:00Z'),
+                }
               : null;
           }
           return null;
@@ -85,6 +101,8 @@ function makeDB(opts: { existingSubId?: string; existingEventId?: string } = {})
   return { db, writes, insertedEventIds };
 }
 
+type RecordedEvent = { indexes: string[]; blobs: string[]; doubles: number[] };
+
 function makeEnv(db: D1Database) {
   return {
     OPENAI_BASE_URL: 'https://upstream.test/v1',
@@ -103,6 +121,33 @@ function makeEnv(db: D1Database) {
     KV: fakeKV,
     RATE_LIMITER: fakeRateLimiter,
   } as const;
+}
+
+/**
+ * Wraps makeEnv with a recording EVENTS binding so tests can assert on
+ * subscription_paid / subscription_canceled writeEventPoint calls.
+ */
+function makeEnvWithEvents(
+  db: D1Database,
+  opts: { eventsDisabled?: boolean } = {},
+): {
+  env: ReturnType<typeof makeEnv> & { EVENTS: AnalyticsEngineDataset };
+  eventsWritten: RecordedEvent[];
+} {
+  const eventsWritten: RecordedEvent[] = [];
+  const EVENTS = {
+    writeDataPoint: (p: RecordedEvent) => {
+      eventsWritten.push(p);
+    },
+  } as unknown as AnalyticsEngineDataset;
+  return {
+    env: {
+      ...makeEnv(db),
+      EVENTS,
+      ...(opts.eventsDisabled ? { EVENTS_DISABLED: '1' } : {}),
+    } as ReturnType<typeof makeEnv> & { EVENTS: AnalyticsEngineDataset },
+    eventsWritten,
+  };
 }
 
 /** 基于实测 SubscriptionEntity 的最小必要字段 fixture */
@@ -288,6 +333,147 @@ describe('routeEvent — subscription event mapping', () => {
     expect(res.status).toBe(200);
     expect(writes).toHaveLength(0);
     expect(insertedEventIds).toEqual(['evt_test']); // 幂等键写了
+  });
+});
+
+describe('routeEvent — web event emission', () => {
+  it('subscription.paid emits one subscription_paid web event with plan + user subject', async () => {
+    const { db } = makeDB();
+    const { env, eventsWritten } = makeEnvWithEvents(db);
+    const res = await postWebhook(envelope('subscription.paid', subFixture()), env);
+    expect(res.status).toBe(200);
+    expect(eventsWritten).toHaveLength(1);
+    const evt = eventsWritten[0];
+    if (!evt) throw new Error('expected one event');
+    expect(evt.indexes).toEqual(['subscription_paid']);
+    // blob10 = tier, blob11 = subject_kind, blob12 = subject_id_hash, blob13 = event_props
+    expect(evt.blobs[9]).toBe('pro');
+    expect(evt.blobs[10]).toBe('user');
+    expect(evt.blobs[11]).toMatch(/^[0-9a-f]{16}$/);
+    expect(evt.blobs[12]).toContain('"plan":"monthly"');
+  });
+
+  it('subscription.canceled emits one subscription_canceled web event', async () => {
+    const { db } = makeDB({ existingSubId: 'sub_2jpgISCbTZv3UTlnMQkGl3' });
+    const { env, eventsWritten } = makeEnvWithEvents(db);
+    const res = await postWebhook(envelope('subscription.canceled', subFixture()), env);
+    expect(res.status).toBe(200);
+    expect(eventsWritten).toHaveLength(1);
+    expect(eventsWritten[0]?.indexes).toEqual(['subscription_canceled']);
+  });
+
+  it('subscription.expired emits subscription_canceled (eventType drives event, not object.status)', async () => {
+    const { db } = makeDB({ existingSubId: 'sub_2jpgISCbTZv3UTlnMQkGl3' });
+    const { env, eventsWritten } = makeEnvWithEvents(db);
+    const res = await postWebhook(envelope('subscription.expired', subFixture()), env);
+    expect(res.status).toBe(200);
+    expect(eventsWritten[0]?.indexes).toEqual(['subscription_canceled']);
+  });
+
+  it('subscription.past_due / paused / scheduled_cancel / update do NOT emit web events', async () => {
+    const cases = [
+      { type: 'subscription.past_due', existingSubId: 'sub_2jpgISCbTZv3UTlnMQkGl3' },
+      { type: 'subscription.paused', existingSubId: 'sub_2jpgISCbTZv3UTlnMQkGl3' },
+      { type: 'subscription.scheduled_cancel', existingSubId: 'sub_2jpgISCbTZv3UTlnMQkGl3' },
+      { type: 'subscription.update', existingSubId: 'sub_2jpgISCbTZv3UTlnMQkGl3' },
+    ];
+    for (const c of cases) {
+      const { db } = makeDB({ existingSubId: c.existingSubId });
+      const { env, eventsWritten } = makeEnvWithEvents(db);
+      const res = await postWebhook(envelope(c.type, subFixture(), `evt_${c.type}`), env);
+      expect(res.status).toBe(200);
+      expect(eventsWritten, `${c.type} should not emit events`).toHaveLength(0);
+    }
+  });
+
+  it('EVENTS_DISABLED=1 short-circuits emission even on subscription.paid', async () => {
+    const { db } = makeDB();
+    const { env, eventsWritten } = makeEnvWithEvents(db, { eventsDisabled: true });
+    const res = await postWebhook(envelope('subscription.paid', subFixture()), env);
+    expect(res.status).toBe(200);
+    expect(eventsWritten).toHaveLength(0);
+  });
+
+  it('renewal (UPDATE with advanced period_end) emits subscription_paid once', async () => {
+    // Existing row has period_end set well before the fixture's period_end →
+    // the upsert sees a period advance and should emit subscription_paid.
+    const { db } = makeDB({
+      existingSubId: 'sub_2jpgISCbTZv3UTlnMQkGl3',
+      existingPeriodEnd: Date.parse('2026-04-10T07:53:00.420Z'),
+    });
+    const { env, eventsWritten } = makeEnvWithEvents(db);
+    const res = await postWebhook(envelope('subscription.paid', subFixture()), env);
+    expect(res.status).toBe(200);
+    expect(eventsWritten).toHaveLength(1);
+    expect(eventsWritten[0]?.indexes).toEqual(['subscription_paid']);
+  });
+
+  it('same-period upsert (active+paid race or verify+webhook dup) emits only once', async () => {
+    // Existing row already at the fixture's period_end → no advancement; the
+    // second event in the active/paid race or webhook-after-verify dup must
+    // silently skip the web event so funnel ratios stay 1:1 per period.
+    const fixtureEndMs = Date.parse('2026-06-10T07:53:00.420Z');
+    const { db } = makeDB({
+      existingSubId: 'sub_2jpgISCbTZv3UTlnMQkGl3',
+      existingPeriodEnd: fixtureEndMs,
+    });
+    const { env, eventsWritten } = makeEnvWithEvents(db);
+    const res = await postWebhook(envelope('subscription.paid', subFixture()), env);
+    expect(res.status).toBe(200);
+    expect(eventsWritten).toHaveLength(0);
+  });
+
+  it('writeDataPoint that throws must NOT take down the webhook (fire-and-forget)', async () => {
+    // Telemetry failure on a webhook would 500 the route, skip writing the
+    // idempotency key, and trigger a Creem retry storm. writeEventPoint is
+    // already self-protecting, but this asserts the contract.
+    const { db } = makeDB();
+    const throwingEvents = {
+      writeDataPoint: () => {
+        throw new Error('AE outage');
+      },
+    } as unknown as AnalyticsEngineDataset;
+    const env = { ...makeEnv(db), EVENTS: throwingEvents } as ReturnType<typeof makeEnv> & {
+      EVENTS: AnalyticsEngineDataset;
+    };
+    const res = await postWebhook(envelope('subscription.paid', subFixture()), env);
+    expect(res.status).toBe(200);
+  });
+
+  it('hashSubjectId failure must NOT take down the webhook either', async () => {
+    // The other half of the emit path: hashSubjectId is async crypto.subtle
+    // and could in principle reject. With the try/catch around the emit body
+    // a rejection drops the event silently and the webhook still 200s.
+    vi.doMock('../lib/event-metrics.ts', async () => {
+      const actual =
+        await vi.importActual<typeof import('../lib/event-metrics.ts')>('../lib/event-metrics.ts');
+      return {
+        ...actual,
+        hashSubjectId: async () => {
+          throw new Error('crypto.subtle.digest down');
+        },
+      };
+    });
+    // Force a fresh app instance that picks up the mock.
+    vi.resetModules();
+    const freshApp = (await import('../index.ts')).app;
+    const { db } = makeDB();
+    const { env, eventsWritten } = makeEnvWithEvents(db);
+    const body = JSON.stringify(envelope('subscription.paid', subFixture()));
+    const sig = await sign(body);
+    const res = await freshApp.request(
+      '/webhooks/creem',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'creem-signature': sig },
+        body,
+      },
+      env,
+    );
+    expect(res.status).toBe(200);
+    expect(eventsWritten).toHaveLength(0); // emit was caught
+    vi.doUnmock('../lib/event-metrics.ts');
+    vi.resetModules();
   });
 });
 

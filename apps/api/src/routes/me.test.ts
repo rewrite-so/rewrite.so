@@ -180,6 +180,80 @@ describe('PUT /v1/me/byok (Pro gate removed)', () => {
     );
     expect(res.status).toBe(400);
   });
+
+  describe('byok_save web event emission', () => {
+    type RecordedEvent = { indexes: string[]; blobs: string[]; doubles: number[] };
+
+    function makeEventsBinding(): { binding: AnalyticsEngineDataset; written: RecordedEvent[] } {
+      const written: RecordedEvent[] = [];
+      return {
+        binding: {
+          writeDataPoint: (p: RecordedEvent) => {
+            written.push(p);
+          },
+        } as unknown as AnalyticsEngineDataset,
+        written,
+      };
+    }
+
+    it('emits byok_save with has_been_set_before=0 on first configuration', async () => {
+      mockSession = { user: { id: 'u_first_byok', email: 'free@test.com' } };
+      const { binding, written } = makeEventsBinding();
+      // DB returns null for the existence pre-check
+      const res = await app.request(
+        '/v1/me/byok',
+        {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(validBody),
+        },
+        { ...MOCK_ENV, EVENTS: binding },
+      );
+      expect(res.status).toBe(200);
+      expect(written).toHaveLength(1);
+      expect(written[0]?.indexes).toEqual(['byok_save']);
+      expect(written[0]?.blobs[10]).toBe('user'); // subject_kind
+      expect(written[0]?.blobs[12]).toContain('"has_been_set_before":0');
+    });
+
+    it('EVENTS_DISABLED=1 suppresses emission', async () => {
+      mockSession = { user: { id: 'u_off', email: 'free@test.com' } };
+      const { binding, written } = makeEventsBinding();
+      const res = await app.request(
+        '/v1/me/byok',
+        {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(validBody),
+        },
+        { ...MOCK_ENV, EVENTS: binding, EVENTS_DISABLED: '1' },
+      );
+      expect(res.status).toBe(200);
+      expect(written).toHaveLength(0);
+    });
+
+    it('emit throw must NOT fail the BYOK save (fire-and-forget)', async () => {
+      // The BYOK row is committed *before* telemetry; a thrown error in the
+      // emit path would 500 the response even though the row is safely
+      // persisted, prompting the user to retry a save that already succeeded.
+      mockSession = { user: { id: 'u_throw', email: 'free@test.com' } };
+      const throwing = {
+        writeDataPoint: () => {
+          throw new Error('AE outage');
+        },
+      } as unknown as AnalyticsEngineDataset;
+      const res = await app.request(
+        '/v1/me/byok',
+        {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(validBody),
+        },
+        { ...MOCK_ENV, EVENTS: throwing },
+      );
+      expect(res.status).toBe(200);
+    });
+  });
 });
 
 describe('DELETE /v1/me/byok', () => {

@@ -8,6 +8,7 @@ import { log } from './lib/log.ts';
 import { banCheckMiddleware } from './middleware/ban-check.ts';
 import { announcementsRoute } from './routes/announcements.ts';
 import { billingRoute } from './routes/billing.ts';
+import { eventsRoute } from './routes/events.ts';
 import { meRoute } from './routes/me.ts';
 import { rewriteRoute } from './routes/rewrite.ts';
 import { unsubscribeRoute } from './routes/unsubscribe.ts';
@@ -118,6 +119,11 @@ app.route('/', webhookRoute);
 app.route('/', announcementsRoute);
 // Phase 5: onboarding email unsubscribe
 app.route('/', unsubscribeRoute);
+// Web user-behavior ingest. NOT under banCheckMiddleware — anonymous reports
+// are first-class, and ban scope (block paid quota usage) doesn't have to
+// extend to analytics silencing. See routes/events.ts for the rationale on
+// banned-user emit behavior.
+app.route('/', eventsRoute);
 
 app.notFound((c) => c.json({ error: 'not_found' }, 404));
 

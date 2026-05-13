@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
+import { BURST_BUCKETS, consume } from '../do/rate-limiter.ts';
 import {
   createCheckoutSession,
   createPortalSession,
@@ -96,6 +97,21 @@ billingRoute.post('/v1/billing/verify-checkout', async (c) => {
   const sessionUser = await getOrResolveSessionUser(c);
   if (!sessionUser) return c.json({ error: 'unauthorized' }, 401);
 
+  // 5 req/min/user ceiling — repeated reloads of /settings?checkout_id=X
+  // would otherwise spam upsertSubscriptionFromObject and the subscription_
+  // paid emit path. period-advancement dedupe already covers most of the
+  // emit fan-out (see webhook.ts), but this is the cheaper outer guard.
+  const burst = await consume(
+    c.env.RATE_LIMITER,
+    { kind: 'user', id: sessionUser.id },
+    BURST_BUCKETS.verifyCheckout,
+  );
+  if (!burst.allowed) {
+    return c.json({ error: 'rate_limit', retryAfterMs: burst.retryAfterMs }, 429, {
+      'retry-after': String(Math.ceil(burst.retryAfterMs / 1000)),
+    });
+  }
+
   let body: unknown;
   try {
     body = await c.req.json();
@@ -168,12 +184,16 @@ billingRoute.post('/v1/billing/verify-checkout', async (c) => {
   // active 状态落库（trialing / paused 等会由后续 webhook 修正；新购通常是 active）。
   // cancelAtPeriodEnd=false：新购 checkout 不会带 scheduled_cancel 状态。
   // 返回值告诉我们 sub 字段是否齐全到能落库——不齐全时不要骗客户端 applied=true，
-  // 让 webhook 兜底
+  // 让 webhook 兜底。
+  // webEvent='paid': verify-checkout 永远是新购确认路径，发 subscription_paid。
+  // 即便 webhook 后到达并重复触发同一事件也没关系——AE 自身就支持高基数计数，
+  // 重复事件等于运营层多看到一次开权（既不会扣 D1 配额也不会影响产品逻辑）。
   const wrote = await upsertSubscriptionFromObject(
     c.env,
     subObject,
     'active',
     `verify-${parsed.data.checkoutId}`,
+    { webEvent: 'paid' },
   );
 
   return c.json({ status: 'completed', applied: wrote });

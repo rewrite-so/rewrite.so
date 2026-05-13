@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
 import type { ReactNode } from 'react';
+import { AnalyticsBootstrap } from '../../components/AnalyticsBootstrap.tsx';
 import { Footer } from '../../components/Footer.tsx';
 import { TopNav } from '../../components/TopNav.tsx';
 import { routing } from '../../i18n/routing.ts';
@@ -59,6 +60,7 @@ export default async function LocaleLayout({
         }}
       >
         <NextIntlClientProvider messages={messages}>
+          <AnalyticsBootstrap />
           <TopNav />
           <div style={{ flex: 1 }}>{children}</div>
           <Footer />

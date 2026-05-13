@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
+import { track } from '../../../../lib/analytics.ts';
 
 type Status = 'idle' | 'sending' | 'sent' | 'error';
 
@@ -16,6 +17,7 @@ export function LoginClient() {
     if (!email.trim()) return;
     setStatus('sending');
     setError(null);
+    track('signin_attempt', { method: 'magiclink' });
 
     try {
       // callbackURL 必须是绝对 URL 指向 web origin（dev: localhost:3000, prod: rewrite.so）。
@@ -26,13 +28,19 @@ export function LoginClient() {
         credentials: 'include',
         body: JSON.stringify({
           email: email.trim(),
-          callbackURL: `${window.location.origin}/settings`,
+          // signin=success lets the destination page detect the sign-in
+          // completion vs. a plain reload and emit a one-shot signin_success
+          // event (see SettingsClient).
+          callbackURL: `${window.location.origin}/settings?signin=success`,
         }),
       });
       if (!res.ok) {
         const text = await res.text().catch(() => '');
         throw new Error(text.slice(0, 200) || `HTTP ${res.status}`);
       }
+      // 'sent' = the magic-link email has been dispatched; the user still has
+      // to click it. We emit signin_success on the destination page (settings)
+      // when the SDK resumes after redirect, not here.
       setStatus('sent');
     } catch (err) {
       setStatus('error');

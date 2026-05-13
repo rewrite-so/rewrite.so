@@ -128,6 +128,17 @@ export const BURST_BUCKETS = {
   // claim-install：5 req/min/user。每用户每月只该调一两次（首次登录 + 跨月），
   // 限严是为了防止用户脚本用随机 installId 刷 usage_claims 表灌脏数据。
   claimInstall: { capacity: 5, refillPerSec: 5 / 60 },
+  // events ingest：30 req/min/ip，每请求最多 20 events（理论 600 events/min/ip）。
+  // 独立 DO 实例命名空间（'events:ip:<hash>'），与 rewrite 的 ip bucket 不共享；
+  // 详见 consumeEventsIp。
+  eventsIp: { capacity: 30, refillPerSec: 30 / 60 },
+  // verify-checkout：5 req/min/user。POST /v1/billing/verify-checkout 每次
+  // 成功调用会触发 upsertSubscriptionFromObject + 可能 emit subscription_paid。
+  // 没限流时用户反复刷 /settings?billing=ok&checkout_id=X 能重复触发——
+  // subscriptions 表幂等（creem_subscription_id PK），且 emit 已通过 period-
+  // advancement 去重（同 period 不再 emit），但加 user-level ceiling 防御
+  // 性更稳，且与 byok-test / claim-install 风格一致。
+  verifyCheckout: { capacity: 5, refillPerSec: 5 / 60 },
 } as const;
 
 export interface ConsumeResult {
@@ -147,6 +158,31 @@ export async function consume(
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ cost: 1, capacity: bucket.capacity, refillPerSec: bucket.refillPerSec }),
+  });
+  return (await res.json()) as ConsumeResult;
+}
+
+/**
+ * Events ingest 专用桶（与 rewrite ip 桶完全独立）。
+ *
+ * DO 实例命名空间 'events:ip:<hashed_ip>' 不会和 'ip:<hashed_ip>' 共享状态，
+ * 避免高频 events 占用 rewrite 反爆刷配额（或反之）。capacity / refillPerSec
+ * 取自 BURST_BUCKETS.eventsIp。
+ */
+export async function consumeEventsIp(
+  ns: DurableObjectNamespace,
+  ipHash: string,
+): Promise<ConsumeResult> {
+  const id = ns.idFromName(`events:ip:${ipHash}`);
+  const stub = ns.get(id);
+  const res = await stub.fetch('http://do/consume', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      cost: 1,
+      capacity: BURST_BUCKETS.eventsIp.capacity,
+      refillPerSec: BURST_BUCKETS.eventsIp.refillPerSec,
+    }),
   });
   return (await res.json()) as ConsumeResult;
 }

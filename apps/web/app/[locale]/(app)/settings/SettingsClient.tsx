@@ -5,6 +5,7 @@ import { QUOTA, REWRITE_TARGET_LABELS, REWRITE_TARGETS } from '@rewrite/shared';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { Link, usePathname, useRouter } from '../../../../i18n/navigation.ts';
+import { track } from '../../../../lib/analytics.ts';
 import { getExtensionInstallUrl } from '../../../../lib/extension-install-url.ts';
 import { performSignOut } from '../../../../lib/sign-out.ts';
 
@@ -159,6 +160,15 @@ export function SettingsClient() {
           url.searchParams.delete('checkoutId');
           window.history.replaceState({}, '', url.toString());
         }
+
+        // Magic-link verify redirect: emit signin_success exactly once on the
+        // destination landing. We strip the marker so a manual refresh of the
+        // same URL doesn't double-fire.
+        if (url.searchParams.get('signin') === 'success') {
+          track('signin_success', { method: 'magiclink' });
+          url.searchParams.delete('signin');
+          window.history.replaceState({}, '', url.toString());
+        }
       }
 
       try {
@@ -216,7 +226,13 @@ export function SettingsClient() {
         credentials: 'include',
         body: JSON.stringify({ targetLang: value }),
       });
-      if (res.ok) setSettings(await res.json());
+      if (res.ok) {
+        setSettings(await res.json());
+        track('settings_change', {
+          field: 'targetLang',
+          is_custom: PRESET_TARGETS.includes(value) ? 0 : 1,
+        });
+      }
     } finally {
       setSavingLang(false);
     }
@@ -262,6 +278,7 @@ export function SettingsClient() {
       });
       if (res.ok) {
         setSettings(await res.json());
+        track('settings_change', { field: 'uiLocale' });
         // 同步到 next-intl 的 cookie，并切换 URL 到对应 locale —— 让浏览器 UI 立刻换语言。
         // 'auto' 时清 cookie，让 middleware 退化到 Accept-Language 检测。
         if (value === 'auto') {
@@ -282,6 +299,7 @@ export function SettingsClient() {
 
   async function signOut() {
     setSigningOut(true);
+    track('signout');
     const result = await performSignOut();
     if (result.status === 'ok') {
       // 成功：导航走 location.href，期间按钮保持 disabled，不复位 state

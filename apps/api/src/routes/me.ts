@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { BURST_BUCKETS, consume } from '../do/rate-limiter.ts';
 import { encryptApiKey } from '../lib/crypto.ts';
+import { hashSubjectId, validateEventProps, writeEventPoint } from '../lib/event-metrics.ts';
 import { log } from '../lib/log.ts';
 import {
   claimAnonymousUsage,
@@ -79,10 +80,15 @@ meRoute.get('/v1/me/usage', async (c) => {
 /**
  * GET /v1/me
  * 返回当前登录用户信息 + 当前订阅摘要（未登录返 user:null）。
+ *
+ * `eventsEnabled` 是用户行为分析管线的运维 kill switch 状态 —— 前端 sender
+ * 启动时通过此端点取，false 时整个 SDK 降级为 no-op。匿名 + 登录路径都返
+ * 该字段，因为匿名访问也会启动 sender。详见 routes/events.ts。
  */
 meRoute.get('/v1/me', async (c) => {
+  const eventsEnabled = c.env.EVENTS_DISABLED !== '1';
   const sessionUser = await getOrResolveSessionUser(c);
-  if (!sessionUser) return c.json({ user: null, subscription: null });
+  if (!sessionUser) return c.json({ user: null, subscription: null, eventsEnabled });
 
   const sub = await c.env.DB.prepare(
     `SELECT plan, status, current_period_end, cancel_at_period_end
@@ -117,6 +123,7 @@ meRoute.get('/v1/me', async (c) => {
           cancelAtPeriodEnd: sub.cancel_at_period_end === 1,
         }
       : null,
+    eventsEnabled,
   });
 });
 
@@ -350,6 +357,13 @@ meRoute.put('/v1/me/byok', async (c) => {
     return c.json({ error: 'encrypt_failed' }, 500);
   }
 
+  // Check whether the user already had a BYOK row before we upsert; the
+  // has_been_set_before prop lets analytics distinguish first-time
+  // configuration from a refresh / rotation.
+  const existed = await c.env.DB.prepare('SELECT 1 FROM byok_keys WHERE user_id = ? LIMIT 1')
+    .bind(sessionUser.id)
+    .first<{ 1: number }>();
+
   const now = Date.now();
   await c.env.DB.prepare(
     `INSERT INTO byok_keys (
@@ -366,6 +380,34 @@ meRoute.put('/v1/me/byok', async (c) => {
   )
     .bind(sessionUser.id, baseUrl, model, enc.encrypted, enc.iv, enc.mask, now, now)
     .run();
+
+  // Fire-and-forget telemetry: a thrown error here would return 500 *after*
+  // the BYOK row was already persisted, causing the user to retry a save
+  // that has already succeeded. resolveUserTier / hashSubjectId both touch
+  // crypto + D1 and can in principle fail; swallow everything (CLAUDE.md
+  // "容错硬契约"; matches metrics.ts:writeRequestEvent strategy).
+  if (c.env.EVENTS_DISABLED !== '1') {
+    try {
+      const propsResult = validateEventProps({ has_been_set_before: existed ? 1 : 0 });
+      if (propsResult.ok) {
+        const tier = await resolveUserTier(c.env.DB, sessionUser.id, c.env.KV);
+        const subjectIdHash = await hashSubjectId('user', sessionUser.id);
+        writeEventPoint(c.env.EVENTS, {
+          eventName: 'byok_save',
+          pagePath: '',
+          locale: '',
+          tier: tier === 'pro' ? 'pro' : 'byok',
+          subjectKind: 'user',
+          subjectIdHash,
+          propsJson: propsResult.json || undefined,
+        });
+      } else {
+        log.warn('events.byok_props_invalid', { reason: propsResult.error });
+      }
+    } catch (err) {
+      log.warn('events.byok_emit_failed', { err });
+    }
+  }
 
   return c.json({ configured: true, baseUrl, model, keyMask: enc.mask });
 });
