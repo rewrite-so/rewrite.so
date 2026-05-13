@@ -161,6 +161,70 @@ describe('POST /v1/events — happy path', () => {
     expect(recordedPoints[0]?.blobs[11]).toMatch(/^[0-9a-f]{16}$/);
   });
 
+  it('logged-in user with a BYOK row gets tier=byok, not free', async () => {
+    // Without the byok_keys lookup, BYOK users' events landed as tier='free'
+    // while their byok_save event landed as tier='byok' — inconsistent.
+    mockSession = { user: { id: 'u_byok', email: 'byok@test.com' } };
+    mockTier = 'free';
+    const byokDB = {
+      prepare: (sql: string) => ({
+        bind: () => ({
+          first: async () => {
+            if (sql.includes('FROM byok_keys')) return { 1: 1 };
+            return null;
+          },
+          run: async () => ({ success: true }),
+          all: async () => ({ results: [], success: true }),
+        }),
+      }),
+    } as unknown as D1Database;
+    const res = await app.request(
+      '/v1/events',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ events: [makeEvent({ visitor_id: 'v' })] }),
+      },
+      { ...makeEnv(), DB: byokDB },
+    );
+    expect(res.status).toBe(202);
+    expect(recordedPoints[0]?.blobs[9]).toBe('byok');
+  });
+
+  it('logged-in pro user keeps tier=pro even if a stale byok_keys row exists', async () => {
+    // Pro takes precedence over BYOK lookup — the byok_keys query never fires.
+    mockSession = { user: { id: 'u_pro', email: 'pro@test.com' } };
+    mockTier = 'pro';
+    let byokQueried = false;
+    const proDB = {
+      prepare: (sql: string) => ({
+        bind: () => ({
+          first: async () => {
+            if (sql.includes('FROM byok_keys')) {
+              byokQueried = true;
+              return { 1: 1 };
+            }
+            return null;
+          },
+          run: async () => ({ success: true }),
+          all: async () => ({ results: [], success: true }),
+        }),
+      }),
+    } as unknown as D1Database;
+    const res = await app.request(
+      '/v1/events',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ events: [makeEvent({ visitor_id: 'v' })] }),
+      },
+      { ...makeEnv(), DB: proDB },
+    );
+    expect(res.status).toBe(202);
+    expect(recordedPoints[0]?.blobs[9]).toBe('pro');
+    expect(byokQueried).toBe(false); // short-circuit
+  });
+
   it('falls back to anonymous_no_id when no visitor_id and no session', async () => {
     const res = await app.request(
       '/v1/events',

@@ -85,11 +85,28 @@ eventsRoute.post('/v1/events', async (c) => {
   const sessionUser = await getOrResolveSessionUser(c);
   const userId = sessionUser?.id;
 
-  // tier resolution: only paid one D1 read for logged-in users
+  // Tier resolution for logged-in users:
+  //   pro  → resolveUserTier returns 'pro' (any active / paused / canceled-
+  //          but-still-in-period subscription)
+  //   byok → free in subscription terms, but has a BYOK key configured
+  //   free → no subscription, no BYOK key
+  //
+  // The extra byok_keys lookup keeps the events `tier` field consistent
+  // with both the EventTier union ('anon'|'free'|'pro'|'byok') and with
+  // me.ts byok_save events, which tag the same cohort as 'byok'. Without
+  // it, BYOK users' /v1/events rows land as 'free' while their byok_save
+  // row lands as 'byok' — segmentation queries on `blob10` would miss them.
   let tier: EventTier = 'anon';
   if (userId) {
     const resolved = await resolveUserTier(c.env.DB, userId, c.env.KV);
-    tier = resolved === 'pro' ? 'pro' : 'free';
+    if (resolved === 'pro') {
+      tier = 'pro';
+    } else {
+      const hasByok = await c.env.DB.prepare('SELECT 1 FROM byok_keys WHERE user_id = ? LIMIT 1')
+        .bind(userId)
+        .first<{ 1: number }>();
+      tier = hasByok ? 'byok' : 'free';
+    }
   }
 
   // CF auto-populated geo (free, no extra request)
