@@ -163,17 +163,21 @@ export function init({ locale, eventsEnabled }: InitOptions): void {
 }
 
 /**
- * Update the SDK-wide enabled flag without re-binding listeners. Useful when
- * /v1/me is re-fetched (e.g. after sign-in changes the user's setting).
+ * Disable the SDK at runtime and drop any queued events.
+ *
+ * Intentionally one-way: there is no public "enable" path. The kill switch
+ * latches at the first `init()` call (which honors the /v1/me response) and
+ * can only be flipped *off* — re-enabling requires flipping `EVENTS_DISABLED`
+ * and reloading. This matches the contract documented on `init()`: an
+ * ops-driven kill switch shouldn't be defeatable by browser-side state
+ * changes (locale flip, post-signin /v1/me refetch, etc.).
  */
-export function setEventsEnabled(value: boolean): void {
-  enabled = value;
-  if (!enabled) {
-    queue = [];
-    if (flushTimer !== null) {
-      clearTimeout(flushTimer);
-      flushTimer = null;
-    }
+export function disableEvents(): void {
+  enabled = false;
+  queue = [];
+  if (flushTimer !== null) {
+    clearTimeout(flushTimer);
+    flushTimer = null;
   }
 }
 

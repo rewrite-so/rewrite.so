@@ -78,8 +78,7 @@ function makeDB(
             return opts.existingSubId && args[0] === opts.existingSubId
               ? {
                   id: 'existing-row',
-                  current_period_end:
-                    opts.existingPeriodEnd ?? Date.parse('2025-01-01T00:00:00Z'),
+                  current_period_end: opts.existingPeriodEnd ?? Date.parse('2025-01-01T00:00:00Z'),
                 }
               : null;
           }

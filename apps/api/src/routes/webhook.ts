@@ -254,10 +254,6 @@ async function upsertFromUpdate(env: AppEnv['Bindings'], evt: CreemEventEnvelope
   await upsertSubscriptionFromObject(env, obj, status, evt.id);
 }
 
-interface SubscriptionRow {
-  id: string;
-}
-
 async function upsertSubscription(
   env: AppEnv['Bindings'],
   evt: CreemEventEnvelope,

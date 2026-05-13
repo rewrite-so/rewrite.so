@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   __resetForTests,
+  disableEvents,
   flush,
   getVisitorId,
   init,
   isEnabled,
-  setEventsEnabled,
   stripLocalePrefix,
   track,
 } from './analytics.ts';
@@ -123,7 +123,7 @@ describe('stripLocalePrefix', () => {
   });
 });
 
-describe('init / setEventsEnabled', () => {
+describe('init / disableEvents', () => {
   it('respects the eventsEnabled gate end-to-end', () => {
     installBrowserGlobals();
     init({ locale: 'en', eventsEnabled: false });
@@ -133,12 +133,12 @@ describe('init / setEventsEnabled', () => {
     expect(getVisitorId()).toBeUndefined();
   });
 
-  it('setEventsEnabled(false) clears the in-flight queue', () => {
+  it('disableEvents() clears the in-flight queue', () => {
     const env = installBrowserGlobals();
     init({ locale: 'en', eventsEnabled: true });
     track('cta_click', { cta: 'install' });
     expect(env.fetchMock).not.toHaveBeenCalled(); // not flushed yet
-    setEventsEnabled(false);
+    disableEvents();
     flush();
     expect(env.fetchMock).not.toHaveBeenCalled();
   });
@@ -150,6 +150,18 @@ describe('init / setEventsEnabled', () => {
     installBrowserGlobals();
     init({ locale: 'en', eventsEnabled: false });
     expect(isEnabled()).toBe(false);
+    init({ locale: 'zh-CN', eventsEnabled: true });
+    expect(isEnabled()).toBe(false);
+  });
+
+  it('there is no public path to re-enable the SDK at runtime', () => {
+    // Once disabled, no exported function can flip `enabled` back to true —
+    // the only re-enable path is flipping EVENTS_DISABLED + reloading.
+    installBrowserGlobals();
+    init({ locale: 'en', eventsEnabled: true });
+    disableEvents();
+    expect(isEnabled()).toBe(false);
+    // init() does not flip enabled on second call (locale-change semantics)
     init({ locale: 'zh-CN', eventsEnabled: true });
     expect(isEnabled()).toBe(false);
   });
