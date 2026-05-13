@@ -184,9 +184,10 @@ eventsRoute.post('/v1/events', async (c) => {
   }
 
   // Resolve subject id hashes in parallel; sha-256 is ~50us per call so this
-  // adds < 1ms even for max-size batches. Doing it inline (rather than under
-  // waitUntil) keeps writeEventPoint truly synchronous — important so the
-  // 202 response means "we tried to write" rather than "we promised to try".
+  // adds < 1ms even for max-size batches. We await the whole batch before
+  // sending 202 (rather than handing it to executionCtx.waitUntil) so the
+  // 202 means "we attempted every write" rather than "we promised to try
+  // later" — the writes themselves are still async, just fully awaited.
   //
   // allSettled (not all): a single hashSubjectId rejection must not poison
   // the other events in the batch. writeEventPoint is already self-protecting
