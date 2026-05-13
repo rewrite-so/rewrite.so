@@ -120,8 +120,9 @@ app.route('/', announcementsRoute);
 // Phase 5: onboarding email unsubscribe
 app.route('/', unsubscribeRoute);
 // Web user-behavior ingest. NOT under banCheckMiddleware — anonymous reports
-// are first-class, and banned users degrade silently to 'visitor' kind via
-// session-cache returning null. See routes/events.ts header for rationale.
+// are first-class, and ban scope (block paid quota usage) doesn't have to
+// extend to analytics silencing. See routes/events.ts for the rationale on
+// banned-user emit behavior.
 app.route('/', eventsRoute);
 
 app.notFound((c) => c.json({ error: 'not_found' }, 404));

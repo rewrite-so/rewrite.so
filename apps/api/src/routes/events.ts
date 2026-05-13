@@ -75,9 +75,13 @@ eventsRoute.post('/v1/events', async (c) => {
     });
   }
 
-  // Optional session — anonymous is fine. ban-check middleware is NOT mounted
-  // on this route (see comment in index.ts); banned users degrade silently to
-  // 'visitor' kind via the session-cache returning null after auth refusal.
+  // Optional session — anonymous is fine. ban-check middleware is deliberately
+  // NOT mounted on this route (see comment in index.ts). Ban exists to keep
+  // banned users from spending paid quota; it does not have to silence them
+  // from analytics. A banned user reaching this point keeps a real session
+  // and lands in events with subjectKind='user' + their hashed user id, the
+  // same as any other logged-in caller. Operations can still segment "events
+  // from banned users" by JOIN-ing the user_bans table on the hash.
   const sessionUser = await getOrResolveSessionUser(c);
   const userId = sessionUser?.id;
 
