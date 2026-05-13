@@ -132,6 +132,13 @@ export const BURST_BUCKETS = {
   // 独立 DO 实例命名空间（'events:ip:<hash>'），与 rewrite 的 ip bucket 不共享；
   // 详见 consumeEventsIp。
   eventsIp: { capacity: 30, refillPerSec: 30 / 60 },
+  // verify-checkout：5 req/min/user。POST /v1/billing/verify-checkout 每次
+  // 成功调用会触发 upsertSubscriptionFromObject + 可能 emit subscription_paid。
+  // 没限流时用户反复刷 /settings?billing=ok&checkout_id=X 能重复触发——
+  // subscriptions 表幂等（creem_subscription_id PK），且 emit 已通过 period-
+  // advancement 去重（同 period 不再 emit），但加 user-level ceiling 防御
+  // 性更稳，且与 byok-test / claim-install 风格一致。
+  verifyCheckout: { capacity: 5, refillPerSec: 5 / 60 },
 } as const;
 
 export interface ConsumeResult {

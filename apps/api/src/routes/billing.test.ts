@@ -72,6 +72,31 @@ describe('POST /v1/billing/verify-checkout', () => {
     expect(res.status).toBe(401);
   });
 
+  it('returns 429 when the per-user rate limit is exhausted', async () => {
+    // Repeated reloads of /settings?billing=ok&checkout_id=X would otherwise
+    // spam upsertSubscriptionFromObject and the subscription_paid emit path.
+    mockSession = { user: { id: 'u1', email: 'u1@test.com' } };
+    const denyingRateLimiter = {
+      idFromName: () => ({}) as DurableObjectId,
+      get: () =>
+        ({
+          fetch: async () =>
+            Response.json({ allowed: false, remaining: 0, retryAfterMs: 1500 }, { status: 429 }),
+        }) as unknown as DurableObjectStub,
+    } as unknown as DurableObjectNamespace;
+    const res = await app.request(
+      '/v1/billing/verify-checkout',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ checkoutId: 'ck_123' }),
+      },
+      { ...MOCK_ENV, RATE_LIMITER: denyingRateLimiter },
+    );
+    expect(res.status).toBe(429);
+    expect(res.headers.get('retry-after')).toBe('2');
+  });
+
   it('returns 400 on missing checkoutId', async () => {
     mockSession = { user: { id: 'u1', email: 'u1@test.com' } };
     const res = await app.request(

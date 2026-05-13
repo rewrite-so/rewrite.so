@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
+import { BURST_BUCKETS, consume } from '../do/rate-limiter.ts';
 import {
   createCheckoutSession,
   createPortalSession,
@@ -95,6 +96,21 @@ const VerifyCheckoutSchema = z
 billingRoute.post('/v1/billing/verify-checkout', async (c) => {
   const sessionUser = await getOrResolveSessionUser(c);
   if (!sessionUser) return c.json({ error: 'unauthorized' }, 401);
+
+  // 5 req/min/user ceiling — repeated reloads of /settings?checkout_id=X
+  // would otherwise spam upsertSubscriptionFromObject and the subscription_
+  // paid emit path. period-advancement dedupe already covers most of the
+  // emit fan-out (see webhook.ts), but this is the cheaper outer guard.
+  const burst = await consume(
+    c.env.RATE_LIMITER,
+    { kind: 'user', id: sessionUser.id },
+    BURST_BUCKETS.verifyCheckout,
+  );
+  if (!burst.allowed) {
+    return c.json({ error: 'rate_limit', retryAfterMs: burst.retryAfterMs }, 429, {
+      'retry-after': String(Math.ceil(burst.retryAfterMs / 1000)),
+    });
+  }
 
   let body: unknown;
   try {
