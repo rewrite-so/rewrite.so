@@ -50,8 +50,13 @@
   
   不能因 PR 简化而删减，这是用户隐私底线。
 - **Shadow DOM 用 `closed` mode**：阻止宿主页脚本枚举我们的浮层（隐私 + 防广告拦截器误杀）。
-
-## 用户行为分析（events）
+- **CustomEvent `rewrite-so:draft-replace` 暴露面**（已评估接受）：Draft.js 适配器
+  通过 window-level CustomEvent 把 `newText` 从 isolated world 传递给 main-world script，
+  **任何页面 JS 可监听到这个事件 + newText payload**。视为可接受的暴露面，理由：
+  (1) newText 已经是用户主动改写后的产物，下一帧就要写进页面 DOM，页面 JS 本来就读得到；
+  (2) 不暴露原文（原文走 inject.ts → API → LLM，不经过 main-world）；(3) 用户每次主动
+  双击 Shift 才触发，非被动数据采集。**绝不**通过此通道传敏感字段（如 BYOK key、userId、
+  api token 等）。
 
 - **唯一通道是 `POST /v1/events` + binding `EVENTS` (dataset `web_events`)**：禁止
   接入 GA / PostHog / Mixpanel / Plausible / Vercel Analytics 等任何第三方 analytics，
@@ -256,13 +261,71 @@
 
 - **content script 不要引入 React/Vue 等框架**：`packages/core` 浮层 UI 用纯 vanilla DOM，bundle gzip < 30KB。扩展自己的 popup/options 才用 Preact。
 - **React 受控 input 替换值**：不能 `el.value = x`，必须用 `Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set` 调 prototype setter，否则 React 不感知。
+- **dot 显示 vs 改写 target 用两条独立信号源**（不要合并！）：
+  - `activeEditable`：focusin/focusout **即时**维护，驱动 dot.show / dot.hide（高频更新，
+    避免每次都跑 shadow root 递归遍历）。
+  - `deepActiveElement()`：handleTrigger（双击 Shift 触发）瞬间**同步**读取，作为改写 target。
+  
+  分离原因：Reddit 创建 subreddit 这类**嵌套 shadow DOM 的 React 模态框** + SPA `ref.focus()`
+  编程式切焦场景下，focusin 事件时序可能异常 → activeEditable 会 stale（指向上一个焦点）→
+  如果 handleTrigger 用 activeEditable 会改写错的元素。改写是低频且必须正确的事件，每次实时
+  读 deepActiveElement 代价可接受；dot 是高频 UI，仍走 focusin 即时驱动。
 - **浮层 button mousedown 必须 preventDefault**：浮层内任何 `<button>`（齿轮 / ↻ / Retry）
   mousedown 默认会把焦点从原输入框转移到 button，触发输入框 focusout → activeEditable
   变 null → onSelect 静默失败 / contenteditable 拒绝写入。`packages/core/src/ui/candidates.ts`
   panel 容器统一 `mousedown preventDefault`（不阻止 click 触发）。同时 mount() 用
   `lockedEditable` 锁定浮层期间的 target，即使焦点真丢了也能 `.focus()` 回来。
   新增 button 时不需要单独处理，panel 容器级 listener 已覆盖。
-- **contenteditable 替换**：先 `dispatchEvent(InputEvent('beforeinput', { inputType: 'insertReplacementText', data }))`，被框架（ProseMirror/Lexical/Slate）preventDefault 后我们就不要再写 DOM；否则降级到 `document.execCommand('insertText')`（已废弃但唯一保留 undo 栈）。
+- **contenteditable 替换（策略反转 2026-05）**：dispatch `beforeinput(insertReplacementText)` →
+  **不**根据框架是否 preventDefault 来 silent-return。原因：浏览器对合成 InputEvent
+  **不执行** native default action（W3C 规范），"框架接管后浏览器仍写入 DOM"的旧假设不成立，
+  silent-return 会让 controlled-tree 框架（Draft.js/Lexical/ProseMirror）的 model 状态
+  永远收不到 input 事件 → 用户看到 "DOM 改了 Backspace 删不掉" 的崩溃态。
+  
+  现行流程（`packages/core/src/editable/write.ts:replaceContentEditable`）：
+  1. `beforeinput`（让框架知道要发生啥）→ 2. 全替换模式**重置 selection**（防 framework
+  handler 漂移） → 3. `execCommand('insertText')`（保留 undo 栈） → 4. 失败兜底
+  `selectNodeContents(el).deleteContents() + insertNode`（**不**用 `sel.getRangeAt(0)`
+  避免被框架破坏的 range） → 5. **无条件** dispatch `input(insertReplacementText)`
+  给框架 reconcile 机会。所有 dispatch 都带 `composed: true` 跨 shadow boundary。
+  
+  **Draft.js 例外路径**：`.public-DraftEditor-content` / `.DraftEditor-root` 命中后
+  走 `requestDraftReplace` → main-world script → React fiber → props.onChange，**不**走
+  以上通用 DOM 路径（Draft 受控树，外部改 DOM 必被 reconcile 回滚）。详见
+  「扩展双 content_script + Draft.js 适配器」段。
+- **扩展双 content_script + Draft.js 适配器**：`apps/extension/src/manifest.config.ts` 有
+  **两个** content_scripts entry：
+  - `src/content/inject.ts`（默认 isolated world）：主逻辑入口，调 mount()。
+  - `src/content/main-world.ts`（`world: 'MAIN'`，Chrome 102+）：**只**处理 Draft.js
+    替换，通过 React fiber 调 `props.onChange(newEditorState)`。
+  
+  **为什么必须 main world**：Chrome MV3 content script 默认 isolated world，**看不到**
+  页面 JS 在 element 上挂的 `__reactFiber$xxx` / `__reactProps$xxx` expando 属性。Draft.js
+  外部更新 EditorState 唯一可靠路径是 fiber → onChange（draft-js-plugins#210；Grammarly
+  blog 称之为 "framework-aware adapter"）。合成 `beforeinput` / `ClipboardEvent` 在 Chrome
+  上不触发 default action / clipboardData 被忽略——全部走不通。
+  
+  **通信契约**：CustomEvent on window，channel 名固定，改名要同步改 `draft.ts` + `main-world.ts` 两边：
+  - 入：`rewrite-so:draft-replace` `{ id, marker, newText }`（marker=临时 data-attribute 名定位元素）
+  - 出：`rewrite-so:draft-replace-result` `{ id, ok }`
+  - ready：`rewrite-so:main-world-ready` + `data-rewrite-so-main-world-ready` attribute on `<html>`
+    （DOM attribute 跨 world 共享，isolated 侧同步可读，避免每次 dispatch 都等 ready）
+  
+  **两个 entry 必须保持 `exclude_matches` 完全一致** —— 新加自家域时两处都要改。
+  
+  **Draft 反射依赖 immutable.js 未 mangle 公开 API**：`EditorState.{push, forceSelection}` /
+  `ContentState.createFromText` / `block.{getKey, getLength}` / `selection.merge`。X 升级
+  编辑器引擎（如迁移 Lexical/ProseMirror）会让 `replaceDraftEditor` 静默失败但不破坏 DOM
+  （`return false` → 通用路径也 skip → UX："什么都没发生" 而不是 "残留+删不掉"）。
+  
+  **失败容错**：fiber lookup 失败 / 反射 throw / `world: 'MAIN'` 不被支持（< Chrome 102；
+  已设 `minimum_chrome_version: "102"` 由商店过滤）→ requestDraftReplace 超时返 false →
+  调用方静默不写 DOM。
+- **shadow DOM 内 contenteditable 不在替换范围**：`read.ts` 用 `window.getSelection()`，
+  Chrome 102+ shadow DOM 内 selection 在 `shadowRoot.getSelection()`（API 不一致）。
+  目前观察到 Reddit / X / Slack / Notion 的 contenteditable 都在 light DOM，shadow DOM
+  内的 `<input>` / `<textarea>` 走 `replaceFormField`（`.value` setter 跨 shadow boundary
+  仍生效）——`focusedTargetFromEvent` 用 `composedPath()` 拿到真实 target，PII 排除照常生效。
 - **chrome.storage 所有 key 带 `_v: 1`**：方便将来跨版本兼容时新字段读旧值。MVP 不写迁移层但保留版本字段习惯。
 - **dot 首次自动 popup tooltip**（onboarding 教学）：扩展端通过
   `UserPrefs.hasSeenDotTooltip` flag 控制——dot 第一次出现时自动 popup tooltip
@@ -396,6 +459,12 @@ migration 文件名编号空间按仓库分治：
 - **Google Docs**：canvas 渲染，无 DOM 输入框可注入。
 - **Gmail compose**：iframe + 复杂 contenteditable，需重大架构变更。
 - **MV3 service worker 30s 强 kill**：单次 SSE 一般 < 5s 不触边界；如果未来加长流式（如自定义 prompt 大输入）需重新评估。
+- **Draft.js 编辑器升级 / 替换 → 静默失败**：X / 老 Medium 等 Draft.js 站点的适配
+  依赖 `EditorState.push/forceSelection` / `ContentState.createFromText` / immutable.js
+  Record 的 `.merge` / `.getKey` / `.getLength` 等公开 API 名未被 mangle。若 X 重大
+  重构（如迁移 Lexical/ProseMirror，或自家 fork 把这些方法名 mangle 了），`replaceDraftEditor`
+  返回 false → 用户体验是"双击 Shift 后什么都没发生"（不是崩溃）。**监控用户反馈**而非
+  自动告警；定位时再走 React fiber DevTools 调研新结构。
 
 ## i18n（多语言）
 

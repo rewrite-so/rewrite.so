@@ -21,6 +21,10 @@ const DEV_PUBLIC_KEY =
 
 export default defineManifest({
   manifest_version: 3,
+  // Chrome 102 是 `world: 'MAIN'` content_script 字段的最低支持版本（2022/6）。
+  // 低于此版本会静默忽略 main-world entry → Draft.js (X/Twitter) 适配失效
+  // (requestDraftReplace 永远 timeout)。Chrome Web Store 会按此过滤老版本。
+  minimum_chrome_version: '102',
   ...(isStoreBuild ? {} : { key: DEV_PUBLIC_KEY }),
   name: 'rewrite.so — Write freely. Send confidently.',
   version: pkg.version,
@@ -62,6 +66,24 @@ export default defineManifest({
         'http://127.0.0.1:3000/*',
       ],
       js: ['src/content/inject.ts'],
+      run_at: 'document_idle',
+      all_frames: false,
+    },
+    // Main-world helper：跑在页面 JS context（isolated world 之外），用于
+    // 访问 React fiber expando 属性（__reactFiber$xxx）。**只**处理 Draft.js
+    // 编辑器替换（X/Twitter / 老 Medium），监听 CustomEvent 与 inject.ts 通信。
+    // 详见 apps/extension/src/content/main-world.ts 头注释。
+    // exclude_matches 与上面 inject.ts 完全一致（同样不在 rewrite.so 自家域跑）。
+    {
+      matches: ['<all_urls>'],
+      exclude_matches: [
+        'https://rewrite.so/*',
+        'https://*.rewrite.so/*',
+        'http://localhost:3000/*',
+        'http://127.0.0.1:3000/*',
+      ],
+      js: ['src/content/main-world.ts'],
+      world: 'MAIN',
       run_at: 'document_idle',
       all_frames: false,
     },

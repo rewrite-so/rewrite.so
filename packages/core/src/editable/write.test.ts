@@ -65,19 +65,28 @@ describe('replaceEditable — contenteditable', () => {
     expect(seen[0]?.data).toBe('world');
   });
 
-  it('framework preventDefault halts our DOM mutation', () => {
+  it('framework preventDefault does NOT halt our replacement', () => {
+    // 关键回归测试：旧实现在 framework preventDefault 后 silent return，
+    // 导致 controlled-tree 框架（Draft.js / Lexical）的 model 状态永不更新，
+    // 用户后续 Backspace 与 DOM 解耦表现为"删不掉 / 删了又恢复"。
+    // 新实现强制走完整链路，DOM 必被改且 input 事件必触发，给框架 reconcile 机会。
     const ce = document.createElement('div');
     ce.contentEditable = 'true';
     ce.textContent = 'original';
     document.body.appendChild(ce);
 
-    // 模拟 framework：preventDefault beforeinput
+    // 模拟 framework：preventDefault beforeinput（Draft.js 的标准行为）
     ce.addEventListener('beforeinput', (e) => e.preventDefault());
+
+    const onInput = vi.fn();
+    ce.addEventListener('input', onInput);
 
     replaceEditable(ce, 'changed', 'all');
 
-    // 我们不应再进行 DOM 操作（textContent 不变；framework 自己负责）
-    expect(ce.textContent).toBe('original');
+    // 新行为：即使 framework preventDefault，我们仍完成替换
+    expect(ce.textContent).toContain('changed');
+    // input 事件必触发（controlled framework 需要看到这个事件才能 reconcile model）
+    expect(onInput).toHaveBeenCalledTimes(1);
   });
 
   it('falls back to DOM mutation when framework does NOT handle', () => {
@@ -91,5 +100,49 @@ describe('replaceEditable — contenteditable', () => {
 
     // 兜底应改 textContent（happy-dom 没 execCommand）
     expect(ce.textContent).toContain('new');
+  });
+
+  it('dispatched input event has composed:true (cross shadow boundary)', () => {
+    // Reddit `<faceplate-textarea-input>` 等 Web Component 把真实输入框放
+    // shadow DOM 内；写值后外层 React state 监听靠 composed:true 才能收到事件。
+    // 这个测试用 contenteditable 但 composed 属性逻辑相同，覆盖 dispatch 配置。
+    const ce = document.createElement('div');
+    ce.contentEditable = 'true';
+    ce.textContent = 'old';
+    document.body.appendChild(ce);
+
+    let beforeInputComposed = false;
+    let inputComposed = false;
+    ce.addEventListener('beforeinput', (e) => {
+      beforeInputComposed = e.composed;
+    });
+    ce.addEventListener('input', (e) => {
+      inputComposed = e.composed;
+    });
+
+    replaceEditable(ce, 'new', 'all');
+
+    expect(beforeInputComposed).toBe(true);
+    expect(inputComposed).toBe(true);
+  });
+
+  it('textarea input/change events have composed:true', () => {
+    const ta = document.createElement('textarea');
+    ta.value = 'old';
+    document.body.appendChild(ta);
+
+    let inputComposed = false;
+    let changeComposed = false;
+    ta.addEventListener('input', (e) => {
+      inputComposed = e.composed;
+    });
+    ta.addEventListener('change', (e) => {
+      changeComposed = e.composed;
+    });
+
+    replaceEditable(ta, 'new', 'all');
+
+    expect(inputComposed).toBe(true);
+    expect(changeComposed).toBe(true);
   });
 });
