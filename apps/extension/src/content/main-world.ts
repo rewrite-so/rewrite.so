@@ -36,16 +36,9 @@ interface DraftEditorStateLike {
   getCurrentContent(): DraftContentStateLike;
   getSelection(): DraftSelectionStateLike;
   constructor: {
-    push(
-      es: DraftEditorStateLike,
-      cs: DraftContentStateLike,
-      ct: string,
-    ): DraftEditorStateLike;
+    push(es: DraftEditorStateLike, cs: DraftContentStateLike, ct: string): DraftEditorStateLike;
     /** 设置 selection 并标记 forceSelection 让 Draft 必须把它同步到 DOM */
-    forceSelection(
-      es: DraftEditorStateLike,
-      sel: DraftSelectionStateLike,
-    ): DraftEditorStateLike;
+    forceSelection(es: DraftEditorStateLike, sel: DraftSelectionStateLike): DraftEditorStateLike;
   };
 }
 
@@ -176,9 +169,7 @@ function handleReplaceRequest(ev: Event): void {
   } catch {
     /* swallow */
   }
-  window.dispatchEvent(
-    new CustomEvent('rewrite-so:draft-replace-result', { detail: { id, ok } }),
-  );
+  window.dispatchEvent(new CustomEvent('rewrite-so:draft-replace-result', { detail: { id, ok } }));
 }
 
 /**
