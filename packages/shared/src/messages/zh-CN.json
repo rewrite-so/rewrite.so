@@ -308,7 +308,7 @@
         "discountBody": "每次续费自动按 3 折。"
       },
       "window": {
-        "title": "60 天宽限期",
+        "title": "{grace} 天宽限期",
         "body": "Pro 到期 {grace} 天内续订，保留 3 折权益；超过就作废。"
       },
       "cta": {
