@@ -165,10 +165,10 @@
       "earlyBird": {
         "label": "早鸟计划",
         "badge": "创始会员",
-        "statusLabel": "终生 3 折",
+        "statusLabel": "永久 3 折",
         "status": {
           "active": "生效中",
-          "grace": "宽限期 · 还有 {days, number} 天内续订有效",
+          "grace": "宽限期 · {days, number} 天内续订仍有效",
           "expired": "已失效"
         },
         "giftBalanceLabel": "赠送 Pro 天数",
@@ -305,11 +305,11 @@
         "giftDaysBody": "领取后立刻开通。",
         "discountLabel": "Pro 永久 3 折",
         "discountPricePreview": "月付 ${originalMonthly} → ${discountedMonthly} / 月；年付 ${originalYearly} → ${discountedYearly} / 月",
-        "discountBody": "每次续费自动 3 折。"
+        "discountBody": "每次续费自动按 3 折。"
       },
       "window": {
         "title": "60 天宽限期",
-        "body": "Pro 到期 {grace} 天内续订，3 折保留；超过就作废。"
+        "body": "Pro 到期 {grace} 天内续订，3 折继续有效；超过就作废。"
       },
       "cta": {
         "notLoggedIn": "登录领取",
@@ -326,7 +326,7 @@
       },
       "ended": {
         "title": "早鸟活动已结束",
-        "body": "订阅 Pro 继续用。",
+        "body": "订阅 Pro，继续畅写。",
         "cta": "查看 Pro 价格"
       }
     }
@@ -372,7 +372,7 @@
   },
   "home": {
     "earlyBirdBadge": {
-      "label": "早鸟 · 90 天免费 + 终生 3 折"
+      "label": "早鸟 · 90 天免费 + 永久 3 折"
     },
     "hero": {
       "eyebrow": "支持的输入框 · 开源",
