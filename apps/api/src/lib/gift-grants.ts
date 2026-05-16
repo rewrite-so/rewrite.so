@@ -13,11 +13,20 @@
  * 会被 INSERT OR IGNORE 兜住。想给同用户多次叠加（如 admin 多次补偿）→ caller
  * 必须让 `sourceId` 每次不同（建议附 timestamp）让 id 散开。
  *
- * 副作用解耦：本 helper 不调 `extendProLapsesAt()` 也不 invalidate KV —— caller
- * 负责调度这些副作用。这样在 batch 场景（如 POST /v1/campaigns/:slug/join）下
- * 可以把多个写操作打包到 D1 batch，由 caller 统一在 batch 成功后 invalidate KV，
- * 避免「helper 已 invalidate 但 batch 后续失败」的不一致。
+ * 副作用内嵌：INSERT 成功（非重复）后自动：
+ *   1) extendProLapsesAt(userId, expires_at) — 推 user_discounts.pro_lapses_at
+ *   2) kv.delete(`gift_active:<userId>`) — 让 resolveUserTier 立即看到新 grant
+ * 这样未来任何新增 caller（admin 补偿、礼品卡兑换、抽奖）调一行就 done，
+ * 不会漏 invalidate / 漏推 pro_lapses_at。
+ *
+ * 例外：D1 batch 场景（如 POST /v1/campaigns/:slug/join 把 gift_grants /
+ * user_discounts / campaign_participations 三表打包到原子 batch）不能用 helper
+ * —— helper 是非 batch 的单 INSERT，无法与其他 INSERT 共享原子性。batch caller
+ * 必须自己负责 extendProLapsesAt + KV invalidate（参考 routes/campaigns.ts）。
  */
+import { log } from './log.ts';
+import { GIFT_ACTIVE_CACHE_PREFIX } from './quota.ts';
+import { extendProLapsesAt } from './user-discounts.ts';
 
 export interface GrantDaysInput {
   userId: string;
@@ -84,13 +93,33 @@ export async function getCurrentMaxGiftExpiresAt(
   return row?.m ?? 0;
 }
 
+export interface GrantDaysOptions {
+  /**
+   * KV binding。INSERT 成功（非重复）后用于 invalidate `gift_active:<userId>`
+   * 让 resolveUserTier 立即看到新 grant。
+   *
+   * **Required**：故意不设可选，让 TS 编译期强制 caller 传入。生产 worker 拿到的
+   * `env.KV` 永远可用；测试要绕过传 `null` 显式标记意图，不允许"忘了传"。
+   */
+  kv: KVNamespace | null;
+}
+
 /**
  * 标准发放入口。返回 { id, granted_at, expires_at, isDuplicate }。
  *
- * isDuplicate=true 时表示该 source 已发放过（PK 冲突），DB 未变化；caller 不应
- * 再触发 pro_lapses_at 更新或 KV invalidate（无 D1 状态变化）。
+ * isDuplicate=true 时表示该 source 已发放过（PK 冲突），DB 未变化，
+ * 内嵌副作用（extendProLapsesAt / KV invalidate）会被跳过。
+ *
+ * 副作用容错：`extendProLapsesAt` 失败用 `log.warn` 静默吞，与 webhook.ts
+ * 的同名调用模式一致——避免「gift_grants 已写入但 extend 抛错 → caller 异常 →
+ * retry 时 INSERT OR IGNORE 命中 PK 冲突走 isDuplicate=true 分支永久跳过
+ * extend」的隐式失败。CLAUDE.md「容错硬契约：任何失败都必须静默吞」要求。
  */
-export async function grantDays(db: D1Database, input: GrantDaysInput): Promise<GrantDaysResult> {
+export async function grantDays(
+  db: D1Database,
+  input: GrantDaysInput,
+  options: GrantDaysOptions,
+): Promise<GrantDaysResult> {
   const { userId, days, sourceKind, sourceId, baseEnd, note } = input;
   const now = Date.now();
   const currentMax = await getCurrentMaxGiftExpiresAt(db, userId, now);
@@ -109,5 +138,18 @@ export async function grantDays(db: D1Database, input: GrantDaysInput): Promise<
 
   const meta = (result as { meta?: { changes?: number } }).meta;
   const changes = typeof meta?.changes === 'number' ? meta.changes : 0;
-  return { id, granted_at, expires_at, isDuplicate: changes === 0 };
+  const isDuplicate = changes === 0;
+
+  // 副作用：仅在真正写入新行时触发，避免重复请求重复推 pro_lapses_at / 清缓存
+  if (!isDuplicate) {
+    await extendProLapsesAt(db, userId, expires_at).catch((err) => {
+      log.warn('gift_grants.extend_pro_lapses_at_failed', { userId, sourceKind, sourceId, err });
+    });
+    const kv = options.kv;
+    if (kv && typeof kv.delete === 'function') {
+      await kv.delete(`${GIFT_ACTIVE_CACHE_PREFIX}${userId}`).catch(() => undefined);
+    }
+  }
+
+  return { id, granted_at, expires_at, isDuplicate };
 }

@@ -165,7 +165,7 @@
       "earlyBird": {
         "label": "Early Bird",
         "badge": "Founding member",
-        "statusLabel": "Lifetime 30% off",
+        "statusLabel": "Lifetime 70% off",
         "status": {
           "active": "Active",
           "grace": "Grace period · re-subscribe within {days, number} days",
@@ -291,32 +291,31 @@
       },
       "earlyBirdBanner": {
         "title": "Early Bird member",
-        "body": "Lifetime 30% off on every renewal",
+        "body": "Lifetime 70% off on every renewal",
         "tooltip": "Stay subscribed to keep the discount; a 60-day grace period applies after cancellation",
         "subscribedHint": "Your next renewal is automatically discounted."
       }
     },
     "early-bird": {
       "title": "Early Bird",
-      "subtitle": "Limited-time founding member offer.",
+      "metaDescription": "rewrite.so Early Bird: claim 90 days of Pro free, then keep Pro at 70% off for life.",
       "loading": "Loading…",
       "perks": {
         "title": "What you get",
         "giftDaysLabel": "{days} days of Pro, free",
-        "giftDaysBody": "Activated the moment you sign up; counts down day by day.",
-        "discountLabel": "{percentage}% off Pro for life",
-        "discountPricePreview": "${originalMonthly}→${discountedMonthly}/mo · ${originalYearly}→${discountedYearly}/mo annual",
-        "discountBody": "Discount applies automatically at checkout while you stay subscribed."
+        "giftDaysBody": "Activated the moment you claim it.",
+        "discountLabel": "Lifetime {percentage}% off Pro",
+        "discountBody": "Auto-applied to every renewal."
       },
       "window": {
-        "title": "How the lifetime discount stays valid",
-        "body": "The discount stays active while you're subscribed. If you cancel, you have {grace} days to re-subscribe and keep it. After {total} days without an active subscription, the offer expires permanently."
+        "title": "{grace}-day grace period",
+        "body": "Re-subscribe within {grace} days of Pro ending to keep the discount; otherwise it's gone for good."
       },
       "cta": {
         "notLoggedIn": "Sign in to claim",
-        "loggedIn": "Claim my Early Bird benefits",
+        "loggedIn": "Claim it",
         "joining": "Claiming…",
-        "alreadyJoined": "Continue to billing"
+        "alreadyJoined": "Go to billing"
       },
       "errors": {
         "loadFailed": "Couldn't load the campaign. Please try again later.",
@@ -327,7 +326,7 @@
       },
       "ended": {
         "title": "Early Bird has ended",
-        "body": "Thanks for your interest. Upgrade to Pro to keep writing freely.",
+        "body": "Subscribe to Pro to keep going.",
         "cta": "See Pro pricing"
       }
     }
@@ -372,6 +371,9 @@
     "paymentsBy": "Payments processed by <creem>Creem</creem>, our Merchant of Record."
   },
   "home": {
+    "earlyBirdBadge": {
+      "label": "Early Bird · 90 days free + lifetime 70% off"
+    },
     "hero": {
       "eyebrow": "Supported text fields. Open source.",
       "h1Line1": "Write freely.",

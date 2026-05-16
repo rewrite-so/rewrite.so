@@ -165,7 +165,7 @@
       "earlyBird": {
         "label": "Early Bird",
         "badge": "Gründungsmitglied",
-        "statusLabel": "Lebenslang 30 % Rabatt",
+        "statusLabel": "Lebenslang 70 % Rabatt",
         "status": {
           "active": "Aktiv",
           "grace": "Kulanzzeit · innerhalb von {days, number} Tagen erneut abonnieren",
@@ -291,30 +291,29 @@
       },
       "earlyBirdBanner": {
         "title": "Early Bird-Mitglied",
-        "body": "30 % Rabatt bei jeder Verlängerung, lebenslang",
+        "body": "70 % Rabatt bei jeder Verlängerung, lebenslang",
         "tooltip": "Bleibe abonniert, um den Rabatt zu behalten; 60 Tage Kulanzzeit nach Kündigung",
         "subscribedHint": "Deine nächste Verlängerung wird automatisch rabattiert."
       }
     },
     "early-bird": {
       "title": "Early Bird",
-      "subtitle": "Begrenztes Angebot für Gründungsmitglieder.",
+      "metaDescription": "rewrite.so Early Bird: 90 Tage Pro gratis einlösen und Pro lebenslang mit 70 % Rabatt behalten.",
       "loading": "Lädt …",
       "perks": {
         "title": "Was du bekommst",
         "giftDaysLabel": "{days} Tage Pro gratis",
-        "giftDaysBody": "Sofort nach Anmeldung aktiv; Countdown pro Tag.",
+        "giftDaysBody": "Sofort nach Einlösung aktiv.",
         "discountLabel": "{percentage} % Pro-Rabatt lebenslang",
-        "discountPricePreview": "${originalMonthly}→${discountedMonthly}/Monat · jährlich ${originalYearly}→${discountedYearly}/Monat",
-        "discountBody": "Der Rabatt wird beim Checkout automatisch angewendet, solange dein Abo aktiv bleibt."
+        "discountBody": "Bei jeder Verlängerung automatisch angewendet."
       },
       "window": {
-        "title": "So bleibt der lebenslange Rabatt gültig",
-        "body": "Er bleibt aktiv, solange du abonniert bist. Bei Kündigung hast du {grace} Tage, um wieder zu abonnieren und den Rabatt zu behalten. Nach {total} Tagen ohne aktives Abo verfällt das Angebot endgültig."
+        "title": "{grace} Tage Karenzzeit",
+        "body": "Schließe innerhalb von {grace} Tagen nach Pro-Ende erneut ab, um den Rabatt zu behalten; sonst verfällt er endgültig."
       },
       "cta": {
         "notLoggedIn": "Anmelden, um einzulösen",
-        "loggedIn": "Early Bird-Vorteile einlösen",
+        "loggedIn": "Einlösen",
         "joining": "Einlösen …",
         "alreadyJoined": "Zur Zahlung"
       },
@@ -327,7 +326,7 @@
       },
       "ended": {
         "title": "Early Bird ist beendet",
-        "body": "Danke für dein Interesse. Wechsle zu Pro, um weiter frei zu schreiben.",
+        "body": "Abonniere Pro, um weiter zu schreiben.",
         "cta": "Pro-Preise anzeigen"
       }
     }
@@ -372,6 +371,9 @@
     "paymentsBy": "Zahlungen abgewickelt von <creem>Creem</creem>, unserem Merchant of Record."
   },
   "home": {
+    "earlyBirdBadge": {
+      "label": "Early Bird · 90 Tage gratis + 70 % lebenslang"
+    },
     "hero": {
       "eyebrow": "Unterstützte Eingabefelder · Open Source",
       "h1Line1": "Frei schreiben.",

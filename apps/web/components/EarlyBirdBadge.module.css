@@ -1,0 +1,54 @@
+/* Hero-region pill linking to /early-bird. Drives a subtle pulsing
+   box-shadow ring to draw attention without being intrusive. The
+   pulse is disabled for users with prefers-reduced-motion. */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #fdfaf2;
+  color: #7a5a18;
+  border: 1px solid #f0e4cf;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  letter-spacing: 0;
+  animation: earlyBirdPulse 2s ease-in-out infinite;
+}
+
+.badge:hover {
+  background: #f9efd6;
+  /* pause animation on hover so the user can read the pill without
+     visual distraction once they've engaged with it */
+  animation-play-state: paused;
+}
+
+.bolt,
+.arrow {
+  /* tiny size guard so the emoji / arrow stay vertically centered
+     regardless of the locale's font fallback chain */
+  line-height: 1;
+}
+
+.arrow {
+  margin-left: 2px;
+}
+
+@keyframes earlyBirdPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(122, 90, 24, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(122, 90, 24, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .badge {
+    animation: none;
+  }
+}

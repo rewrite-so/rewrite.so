@@ -12,7 +12,7 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: 'page.early-bird' });
   return localizedMetadata(locale, '/early-bird', {
     title: t('title'),
-    description: t('subtitle'),
+    description: t('metaDescription'),
   });
 }
 

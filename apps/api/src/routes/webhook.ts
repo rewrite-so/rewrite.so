@@ -376,10 +376,11 @@ export async function upsertSubscriptionFromObject(
       // Cancel is a one-shot user action; no period-based dedupe applies.
       await emitSubscriptionWebEvent(env, 'canceled', userId, plan);
     }
-    // 推 user_discounts.pro_lapses_at（单调递增）— 仅 active/trialing 介入。
-    // canceled/expired 不动 pro_lapses_at（已记录的 period_end 是上限）。
+    // 推 user_discounts.pro_lapses_at（单调递增）— active/trialing/paused 都算
+    // 「Pro 资格在线」，与 resolveUserTier 的判定一致。canceled/expired/past_due
+    // 不动 pro_lapses_at（已记录的 period_end 是上限）。
     // 非早鸟用户无 user_discounts row，UPDATE 0 行 silent no-op。
-    if (status === 'active' || status === 'trialing') {
+    if (status === 'active' || status === 'trialing' || status === 'paused') {
       await extendProLapsesAt(env.DB, userId, periodEnd).catch((err) => {
         log.warn('subscription.extend_pro_lapses_at_failed', { ctxId, err });
       });
@@ -414,8 +415,8 @@ export async function upsertSubscriptionFromObject(
   if (opts?.webEvent) {
     await emitSubscriptionWebEvent(env, opts.webEvent, userId, plan);
   }
-  // 同 UPDATE 分支：仅 active/trialing 推 pro_lapses_at；非早鸟 no-op
-  if (status === 'active' || status === 'trialing') {
+  // 同 UPDATE 分支：active/trialing/paused 推 pro_lapses_at；非早鸟 no-op
+  if (status === 'active' || status === 'trialing' || status === 'paused') {
     await extendProLapsesAt(env.DB, userId, periodEnd).catch((err) => {
       log.warn('subscription.extend_pro_lapses_at_failed', { ctxId, err });
     });

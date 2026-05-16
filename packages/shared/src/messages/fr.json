@@ -165,7 +165,7 @@
       "earlyBird": {
         "label": "Early Bird",
         "badge": "Membre fondateur",
-        "statusLabel": "30 % de remise à vie",
+        "statusLabel": "70 % de remise à vie",
         "status": {
           "active": "Actif",
           "grace": "Période de grâce · réabonnez-vous dans {days, number} jours",
@@ -291,32 +291,31 @@
       },
       "earlyBirdBanner": {
         "title": "Membre Early Bird",
-        "body": "30 % de remise à chaque renouvellement, à vie",
+        "body": "70 % de remise à chaque renouvellement, à vie",
         "tooltip": "Restez abonné pour conserver la remise ; 60 jours de grâce après annulation",
         "subscribedHint": "Votre prochain renouvellement sera automatiquement remisé."
       }
     },
     "early-bird": {
       "title": "Early Bird",
-      "subtitle": "Offre limitée pour membres fondateurs.",
+      "metaDescription": "rewrite.so Early Bird : réclamez 90 jours de Pro offerts et gardez Pro à 70 % de remise à vie.",
       "loading": "Chargement…",
       "perks": {
         "title": "Ce que vous obtenez",
         "giftDaysLabel": "{days} jours de Pro offerts",
-        "giftDaysBody": "Activé dès votre inscription ; compte à rebours quotidien.",
+        "giftDaysBody": "Activé dès que vous le réclamez.",
         "discountLabel": "{percentage} % de remise Pro à vie",
-        "discountPricePreview": "${originalMonthly}→${discountedMonthly}/mois · annuel ${originalYearly}→${discountedYearly}/mois",
-        "discountBody": "La remise s'applique automatiquement au paiement tant que vous restez abonné."
+        "discountBody": "Appliquée automatiquement à chaque renouvellement."
       },
       "window": {
-        "title": "Comment la remise à vie reste valable",
-        "body": "Elle reste active tant que vous êtes abonné. Si vous annulez, vous avez {grace} jours pour vous réabonner et la conserver. Après {total} jours sans abonnement actif, l'offre expire définitivement."
+        "title": "Période de grâce de {grace} jours",
+        "body": "Réabonnez-vous dans les {grace} jours suivant la fin de Pro pour conserver la remise ; passé ce délai, elle expire définitivement."
       },
       "cta": {
         "notLoggedIn": "Connectez-vous pour réclamer",
-        "loggedIn": "Réclamer mes avantages Early Bird",
+        "loggedIn": "Réclamer",
         "joining": "Réclamation en cours…",
-        "alreadyJoined": "Continuer vers le paiement"
+        "alreadyJoined": "Aller au paiement"
       },
       "errors": {
         "loadFailed": "Impossible de charger la campagne. Réessayez plus tard.",
@@ -327,7 +326,7 @@
       },
       "ended": {
         "title": "Early Bird est terminé",
-        "body": "Merci pour votre intérêt. Passez à Pro pour continuer à écrire en toute liberté.",
+        "body": "Abonnez-vous à Pro pour continuer.",
         "cta": "Voir les tarifs Pro"
       }
     }
@@ -372,6 +371,9 @@
     "paymentsBy": "Paiements traités par <creem>Creem</creem>, notre Merchant of Record."
   },
   "home": {
+    "earlyBirdBadge": {
+      "label": "Early Bird · 90 jours gratuits + 70 % à vie"
+    },
     "hero": {
       "eyebrow": "Champs pris en charge · Open source",
       "h1Line1": "Écris librement.",

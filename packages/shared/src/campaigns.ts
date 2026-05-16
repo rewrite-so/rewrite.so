@@ -123,6 +123,14 @@ export const CampaignWriteSchema = z.object({
   type: CampaignTypeSchema,
   slug: CampaignSlugSchema,
   enabled: z.boolean(),
+  /**
+   * Marketing visibility toggle (orthogonal to `enabled`). When true the
+   * homepage Hero + TopNav show the campaign entry; when false those
+   * surfaces hide it but URL direct-access still serves the active
+   * campaign. Default false so newly-created campaigns don't accidentally
+   * appear on the homepage. See CLAUDE.md "运营活动契约".
+   */
+  show_homepage_badge: z.boolean().default(false),
   starts_at: z.number().int().nonnegative(),
   ends_at: z.number().int().nonnegative(),
   capacity: z.number().int().positive().nullable(),
@@ -159,6 +167,7 @@ export const CampaignPublicViewSchema = z.object({
   slug: CampaignSlugSchema,
   type: CampaignTypeSchema,
   enabled: z.boolean(),
+  show_homepage_badge: z.boolean(),
   starts_at: z.number().int().nonnegative(),
   ends_at: z.number().int().nonnegative(),
   capacity: z.number().int().positive().nullable(),

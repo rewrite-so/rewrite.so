@@ -12,11 +12,16 @@
  *
  *   更新点（都用 max(原值, 新值) 单调推进；grace 从行内 grace_period_days 列读，
  *   caller 只传 newEndTimestamp 三参数即可）：
- *     1) gift_grants 写入时：调 extendProLapsesAt(db, userId, gift.expires_at)
+ *     1) gift_grants 写入时：由 lib/gift-grants.ts:grantDays helper 自动内嵌
+ *        （extendProLapsesAt + KV invalidate gift_active:<userId>）
  *        — 例外：campaigns.ts 报名路径把 INSERT 打包进 D1 batch，pro_lapses_at 在
- *          INSERT 里就直接赋初值（NULL → MAX(0, x) = x 语义等价于 helper）。
- *     2) webhook subscription.active/trialing：调 extendProLapsesAt(db, userId, sub.current_period_end)
- *     3) webhook subscription.canceled/expired：**不调用**（current_period_end 已在 #2 记录）
+ *          INSERT 里就直接赋初值（NULL → MAX(0, x) = x 语义等价于 helper），
+ *          batch 后再手工调一次 extendProLapsesAt fan-out 覆盖旧 active 行。
+ *     2) webhook subscription.active / trialing / paused：调 extendProLapsesAt(
+ *        db, userId, sub.current_period_end) — paused 必须包含，因为
+ *        resolveUserTier() 把 paused 算 pro，两者语义要一致。
+ *     3) webhook subscription.canceled / expired / past_due：**不调用**
+ *        （current_period_end 已在 #2 记录过）
  *
  *   读取（lazy-on-read，无 cron）：resolveActiveDiscount() 内部检测到
  *   `now > pro_lapses_at` 时写 `status='expired'` 并返 null。

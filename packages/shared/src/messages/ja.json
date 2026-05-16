@@ -165,7 +165,7 @@
       "earlyBird": {
         "label": "アーリーバード",
         "badge": "創設メンバー",
-        "statusLabel": "Pro 生涯 30% オフ",
+        "statusLabel": "Pro 生涯 70% オフ",
         "status": {
           "active": "有効",
           "grace": "猶予期間 · あと {days, number} 日以内に再加入で有効",
@@ -291,30 +291,29 @@
       },
       "earlyBirdBanner": {
         "title": "アーリーバード会員",
-        "body": "更新ごとに自動で 30% オフ",
+        "body": "更新ごとに自動で 70% オフ",
         "tooltip": "サブスクリプションを維持中のみ有効。キャンセル後 60 日間の猶予期間あり",
         "subscribedHint": "次回更新時に自動で割引が適用されます。"
       }
     },
     "early-bird": {
       "title": "アーリーバード",
-      "subtitle": "期間限定の創設メンバー特典。",
+      "metaDescription": "rewrite.so アーリーバード：今すぐ受け取って 90 日間無料 Pro、その後も Pro が生涯 70% オフ。",
       "loading": "読み込み中…",
       "perks": {
         "title": "得られるもの",
         "giftDaysLabel": "Pro を {days} 日間無料",
-        "giftDaysBody": "登録した瞬間から有効、日単位でカウントダウン。",
+        "giftDaysBody": "受け取った瞬間から有効。",
         "discountLabel": "Pro 生涯 {percentage}% オフ",
-        "discountPricePreview": "${originalMonthly}→${discountedMonthly}/月 · 年払い ${originalYearly}→${discountedYearly}/月",
-        "discountBody": "サブスクリプション継続中はチェックアウトで自動適用。"
+        "discountBody": "更新ごとに自動で適用。"
       },
       "window": {
-        "title": "生涯割引の有効条件",
-        "body": "サブスクリプション中はずっと有効。キャンセル後 {grace} 日以内に再加入すれば継続。連続 {total} 日間サブスクリプションがないと失効します。"
+        "title": "{grace} 日間の猶予期間",
+        "body": "Pro 終了後 {grace} 日以内に再加入すれば割引を維持できます。期限を過ぎると失効します。"
       },
       "cta": {
         "notLoggedIn": "ログインして受け取る",
-        "loggedIn": "アーリーバード特典を受け取る",
+        "loggedIn": "受け取る",
         "joining": "受け取り中…",
         "alreadyJoined": "支払いページへ"
       },
@@ -327,7 +326,7 @@
       },
       "ended": {
         "title": "アーリーバードは終了しました",
-        "body": "ご関心ありがとうございます。Pro にアップグレードして引き続きご利用ください。",
+        "body": "Pro に登録して使い続けてください。",
         "cta": "Pro 料金を見る"
       }
     }
@@ -372,6 +371,9 @@
     "paymentsBy": "決済は Merchant of Record である <creem>Creem</creem> が処理しています。"
   },
   "home": {
+    "earlyBirdBadge": {
+      "label": "アーリーバード · 90 日間無料 + 70% 永久オフ"
+    },
     "hero": {
       "eyebrow": "対応している入力欄 · オープンソース",
       "h1Line1": "自由に書いて、",

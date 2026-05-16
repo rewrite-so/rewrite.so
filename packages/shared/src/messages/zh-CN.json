@@ -165,10 +165,10 @@
       "earlyBird": {
         "label": "早鸟计划",
         "badge": "创始会员",
-        "statusLabel": "终生 3 折",
+        "statusLabel": "永久 3 折",
         "status": {
           "active": "生效中",
-          "grace": "宽限期 · 还有 {days, number} 天内续订有效",
+          "grace": "宽限期 · {days, number} 天内续订仍有效",
           "expired": "已失效"
         },
         "giftBalanceLabel": "赠送 Pro 天数",
@@ -291,32 +291,31 @@
       },
       "earlyBirdBanner": {
         "title": "早鸟会员",
-        "body": "每次续费自动享 3 折",
-        "tooltip": "订阅在线时享受优惠；取消后 60 天宽限期内重订仍生效",
-        "subscribedHint": "你下次续费会自动按 3 折计价。"
+        "body": "每次续费自动按 3 折",
+        "tooltip": "订阅期间一直享 3 折；取消后 60 天内重新订阅仍有效",
+        "subscribedHint": "你下次续费会自动按 3 折扣款。"
       }
     },
     "early-bird": {
       "title": "早鸟计划",
-      "subtitle": "限时创始会员福利。",
+      "metaDescription": "rewrite.so 创始会员限时早鸟：领取即享 90 天免费 Pro，订阅后永久 3 折。",
       "loading": "加载中…",
       "perks": {
         "title": "你将获得",
         "giftDaysLabel": "免费 {days} 天 Pro",
-        "giftDaysBody": "报名即刻生效，按天倒计时。",
-        "discountLabel": "Pro 终生 {percentage}% 折扣（3 折）",
-        "discountPricePreview": "${originalMonthly}→${discountedMonthly}/月 · 年付 ${originalYearly}→${discountedYearly}/月",
-        "discountBody": "订阅状态在线时，下单自动按 3 折结算。"
+        "giftDaysBody": "领取后立刻开通。",
+        "discountLabel": "Pro 永久 3 折",
+        "discountBody": "每次续费自动按 3 折。"
       },
       "window": {
-        "title": "终生 3 折如何保持有效",
-        "body": "订阅期内一直有效。取消后还有 {grace} 天的宽限期可重订续命；连续 {total} 天没有有效订阅则永久失效。"
+        "title": "{grace} 天宽限期",
+        "body": "Pro 到期 {grace} 天内续订，保留 3 折权益；超过就作废。"
       },
       "cta": {
         "notLoggedIn": "登录领取",
-        "loggedIn": "领取早鸟权益",
+        "loggedIn": "立即领取",
         "joining": "领取中…",
-        "alreadyJoined": "前往订阅页"
+        "alreadyJoined": "去订阅"
       },
       "errors": {
         "loadFailed": "活动信息加载失败，请稍后再试。",
@@ -326,8 +325,8 @@
         "rateLimit": "操作太频繁，请稍候再试。"
       },
       "ended": {
-        "title": "早鸟活动已结束",
-        "body": "感谢你的关注。升级 Pro 继续畅快写作。",
+        "title": "早鸟计划已结束",
+        "body": "订阅 Pro，继续畅写。",
         "cta": "查看 Pro 价格"
       }
     }
@@ -335,7 +334,7 @@
   "nav": {
     "try": "试用",
     "pricing": "价格",
-    "earlyBird": "早鸟",
+    "earlyBird": "早鸟计划",
     "github": "GitHub",
     "signIn": "登录",
     "install": "安装扩展",
@@ -372,6 +371,9 @@
     "paymentsBy": "支付由 <creem>Creem</creem> 处理，作为我们的 Merchant of Record。"
   },
   "home": {
+    "earlyBirdBadge": {
+      "label": "早鸟计划 · 90 天免费 + 永久 3 折"
+    },
     "hero": {
       "eyebrow": "支持的输入框 · 开源",
       "h1Line1": "随意写，",
