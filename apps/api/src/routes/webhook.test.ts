@@ -62,9 +62,11 @@ function makeDB(
   db: D1Database;
   writes: DBWrite[];
   insertedEventIds: string[];
+  userDiscountUpdates: { bindings: unknown[]; sql: string }[];
 } {
   const writes: DBWrite[] = [];
   const insertedEventIds: string[] = [];
+  const userDiscountUpdates: { bindings: unknown[]; sql: string }[] = [];
   const db = {
     prepare: (sql: string) => ({
       bind: (...args: unknown[]) => ({
@@ -89,6 +91,10 @@ function makeDB(
             writes.push({ kind: 'INSERT', bindings: args, sql });
           } else if (sql.includes('UPDATE subscriptions')) {
             writes.push({ kind: 'UPDATE', bindings: args, sql });
+          } else if (sql.includes('UPDATE user_discounts')) {
+            // Tracked separately so subscription-focused assertions on `writes`
+            // are not perturbed by the new pro_lapses_at side-effect UPDATE.
+            userDiscountUpdates.push({ bindings: args, sql });
           } else if (sql.includes('INSERT INTO webhook_events')) {
             insertedEventIds.push(args[0] as string);
           }
@@ -98,7 +104,7 @@ function makeDB(
       }),
     }),
   } as unknown as D1Database;
-  return { db, writes, insertedEventIds };
+  return { db, writes, insertedEventIds, userDiscountUpdates };
 }
 
 type RecordedEvent = { indexes: string[]; blobs: string[]; doubles: number[] };
@@ -368,6 +374,23 @@ describe('routeEvent — web event emission', () => {
     const res = await postWebhook(envelope('subscription.expired', subFixture()), env);
     expect(res.status).toBe(200);
     expect(eventsWritten[0]?.indexes).toEqual(['subscription_canceled']);
+  });
+
+  // 治根 B：paused 必须推 pro_lapses_at，与 resolveUserTier 把 paused 算 pro 一致。
+  // 漏掉会让长期 paused 用户的折扣提前于真实 sub_end+60d 失效。
+  it('subscription.paused triggers extendProLapsesAt UPDATE on user_discounts', async () => {
+    const { db, userDiscountUpdates } = makeDB({
+      existingSubId: 'sub_2jpgISCbTZv3UTlnMQkGl3',
+    });
+    const res = await postWebhook(
+      envelope('subscription.paused', subFixture({ status: 'paused' }), 'evt_paused_test'),
+      makeEnv(db),
+    );
+    expect(res.status).toBe(200);
+    expect(userDiscountUpdates).toHaveLength(1);
+    // args order in extendProLapsesAt: newEndTimestamp, MS_PER_DAY, now, userId
+    const userId = userDiscountUpdates[0]?.bindings[3] as string;
+    expect(userId).toBe('joALmu5aCupEwAZ0hI3M3V1pdfZmsxTP');
   });
 
   it('subscription.past_due / paused / scheduled_cancel / update do NOT emit web events', async () => {

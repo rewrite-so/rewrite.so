@@ -17,11 +17,17 @@ interface Row {
  * Minimal in-memory gift_grants table fake supporting:
  *  - INSERT OR IGNORE (PK = id)
  *  - SELECT MAX(expires_at) WHERE user/status/expires_at filter
+ *  - UPDATE user_discounts SET pro_lapses_at — counts invocations for side-effect assertions
  *
- * Returns { db, rows } so tests can assert on the persisted state.
+ * Returns { db, rows, extendCalls } so tests can assert on the persisted state.
  */
-function makeFakeDb(): { db: D1Database; rows: Row[] } {
+function makeFakeDb(): {
+  db: D1Database;
+  rows: Row[];
+  extendCalls: { newEnd: number; userId: string }[];
+} {
   const rows: Row[] = [];
+  const extendCalls: { newEnd: number; userId: string }[] = [];
   const db = {
     prepare: (sql: string) => ({
       bind: (...args: unknown[]) => ({
@@ -79,13 +85,30 @@ function makeFakeDb(): { db: D1Database; rows: Row[] } {
             });
             return { success: true, meta: { changes: 1 } };
           }
+          if (sql.includes('UPDATE user_discounts') && sql.includes('pro_lapses_at')) {
+            // bindings: newEndTimestamp, MS_PER_DAY, now, userId
+            const [newEnd, _msPerDay, _now, userId] = args as [number, number, number, string];
+            extendCalls.push({ newEnd, userId });
+            return { success: true, meta: { changes: 0 } };
+          }
           return { success: true, meta: { changes: 0 } };
         },
         all: async () => ({ results: [], success: true }),
       }),
     }),
   } as unknown as D1Database;
-  return { db, rows };
+  return { db, rows, extendCalls };
+}
+
+function makeFakeKv(): { kv: KVNamespace; deleted: string[] } {
+  const deleted: string[] = [];
+  const kv = {
+    delete: async (key: string) => {
+      deleted.push(key);
+      return undefined;
+    },
+  } as unknown as KVNamespace;
+  return { kv, deleted };
 }
 
 describe('computeGrantId', () => {
@@ -222,6 +245,66 @@ describe('grantDays', () => {
       baseEnd: Date.now(),
     });
     expect(r2.granted_at).toBe(newGiftMax);
+  });
+});
+
+describe('grantDays — embedded side effects', () => {
+  // 治根 A：helper 自给自足，未来 caller (admin 补偿 / 礼品卡 / 抽奖) 不再
+  // 需要手工记得调 extendProLapsesAt + KV invalidate
+  it('calls extendProLapsesAt with expires_at after successful insert', async () => {
+    const { db, rows, extendCalls } = makeFakeDb();
+    const r = await grantDays(db, {
+      userId: 'u1',
+      days: 90,
+      sourceKind: 'admin',
+      sourceId: 'admin_test:1',
+    });
+    expect(r.isDuplicate).toBe(false);
+    expect(extendCalls).toHaveLength(1);
+    const call = extendCalls[0];
+    if (!call) throw new Error('expected extend call');
+    expect(call.userId).toBe('u1');
+    const row0 = rows[0];
+    if (!row0) throw new Error('expected row[0]');
+    expect(call.newEnd).toBe(row0.expires_at);
+  });
+
+  it('invalidates gift_active:<userId> KV key when kv option provided', async () => {
+    const { db } = makeFakeDb();
+    const { kv, deleted } = makeFakeKv();
+    await grantDays(
+      db,
+      { userId: 'u_abc', days: 30, sourceKind: 'admin', sourceId: 'admin_test:1' },
+      { kv },
+    );
+    expect(deleted).toEqual(['gift_active:u_abc']);
+  });
+
+  it('skips side effects on duplicate insert (PK conflict)', async () => {
+    const { db, extendCalls } = makeFakeDb();
+    const { kv, deleted } = makeFakeKv();
+    const input = {
+      userId: 'u1',
+      days: 90,
+      sourceKind: 'campaign' as const,
+      sourceId: 'camp_early',
+    };
+    await grantDays(db, input, { kv });
+    await grantDays(db, input, { kv }); // retry → duplicate
+    expect(extendCalls).toHaveLength(1); // only first call ran side effects
+    expect(deleted).toEqual(['gift_active:u1']);
+  });
+
+  it('does not throw when kv option omitted (test convenience path)', async () => {
+    const { db, extendCalls } = makeFakeDb();
+    const r = await grantDays(db, {
+      userId: 'u1',
+      days: 1,
+      sourceKind: 'system',
+      sourceId: 's:1',
+    });
+    expect(r.isDuplicate).toBe(false);
+    expect(extendCalls).toHaveLength(1);
   });
 });
 

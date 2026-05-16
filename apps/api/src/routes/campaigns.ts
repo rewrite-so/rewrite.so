@@ -29,6 +29,7 @@ import { computeGrantId } from '../lib/gift-grants.ts';
 import { log } from '../lib/log.ts';
 import { GIFT_ACTIVE_CACHE_PREFIX, resolveUserTier } from '../lib/quota.ts';
 import { getOrResolveSessionUser } from '../lib/session-cache.ts';
+import { extendProLapsesAt } from '../lib/user-discounts.ts';
 import type { AppEnv } from '../types.ts';
 
 export const campaignsRoute = new Hono<AppEnv>();
@@ -356,6 +357,15 @@ campaignsRoute.post('/v1/campaigns/:slug/join', async (c) => {
   if (c.env.KV && typeof c.env.KV.delete === 'function') {
     c.env.KV.delete(`${GIFT_ACTIVE_CACHE_PREFIX}${sessionUser.id}`).catch(() => undefined);
   }
+
+  // Phase 2 多 campaign 安全网：batch 里 INSERT OR IGNORE 只给本 campaign 行赋
+  // 初始 pro_lapses_at，不会更新用户已有的其他 active user_discounts 行。这里
+  // 显式 fan-out 推一次，让所有 active 行（含本次新写的）都被推到 max(原值,
+  // giftExpiresAt + grace)。Phase 1 单活动场景下对新写行是恒等操作（MAX(X, X)），
+  // 无副作用；Phase 2 时自动正确。
+  await extendProLapsesAt(c.env.DB, sessionUser.id, giftExpiresAt).catch((err) => {
+    log.warn('campaign.extend_pro_lapses_at_failed', { slug, userId: sessionUser.id, err });
+  });
 
   // emit campaign_join event（容错吞错，不影响响应）
   if (c.env.EVENTS_DISABLED !== '1') {

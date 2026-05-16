@@ -266,15 +266,33 @@ type-specific 配置走 `config_json`（schema 在 `packages/shared/src/campaign
 - **`pro_lapses_at` 是单调递增状态机**：「按当前已知信息，Pro 资格预计在这
   个时间点彻底丢失（已含 60 天宽限）」。更新点都用 `max(原值, 新值)`：
   1. `gift_grants` 写入时：推到 `gift.expires_at + grace_period_days*86400000`
-  2. webhook `subscription.active / trialing`：推到 `sub.current_period_end + grace`
-  3. webhook `subscription.canceled / expired`：**不更新**（current_period_end 已记在 #2）
+     —— 由 `lib/gift-grants.ts:grantDays` helper 自动内嵌（同时 invalidate
+     `gift_active:<userId>` KV），caller 不需要手工调。**例外**：D1 batch 场景
+     （`POST /v1/campaigns/:slug/join` 把三表 INSERT 打到原子 batch）helper 用不了，
+     由 routes/campaigns.ts 自行：(a) INSERT 时给新 user_discounts 行直接赋初始
+     `pro_lapses_at`；(b) batch 成功后显式调 `extendProLapsesAt()` 把所有 active
+     行（含未来 Phase 2 multi-campaign 的旧 row）一起推；(c) 显式 `KV.delete`
+     gift_active key。
+  2. webhook `subscription.active / trialing / paused`：推到 `sub.current_period_end + grace`
+     —— `paused` 必须包含，因为 `resolveUserTier()` 把 paused 算 pro，两边语义要一致；
+     漏掉会让长期 paused 用户的 pro_lapses_at 提前于真实 sub_end+60d 失效。
+  3. webhook `subscription.canceled / expired / past_due`：**不更新**（current_period_end
+     已记在 #2）
   
   读取走 lazy-on-read：`resolveActiveDiscount()` 内部检测 `now > pro_lapses_at`
   时写 `status='expired'` 并返 null（无 cron）。/v1/me 路径不写副作用，由
   checkout 时真正裁决。
+- **`extendProLapsesAt` WHERE `status='active'` — expired 行不会被复活**：一旦
+  lazy 写 expired，后续任何 webhook / gift_grant 都救不回。这是产品决策
+  「丢资格不可恢复」的硬保证。**运营陷阱**：admin 给 expired 用户加 gift_grants 时
+  用户 tier 会回 pro（resolveUserTier 看 gift_grants），但 user_discounts 仍
+  expired → 不享 3 折。如果业务要复活折扣，必须是 admin 显式操作（直接 UPDATE
+  user_discounts 把 status 改回 active + 推 pro_lapses_at），不要默认行为。
 - **「报名但从未订阅过」用户**：`pro_lapses_at` 在 gift 写入时已推到
   `gift_end + grace`（约 150 天）。该窗口内首次订阅享 3 折；超过 150 天失
-  效永久。这是产品决策（用户已确认）。
+  效永久。这是产品决策（用户已确认）。**注意**：150 这个数字只对这一种用户准确；
+  其他用户的失效时点是 `last_pro_end + 60d`（每段 Pro 期满都把失效线往后推）。
+  /early-bird 页面文案描述的是后者（通用语义），不要把 150 当通用上限来宣传。
 - **`grace_period_days` 写入 user_discounts 行后是 per-user 字段**：admin
   改活动 config 只影响**新报名**，已有 user 的宽限值不变。`extendProLapsesAt()`
   从 row 自己读 grace（caller 不需要知道）。

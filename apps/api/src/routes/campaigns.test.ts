@@ -354,4 +354,29 @@ describe('POST /v1/campaigns/:slug/join', () => {
     expect(duration).toBe('forever');
     expect(grace).toBe(60);
   });
+
+  // 治根 D：batch 后 fan-out extendProLapsesAt 安全网，让 Phase 2 multi-campaign
+  // 场景下旧 active user_discounts row 也被推到新 giftExpiresAt + grace
+  it('join batch success triggers extendProLapsesAt UPDATE on user_discounts', async () => {
+    mockSession = { user: { id: 'u1', email: 'u@test.com' } };
+    const state = makeState();
+    await app.request('/v1/campaigns/early-bird/join', { method: 'POST' }, makeEnv(state));
+    const update = state.trace.find(
+      (t) =>
+        t.sql.includes('UPDATE user_discounts') &&
+        t.sql.includes('pro_lapses_at') &&
+        t.sql.includes('MAX(COALESCE'),
+    );
+    if (!update) {
+      throw new Error('expected extendProLapsesAt UPDATE after batch');
+    }
+    // args: newEndTimestamp, MS_PER_DAY, now, userId
+    const userId = update.args[3] as string;
+    expect(userId).toBe('u1');
+    // newEndTimestamp should be giftExpiresAt = now + 90d (no sub / no gift baseline)
+    const newEnd = update.args[0] as number;
+    const giftExpected = Date.now() + 90 * 86400000;
+    // 1s tolerance for test timing
+    expect(Math.abs(newEnd - giftExpected)).toBeLessThan(1000);
+  });
 });
