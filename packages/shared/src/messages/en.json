@@ -303,7 +303,7 @@
         "title": "What you get",
         "giftDaysLabel": "{days} days of Pro, free",
         "giftDaysBody": "Activated the moment you claim it.",
-        "discountLabel": "{percentage}% off Pro for life",
+        "discountLabel": "Lifetime {percentage}% off Pro",
         "discountPricePreview": "${originalMonthly}→${discountedMonthly}/mo · ${originalYearly}→${discountedYearly}/mo annual",
         "discountBody": "Auto-applied to every renewal."
       },
@@ -372,7 +372,7 @@
   },
   "home": {
     "earlyBirdBadge": {
-      "label": "Early Bird · 90 days free + 70% off forever"
+      "label": "Early Bird · 90 days free + lifetime 70% off"
     },
     "hero": {
       "eyebrow": "Supported text fields. Open source.",
