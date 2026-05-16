@@ -206,8 +206,7 @@ export default function EarlyBirdClient({ locale }: { locale: string }) {
           {t('perks.giftDaysBody')}
         </li>
         <li style={PERK_ITEM}>
-          <strong>{t('perks.discountLabel', { percentage })}</strong> —{' '}
-          {t('perks.discountBody')}
+          <strong>{t('perks.discountLabel', { percentage })}</strong> — {t('perks.discountBody')}
         </li>
       </ul>
 
