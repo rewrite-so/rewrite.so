@@ -309,7 +309,7 @@
       },
       "window": {
         "title": "60 天宽限期",
-        "body": "Pro 到期 {grace} 天内续订，3 折继续有效；超过就作废。"
+        "body": "Pro 到期 {grace} 天内续订，保留 3 折权益；超过就作废。"
       },
       "cta": {
         "notLoggedIn": "登录领取",
