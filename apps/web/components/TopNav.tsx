@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '../i18n/navigation.ts';
+import { getCampaignEntryState } from '../lib/campaign-entry.ts';
 import { getExtensionInstallUrl } from '../lib/extension-install-url.ts';
 import { CtaLink } from './CtaLink.tsx';
 import { LanguageSwitcher } from './LanguageSwitcher.tsx';
@@ -66,38 +67,18 @@ async function getCurrentUser(): Promise<MeUser | null> {
   }
 }
 
-/**
- * Check whether the early-bird campaign is currently active (admin enabled +
- * within time window). Returns false when missing / disabled / past ends_at;
- * any error returns false so the nav link stays hidden by default.
- *
- * SSR fetch — runs per request. KV cache (60s TTL) on the api side limits D1
- * hits even with high traffic. Phase 2+ may want to memoize in Next's request
- * cache or pre-fetch from a single layout if multiple components need it.
- */
-async function isEarlyBirdActive(): Promise<boolean> {
-  try {
-    const apiBase = process.env.API_BASE_URL ?? 'http://localhost:8787';
-    const res = await fetch(`${apiBase}/v1/campaigns/early-bird`, { cache: 'no-store' });
-    if (!res.ok) return false;
-    const data = (await res.json()) as {
-      enabled?: boolean;
-      starts_at?: number;
-      ends_at?: number;
-    };
-    if (!data.enabled) return false;
-    const now = Date.now();
-    if (data.starts_at && now < data.starts_at) return false;
-    if (data.ends_at && now > data.ends_at) return false;
-    return true;
-  } catch {
-    return false;
-  }
-}
+// Early Bird link visibility now flows through the shared
+// `getCampaignEntryState('early-bird')` helper (apps/web/lib/campaign-entry.ts),
+// which also drives the homepage Hero badge. The two surfaces are locked
+// together via the `show_homepage_badge` column on the campaigns row — so
+// `state.showBadge` is the single condition for showing either.
 
 export async function TopNav() {
   const t = await getTranslations('nav');
-  const [user, earlyBirdActive] = await Promise.all([getCurrentUser(), isEarlyBirdActive()]);
+  const [user, earlyBirdEntry] = await Promise.all([
+    getCurrentUser(),
+    getCampaignEntryState('early-bird'),
+  ]);
   const isAuthed = user !== null;
 
   return (
@@ -157,7 +138,7 @@ export async function TopNav() {
           <Link href="/pricing" style={NAV_LINK}>
             {t('pricing')}
           </Link>
-          {earlyBirdActive && (
+          {earlyBirdEntry.showBadge && (
             <Link href="/early-bird" style={{ ...NAV_LINK, color: '#7a5a18', fontWeight: 500 }}>
               {t('earlyBird')}
             </Link>

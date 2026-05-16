@@ -133,6 +133,57 @@ describe('CampaignWriteSchema', () => {
       }).success,
     ).toBe(true);
   });
+
+  it('defaults show_homepage_badge to false when omitted (backward-compat with pre-0010 rows)', () => {
+    const result = CampaignWriteSchema.safeParse({
+      type: 'early_bird',
+      slug: 'early-bird',
+      enabled: true,
+      starts_at: 1700000000000,
+      ends_at: 1800000000000,
+      capacity: null,
+      config_json: VALID_EARLY_BIRD_CONFIG,
+      i18n_json: VALID_I18N,
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.show_homepage_badge).toBe(false);
+    }
+  });
+
+  it('accepts show_homepage_badge = true', () => {
+    const result = CampaignWriteSchema.safeParse({
+      type: 'early_bird',
+      slug: 'early-bird',
+      enabled: true,
+      show_homepage_badge: true,
+      starts_at: 1700000000000,
+      ends_at: 1800000000000,
+      capacity: null,
+      config_json: VALID_EARLY_BIRD_CONFIG,
+      i18n_json: VALID_I18N,
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.show_homepage_badge).toBe(true);
+    }
+  });
+
+  it('rejects non-boolean show_homepage_badge', () => {
+    expect(
+      CampaignWriteSchema.safeParse({
+        type: 'early_bird',
+        slug: 'early-bird',
+        enabled: true,
+        show_homepage_badge: 'yes',
+        starts_at: 1,
+        ends_at: 2,
+        capacity: null,
+        config_json: VALID_EARLY_BIRD_CONFIG,
+        i18n_json: VALID_I18N,
+      }).success,
+    ).toBe(false);
+  });
 });
 
 describe('getCampaignConfigSchema', () => {

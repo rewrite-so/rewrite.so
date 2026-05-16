@@ -2,6 +2,8 @@ import { PRO_PRICE, QUOTA } from '@rewrite/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { CtaLink } from '../../components/CtaLink.tsx';
+import { EarlyBirdBadge } from '../../components/EarlyBirdBadge.tsx';
+import { getCampaignEntryState } from '../../lib/campaign-entry.ts';
 import { getExtensionInstallUrl } from '../../lib/extension-install-url.ts';
 import styles from './HomePage.module.css';
 import { HomeRewriteDemo } from './HomeRewriteDemo.tsx';
@@ -22,6 +24,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations('home');
+  const earlyBirdEntry = await getCampaignEntryState('early-bird');
 
   const demoCopy = {
     anyInput: t('demo.anyInput'),
@@ -49,6 +52,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         <div className={styles.heroWash} aria-hidden="true" />
         <div className={styles.heroInner}>
           <div className={styles.heroCopy}>
+            {earlyBirdEntry.showBadge && <EarlyBirdBadge />}
             <p className={styles.eyebrow}>{t('hero.eyebrow')}</p>
             <h1 className={styles.heroTitle}>rewrite.so</h1>
             <p className={styles.heroStatement}>

@@ -372,6 +372,9 @@
     "paymentsBy": "결제는 Merchant of Record인 <creem>Creem</creem>을(를) 통해 처리됩니다."
   },
   "home": {
+    "earlyBirdBadge": {
+      "label": "얼리버드 · 90일 무료 + 평생 30% 할인"
+    },
     "hero": {
       "eyebrow": "지원되는 입력란 · 오픈소스",
       "h1Line1": "자유롭게 쓰고,",

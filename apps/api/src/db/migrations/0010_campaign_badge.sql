@@ -1,0 +1,18 @@
+-- Add `show_homepage_badge` as a top-level meta-column on campaigns.
+--
+-- Decouples marketing exposure (homepage hero + TopNav entry) from the
+-- business `enabled` flag (signup acceptance + URL serving real content
+-- vs "ended" state). Allows staged rollout:
+--   enabled=true + show_homepage_badge=false → URL direct-access only,
+--     useful for soft launch / customer-support email seeding.
+--   enabled=true + show_homepage_badge=true  → fully public.
+--
+-- This is a generic campaign meta-attribute (NOT type-specific perks),
+-- so it lives as a top-level column alongside `enabled`, not inside
+-- `config_json`. Every campaign type (early_bird now; gift_card,
+-- referral, promo in the future) shares the same toggle.
+--
+-- Default 0 (false): existing prod rows backfill to "no badge" — current
+-- behaviour is preserved until admin explicitly turns it on per campaign.
+-- Zero rollback risk.
+ALTER TABLE campaigns ADD COLUMN show_homepage_badge INTEGER NOT NULL DEFAULT 0;

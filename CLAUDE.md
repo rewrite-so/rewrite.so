@@ -237,6 +237,20 @@ type-specific 配置走 `config_json`（schema 在 `packages/shared/src/campaign
 - **「早鸟」slug hardcode 是 Phase 1 妥协**：前端 `/early-bird` 路径与 slug
   `early-bird` 绑定。Phase 2+ 多活动并行时重构为 `/campaigns/[slug]` 动态
   路由 + admin SPA 显式配 slug。
+- **`enabled` vs `show_homepage_badge` 是两个正交开关**：两个顶层列各管一件事，
+  千万别混。
+  - `enabled` = **业务开关**：决定 `POST /v1/campaigns/:slug/join` 是否接受报名
+    + `GET /v1/campaigns/:slug` 是否返活动内容（vs 渲染「已结束」section）+
+    `/early-bird` 页面 active 还是 ended 状态。
+  - `show_homepage_badge` = **营销开关**：决定首页 hero badge + TopNav Early Bird
+    链接是否展示。URL 直达不受影响（`/early-bird` 仍 serve active 内容）。
+  - 4 种组合中最常用「灰度上线」= `enabled=true + show_homepage_badge=false`：
+    URL 直达可用（给客服/邮件预热），但首页 / TopNav 静默。验证 OK 后再翻 badge
+    开关公开推送。
+  - 两个 web 入口（hero badge + TopNav 链接）由同一 helper
+    `apps/web/lib/campaign-entry.ts:getCampaignEntryState(slug)` 决定，
+    `showBadge = active && show_homepage_badge`。两个入口同步显示/隐藏，
+    不存在「TopNav 有但首页没」的中间状态。
 
 ### 3 折折扣 / user_discounts 宽限规则
 

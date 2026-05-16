@@ -372,6 +372,9 @@
     "paymentsBy": "支付由 <creem>Creem</creem> 处理，作为我们的 Merchant of Record。"
   },
   "home": {
+    "earlyBirdBadge": {
+      "label": "早鸟 · 90 天免费 + 终生 3 折"
+    },
     "hero": {
       "eyebrow": "支持的输入框 · 开源",
       "h1Line1": "随意写，",

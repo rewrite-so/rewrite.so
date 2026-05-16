@@ -42,6 +42,7 @@ interface CampaignRow {
   type: string;
   slug: string;
   enabled: number;
+  show_homepage_badge: number;
   starts_at: number;
   ends_at: number;
   capacity: number | null;
@@ -54,6 +55,7 @@ interface ParsedCampaign {
   type: CampaignType;
   slug: string;
   enabled: boolean;
+  show_homepage_badge: boolean;
   starts_at: number;
   ends_at: number;
   capacity: number | null;
@@ -100,7 +102,8 @@ async function writeCampaignCache(
 async function fetchCampaignBySlug(db: D1Database, slug: string): Promise<ParsedCampaign | null> {
   const row = await db
     .prepare(
-      `SELECT id, type, slug, enabled, starts_at, ends_at, capacity, config_json, i18n_json
+      `SELECT id, type, slug, enabled, show_homepage_badge,
+              starts_at, ends_at, capacity, config_json, i18n_json
          FROM campaigns
         WHERE slug = ?
         LIMIT 1`,
@@ -123,6 +126,7 @@ async function fetchCampaignBySlug(db: D1Database, slug: string): Promise<Parsed
     type: row.type as CampaignType,
     slug: row.slug,
     enabled: row.enabled === 1,
+    show_homepage_badge: row.show_homepage_badge === 1,
     starts_at: row.starts_at,
     ends_at: row.ends_at,
     capacity: row.capacity,
@@ -175,6 +179,7 @@ campaignsRoute.get('/v1/campaigns/:slug', async (c) => {
     slug: campaign.slug,
     type: campaign.type,
     enabled: campaign.enabled,
+    show_homepage_badge: campaign.show_homepage_badge,
     starts_at: campaign.starts_at,
     ends_at: campaign.ends_at,
     capacity: campaign.capacity,

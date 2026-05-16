@@ -372,6 +372,9 @@
     "paymentsBy": "Zahlungen abgewickelt von <creem>Creem</creem>, unserem Merchant of Record."
   },
   "home": {
+    "earlyBirdBadge": {
+      "label": "Early Bird · 90 Tage gratis + 30 % lebenslang"
+    },
     "hero": {
       "eyebrow": "Unterstützte Eingabefelder · Open Source",
       "h1Line1": "Frei schreiben.",

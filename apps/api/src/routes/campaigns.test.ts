@@ -32,6 +32,7 @@ interface FakeCampaign {
   type: string;
   slug: string;
   enabled: number;
+  show_homepage_badge: number;
   starts_at: number;
   ends_at: number;
   capacity: number | null;
@@ -120,6 +121,7 @@ function makeCampaign(overrides: Partial<FakeCampaign> = {}): FakeCampaign {
     type: 'early_bird',
     slug: 'early-bird',
     enabled: 1,
+    show_homepage_badge: 0,
     starts_at: now - 86400000,
     ends_at: now + 86400000 * 30,
     capacity: null,
@@ -171,6 +173,21 @@ describe('GET /v1/campaigns/:slug', () => {
     expect(body.slug).toBe('early-bird');
     expect(body.enabled).toBe(true);
     expect(body).not.toHaveProperty('viewer');
+  });
+
+  it('exposes show_homepage_badge=false by default', async () => {
+    mockSession = null;
+    const res = await app.request('/v1/campaigns/early-bird', {}, makeEnv(makeState()));
+    const body = (await res.json()) as { show_homepage_badge: boolean };
+    expect(body.show_homepage_badge).toBe(false);
+  });
+
+  it('exposes show_homepage_badge=true when D1 column is 1', async () => {
+    mockSession = null;
+    const state = makeState({ campaign: makeCampaign({ show_homepage_badge: 1 }) });
+    const res = await app.request('/v1/campaigns/early-bird', {}, makeEnv(state));
+    const body = (await res.json()) as { show_homepage_badge: boolean };
+    expect(body.show_homepage_badge).toBe(true);
   });
 
   it('includes viewer.joined when authed and not joined yet', async () => {
