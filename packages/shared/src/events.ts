@@ -32,6 +32,8 @@ export const EVENT_NAMES = [
   'subscription_paid', // props: { plan } — emitted server-side from webhook
   'subscription_canceled',
   'byok_save', // props: { has_been_set_before: 0|1 } — never the key
+  // ---- Campaigns / promotions ----
+  'campaign_join', // props: { campaign_slug, campaign_type } — emitted server-side from POST /v1/campaigns/:slug/join
 ] as const;
 
 export type EventName = (typeof EVENT_NAMES)[number];

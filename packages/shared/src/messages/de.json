@@ -162,6 +162,20 @@
         "autoSystem": "Auto (Systemeinstellung folgen)",
         "autoFromPage": "Seitensprache automatisch erkennen"
       },
+      "earlyBird": {
+        "label": "Early Bird",
+        "badge": "Gründungsmitglied",
+        "statusLabel": "Lebenslang 30 % Rabatt",
+        "status": {
+          "active": "Aktiv",
+          "grace": "Kulanzzeit · innerhalb von {days, number} Tagen erneut abonnieren",
+          "expired": "Abgelaufen"
+        },
+        "giftBalanceLabel": "Geschenkte Pro-Tage",
+        "giftBalanceValue": "Noch {days, number} Tage",
+        "proSourceLabel": "Pro-Quelle",
+        "proSourceSubscription": "Abonnement · verlängert am {date}"
+      },
       "sub": {
         "label": "Abonnement",
         "statusLabel": "Status",
@@ -274,12 +288,54 @@
         "ctaRedirecting": "Wird weitergeleitet…",
         "ctaMonthly": "Pro Monatlich abonnieren",
         "ctaAnnual": "Pro Jährlich abonnieren"
+      },
+      "earlyBirdBanner": {
+        "title": "Early Bird-Mitglied",
+        "body": "30 % Rabatt bei jeder Verlängerung, lebenslang",
+        "tooltip": "Bleibe abonniert, um den Rabatt zu behalten; 60 Tage Kulanzzeit nach Kündigung",
+        "subscribedHint": "Deine nächste Verlängerung wird automatisch rabattiert."
+      }
+    },
+    "early-bird": {
+      "title": "Early Bird",
+      "subtitle": "Begrenztes Angebot für Gründungsmitglieder.",
+      "loading": "Lädt …",
+      "perks": {
+        "title": "Was du bekommst",
+        "giftDaysLabel": "{days} Tage Pro gratis",
+        "giftDaysBody": "Sofort nach Anmeldung aktiv; Countdown pro Tag.",
+        "discountLabel": "{percentage} % Pro-Rabatt lebenslang",
+        "discountPricePreview": "${originalMonthly}→${discountedMonthly}/Monat · jährlich ${originalYearly}→${discountedYearly}/Monat",
+        "discountBody": "Der Rabatt wird beim Checkout automatisch angewendet, solange dein Abo aktiv bleibt."
+      },
+      "window": {
+        "title": "So bleibt der lebenslange Rabatt gültig",
+        "body": "Er bleibt aktiv, solange du abonniert bist. Bei Kündigung hast du {grace} Tage, um wieder zu abonnieren und den Rabatt zu behalten. Nach {total} Tagen ohne aktives Abo verfällt das Angebot endgültig."
+      },
+      "cta": {
+        "notLoggedIn": "Anmelden, um einzulösen",
+        "loggedIn": "Early Bird-Vorteile einlösen",
+        "joining": "Einlösen …",
+        "alreadyJoined": "Zur Zahlung"
+      },
+      "errors": {
+        "loadFailed": "Kampagne konnte nicht geladen werden. Bitte später erneut versuchen.",
+        "generic": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
+        "ended": "Diese Kampagne ist gerade beendet.",
+        "full": "Diese Kampagne ist voll.",
+        "rateLimit": "Zu viele Versuche. Bitte eine Minute warten."
+      },
+      "ended": {
+        "title": "Early Bird ist beendet",
+        "body": "Danke für dein Interesse. Wechsle zu Pro, um weiter frei zu schreiben.",
+        "cta": "Pro-Preise anzeigen"
       }
     }
   },
   "nav": {
     "try": "Testen",
     "pricing": "Preise",
+    "earlyBird": "Early Bird",
     "github": "GitHub",
     "signIn": "Anmelden",
     "install": "Erweiterung installieren",

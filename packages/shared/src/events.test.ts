@@ -24,6 +24,7 @@ describe('events whitelist', () => {
       'subscription_paid',
       'subscription_canceled',
       'byok_save',
+      'campaign_join',
     ]);
   });
 

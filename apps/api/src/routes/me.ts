@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { BURST_BUCKETS, consume } from '../do/rate-limiter.ts';
 import { encryptApiKey } from '../lib/crypto.ts';
+import { resolveEarlyBirdSnapshot } from '../lib/early-bird.ts';
 import { hashSubjectId, validateEventProps, writeEventPoint } from '../lib/event-metrics.ts';
 import { log } from '../lib/log.ts';
 import {
@@ -88,7 +89,15 @@ meRoute.get('/v1/me/usage', async (c) => {
 meRoute.get('/v1/me', async (c) => {
   const eventsEnabled = c.env.EVENTS_DISABLED !== '1';
   const sessionUser = await getOrResolveSessionUser(c);
-  if (!sessionUser) return c.json({ user: null, subscription: null, eventsEnabled });
+  if (!sessionUser) {
+    return c.json({
+      user: null,
+      subscription: null,
+      earlyBird: null,
+      giftBalanceDays: 0,
+      eventsEnabled,
+    });
+  }
 
   const sub = await c.env.DB.prepare(
     `SELECT plan, status, current_period_end, cancel_at_period_end
@@ -106,6 +115,7 @@ meRoute.get('/v1/me', async (c) => {
     }>();
 
   const tier = await resolveUserTier(c.env.DB, sessionUser.id, c.env.KV);
+  const earlyBird = await resolveEarlyBirdSnapshot(c.env.DB, sessionUser.id);
 
   return c.json({
     user: {
@@ -123,6 +133,8 @@ meRoute.get('/v1/me', async (c) => {
           cancelAtPeriodEnd: sub.cancel_at_period_end === 1,
         }
       : null,
+    earlyBird: earlyBird.snapshot,
+    giftBalanceDays: earlyBird.giftBalanceDays,
     eventsEnabled,
   });
 });

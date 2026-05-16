@@ -43,6 +43,12 @@ export interface CreateCheckoutInput {
   customerEmail: string;
   /** metadata 会 echo 回 webhook，方便我们关联到内部 user */
   metadata?: Record<string, string>;
+  /**
+   * 折扣码（早鸟 prod 当前 = 'ISIZATWC8P'；来源 campaigns.config_json）。由 caller 通过
+   * resolveActiveDiscount() 查 user_discounts 决定是否注入。Creem 不支持
+   * customer-bound 折扣，所以每次 checkout 必须显式传码。omit = 走原价。
+   */
+  discountCode?: string;
 }
 
 export interface CreateCheckoutOutput {
@@ -67,6 +73,7 @@ export async function createCheckoutSession(
       success_url: input.successUrl,
       customer: { email: input.customerEmail },
       metadata: input.metadata ?? {},
+      ...(input.discountCode ? { discount_code: input.discountCode } : {}),
     }),
   });
 

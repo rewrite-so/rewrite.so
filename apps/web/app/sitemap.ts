@@ -9,6 +9,7 @@ const PUBLIC_PATHS = [
   '/',
   '/try',
   '/pricing',
+  '/early-bird',
   '/login',
   '/contact',
   '/terms',

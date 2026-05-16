@@ -162,6 +162,20 @@
         "autoSystem": "Auto (use system)",
         "autoFromPage": "Auto-detect from page"
       },
+      "earlyBird": {
+        "label": "Early Bird",
+        "badge": "Founding member",
+        "statusLabel": "Lifetime 30% off",
+        "status": {
+          "active": "Active",
+          "grace": "Grace period · re-subscribe within {days, number} days",
+          "expired": "Expired"
+        },
+        "giftBalanceLabel": "Gift Pro days",
+        "giftBalanceValue": "{days, number} days remaining",
+        "proSourceLabel": "Pro source",
+        "proSourceSubscription": "Subscription · renews {date}"
+      },
       "sub": {
         "label": "Subscription",
         "statusLabel": "Status",
@@ -274,12 +288,54 @@
         "ctaRedirecting": "Redirecting…",
         "ctaMonthly": "Subscribe to Pro Monthly",
         "ctaAnnual": "Subscribe to Pro Annual"
+      },
+      "earlyBirdBanner": {
+        "title": "Early Bird member",
+        "body": "Lifetime 30% off on every renewal",
+        "tooltip": "Stay subscribed to keep the discount; a 60-day grace period applies after cancellation",
+        "subscribedHint": "Your next renewal is automatically discounted."
+      }
+    },
+    "early-bird": {
+      "title": "Early Bird",
+      "subtitle": "Limited-time founding member offer.",
+      "loading": "Loading…",
+      "perks": {
+        "title": "What you get",
+        "giftDaysLabel": "{days} days of Pro, free",
+        "giftDaysBody": "Activated the moment you sign up; counts down day by day.",
+        "discountLabel": "{percentage}% off Pro for life",
+        "discountPricePreview": "${originalMonthly}→${discountedMonthly}/mo · ${originalYearly}→${discountedYearly}/mo annual",
+        "discountBody": "Discount applies automatically at checkout while you stay subscribed."
+      },
+      "window": {
+        "title": "How the lifetime discount stays valid",
+        "body": "The discount stays active while you're subscribed. If you cancel, you have {grace} days to re-subscribe and keep it. After {total} days without an active subscription, the offer expires permanently."
+      },
+      "cta": {
+        "notLoggedIn": "Sign in to claim",
+        "loggedIn": "Claim my Early Bird benefits",
+        "joining": "Claiming…",
+        "alreadyJoined": "Continue to billing"
+      },
+      "errors": {
+        "loadFailed": "Couldn't load the campaign. Please try again later.",
+        "generic": "Something went wrong. Please try again.",
+        "ended": "This campaign has just ended.",
+        "full": "This campaign is fully subscribed.",
+        "rateLimit": "Too many attempts. Please wait a minute and retry."
+      },
+      "ended": {
+        "title": "Early Bird has ended",
+        "body": "Thanks for your interest. Upgrade to Pro to keep writing freely.",
+        "cta": "See Pro pricing"
       }
     }
   },
   "nav": {
     "try": "Try",
     "pricing": "Pricing",
+    "earlyBird": "Early Bird",
     "github": "GitHub",
     "signIn": "Sign in",
     "install": "Install extension",

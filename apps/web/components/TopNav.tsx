@@ -66,9 +66,38 @@ async function getCurrentUser(): Promise<MeUser | null> {
   }
 }
 
+/**
+ * Check whether the early-bird campaign is currently active (admin enabled +
+ * within time window). Returns false when missing / disabled / past ends_at;
+ * any error returns false so the nav link stays hidden by default.
+ *
+ * SSR fetch — runs per request. KV cache (60s TTL) on the api side limits D1
+ * hits even with high traffic. Phase 2+ may want to memoize in Next's request
+ * cache or pre-fetch from a single layout if multiple components need it.
+ */
+async function isEarlyBirdActive(): Promise<boolean> {
+  try {
+    const apiBase = process.env.API_BASE_URL ?? 'http://localhost:8787';
+    const res = await fetch(`${apiBase}/v1/campaigns/early-bird`, { cache: 'no-store' });
+    if (!res.ok) return false;
+    const data = (await res.json()) as {
+      enabled?: boolean;
+      starts_at?: number;
+      ends_at?: number;
+    };
+    if (!data.enabled) return false;
+    const now = Date.now();
+    if (data.starts_at && now < data.starts_at) return false;
+    if (data.ends_at && now > data.ends_at) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function TopNav() {
   const t = await getTranslations('nav');
-  const user = await getCurrentUser();
+  const [user, earlyBirdActive] = await Promise.all([getCurrentUser(), isEarlyBirdActive()]);
   const isAuthed = user !== null;
 
   return (
@@ -128,6 +157,11 @@ export async function TopNav() {
           <Link href="/pricing" style={NAV_LINK}>
             {t('pricing')}
           </Link>
+          {earlyBirdActive && (
+            <Link href="/early-bird" style={{ ...NAV_LINK, color: '#7a5a18', fontWeight: 500 }}>
+              {t('earlyBird')}
+            </Link>
+          )}
           <a
             href="https://github.com/rewrite-so/rewrite.so"
             style={NAV_LINK}

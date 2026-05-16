@@ -8,6 +8,7 @@ import { log } from './lib/log.ts';
 import { banCheckMiddleware } from './middleware/ban-check.ts';
 import { announcementsRoute } from './routes/announcements.ts';
 import { billingRoute } from './routes/billing.ts';
+import { campaignsRoute } from './routes/campaigns.ts';
 import { eventsRoute } from './routes/events.ts';
 import { meRoute } from './routes/me.ts';
 import { rewriteRoute } from './routes/rewrite.ts';
@@ -100,6 +101,9 @@ app.use('/v1/rewrite', banCheckMiddleware());
 app.use('/v1/me', banCheckMiddleware());
 app.use('/v1/me/*', banCheckMiddleware());
 app.use('/v1/billing/*', banCheckMiddleware());
+// Campaigns join 写 D1 perks，必须拦 banned 用户；GET 公开也走 ban-check 但
+// middleware 内部对匿名/无 session 自动放行
+app.use('/v1/campaigns/*', banCheckMiddleware());
 
 // Phase 1: POST /v1/rewrite (SSE)
 app.route('/', rewriteRoute);
@@ -117,6 +121,8 @@ app.route('/', billingRoute);
 app.route('/', webhookRoute);
 // Public announcements feed (web/extension consume)
 app.route('/', announcementsRoute);
+// Campaigns: GET /v1/campaigns/:slug (public) + POST /v1/campaigns/:slug/join (auth)
+app.route('/', campaignsRoute);
 // Phase 5: onboarding email unsubscribe
 app.route('/', unsubscribeRoute);
 // Web user-behavior ingest. NOT under banCheckMiddleware — anonymous reports

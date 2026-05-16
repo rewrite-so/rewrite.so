@@ -36,6 +36,13 @@ interface UserInfo {
     currentPeriodEnd: string;
     cancelAtPeriodEnd: boolean;
   } | null;
+  earlyBird?: {
+    isParticipant: boolean;
+    discountActive: boolean;
+    proLapsesAt: string | null;
+  } | null;
+  /** Remaining gift Pro days = ceil((max(gift_grants.expires_at) - now) / 1d) */
+  giftBalanceDays?: number;
 }
 
 interface Usage {
@@ -486,6 +493,10 @@ export function SettingsClient() {
 
       <SubscriptionSection me={me} />
 
+      {(me.earlyBird?.isParticipant === true || (me.giftBalanceDays ?? 0) > 0) && (
+        <EarlyBirdSection me={me} />
+      )}
+
       <ByokSection byok={byok} onChange={setByok} onDelete={deleteByok} />
 
       <div style={{ marginTop: 24 }}>
@@ -589,6 +600,64 @@ function statusLabel(t: ReturnType<typeof useTranslations>, s: string): string {
   const known = ['active', 'trialing', 'paused', 'canceled', 'pastDue', 'expired'];
   const key = s === 'past_due' ? 'pastDue' : s;
   return known.includes(key) ? t(`status.${key}`) : s;
+}
+
+const MS_PER_DAY = 86_400_000;
+
+function EarlyBirdSection({ me }: { me: UserInfo }) {
+  const t = useTranslations('page.settings.earlyBird');
+  const format = useFormatter();
+  const eb = me.earlyBird;
+  const giftDays = me.giftBalanceDays ?? 0;
+
+  // Status badge variants:
+  //   - active  : discountActive && proLapsesAt > now + grace OR currently in subscription
+  //   - grace   : discountActive && proLapsesAt > now (lapses within grace window)
+  //   - expired : !discountActive (status='expired')
+  let statusKey: 'active' | 'grace' | 'expired' | null = null;
+  let graceDaysLeft = 0;
+  if (eb?.isParticipant) {
+    if (!eb.discountActive) {
+      statusKey = 'expired';
+    } else if (eb.proLapsesAt) {
+      const lapsesAtMs = Date.parse(eb.proLapsesAt);
+      const remainingDays = Math.max(0, Math.ceil((lapsesAtMs - Date.now()) / MS_PER_DAY));
+      // If user currently has Pro (subscription or gift), show "active"; otherwise show how
+      // many days until 3-fold eligibility lapses.
+      if (me.tier === 'pro') {
+        statusKey = 'active';
+      } else {
+        statusKey = 'grace';
+        graceDaysLeft = remainingDays;
+      }
+    } else {
+      statusKey = 'active';
+    }
+  }
+
+  return (
+    <div style={{ ...cardStyle, marginTop: 16 }}>
+      <Row label={t('label')} value={t('badge')} />
+      {statusKey && (
+        <Row label={t('statusLabel')} value={t(`status.${statusKey}`, { days: graceDaysLeft })} />
+      )}
+      {giftDays > 0 && (
+        <Row label={t('giftBalanceLabel')} value={t('giftBalanceValue', { days: giftDays })} />
+      )}
+      {me.tier === 'pro' && me.subscription && (
+        <Row
+          label={t('proSourceLabel')}
+          value={t('proSourceSubscription', {
+            date: format.dateTime(new Date(me.subscription.currentPeriodEnd), {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            }),
+          })}
+        />
+      )}
+    </div>
+  );
 }
 
 function ByokSection({

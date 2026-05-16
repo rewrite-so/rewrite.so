@@ -162,6 +162,20 @@
         "autoSystem": "自动（跟随系统）",
         "autoFromPage": "自动识别页面语言"
       },
+      "earlyBird": {
+        "label": "早鸟计划",
+        "badge": "创始会员",
+        "statusLabel": "终生 3 折",
+        "status": {
+          "active": "生效中",
+          "grace": "宽限期 · 还有 {days, number} 天内续订有效",
+          "expired": "已失效"
+        },
+        "giftBalanceLabel": "赠送 Pro 天数",
+        "giftBalanceValue": "剩余 {days, number} 天",
+        "proSourceLabel": "Pro 来源",
+        "proSourceSubscription": "订阅 · {date} 续费"
+      },
       "sub": {
         "label": "订阅",
         "statusLabel": "状态",
@@ -274,12 +288,54 @@
         "ctaRedirecting": "跳转中…",
         "ctaMonthly": "订阅 Pro 月付",
         "ctaAnnual": "订阅 Pro 年付"
+      },
+      "earlyBirdBanner": {
+        "title": "早鸟会员",
+        "body": "每次续费自动享 3 折",
+        "tooltip": "订阅在线时享受优惠；取消后 60 天宽限期内重订仍生效",
+        "subscribedHint": "你下次续费会自动按 3 折计价。"
+      }
+    },
+    "early-bird": {
+      "title": "早鸟计划",
+      "subtitle": "限时创始会员福利。",
+      "loading": "加载中…",
+      "perks": {
+        "title": "你将获得",
+        "giftDaysLabel": "免费 {days} 天 Pro",
+        "giftDaysBody": "报名即刻生效，按天倒计时。",
+        "discountLabel": "Pro 终生 {percentage}% 折扣（3 折）",
+        "discountPricePreview": "${originalMonthly}→${discountedMonthly}/月 · 年付 ${originalYearly}→${discountedYearly}/月",
+        "discountBody": "订阅状态在线时，下单自动按 3 折结算。"
+      },
+      "window": {
+        "title": "终生 3 折如何保持有效",
+        "body": "订阅期内一直有效。取消后还有 {grace} 天的宽限期可重订续命；连续 {total} 天没有有效订阅则永久失效。"
+      },
+      "cta": {
+        "notLoggedIn": "登录领取",
+        "loggedIn": "领取早鸟权益",
+        "joining": "领取中…",
+        "alreadyJoined": "前往订阅页"
+      },
+      "errors": {
+        "loadFailed": "活动信息加载失败，请稍后再试。",
+        "generic": "出错了，请重试。",
+        "ended": "活动刚刚结束。",
+        "full": "本期名额已满。",
+        "rateLimit": "操作太频繁，请稍候再试。"
+      },
+      "ended": {
+        "title": "早鸟活动已结束",
+        "body": "感谢你的关注。升级 Pro 继续畅快写作。",
+        "cta": "查看 Pro 价格"
       }
     }
   },
   "nav": {
     "try": "试用",
     "pricing": "价格",
+    "earlyBird": "早鸟",
     "github": "GitHub",
     "signIn": "登录",
     "install": "安装扩展",

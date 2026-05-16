@@ -16,7 +16,18 @@ interface MeResponse {
     currentPeriodEnd: string;
     cancelAtPeriodEnd: boolean;
   } | null;
+  earlyBird?: {
+    isParticipant: boolean;
+    discountActive: boolean;
+    proLapsesAt: string | null;
+  } | null;
 }
+
+/** Early-bird 折扣率与 packages/shared/EarlyBirdConfigSchema.perks.discount.percentage 对齐。
+ *  70 = 70% off = 用户付 30%。改这里前请同步 admin SPA 上创建的活动 config 与
+ *  Creem dashboard 折扣码（CLAUDE.md 「Creem 折扣码人工建立步骤」）。
+ */
+const EARLY_BIRD_USER_PAY_RATIO = 0.3;
 
 export function BillingClient() {
   const t = useTranslations('page.billing');
@@ -30,7 +41,7 @@ export function BillingClient() {
     fetch('/v1/me', { credentials: 'include' })
       .then((r) => r.json())
       .then((data: MeResponse) => setMe(data))
-      .catch(() => setMe({ user: null, subscription: null }));
+      .catch(() => setMe({ user: null, subscription: null, earlyBird: null }));
   }, []);
 
   async function checkout(p: Plan) {
@@ -93,6 +104,17 @@ export function BillingClient() {
   }
 
   const subscribed = me.subscription !== null && me.tier === 'pro';
+  const earlyBirdActive = me.earlyBird?.discountActive === true;
+  // Keep as a string so trailing zeros (e.g. "$4.20") don't get stripped by
+  // `Number(...)` rounding when toFixed → +num → string round-trip. The plain
+  // price (no discount) is a fixed constant with .99 cents so it never loses
+  // precision; templating both as strings keeps the JSX uniform.
+  const monthlyPrice = earlyBirdActive
+    ? (PRO_PRICE.monthly * EARLY_BIRD_USER_PAY_RATIO).toFixed(2)
+    : PRO_PRICE.monthly.toFixed(2);
+  const yearlyMonthlyPrice = earlyBirdActive
+    ? (PRO_PRICE.yearlyMonthly * EARLY_BIRD_USER_PAY_RATIO).toFixed(2)
+    : PRO_PRICE.yearlyMonthly.toFixed(2);
   const subscribedDate = me.subscription
     ? format.dateTime(new Date(me.subscription.currentPeriodEnd), {
         year: 'numeric',
@@ -105,6 +127,22 @@ export function BillingClient() {
 
   return (
     <section style={{ marginTop: 32 }}>
+      {earlyBirdActive && (
+        <div
+          style={{
+            padding: '12px 16px',
+            background: '#fdfaf2',
+            border: '1px solid #f0e4cf',
+            borderRadius: 8,
+            fontSize: 14,
+            color: '#7a5a18',
+            marginBottom: 16,
+          }}
+          title={t('earlyBirdBanner.tooltip')}
+        >
+          <strong>{t('earlyBirdBanner.title')}</strong> · {t('earlyBirdBanner.body')}
+        </div>
+      )}
       {subscribed && (
         <div
           style={{
@@ -182,7 +220,14 @@ export function BillingClient() {
         />
         <PlanCard
           title={t('pro.title')}
-          price={plan === 'monthly' ? `$${PRO_PRICE.monthly}` : `$${PRO_PRICE.yearlyMonthly}`}
+          price={plan === 'monthly' ? `$${monthlyPrice}` : `$${yearlyMonthlyPrice}`}
+          originalPrice={
+            earlyBirdActive
+              ? plan === 'monthly'
+                ? `$${PRO_PRICE.monthly}`
+                : `$${PRO_PRICE.yearlyMonthly}`
+              : undefined
+          }
           period={
             plan === 'monthly'
               ? t('pro.periodMonthly')
@@ -202,6 +247,11 @@ export function BillingClient() {
           onClick={() => !subscribed && checkout(plan)}
           disabled={subscribed || loading}
         />
+        {subscribed && earlyBirdActive && (
+          <p style={{ fontSize: 12, color: '#888', marginTop: 4, gridColumn: '1 / -1' }}>
+            {t('earlyBirdBanner.subscribedHint')}
+          </p>
+        )}
       </div>
 
       {error && (
@@ -248,6 +298,7 @@ function ToggleBtn({
 function PlanCard({
   title,
   price,
+  originalPrice,
   period,
   features,
   cta,
@@ -257,6 +308,8 @@ function PlanCard({
 }: {
   title: string;
   price: string;
+  /** When present, rendered as struck-through prefix (e.g. early-bird discount) */
+  originalPrice?: string;
   period: string;
   features: string[];
   cta: string;
@@ -274,7 +327,12 @@ function PlanCard({
       }}
     >
       <div style={{ fontSize: 14, color: '#888', marginBottom: 4 }}>{title}</div>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 16 }}>
+        {originalPrice && (
+          <span style={{ fontSize: 18, color: '#999', textDecoration: 'line-through' }}>
+            {originalPrice}
+          </span>
+        )}
         <span style={{ fontSize: 32, fontWeight: 700 }}>{price}</span>
         <span style={{ fontSize: 13, color: '#888' }}>{period}</span>
       </div>

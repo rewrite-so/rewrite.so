@@ -200,6 +200,20 @@ const OVERRIDE_CACHE_PREFIX = 'override:';
 const OVERRIDE_CACHE_TTL_SEC = 300;
 const OVERRIDE_NONE_SENTINEL = '__none__';
 
+/**
+ * gift_grants 命中状态的 KV 缓存。仅作 boolean「user 当前有 active gift」用。
+ *
+ * Key prefix is **exported** so the campaigns join route (and any future
+ * gift-writing path in this worker, or admin-side `invalidateGiftActive`)
+ * uses the exact same string. Keep `quota.ts` as the single source of truth
+ * for this key — CLAUDE.md "跨仓库 KV cache 失效协议" warns against
+ * drift between read and invalidate sites.
+ */
+export const GIFT_ACTIVE_CACHE_PREFIX = 'gift_active:';
+const GIFT_ACTIVE_CACHE_TTL_SEC = 300;
+const GIFT_ACTIVE_SENTINEL_TRUE = '1';
+const GIFT_ACTIVE_SENTINEL_FALSE = '__none__';
+
 interface OverrideRow {
   force_tier: 'pro' | 'free';
   expires_at: number | null;
@@ -301,11 +315,70 @@ export async function resolveUserTier(
     )
     .bind(userId)
     .first<{ status: string; current_period_end: number }>();
-  if (!row) return 'free';
-  const s = row.status;
-  if (s === 'active' || s === 'trialing' || s === 'paused') return 'pro';
-  if (s === 'canceled' && row.current_period_end > now) return 'pro';
+  if (row) {
+    const s = row.status;
+    if (s === 'active' || s === 'trialing' || s === 'paused') return 'pro';
+    if (s === 'canceled' && row.current_period_end > now) return 'pro';
+  }
+
+  // ===== Step 3: gift_grants 兜底 =====
+  // 通用「赠送 Pro 时长」表（早鸟报名 / 礼品卡 / 客服补偿等）。仅影响 tier 判定，
+  // 不影响月配额池子（pro 仍 2000/月）。KV 缓存命中 / 负缓存命中 0 round-trip；
+  // miss 多 1 次 D1（< 5ms p95）。
+  //
+  // KV invalidation 写入路径（都用 KV.delete(GIFT_ACTIVE_CACHE_PREFIX + userId)）：
+  //   - 本仓 api 报名: POST /v1/campaigns/:slug/join (apps/api/src/routes/campaigns.ts)
+  //   - admin worker 手工补偿: invalidateGiftActive() helper（admin lib/kv-invalidate.ts）
+  // 完整跨仓 invalidate 表见 CLAUDE.md "跨仓库 KV cache 失效协议"。
+  let hasGift = await readGiftActiveCache(kv, userId);
+  if (hasGift === undefined) {
+    const giftRow = await db
+      .prepare(
+        `SELECT 1 FROM gift_grants
+          WHERE user_id = ? AND status = 'active' AND expires_at > ?
+          LIMIT 1`,
+      )
+      .bind(userId, now)
+      .first<{ 1: number }>();
+    hasGift = giftRow !== null;
+    await writeGiftActiveCache(kv, userId, hasGift).catch(() => undefined);
+  }
+  if (hasGift) return 'pro';
+
   return 'free';
+}
+
+async function readGiftActiveCache(
+  kv: KVNamespace | undefined,
+  userId: string,
+): Promise<boolean | undefined> {
+  if (!kv || typeof kv.get !== 'function') return undefined;
+  let cached: string | null;
+  try {
+    cached = await kv.get(`${GIFT_ACTIVE_CACHE_PREFIX}${userId}`);
+  } catch {
+    return undefined;
+  }
+  if (cached === null) return undefined;
+  if (cached === GIFT_ACTIVE_SENTINEL_TRUE) return true;
+  if (cached === GIFT_ACTIVE_SENTINEL_FALSE) return false;
+  return undefined;
+}
+
+async function writeGiftActiveCache(
+  kv: KVNamespace | undefined,
+  userId: string,
+  active: boolean,
+): Promise<void> {
+  if (!kv || typeof kv.put !== 'function') return;
+  const body = active ? GIFT_ACTIVE_SENTINEL_TRUE : GIFT_ACTIVE_SENTINEL_FALSE;
+  try {
+    await kv.put(`${GIFT_ACTIVE_CACHE_PREFIX}${userId}`, body, {
+      expirationTtl: GIFT_ACTIVE_CACHE_TTL_SEC,
+    });
+  } catch {
+    // best-effort
+  }
 }
 
 export interface ClaimResult {
