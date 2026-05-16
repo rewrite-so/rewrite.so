@@ -259,6 +259,29 @@ campaignsRoute.post('/v1/campaigns/:slug/join', async (c) => {
     .bind(sessionUser.id, campaign.id)
     .first<{ joined_at: number }>();
   if (existing) {
+    // Self-heal：上次 join 若在 batch 写入后但 fan-out 前 crash（Worker 超时 /
+    // OOM），下方 KV delete + extendProLapsesAt 永远不会运行。alreadyJoined retry
+    // 重新跑两个副作用，两者都幂等（KV delete no-op；extendProLapsesAt MAX 计算）。
+    // ~1 D1 SELECT + UPDATE 的开销，可接受；保住 Phase 2 多 campaign 的 fan-out
+    // 不变性。
+    const giftId = await computeGrantId(sessionUser.id, 'campaign', campaign.id);
+    const giftRow = await c.env.DB.prepare(
+      `SELECT expires_at FROM gift_grants WHERE id = ? AND status = 'active'`,
+    )
+      .bind(giftId)
+      .first<{ expires_at: number }>();
+    if (giftRow) {
+      await extendProLapsesAt(c.env.DB, sessionUser.id, giftRow.expires_at).catch((err) => {
+        log.warn('campaign.alreadyJoined_self_heal_failed', {
+          slug,
+          userId: sessionUser.id,
+          err,
+        });
+      });
+    }
+    if (c.env.KV && typeof c.env.KV.delete === 'function') {
+      c.env.KV.delete(`${GIFT_ACTIVE_CACHE_PREFIX}${sessionUser.id}`).catch(() => undefined);
+    }
     return c.json({ ok: true, alreadyJoined: true, joinedAt: existing.joined_at });
   }
 
@@ -361,8 +384,9 @@ campaignsRoute.post('/v1/campaigns/:slug/join', async (c) => {
   // Phase 2 多 campaign 安全网：batch 里 INSERT OR IGNORE 只给本 campaign 行赋
   // 初始 pro_lapses_at，不会更新用户已有的其他 active user_discounts 行。这里
   // 显式 fan-out 推一次，让所有 active 行（含本次新写的）都被推到 max(原值,
-  // giftExpiresAt + grace)。Phase 1 单活动场景下对新写行是恒等操作（MAX(X, X)），
-  // 无副作用；Phase 2 时自动正确。
+  // giftExpiresAt + grace)。Phase 1 单活动场景下对新写行是恒等操作（MAX(X, X)）。
+  // 若 worker 在此处与 batch 之间 crash，下次同 user 的 join 走 alreadyJoined
+  // 分支的 self-heal 路径补跑此 fan-out（见上方），不会永久丢失。
   await extendProLapsesAt(c.env.DB, sessionUser.id, giftExpiresAt).catch((err) => {
     log.warn('campaign.extend_pro_lapses_at_failed', { slug, userId: sessionUser.id, err });
   });

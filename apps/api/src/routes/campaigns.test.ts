@@ -45,6 +45,9 @@ interface DBState {
   participation: { user_id: string; campaign_id: string; joined_at: number } | null;
   subscription: { current_period_end: number; status: string } | null;
   giftMaxEnd: number | null;
+  /** alreadyJoined self-heal path queries `SELECT expires_at FROM gift_grants
+   *  WHERE id = ?` — return this row's expires_at when set. */
+  existingGiftExpiresAt: number | null;
   participationCount: number;
   /** SQL traces for assertions; truncated to keep tests readable */
   trace: { sql: string; args: unknown[] }[];
@@ -70,7 +73,13 @@ function makeFakeDb(state: DBState): D1Database {
               return state.subscription;
             }
             if (sql.includes('FROM gift_grants')) {
-              return { m: state.giftMaxEnd };
+              // self-heal 路径用 `SELECT expires_at ... WHERE id = ?`，没有 MAX()
+              if (sql.includes('MAX(expires_at)')) {
+                return { m: state.giftMaxEnd };
+              }
+              return state.existingGiftExpiresAt !== null
+                ? { expires_at: state.existingGiftExpiresAt }
+                : null;
             }
             if (sql.includes('admin_user_overrides')) return null;
             return null;
@@ -137,6 +146,7 @@ function makeState(overrides: Partial<DBState> = {}): DBState {
     participation: null,
     subscription: null,
     giftMaxEnd: null,
+    existingGiftExpiresAt: null,
     participationCount: 0,
     trace: [],
     ...overrides,
@@ -353,6 +363,58 @@ describe('POST /v1/campaigns/:slug/join', () => {
     expect(percentage).toBe(70);
     expect(duration).toBe('forever');
     expect(grace).toBe(60);
+  });
+
+  // 治根 3 self-heal：previous attempt crashed between batch and fan-out →
+  // alreadyJoined retry must rerun extendProLapsesAt from the existing gift row,
+  // not silently skip it.
+  it('alreadyJoined branch self-heals by rerunning extendProLapsesAt from existing gift', async () => {
+    mockSession = { user: { id: 'u1', email: 'u@test.com' } };
+    const existingExpiry = Date.now() + 90 * 86400000;
+    const state = makeState({
+      participation: { user_id: 'u1', campaign_id: 'camp_test', joined_at: Date.now() - 1000 },
+      existingGiftExpiresAt: existingExpiry,
+    });
+    const res = await app.request(
+      '/v1/campaigns/early-bird/join',
+      { method: 'POST' },
+      makeEnv(state),
+    );
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { alreadyJoined: boolean };
+    expect(body.alreadyJoined).toBe(true);
+    const update = state.trace.find(
+      (t) =>
+        t.sql.includes('UPDATE user_discounts') &&
+        t.sql.includes('pro_lapses_at') &&
+        t.sql.includes('MAX(COALESCE'),
+    );
+    if (!update) {
+      throw new Error('expected self-heal extendProLapsesAt UPDATE on alreadyJoined');
+    }
+    const newEnd = update.args[0] as number;
+    expect(newEnd).toBe(existingExpiry);
+  });
+
+  it('alreadyJoined branch tolerates missing gift row (no self-heal UPDATE)', async () => {
+    mockSession = { user: { id: 'u1', email: 'u@test.com' } };
+    const state = makeState({
+      participation: { user_id: 'u1', campaign_id: 'camp_test', joined_at: Date.now() - 1000 },
+      existingGiftExpiresAt: null, // gift row missing or already expired
+    });
+    const res = await app.request(
+      '/v1/campaigns/early-bird/join',
+      { method: 'POST' },
+      makeEnv(state),
+    );
+    expect(res.status).toBe(200);
+    const update = state.trace.find(
+      (t) =>
+        t.sql.includes('UPDATE user_discounts') &&
+        t.sql.includes('pro_lapses_at') &&
+        t.sql.includes('MAX(COALESCE'),
+    );
+    expect(update).toBeUndefined();
   });
 
   // 治根 D：batch 后 fan-out extendProLapsesAt 安全网，让 Phase 2 multi-campaign

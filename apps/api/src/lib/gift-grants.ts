@@ -24,6 +24,7 @@
  * —— helper 是非 batch 的单 INSERT，无法与其他 INSERT 共享原子性。batch caller
  * 必须自己负责 extendProLapsesAt + KV invalidate（参考 routes/campaigns.ts）。
  */
+import { log } from './log.ts';
 import { GIFT_ACTIVE_CACHE_PREFIX } from './quota.ts';
 import { extendProLapsesAt } from './user-discounts.ts';
 
@@ -94,11 +95,13 @@ export async function getCurrentMaxGiftExpiresAt(
 
 export interface GrantDaysOptions {
   /**
-   * KV binding。传入则 INSERT 成功（非重复）后自动 invalidate
-   * `gift_active:<userId>` 让 resolveUserTier 立即看到新 grant。
-   * 生产 caller 必传；测试可以省略以避免 KV mock。
+   * KV binding。INSERT 成功（非重复）后用于 invalidate `gift_active:<userId>`
+   * 让 resolveUserTier 立即看到新 grant。
+   *
+   * **Required**：故意不设可选，让 TS 编译期强制 caller 传入。生产 worker 拿到的
+   * `env.KV` 永远可用；测试要绕过传 `null` 显式标记意图，不允许"忘了传"。
    */
-  kv?: KVNamespace;
+  kv: KVNamespace | null;
 }
 
 /**
@@ -106,11 +109,16 @@ export interface GrantDaysOptions {
  *
  * isDuplicate=true 时表示该 source 已发放过（PK 冲突），DB 未变化，
  * 内嵌副作用（extendProLapsesAt / KV invalidate）会被跳过。
+ *
+ * 副作用容错：`extendProLapsesAt` 失败用 `log.warn` 静默吞，与 webhook.ts
+ * 的同名调用模式一致——避免「gift_grants 已写入但 extend 抛错 → caller 异常 →
+ * retry 时 INSERT OR IGNORE 命中 PK 冲突走 isDuplicate=true 分支永久跳过
+ * extend」的隐式失败。CLAUDE.md「容错硬契约：任何失败都必须静默吞」要求。
  */
 export async function grantDays(
   db: D1Database,
   input: GrantDaysInput,
-  options?: GrantDaysOptions,
+  options: GrantDaysOptions,
 ): Promise<GrantDaysResult> {
   const { userId, days, sourceKind, sourceId, baseEnd, note } = input;
   const now = Date.now();
@@ -134,8 +142,10 @@ export async function grantDays(
 
   // 副作用：仅在真正写入新行时触发，避免重复请求重复推 pro_lapses_at / 清缓存
   if (!isDuplicate) {
-    await extendProLapsesAt(db, userId, expires_at);
-    const kv = options?.kv;
+    await extendProLapsesAt(db, userId, expires_at).catch((err) => {
+      log.warn('gift_grants.extend_pro_lapses_at_failed', { userId, sourceKind, sourceId, err });
+    });
+    const kv = options.kv;
     if (kv && typeof kv.delete === 'function') {
       await kv.delete(`${GIFT_ACTIVE_CACHE_PREFIX}${userId}`).catch(() => undefined);
     }

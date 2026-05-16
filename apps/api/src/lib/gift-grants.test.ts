@@ -132,16 +132,20 @@ describe('computeGrantId', () => {
   });
 });
 
+/** grantDays now requires `kv` to force production callers to invalidate
+ *  gift_active. Tests legitimately want to bypass real KV; pass `null` to
+ *  signal explicit opt-out. */
+const NO_KV = { kv: null };
+
 describe('grantDays', () => {
   it('inserts a fresh grant when none exist', async () => {
     const { db, rows } = makeFakeDb();
     const before = Date.now();
-    const r = await grantDays(db, {
-      userId: 'u1',
-      days: 90,
-      sourceKind: 'campaign',
-      sourceId: 'camp_early',
-    });
+    const r = await grantDays(
+      db,
+      { userId: 'u1', days: 90, sourceKind: 'campaign', sourceId: 'camp_early' },
+      NO_KV,
+    );
     expect(r.isDuplicate).toBe(false);
     expect(rows).toHaveLength(1);
     const row0 = rows[0];
@@ -154,18 +158,14 @@ describe('grantDays', () => {
 
   it('is idempotent on retry with same sourceId (deterministic id → PK conflict)', async () => {
     const { db, rows } = makeFakeDb();
-    const r1 = await grantDays(db, {
+    const input = {
       userId: 'u1',
       days: 90,
-      sourceKind: 'campaign',
+      sourceKind: 'campaign' as const,
       sourceId: 'camp_early',
-    });
-    const r2 = await grantDays(db, {
-      userId: 'u1',
-      days: 90,
-      sourceKind: 'campaign',
-      sourceId: 'camp_early',
-    });
+    };
+    const r1 = await grantDays(db, input, NO_KV);
+    const r2 = await grantDays(db, input, NO_KV);
     expect(r1.isDuplicate).toBe(false);
     expect(r2.isDuplicate).toBe(true);
     expect(r1.id).toBe(r2.id);
@@ -174,22 +174,20 @@ describe('grantDays', () => {
 
   it('stacks multiple grants with different sourceId — granted_at extends past existing max(expires_at)', async () => {
     const { db, rows } = makeFakeDb();
-    await grantDays(db, {
-      userId: 'u1',
-      days: 90,
-      sourceKind: 'campaign',
-      sourceId: 'camp_early',
-    });
+    await grantDays(
+      db,
+      { userId: 'u1', days: 90, sourceKind: 'campaign', sourceId: 'camp_early' },
+      NO_KV,
+    );
     const firstRow = rows[0];
     if (!firstRow) throw new Error('expected first row');
     const firstExpiry = firstRow.expires_at;
     // Second grant uses different sourceId → distinct id; granted_at should be firstExpiry, not now
-    const r2 = await grantDays(db, {
-      userId: 'u1',
-      days: 15,
-      sourceKind: 'admin',
-      sourceId: 'admin_a:1234',
-    });
+    const r2 = await grantDays(
+      db,
+      { userId: 'u1', days: 15, sourceKind: 'admin', sourceId: 'admin_a:1234' },
+      NO_KV,
+    );
     expect(r2.isDuplicate).toBe(false);
     expect(rows).toHaveLength(2);
     expect(r2.granted_at).toBe(firstExpiry);
@@ -199,13 +197,17 @@ describe('grantDays', () => {
   it('respects caller-provided baseEnd (e.g. subscription.current_period_end) when greater than max gift end', async () => {
     const { db, rows } = makeFakeDb();
     const subEnd = Date.now() + 30 * 86400000;
-    const r = await grantDays(db, {
-      userId: 'u1',
-      days: 90,
-      sourceKind: 'campaign',
-      sourceId: 'camp_early',
-      baseEnd: subEnd,
-    });
+    const r = await grantDays(
+      db,
+      {
+        userId: 'u1',
+        days: 90,
+        sourceKind: 'campaign',
+        sourceId: 'camp_early',
+        baseEnd: subEnd,
+      },
+      NO_KV,
+    );
     expect(r.granted_at).toBe(subEnd);
     const row0 = rows[0];
     if (!row0) throw new Error('expected row[0]');
@@ -214,36 +216,37 @@ describe('grantDays', () => {
 
   it('granted_at = max(now, baseEnd, currentMaxGiftExpiresAt)', async () => {
     const { db, rows } = makeFakeDb();
-    await grantDays(db, {
-      userId: 'u1',
-      days: 30,
-      sourceKind: 'campaign',
-      sourceId: 'camp_a',
-    });
+    await grantDays(
+      db,
+      { userId: 'u1', days: 30, sourceKind: 'campaign', sourceId: 'camp_a' },
+      NO_KV,
+    );
     const firstRow = rows[0];
     if (!firstRow) throw new Error('expected first row');
     const giftMax = firstRow.expires_at;
     // baseEnd > giftMax → use baseEnd
     const baseEnd = giftMax + 10 * 86400000;
-    const r1 = await grantDays(db, {
-      userId: 'u1',
-      days: 5,
-      sourceKind: 'admin',
-      sourceId: 'admin_a:1',
-      baseEnd,
-    });
+    const r1 = await grantDays(
+      db,
+      { userId: 'u1', days: 5, sourceKind: 'admin', sourceId: 'admin_a:1', baseEnd },
+      NO_KV,
+    );
     expect(r1.granted_at).toBe(baseEnd);
     // baseEnd < giftMax of the new max → use giftMax
     const row1 = rows[1];
     if (!row1) throw new Error('expected row[1]');
     const newGiftMax = row1.expires_at;
-    const r2 = await grantDays(db, {
-      userId: 'u1',
-      days: 3,
-      sourceKind: 'admin',
-      sourceId: 'admin_a:2',
-      baseEnd: Date.now(),
-    });
+    const r2 = await grantDays(
+      db,
+      {
+        userId: 'u1',
+        days: 3,
+        sourceKind: 'admin',
+        sourceId: 'admin_a:2',
+        baseEnd: Date.now(),
+      },
+      NO_KV,
+    );
     expect(r2.granted_at).toBe(newGiftMax);
   });
 });
@@ -253,12 +256,11 @@ describe('grantDays — embedded side effects', () => {
   // 需要手工记得调 extendProLapsesAt + KV invalidate
   it('calls extendProLapsesAt with expires_at after successful insert', async () => {
     const { db, rows, extendCalls } = makeFakeDb();
-    const r = await grantDays(db, {
-      userId: 'u1',
-      days: 90,
-      sourceKind: 'admin',
-      sourceId: 'admin_test:1',
-    });
+    const r = await grantDays(
+      db,
+      { userId: 'u1', days: 90, sourceKind: 'admin', sourceId: 'admin_test:1' },
+      NO_KV,
+    );
     expect(r.isDuplicate).toBe(false);
     expect(extendCalls).toHaveLength(1);
     const call = extendCalls[0];
@@ -280,6 +282,17 @@ describe('grantDays — embedded side effects', () => {
     expect(deleted).toEqual(['gift_active:u_abc']);
   });
 
+  it('skips KV invalidate when kv is null (test path)', async () => {
+    const { db, extendCalls } = makeFakeDb();
+    const r = await grantDays(
+      db,
+      { userId: 'u1', days: 1, sourceKind: 'system', sourceId: 's:1' },
+      NO_KV,
+    );
+    expect(r.isDuplicate).toBe(false);
+    expect(extendCalls).toHaveLength(1);
+  });
+
   it('skips side effects on duplicate insert (PK conflict)', async () => {
     const { db, extendCalls } = makeFakeDb();
     const { kv, deleted } = makeFakeKv();
@@ -295,16 +308,36 @@ describe('grantDays — embedded side effects', () => {
     expect(deleted).toEqual(['gift_active:u1']);
   });
 
-  it('does not throw when kv option omitted (test convenience path)', async () => {
-    const { db, extendCalls } = makeFakeDb();
-    const r = await grantDays(db, {
-      userId: 'u1',
-      days: 1,
-      sourceKind: 'system',
-      sourceId: 's:1',
-    });
-    expect(r.isDuplicate).toBe(false);
-    expect(extendCalls).toHaveLength(1);
+  // 治根 1：transient D1 错误下 extendProLapsesAt 抛错时必须静默吞，避免
+  // gift_grants 已写入但 retry 因 PK 冲突走 isDuplicate=true 永久跳过 extend。
+  it('swallows extendProLapsesAt failure so isDuplicate retry is not poisoned', async () => {
+    // 用 spy 让 user_discounts UPDATE 抛错，模拟 transient D1 错误
+    const { db, rows } = makeFakeDb();
+    const origPrepare = db.prepare.bind(db);
+    db.prepare = ((sql: string) => {
+      if (sql.includes('UPDATE user_discounts') && sql.includes('pro_lapses_at')) {
+        return {
+          bind: () => ({
+            run: async () => {
+              throw new Error('transient D1 failure');
+            },
+            first: async () => null,
+            all: async () => ({ results: [], success: true }),
+          }),
+        };
+      }
+      return origPrepare(sql);
+    }) as typeof db.prepare;
+
+    // First call must NOT throw despite extendProLapsesAt rejecting
+    await expect(
+      grantDays(
+        db,
+        { userId: 'u1', days: 90, sourceKind: 'campaign', sourceId: 'camp_early' },
+        NO_KV,
+      ),
+    ).resolves.toMatchObject({ isDuplicate: false });
+    expect(rows).toHaveLength(1);
   });
 });
 
@@ -316,18 +349,12 @@ describe('getCurrentMaxGiftExpiresAt', () => {
 
   it('returns max expires_at across multiple active grants', async () => {
     const { db, rows } = makeFakeDb();
-    await grantDays(db, {
-      userId: 'u1',
-      days: 30,
-      sourceKind: 'campaign',
-      sourceId: 'a',
-    });
-    await grantDays(db, {
-      userId: 'u1',
-      days: 5,
-      sourceKind: 'admin',
-      sourceId: 'admin_1:t1',
-    });
+    await grantDays(db, { userId: 'u1', days: 30, sourceKind: 'campaign', sourceId: 'a' }, NO_KV);
+    await grantDays(
+      db,
+      { userId: 'u1', days: 5, sourceKind: 'admin', sourceId: 'admin_1:t1' },
+      NO_KV,
+    );
     const maxExpected = Math.max(...rows.map((r) => r.expires_at));
     expect(await getCurrentMaxGiftExpiresAt(db, 'u1', Date.now())).toBe(maxExpected);
   });
