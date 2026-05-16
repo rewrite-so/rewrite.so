@@ -1,5 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
+  createCheckoutSession,
   extractCustomerId,
   extractPeriodEnd,
   extractPeriodStart,
@@ -8,6 +9,10 @@ import {
   planFromProductId,
   verifyWebhookSignature,
 } from './creem.ts';
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 describe('verifyWebhookSignature', () => {
   const secret = 'whsec_test_secret';
@@ -151,5 +156,45 @@ describe('extractPeriodStart', () => {
   it('returns null for legacy field names', () => {
     expect(extractPeriodStart({ currentPeriodStart: '2026-05-10T00:00:00Z' })).toBeNull();
     expect(extractPeriodStart({ current_period_start: '2026-05-10T00:00:00Z' })).toBeNull();
+  });
+});
+
+describe('createCheckoutSession discountCode body shape', () => {
+  function mockCreemOk() {
+    return vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(
+        Response.json({ id: 'ck_abc', checkout_url: 'https://creem/p/ck_abc', status: 'pending' }),
+      );
+  }
+
+  it('omits discount_code from body when discountCode is not provided', async () => {
+    const spy = mockCreemOk();
+    await createCheckoutSession({
+      apiKey: 'creem_test_key',
+      productId: 'prod_x',
+      requestId: 'u1',
+      successUrl: 'https://rewrite.so/settings?billing=ok',
+      customerEmail: 'u@test.com',
+    });
+    const init = spy.mock.calls[0]?.[1] as RequestInit;
+    const body = JSON.parse(init.body as string) as Record<string, unknown>;
+    expect(body).not.toHaveProperty('discount_code');
+    expect(body).toMatchObject({ product_id: 'prod_x', request_id: 'u1' });
+  });
+
+  it('passes discount_code into the body when provided', async () => {
+    const spy = mockCreemOk();
+    await createCheckoutSession({
+      apiKey: 'creem_test_key',
+      productId: 'prod_x',
+      requestId: 'u1',
+      successUrl: 'https://rewrite.so/settings?billing=ok',
+      customerEmail: 'u@test.com',
+      discountCode: 'EARLYBIRD_LIFETIME_70OFF',
+    });
+    const init = spy.mock.calls[0]?.[1] as RequestInit;
+    const body = JSON.parse(init.body as string) as Record<string, unknown>;
+    expect(body.discount_code).toBe('EARLYBIRD_LIFETIME_70OFF');
   });
 });

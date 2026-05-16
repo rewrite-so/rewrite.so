@@ -10,6 +10,7 @@ import {
 } from '../lib/creem.ts';
 import { log } from '../lib/log.ts';
 import { getOrResolveSessionUser } from '../lib/session-cache.ts';
+import { resolveActiveDiscount } from '../lib/user-discounts.ts';
 import type { AppEnv } from '../types.ts';
 import { upsertSubscriptionFromObject } from './webhook.ts';
 
@@ -57,6 +58,13 @@ billingRoute.post('/v1/billing/checkout', async (c) => {
   }
 
   const defaultSuccess = `${c.env.WEB_ORIGIN}/settings?billing=ok`;
+  // 自动注入用户当前可用折扣码（早鸟 3 折等）。resolveActiveDiscount 内部
+  // 已 lazy-on-read 校验宽限期是否到期；返 null 表示无可用折扣，走原价。
+  const discount = await resolveActiveDiscount(c.env.DB, sessionUser.id).catch((err) => {
+    // 折扣查询失败不应阻塞 checkout —— 用户重试 / 联系支持。log 后走原价。
+    log.warn('billing.discount_lookup_failed', { err });
+    return null;
+  });
   try {
     const checkout = await createCheckoutSession({
       apiKey: c.env.CREEM_API_KEY,
@@ -68,6 +76,7 @@ billingRoute.post('/v1/billing/checkout', async (c) => {
         user_id: sessionUser.id,
         plan,
       },
+      ...(discount ? { discountCode: discount.code } : {}),
     });
     return c.json({ url: checkout.checkout_url });
   } catch (err) {

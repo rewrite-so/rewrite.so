@@ -162,6 +162,20 @@
         "autoSystem": "Auto (seguir el sistema)",
         "autoFromPage": "Detectar el idioma de la página"
       },
+      "earlyBird": {
+        "label": "Early Bird",
+        "badge": "Miembro fundador",
+        "statusLabel": "30% de descuento de por vida",
+        "status": {
+          "active": "Activo",
+          "grace": "Período de gracia · vuelve a suscribirte en {days, number} días",
+          "expired": "Expirado"
+        },
+        "giftBalanceLabel": "Días Pro de regalo",
+        "giftBalanceValue": "{days, number} días restantes",
+        "proSourceLabel": "Fuente de Pro",
+        "proSourceSubscription": "Suscripción · se renueva el {date}"
+      },
       "sub": {
         "label": "Suscripción",
         "statusLabel": "Estado",
@@ -274,12 +288,54 @@
         "ctaRedirecting": "Redirigiendo…",
         "ctaMonthly": "Suscribirse a Pro Mensual",
         "ctaAnnual": "Suscribirse a Pro Anual"
+      },
+      "earlyBirdBanner": {
+        "title": "Miembro Early Bird",
+        "body": "30% de descuento en cada renovación de por vida",
+        "tooltip": "Mantén la suscripción para conservar el descuento; 60 días de gracia tras cancelar",
+        "subscribedHint": "Tu próxima renovación tendrá el descuento aplicado automáticamente."
+      }
+    },
+    "early-bird": {
+      "title": "Early Bird",
+      "subtitle": "Oferta limitada para miembros fundadores.",
+      "loading": "Cargando…",
+      "perks": {
+        "title": "Lo que obtienes",
+        "giftDaysLabel": "{days} días de Pro gratis",
+        "giftDaysBody": "Se activa al inscribirte; cuenta atrás por día.",
+        "discountLabel": "{percentage}% de descuento Pro de por vida",
+        "discountPricePreview": "${originalMonthly}→${discountedMonthly}/mes · anual ${originalYearly}→${discountedYearly}/mes",
+        "discountBody": "El descuento se aplica automáticamente al pagar mientras sigas suscrito."
+      },
+      "window": {
+        "title": "Cómo se mantiene válido el descuento de por vida",
+        "body": "Permanece activo mientras estés suscrito. Si cancelas, tienes {grace} días para volver a suscribirte y conservarlo. Tras {total} días sin suscripción activa, expira de forma permanente."
+      },
+      "cta": {
+        "notLoggedIn": "Inicia sesión para reclamar",
+        "loggedIn": "Reclamar mis beneficios Early Bird",
+        "joining": "Reclamando…",
+        "alreadyJoined": "Continuar al pago"
+      },
+      "errors": {
+        "loadFailed": "No se pudo cargar la campaña. Inténtalo más tarde.",
+        "generic": "Algo salió mal. Vuelve a intentarlo.",
+        "ended": "Esta campaña acaba de terminar.",
+        "full": "Esta campaña está completa.",
+        "rateLimit": "Demasiados intentos. Espera un minuto e inténtalo de nuevo."
+      },
+      "ended": {
+        "title": "Early Bird ha terminado",
+        "body": "Gracias por tu interés. Pasa a Pro para seguir escribiendo con libertad.",
+        "cta": "Ver precios Pro"
       }
     }
   },
   "nav": {
     "try": "Probar",
     "pricing": "Precios",
+    "earlyBird": "Early Bird",
     "github": "GitHub",
     "signIn": "Iniciar sesión",
     "install": "Instalar extensión",

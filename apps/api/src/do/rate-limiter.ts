@@ -139,6 +139,10 @@ export const BURST_BUCKETS = {
   // advancement 去重（同 period 不再 emit），但加 user-level ceiling 防御
   // 性更稳，且与 byok-test / claim-install 风格一致。
   verifyCheckout: { capacity: 5, refillPerSec: 5 / 60 },
+  // campaign-join：5 req/min/user。POST /v1/campaigns/:slug/join 是写 D1
+  // 多张表 + 落 perks 的高权重端点。INSERT OR IGNORE 保证幂等不会写双份，
+  // 但 batch 失败重试 / 用户重复点击不应让 D1 反复扛 batch。
+  campaignJoin: { capacity: 5, refillPerSec: 5 / 60 },
 } as const;
 
 export interface ConsumeResult {

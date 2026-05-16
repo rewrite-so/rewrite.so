@@ -477,3 +477,113 @@ describe('POST /v1/billing/verify-checkout', () => {
     expect(writes).toEqual([]);
   });
 });
+
+describe('POST /v1/billing/checkout (discountCode injection)', () => {
+  /** Make a fake DB whose user_discounts SELECT returns the provided row */
+  function makeDbWithDiscount(
+    discount: {
+      code: string;
+      percentage: number;
+      duration: string;
+      pro_lapses_at: number | null;
+      expires_at: number | null;
+    } | null,
+  ): D1Database {
+    return {
+      prepare: (sql: string) => ({
+        bind: (..._args: unknown[]) => ({
+          first: async () => {
+            if (sql.includes('FROM user_discounts')) return discount;
+            return null;
+          },
+          run: async () => ({ success: true, meta: { changes: 0 } }),
+          all: async () => ({ results: [], success: true }),
+        }),
+      }),
+    } as unknown as D1Database;
+  }
+
+  it('injects discount_code into Creem when user has active early-bird discount', async () => {
+    mockSession = { user: { id: 'u1', email: 'u1@test.com' } };
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(
+        Response.json({ id: 'ck_a', checkout_url: 'https://creem/p/ck_a', status: 'pending' }),
+      );
+    const env = {
+      ...MOCK_ENV,
+      DB: makeDbWithDiscount({
+        code: 'EARLYBIRD_LIFETIME_70OFF',
+        percentage: 70,
+        duration: 'forever',
+        pro_lapses_at: Date.now() + 150 * 86400000,
+        expires_at: null,
+      }),
+    };
+    await app.request(
+      '/v1/billing/checkout',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ plan: 'monthly' }),
+      },
+      env,
+    );
+    const init = fetchSpy.mock.calls[0]?.[1] as RequestInit;
+    const body = JSON.parse(init.body as string) as Record<string, unknown>;
+    expect(body.discount_code).toBe('EARLYBIRD_LIFETIME_70OFF');
+  });
+
+  it('omits discount_code when user has no active discount', async () => {
+    mockSession = { user: { id: 'u1', email: 'u1@test.com' } };
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(
+        Response.json({ id: 'ck_a', checkout_url: 'https://creem/p/ck_a', status: 'pending' }),
+      );
+    const env = { ...MOCK_ENV, DB: makeDbWithDiscount(null) };
+    await app.request(
+      '/v1/billing/checkout',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ plan: 'monthly' }),
+      },
+      env,
+    );
+    const init = fetchSpy.mock.calls[0]?.[1] as RequestInit;
+    const body = JSON.parse(init.body as string) as Record<string, unknown>;
+    expect(body).not.toHaveProperty('discount_code');
+  });
+
+  it('omits discount_code when user_discounts is past pro_lapses_at (lazy-expired)', async () => {
+    mockSession = { user: { id: 'u1', email: 'u1@test.com' } };
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(
+        Response.json({ id: 'ck_a', checkout_url: 'https://creem/p/ck_a', status: 'pending' }),
+      );
+    const env = {
+      ...MOCK_ENV,
+      DB: makeDbWithDiscount({
+        code: 'EARLYBIRD_LIFETIME_70OFF',
+        percentage: 70,
+        duration: 'forever',
+        pro_lapses_at: Date.now() - 1000, // past
+        expires_at: null,
+      }),
+    };
+    await app.request(
+      '/v1/billing/checkout',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ plan: 'monthly' }),
+      },
+      env,
+    );
+    const init = fetchSpy.mock.calls[0]?.[1] as RequestInit;
+    const body = JSON.parse(init.body as string) as Record<string, unknown>;
+    expect(body).not.toHaveProperty('discount_code');
+  });
+});

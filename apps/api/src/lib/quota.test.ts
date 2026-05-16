@@ -65,8 +65,10 @@ describe('checkAndIncrement', () => {
 interface FakeFixture {
   override: { force_tier: 'pro' | 'free'; expires_at: number | null } | null;
   sub: { status: string; current_period_end: number } | null;
+  /** When non-null, gift_grants SELECT returns a hit row (tier resolves to pro) */
+  gift?: { 1: 1 } | null;
   /** Per-call counters; verifies cache + priority behaviour */
-  selects: { override: number; subscriptions: number };
+  selects: { override: number; subscriptions: number; gift: number };
 }
 
 function makeDb(fx: FakeFixture): D1Database {
@@ -81,6 +83,10 @@ function makeDb(fx: FakeFixture): D1Database {
           if (sql.includes('FROM subscriptions')) {
             fx.selects.subscriptions++;
             return fx.sub;
+          }
+          if (sql.includes('FROM gift_grants')) {
+            fx.selects.gift++;
+            return fx.gift ?? null;
           }
           return null;
         },
@@ -116,7 +122,7 @@ describe('resolveUserTier', () => {
     const fx: FakeFixture = {
       override: null,
       sub: null,
-      selects: { override: 0, subscriptions: 0 },
+      selects: { override: 0, subscriptions: 0, gift: 0 },
     };
     const tier = await resolveUserTier(makeDb(fx), 'u1');
     expect(tier).toBe('free');
@@ -128,7 +134,7 @@ describe('resolveUserTier', () => {
     const fx: FakeFixture = {
       override: null,
       sub: { status: 'active', current_period_end: Date.now() + 86400_000 },
-      selects: { override: 0, subscriptions: 0 },
+      selects: { override: 0, subscriptions: 0, gift: 0 },
     };
     expect(await resolveUserTier(makeDb(fx), 'u1')).toBe('pro');
   });
@@ -137,7 +143,7 @@ describe('resolveUserTier', () => {
     const fx: FakeFixture = {
       override: { force_tier: 'pro', expires_at: null }, // permanent override
       sub: null,
-      selects: { override: 0, subscriptions: 0 },
+      selects: { override: 0, subscriptions: 0, gift: 0 },
     };
     expect(await resolveUserTier(makeDb(fx), 'u1')).toBe('pro');
     // subscriptions table not consulted when override hits
@@ -148,7 +154,7 @@ describe('resolveUserTier', () => {
     const fx: FakeFixture = {
       override: { force_tier: 'free', expires_at: null },
       sub: { status: 'active', current_period_end: Date.now() + 86400_000 },
-      selects: { override: 0, subscriptions: 0 },
+      selects: { override: 0, subscriptions: 0, gift: 0 },
     };
     expect(await resolveUserTier(makeDb(fx), 'u1')).toBe('free');
     expect(fx.selects.subscriptions).toBe(0);
@@ -158,7 +164,7 @@ describe('resolveUserTier', () => {
     const fx: FakeFixture = {
       override: { force_tier: 'pro', expires_at: Math.floor(Date.now() / 1000) - 60 }, // expired 1min ago
       sub: null,
-      selects: { override: 0, subscriptions: 0 },
+      selects: { override: 0, subscriptions: 0, gift: 0 },
     };
     expect(await resolveUserTier(makeDb(fx), 'u1')).toBe('free');
     expect(fx.selects.subscriptions).toBe(1);
@@ -168,7 +174,7 @@ describe('resolveUserTier', () => {
     const fx: FakeFixture = {
       override: null,
       sub: { status: 'canceled', current_period_end: Date.now() + 86400_000 },
-      selects: { override: 0, subscriptions: 0 },
+      selects: { override: 0, subscriptions: 0, gift: 0 },
     };
     expect(await resolveUserTier(makeDb(fx), 'u1')).toBe('pro');
   });
@@ -177,7 +183,7 @@ describe('resolveUserTier', () => {
     const fx: FakeFixture = {
       override: null,
       sub: null,
-      selects: { override: 0, subscriptions: 0 },
+      selects: { override: 0, subscriptions: 0, gift: 0 },
     };
     const { kv } = makeKv({ 'override:u1': '__none__' });
     await resolveUserTier(makeDb(fx), 'u1', kv);
@@ -189,7 +195,7 @@ describe('resolveUserTier', () => {
     const fx: FakeFixture = {
       override: null,
       sub: null,
-      selects: { override: 0, subscriptions: 0 },
+      selects: { override: 0, subscriptions: 0, gift: 0 },
     };
     const { kv } = makeKv({
       'override:u1': JSON.stringify({ force_tier: 'pro', expires_at: null }),
@@ -199,15 +205,52 @@ describe('resolveUserTier', () => {
     expect(fx.selects.subscriptions).toBe(0);
   });
 
-  it('KV cache miss writes a sentinel after first lookup', async () => {
+  it('KV cache miss writes both override + gift_active sentinels', async () => {
     const fx: FakeFixture = {
       override: null,
       sub: null,
-      selects: { override: 0, subscriptions: 0 },
+      selects: { override: 0, subscriptions: 0, gift: 0 },
     };
     const { kv, store, ops } = makeKv();
     await resolveUserTier(makeDb(fx), 'u1', kv);
-    expect(ops.put).toBe(1);
+    // Both override + gift_active sentinels are written on full miss path
+    expect(ops.put).toBe(2);
     expect(store['override:u1']).toBe('__none__');
+    expect(store['gift_active:u1']).toBe('__none__');
+  });
+
+  it('returns pro when no override, no subscription, but gift_grants is active', async () => {
+    const fx: FakeFixture = {
+      override: null,
+      sub: null,
+      gift: { 1: 1 },
+      selects: { override: 0, subscriptions: 0, gift: 0 },
+    };
+    expect(await resolveUserTier(makeDb(fx), 'u1')).toBe('pro');
+    expect(fx.selects.gift).toBe(1);
+  });
+
+  it('returns pro when gift_grants present even without subscription row', async () => {
+    const fx: FakeFixture = {
+      override: null,
+      sub: null,
+      gift: { 1: 1 },
+      selects: { override: 0, subscriptions: 0, gift: 0 },
+    };
+    const { kv, store } = makeKv();
+    expect(await resolveUserTier(makeDb(fx), 'u1', kv)).toBe('pro');
+    expect(store['gift_active:u1']).toBe('1');
+  });
+
+  it('gift_active KV hit (true sentinel) skips gift_grants SELECT', async () => {
+    const fx: FakeFixture = {
+      override: null,
+      sub: null,
+      gift: null,
+      selects: { override: 0, subscriptions: 0, gift: 0 },
+    };
+    const { kv } = makeKv({ 'override:u1': '__none__', 'gift_active:u1': '1' });
+    expect(await resolveUserTier(makeDb(fx), 'u1', kv)).toBe('pro');
+    expect(fx.selects.gift).toBe(0);
   });
 });

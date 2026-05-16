@@ -61,6 +61,13 @@ chrome.runtime.onMessage.addListener((rawMsg: unknown, _sender, sendResponse) =>
   }
 
   if (msg?.type === 'me:get') {
+    // Schema mirrors packages/shared/src/me.ts:MeResponseSchema. We use a plain
+    // type cast (not zod parse) to avoid pulling zod into the SW bundle just
+    // for this one endpoint; the api guarantees the shape and consumers
+    // (options App) treat earlyBird / giftBalanceDays as optional.
+    // **Do NOT mirror earlyBird state to chrome.storage** — keep it as a live
+    // pull from /v1/me to avoid stale local copies surviving subscription /
+    // discount lifecycle changes. (Plan: § "扩展端 chrome.storage 不镜像")
     fetch(`${API_BASE}/v1/me`, { credentials: 'include' })
       .then(async (res) => {
         if (!res.ok) {
@@ -75,6 +82,19 @@ chrome.runtime.onMessage.addListener((rawMsg: unknown, _sender, sendResponse) =>
             image: string | null;
           } | null;
           tier?: 'free' | 'pro';
+          subscription?: {
+            plan: string;
+            status: string;
+            currentPeriodEnd: string;
+            cancelAtPeriodEnd: boolean;
+          } | null;
+          earlyBird?: {
+            isParticipant: boolean;
+            discountActive: boolean;
+            proLapsesAt: string | null;
+          } | null;
+          giftBalanceDays?: number;
+          eventsEnabled?: boolean;
         };
         sendResponse({ ok: true, data });
       })

@@ -184,9 +184,15 @@
   `onUserPrefsSync` callback 写回 chrome.storage（仅当与 cache 不同；避免无限循环）。
   这是 visibilitychange + 30s 节流的轻量补充：用户改完语言下一次改写就立即跨端同步，
   0 额外网络往返。匿名用户不带这字段，跳过同步。
-- **resolveUserTier 是订阅 → 配额档位的唯一入口**：`/v1/rewrite` 和 `/v1/me/usage` 都通过它查 subscriptions
-  表决定 free/pro。`status` 为 `active|trialing|paused`，或 `canceled` 但 `current_period_end > now`，
-  都返回 'pro'。其它（包括 `expired|past_due`）返回 'free'。webhook 状态机和这个查询逻辑必须一致。
+- **resolveUserTier 是 tier 判定的唯一入口**：`/v1/rewrite` 和 `/v1/me/usage` 都通过它决定 free/pro。
+  优先级（高 → 低）：
+  1. `admin_user_overrides`（运营手术调档；KV `override:<userId>` 5min TTL）
+  2. `subscriptions`：`status ∈ active|trialing|paused`，或 `canceled` 且 `current_period_end > now` → 'pro'。其他（`expired|past_due`）→ 落到 #3
+  3. `gift_grants`：任一 `status='active'` 且 `expires_at > now` 的赠送行 → 'pro'（KV `gift_active:<userId>` 5min TTL，写 gift/sub 后 invalidate）
+  4. 都不命中 → 'free'
+  
+  **gift_grants 是「半 tier 来源」**：影响 tier 判定但不影响月配额池子（pro 仍 2000/月）。
+  webhook 状态机、checkout 路径、所有 tier 查询都必须经此函数 — 不要绕过自己查 subscriptions。
 - **Webhook 路径 `/webhooks/creem`**：Creem 用 header `creem-signature` 传 hex 编码的 HMAC-SHA256，
   必须用原始 `c.req.text()` 做签名校验（JSON.parse 后再 stringify 会丢空白导致签名对不上）。
   幂等用 `webhook_events` 表的 `event_id` PK，先查 → 处理 → 写。
@@ -204,6 +210,64 @@
   （防匿名滥用作 base URL 探测）。
 - **BYOK_MASTER_KEY 是 base64 编码的 32 字节 AES-GCM key**（`openssl rand -base64 32` 生成）。
   改 master key 会让所有 byok_keys 失效。`key_version` 字段保留给将来多 key 轮换用，MVP v=1。
+
+### 运营活动 / 早鸟（campaigns）
+
+通用运营活动统一通过 `campaigns` + `campaign_participations` 双表表达。
+type-specific 配置走 `config_json`（schema 在 `packages/shared/src/campaigns.ts`
+共享）。营销文案走 `i18n_json`，admin 可改文案**无需发版**。结构性 UI 文本
+（按钮、标签、状态）走 `packages/shared/src/messages/*.json` i18n catalog —
+**两者不要混**。
+
+- **`campaigns` 表是 admin worker 写、本仓 api 只读**：admin SPA POST/PATCH
+  写入后必须 `KV.delete('campaign:<slug>')` invalidate（60s TTL）。本仓 api
+  通过 `GET /v1/campaigns/:slug` 读取 + 缓存。新增 campaign type 时同步扩
+  `packages/shared/src/campaigns.ts` 的 `CAMPAIGN_TYPES` + `getCampaignConfigSchema()`。
+- **早鸟报名落 3 张表（D1 batch）**：`POST /v1/campaigns/:slug/join` 顺序
+  「先 SELECT existing 防重复 → 再 batch 写 gift_grants + user_discounts +
+  campaign_participations」，全部 INSERT OR IGNORE。`gift_grants.id` 用
+  `gg_<sha256(userId+:campaign+:campaignId)[:12]>` 确定性，重试 / 并发 race
+  都幂等。
+- **「报名时已 Pro 用户」 gift_grants.granted_at 延后到 sub 期末**：避免与现
+  有订阅期重叠浪费 90 天赠送。统一公式 `granted_at = max(now, subEnd, currentMaxGiftEnd)`
+  涵盖「报名 + 续期叠加」两个场景。
+- **HTTP status 规范**：disabled / 时间窗外 → 410 + `code: CAMPAIGN_ENDED`；
+  未开始 → 425 + `CAMPAIGN_NOT_STARTED`；capacity 满 → 409 + `CAMPAIGN_FULL`；
+  已报名 → 200 + `alreadyJoined: true`；未登录 → 401。
+- **「早鸟」slug hardcode 是 Phase 1 妥协**：前端 `/early-bird` 路径与 slug
+  `early-bird` 绑定。Phase 2+ 多活动并行时重构为 `/campaigns/[slug]` 动态
+  路由 + admin SPA 显式配 slug。
+
+### 3 折折扣 / user_discounts 宽限规则
+
+- **Creem 不支持 customer-bound 折扣 + 不支持 trial period**：所以 3 折通过
+  「app 层每次 checkout 主动注入 discount_code」实现，3 个月免费通过 app 层
+  `gift_grants` 直接发放。**不要试图建独立 Creem product 表达早鸟价**（多
+  product 不能挂多 price + 维护噩梦）。统一用全局 discount + app 注入。
+- **`pro_lapses_at` 是单调递增状态机**：「按当前已知信息，Pro 资格预计在这
+  个时间点彻底丢失（已含 60 天宽限）」。更新点都用 `max(原值, 新值)`：
+  1. `gift_grants` 写入时：推到 `gift.expires_at + grace_period_days*86400000`
+  2. webhook `subscription.active / trialing`：推到 `sub.current_period_end + grace`
+  3. webhook `subscription.canceled / expired`：**不更新**（current_period_end 已记在 #2）
+  
+  读取走 lazy-on-read：`resolveActiveDiscount()` 内部检测 `now > pro_lapses_at`
+  时写 `status='expired'` 并返 null（无 cron）。/v1/me 路径不写副作用，由
+  checkout 时真正裁决。
+- **「报名但从未订阅过」用户**：`pro_lapses_at` 在 gift 写入时已推到
+  `gift_end + grace`（约 150 天）。该窗口内首次订阅享 3 折；超过 150 天失
+  效永久。这是产品决策（用户已确认）。
+- **`grace_period_days` 写入 user_discounts 行后是 per-user 字段**：admin
+  改活动 config 只影响**新报名**，已有 user 的宽限值不变。`extendProLapsesAt()`
+  从 row 自己读 grace（caller 不需要知道）。
+- **Creem dashboard 折扣码必须与 `campaigns.config_json.perks.discount.code`
+  字符串完全一致**：是**人工同步责任**。当前早鸟码 `ISIZATWC8P`
+  （Creem dashboard 生成，duration=forever, percentage=70,
+  applies_to=[CREEM_PRO_MONTHLY_PRODUCT_ID, CREEM_PRO_YEARLY_PRODUCT_ID]）。
+  Code 是 Creem 自动生成的随机串，没有自描述语义；活动配置 + admin SPA
+  默认模板 (CampaignsPage.tsx `DEFAULT_EARLY_BIRD_CONFIG`) 同步引用。
+  **percentage 是「折扣率」语义**：70 = 70% off = 用户付 30% = 中文「3 折」。
+  Creem 全用 percentage 表达，中文「3 折」转换（100 - 70）只在前端 i18n
+  字符串里完成。
 
 ### Creem 契约（实测 + OpenAPI 严格 cross-check）
 
@@ -437,15 +501,17 @@ migration 文件名编号空间按仓库分治：
 
 ## 跨仓库 KV cache 失效协议
 
-主仓库读、admin 仓库写的两张表（`admin_user_overrides`、`user_bans`）走 KV
-缓存（5min TTL + `__none__` 负缓存防穿透）减少热路径 D1 读。admin worker
-**写表后必须立即** `KV.delete()` 对应 key 让缓存失效，否则用户会在最坏 5min
-内拿到旧 tier / ban 状态：
+主仓库读、admin 仓库写的多张表都走 KV 缓存（5min TTL + 负缓存 sentinel
+防穿透；campaigns 用 60s + `__none__`）减少热路径 D1 读。admin worker
+**写表后必须立即** `KV.delete()` 对应 key 让缓存失效，否则用户会在最坏 TTL
+窗口内拿到旧状态：
 
-| 表 | KV key 公式 | 失效时机 |
-|---|---|---|
-| `admin_user_overrides` | `override:<user_id>` | INSERT / UPDATE / DELETE 后 |
-| `user_bans` | `ban:<user_id>` | INSERT / DELETE 后 |
+| 表 | KV key 公式 | TTL | 失效时机 |
+|---|---|---|---|
+| `admin_user_overrides` | `override:<user_id>` | 5min | INSERT / UPDATE / DELETE 后 |
+| `user_bans` | `ban:<user_id>` | 5min | INSERT / DELETE 后 |
+| `gift_grants` (+ `subscriptions`) | `gift_active:<user_id>` | 5min | 任一写入后；本仓 api 报名路径 batch 成功后亦显式 invalidate |
+| `campaigns` | `campaign:<slug>` | 60s | admin POST/PATCH 后；slug 改名时旧 key 自然 TTL 过期 |
 
 `announcements` 表**不走服务端 KV cache**（行数极少，每次直查 D1）；admin 写表
 对所有读路径立即生效，`Cache-Control: max-age=60` 仅是客户端浏览器层缓存。

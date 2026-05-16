@@ -162,6 +162,20 @@
         "autoSystem": "Auto (suivre le système)",
         "autoFromPage": "Détecter la langue de la page"
       },
+      "earlyBird": {
+        "label": "Early Bird",
+        "badge": "Membre fondateur",
+        "statusLabel": "30 % de remise à vie",
+        "status": {
+          "active": "Actif",
+          "grace": "Période de grâce · réabonnez-vous dans {days, number} jours",
+          "expired": "Expiré"
+        },
+        "giftBalanceLabel": "Jours Pro offerts",
+        "giftBalanceValue": "{days, number} jours restants",
+        "proSourceLabel": "Source Pro",
+        "proSourceSubscription": "Abonnement · renouvellement le {date}"
+      },
       "sub": {
         "label": "Abonnement",
         "statusLabel": "Statut",
@@ -274,12 +288,54 @@
         "ctaRedirecting": "Redirection…",
         "ctaMonthly": "S'abonner à Pro Mensuel",
         "ctaAnnual": "S'abonner à Pro Annuel"
+      },
+      "earlyBirdBanner": {
+        "title": "Membre Early Bird",
+        "body": "30 % de remise à chaque renouvellement, à vie",
+        "tooltip": "Restez abonné pour conserver la remise ; 60 jours de grâce après annulation",
+        "subscribedHint": "Votre prochain renouvellement sera automatiquement remisé."
+      }
+    },
+    "early-bird": {
+      "title": "Early Bird",
+      "subtitle": "Offre limitée pour membres fondateurs.",
+      "loading": "Chargement…",
+      "perks": {
+        "title": "Ce que vous obtenez",
+        "giftDaysLabel": "{days} jours de Pro offerts",
+        "giftDaysBody": "Activé dès votre inscription ; compte à rebours quotidien.",
+        "discountLabel": "{percentage} % de remise Pro à vie",
+        "discountPricePreview": "${originalMonthly}→${discountedMonthly}/mois · annuel ${originalYearly}→${discountedYearly}/mois",
+        "discountBody": "La remise s'applique automatiquement au paiement tant que vous restez abonné."
+      },
+      "window": {
+        "title": "Comment la remise à vie reste valable",
+        "body": "Elle reste active tant que vous êtes abonné. Si vous annulez, vous avez {grace} jours pour vous réabonner et la conserver. Après {total} jours sans abonnement actif, l'offre expire définitivement."
+      },
+      "cta": {
+        "notLoggedIn": "Connectez-vous pour réclamer",
+        "loggedIn": "Réclamer mes avantages Early Bird",
+        "joining": "Réclamation en cours…",
+        "alreadyJoined": "Continuer vers le paiement"
+      },
+      "errors": {
+        "loadFailed": "Impossible de charger la campagne. Réessayez plus tard.",
+        "generic": "Une erreur est survenue. Réessayez.",
+        "ended": "Cette campagne vient de se terminer.",
+        "full": "Cette campagne est complète.",
+        "rateLimit": "Trop de tentatives. Attendez une minute et réessayez."
+      },
+      "ended": {
+        "title": "Early Bird est terminé",
+        "body": "Merci pour votre intérêt. Passez à Pro pour continuer à écrire en toute liberté.",
+        "cta": "Voir les tarifs Pro"
       }
     }
   },
   "nav": {
     "try": "Essayer",
     "pricing": "Tarifs",
+    "earlyBird": "Early Bird",
     "github": "GitHub",
     "signIn": "Se connecter",
     "install": "Installer l'extension",

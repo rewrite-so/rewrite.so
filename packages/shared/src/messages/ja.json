@@ -162,6 +162,20 @@
         "autoSystem": "自動（システムに合わせる）",
         "autoFromPage": "ページの言語を自動検出"
       },
+      "earlyBird": {
+        "label": "アーリーバード",
+        "badge": "創設メンバー",
+        "statusLabel": "Pro 生涯 30% オフ",
+        "status": {
+          "active": "有効",
+          "grace": "猶予期間 · あと {days, number} 日以内に再加入で有効",
+          "expired": "失効"
+        },
+        "giftBalanceLabel": "ギフト Pro 日数",
+        "giftBalanceValue": "残り {days, number} 日",
+        "proSourceLabel": "Pro の出どころ",
+        "proSourceSubscription": "サブスクリプション · {date} 更新"
+      },
       "sub": {
         "label": "サブスクリプション",
         "statusLabel": "ステータス",
@@ -274,12 +288,54 @@
         "ctaRedirecting": "移動中…",
         "ctaMonthly": "Pro 月額に加入",
         "ctaAnnual": "Pro 年額に加入"
+      },
+      "earlyBirdBanner": {
+        "title": "アーリーバード会員",
+        "body": "更新ごとに自動で 30% オフ",
+        "tooltip": "サブスクリプションを維持中のみ有効。キャンセル後 60 日間の猶予期間あり",
+        "subscribedHint": "次回更新時に自動で割引が適用されます。"
+      }
+    },
+    "early-bird": {
+      "title": "アーリーバード",
+      "subtitle": "期間限定の創設メンバー特典。",
+      "loading": "読み込み中…",
+      "perks": {
+        "title": "得られるもの",
+        "giftDaysLabel": "Pro を {days} 日間無料",
+        "giftDaysBody": "登録した瞬間から有効、日単位でカウントダウン。",
+        "discountLabel": "Pro 生涯 {percentage}% オフ",
+        "discountPricePreview": "${originalMonthly}→${discountedMonthly}/月 · 年払い ${originalYearly}→${discountedYearly}/月",
+        "discountBody": "サブスクリプション継続中はチェックアウトで自動適用。"
+      },
+      "window": {
+        "title": "生涯割引の有効条件",
+        "body": "サブスクリプション中はずっと有効。キャンセル後 {grace} 日以内に再加入すれば継続。連続 {total} 日間サブスクリプションがないと失効します。"
+      },
+      "cta": {
+        "notLoggedIn": "ログインして受け取る",
+        "loggedIn": "アーリーバード特典を受け取る",
+        "joining": "受け取り中…",
+        "alreadyJoined": "支払いページへ"
+      },
+      "errors": {
+        "loadFailed": "キャンペーン情報の読み込みに失敗しました。",
+        "generic": "問題が発生しました。再度お試しください。",
+        "ended": "キャンペーンは終了しました。",
+        "full": "今回の枠は満員です。",
+        "rateLimit": "操作が多すぎます。少し待ってから再試行してください。"
+      },
+      "ended": {
+        "title": "アーリーバードは終了しました",
+        "body": "ご関心ありがとうございます。Pro にアップグレードして引き続きご利用ください。",
+        "cta": "Pro 料金を見る"
       }
     }
   },
   "nav": {
     "try": "試す",
     "pricing": "料金",
+    "earlyBird": "アーリーバード",
     "github": "GitHub",
     "signIn": "ログイン",
     "install": "拡張機能をインストール",
