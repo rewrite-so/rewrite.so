@@ -310,7 +310,7 @@
       },
       "window": {
         "title": "How the lifetime discount stays valid",
-        "body": "The discount stays active while you're subscribed. If you cancel, you have {grace} days to re-subscribe and keep it. After {total} days without an active subscription, the offer expires permanently."
+        "body": "Your discount stays active as long as you have Pro — both the {giftDays}-day gift at signup and any later active subscription. When any Pro period ends, you have {grace} days to re-subscribe and keep your eligibility. Miss that grace window and the offer expires permanently."
       },
       "cta": {
         "notLoggedIn": "Sign in to claim",

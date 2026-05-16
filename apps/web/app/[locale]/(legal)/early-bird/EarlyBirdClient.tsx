@@ -228,9 +228,7 @@ export default function EarlyBirdClient({ locale }: { locale: string }) {
 
       <div style={WINDOW_NOTE}>
         <strong>{t('window.title')}</strong>
-        <p style={{ color: '#555', marginTop: 4 }}>
-          {t('window.body', { giftDays, grace, total: giftDays + grace })}
-        </p>
+        <p style={{ color: '#555', marginTop: 4 }}>{t('window.body', { giftDays, grace })}</p>
       </div>
 
       <div style={{ marginTop: 32 }}>

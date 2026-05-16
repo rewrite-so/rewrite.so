@@ -310,7 +310,7 @@
       },
       "window": {
         "title": "So bleibt der lebenslange Rabatt gültig",
-        "body": "Er bleibt aktiv, solange du abonniert bist. Bei Kündigung hast du {grace} Tage, um wieder zu abonnieren und den Rabatt zu behalten. Nach {total} Tagen ohne aktives Abo verfällt das Angebot endgültig."
+        "body": "Der Rabatt bleibt aktiv, solange du Pro hast — sowohl die {giftDays} kostenlosen Pro-Tage bei der Anmeldung als auch jedes spätere aktive Abo. Wenn eine Pro-Phase endet, hast du {grace} Tage Zeit, um erneut zu abonnieren und deine Berechtigung zu behalten. Verpasst du dieses Fenster, verfällt das Angebot endgültig."
       },
       "cta": {
         "notLoggedIn": "Anmelden, um einzulösen",

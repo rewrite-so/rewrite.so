@@ -310,7 +310,7 @@
       },
       "window": {
         "title": "Comment la remise à vie reste valable",
-        "body": "Elle reste active tant que vous êtes abonné. Si vous annulez, vous avez {grace} jours pour vous réabonner et la conserver. Après {total} jours sans abonnement actif, l'offre expire définitivement."
+        "body": "La remise reste active tant que vous avez Pro — les {giftDays} jours offerts à l'inscription comme toute période d'abonnement actif. À la fin de chaque période Pro, vous disposez de {grace} jours pour vous réabonner et conserver votre éligibilité. Passé ce délai, l'offre expire définitivement."
       },
       "cta": {
         "notLoggedIn": "Connectez-vous pour réclamer",

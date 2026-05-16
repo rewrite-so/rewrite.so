@@ -310,7 +310,7 @@
       },
       "window": {
         "title": "Cómo se mantiene válido el descuento de por vida",
-        "body": "Permanece activo mientras estés suscrito. Si cancelas, tienes {grace} días para volver a suscribirte y conservarlo. Tras {total} días sin suscripción activa, expira de forma permanente."
+        "body": "El descuento permanece activo mientras tengas Pro — tanto los {giftDays} días de Pro gratis al inscribirte como cualquier suscripción activa posterior. Cuando finalice cualquier periodo Pro, tendrás {grace} días para volver a suscribirte y conservar tu elegibilidad. Si dejas pasar ese plazo, la oferta expira de forma permanente."
       },
       "cta": {
         "notLoggedIn": "Inicia sesión para reclamar",
