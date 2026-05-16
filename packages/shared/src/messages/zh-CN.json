@@ -304,7 +304,6 @@
         "giftDaysLabel": "免费 {days} 天 Pro",
         "giftDaysBody": "领取后立刻开通。",
         "discountLabel": "Pro 永久 3 折",
-        "discountPricePreview": "月付 ${originalMonthly} → ${discountedMonthly} / 月；年付 ${originalYearly} → ${discountedYearly} / 月",
         "discountBody": "每次续费自动按 3 折。"
       },
       "window": {

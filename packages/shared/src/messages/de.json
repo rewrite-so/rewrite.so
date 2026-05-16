@@ -304,7 +304,6 @@
         "giftDaysLabel": "{days} Tage Pro gratis",
         "giftDaysBody": "Sofort nach Einlösung aktiv.",
         "discountLabel": "{percentage} % Pro-Rabatt lebenslang",
-        "discountPricePreview": "${originalMonthly}→${discountedMonthly}/Monat · jährlich ${originalYearly}→${discountedYearly}/Monat",
         "discountBody": "Bei jeder Verlängerung automatisch angewendet."
       },
       "window": {

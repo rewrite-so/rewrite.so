@@ -304,7 +304,6 @@
         "giftDaysLabel": "Pro を {days} 日間無料",
         "giftDaysBody": "受け取った瞬間から有効。",
         "discountLabel": "Pro 生涯 {percentage}% オフ",
-        "discountPricePreview": "${originalMonthly}→${discountedMonthly}/月 · 年払い ${originalYearly}→${discountedYearly}/月",
         "discountBody": "更新ごとに自動で適用。"
       },
       "window": {

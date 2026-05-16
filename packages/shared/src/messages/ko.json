@@ -304,7 +304,6 @@
         "giftDaysLabel": "Pro {days}일 무료",
         "giftDaysBody": "받는 순간부터 활성화됩니다.",
         "discountLabel": "Pro 평생 {percentage}% 할인",
-        "discountPricePreview": "${originalMonthly}→${discountedMonthly}/월 · 연간 ${originalYearly}→${discountedYearly}/월",
         "discountBody": "갱신할 때마다 자동 적용됩니다."
       },
       "window": {

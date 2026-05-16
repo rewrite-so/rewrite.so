@@ -304,7 +304,6 @@
         "giftDaysLabel": "{days} days of Pro, free",
         "giftDaysBody": "Activated the moment you claim it.",
         "discountLabel": "Lifetime {percentage}% off Pro",
-        "discountPricePreview": "${originalMonthly}→${discountedMonthly}/mo · ${originalYearly}→${discountedYearly}/mo annual",
         "discountBody": "Auto-applied to every renewal."
       },
       "window": {

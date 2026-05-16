@@ -304,7 +304,6 @@
         "giftDaysLabel": "{days} días de Pro gratis",
         "giftDaysBody": "Se activa en cuanto lo reclamas.",
         "discountLabel": "{percentage}% de descuento Pro de por vida",
-        "discountPricePreview": "${originalMonthly}→${discountedMonthly}/mes · anual ${originalYearly}→${discountedYearly}/mes",
         "discountBody": "Aplicado automáticamente en cada renovación."
       },
       "window": {

@@ -12,7 +12,6 @@
  *   so external links stay stable.
  */
 
-import { PRO_PRICE } from '@rewrite/shared';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { useRouter } from '../../../../i18n/navigation.ts';
@@ -192,10 +191,6 @@ export default function EarlyBirdClient({ locale }: { locale: string }) {
   const giftDays = campaign.config.perks.gift_days;
   const grace = campaign.config.perks.discount.grace_period_days;
   const percentage = campaign.config.perks.discount.percentage;
-  // 70 off = 用户付 30% = "3 折"，需要由 i18n catalog 翻译成区域表述
-  const userPaysPercent = 100 - percentage;
-  const discountedMonthly = (PRO_PRICE.monthly * userPaysPercent) / 100;
-  const discountedYearlyMonthly = (PRO_PRICE.yearlyMonthly * userPaysPercent) / 100;
   const joined = campaign.viewer?.joined === true;
 
   return (
@@ -211,18 +206,8 @@ export default function EarlyBirdClient({ locale }: { locale: string }) {
           {t('perks.giftDaysBody')}
         </li>
         <li style={PERK_ITEM}>
-          <strong>{t('perks.discountLabel', { percentage })}</strong>{' '}
-          <span style={{ color: '#888', fontSize: 13 }}>
-            (
-            {t('perks.discountPricePreview', {
-              originalMonthly: PRO_PRICE.monthly.toFixed(2),
-              discountedMonthly: discountedMonthly.toFixed(2),
-              originalYearly: PRO_PRICE.yearlyMonthly.toFixed(2),
-              discountedYearly: discountedYearlyMonthly.toFixed(2),
-            })}
-            )
-          </span>{' '}
-          — {t('perks.discountBody')}
+          <strong>{t('perks.discountLabel', { percentage })}</strong> —{' '}
+          {t('perks.discountBody')}
         </li>
       </ul>
 
