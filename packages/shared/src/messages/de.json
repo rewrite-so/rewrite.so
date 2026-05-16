@@ -298,6 +298,7 @@
     },
     "early-bird": {
       "title": "Early Bird",
+      "metaDescription": "rewrite.so Early Bird: 90 Tage Pro gratis einlösen und Pro lebenslang mit 70 % Rabatt behalten.",
       "loading": "Lädt …",
       "perks": {
         "title": "Was du bekommst",

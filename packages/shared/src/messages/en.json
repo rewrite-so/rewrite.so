@@ -298,6 +298,7 @@
     },
     "early-bird": {
       "title": "Early Bird",
+      "metaDescription": "rewrite.so Early Bird: claim 90 days of Pro free, then keep Pro at 70% off for life.",
       "loading": "Loading…",
       "perks": {
         "title": "What you get",

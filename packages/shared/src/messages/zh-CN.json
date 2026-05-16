@@ -298,6 +298,7 @@
     },
     "early-bird": {
       "title": "早鸟计划",
+      "metaDescription": "rewrite.so 创始会员限时早鸟：领取即享 90 天免费 Pro，订阅后永久 3 折。",
       "loading": "加载中…",
       "perks": {
         "title": "你将获得",

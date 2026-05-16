@@ -298,6 +298,7 @@
     },
     "early-bird": {
       "title": "얼리버드",
+      "metaDescription": "rewrite.so 얼리버드: 지금 받으면 90일 무료 Pro, 이후 Pro 평생 70% 할인.",
       "loading": "로드 중…",
       "perks": {
         "title": "받게 되는 혜택",
