@@ -251,6 +251,11 @@ type-specific 配置走 `config_json`（schema 在 `packages/shared/src/campaign
     `apps/web/lib/campaign-entry.ts:getCampaignEntryState(slug)` 决定，
     `showBadge = active && show_homepage_badge`。两个入口同步显示/隐藏，
     不存在「TopNav 有但首页没」的中间状态。
+  - **Admin 翻这个开关必须立即 `KV.delete('campaign:<slug>')`** 让 60s TTL 之内
+    生效，否则用户最坏要等到 KV cache 自然过期。已被 §「跨仓库 KV cache 失效协议」
+    的 `campaigns | campaign:<slug>` 行覆盖（admin 路由 PATCH 后自动调
+    `invalidateCampaign`），此处再次提醒因为 badge 开关是高频运营操作，
+    对延迟敏感度高于其它列。
 
 ### 3 折折扣 / user_discounts 宽限规则
 
