@@ -10,9 +10,12 @@
  *
  *   字段语义：「按当前已知信息，Pro 资格预计在这个时间点彻底丢失（已含宽限期）」
  *
- *   更新点（都用 max(原值, 新值) 单调推进）：
- *     1) gift_grants 写入时：调 extendProLapsesAt(db, userId, gift.expires_at, grace)
- *     2) webhook subscription.active/trialing：调 extendProLapsesAt(db, userId, sub.current_period_end, grace)
+ *   更新点（都用 max(原值, 新值) 单调推进；grace 从行内 grace_period_days 列读，
+ *   caller 只传 newEndTimestamp 三参数即可）：
+ *     1) gift_grants 写入时：调 extendProLapsesAt(db, userId, gift.expires_at)
+ *        — 例外：campaigns.ts 报名路径把 INSERT 打包进 D1 batch，pro_lapses_at 在
+ *          INSERT 里就直接赋初值（NULL → MAX(0, x) = x 语义等价于 helper）。
+ *     2) webhook subscription.active/trialing：调 extendProLapsesAt(db, userId, sub.current_period_end)
  *     3) webhook subscription.canceled/expired：**不调用**（current_period_end 已在 #2 记录）
  *
  *   读取（lazy-on-read，无 cron）：resolveActiveDiscount() 内部检测到

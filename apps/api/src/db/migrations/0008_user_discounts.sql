@@ -26,7 +26,7 @@
 -- source_id NOT NULL：参与 PK，NULL 会让 PK 失效；同 user_discounts 设计。
 CREATE TABLE IF NOT EXISTS user_discounts (
   user_id            TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  code               TEXT NOT NULL,                  -- 与 Creem dashboard 折扣码一致，例 'EARLYBIRD_LIFETIME_70OFF'
+  code               TEXT NOT NULL,                  -- 必须与 Creem dashboard 折扣码完全一致。当前 prod 早鸟码 = 'ISIZATWC8P'（来自 campaigns.config_json，admin SPA 配）；schema 例只是占位。
   percentage         INTEGER NOT NULL,               -- 70 = 70% off = 中文「3 折」（用户付 30%）
   duration           TEXT NOT NULL,                  -- 'forever' | 'once' | 'repeating'
   source_kind        TEXT NOT NULL,                  -- 'campaign'

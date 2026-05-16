@@ -27,7 +27,7 @@ import { BURST_BUCKETS, consume } from '../do/rate-limiter.ts';
 import { hashSubjectId, validateEventProps, writeEventPoint } from '../lib/event-metrics.ts';
 import { computeGrantId } from '../lib/gift-grants.ts';
 import { log } from '../lib/log.ts';
-import { resolveUserTier } from '../lib/quota.ts';
+import { GIFT_ACTIVE_CACHE_PREFIX, resolveUserTier } from '../lib/quota.ts';
 import { getOrResolveSessionUser } from '../lib/session-cache.ts';
 import type { AppEnv } from '../types.ts';
 
@@ -35,7 +35,6 @@ export const campaignsRoute = new Hono<AppEnv>();
 
 const CAMPAIGN_CACHE_PREFIX = 'campaign:';
 const CAMPAIGN_CACHE_TTL_SEC = 60;
-const GIFT_ACTIVE_CACHE_PREFIX = 'gift_active:';
 const MS_PER_DAY = 86_400_000;
 
 interface CampaignRow {
@@ -289,6 +288,10 @@ campaignsRoute.post('/v1/campaigns/:slug/join', async (c) => {
   // 3) 统一基准
   const grantedAt = Math.max(now, subEnd, giftMaxEnd);
   const giftExpiresAt = grantedAt + cfg.perks.gift_days * MS_PER_DAY;
+  // pro_lapses_at 在 user_discounts INSERT 里直接赋初值，绕过
+  // lib/user-discounts.ts:extendProLapsesAt() helper —— 因为这里要打包进 D1
+  // batch，helper 是单独的 UPDATE 没法和 INSERT 共享原子性。语义等价：行不存
+  // 在时，helper 的 MAX(COALESCE(NULL,0), target) 等于直接 INSERT target。
   const proLapsesAt = giftExpiresAt + cfg.perks.discount.grace_period_days * MS_PER_DAY;
 
   // gift_grants id 用 (userId, 'campaign', campaign.id) 确定性，重试幂等
