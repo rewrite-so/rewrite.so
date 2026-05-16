@@ -298,23 +298,22 @@
     },
     "early-bird": {
       "title": "アーリーバード",
-      "subtitle": "期間限定の創設メンバー特典。",
       "loading": "読み込み中…",
       "perks": {
         "title": "得られるもの",
         "giftDaysLabel": "Pro を {days} 日間無料",
-        "giftDaysBody": "登録した瞬間から有効、日単位でカウントダウン。",
+        "giftDaysBody": "受け取った瞬間から有効。",
         "discountLabel": "Pro 生涯 {percentage}% オフ",
         "discountPricePreview": "${originalMonthly}→${discountedMonthly}/月 · 年払い ${originalYearly}→${discountedYearly}/月",
-        "discountBody": "サブスクリプション継続中はチェックアウトで自動適用。"
+        "discountBody": "更新ごとに自動で適用。"
       },
       "window": {
-        "title": "生涯割引の有効条件",
-        "body": "割引は Pro が有効な間ずっと続きます — 登録時の {giftDays} 日間の無料 Pro 期間と、その後の各サブスクリプション期間中も同様です。Pro 期間が終了するたびに {grace} 日間の猶予期間内に再加入すれば資格を維持できます。猶予期間を逃すとオファーは永久に失効します。"
+        "title": "{grace} 日間の猶予期間",
+        "body": "Pro 終了後 {grace} 日以内に再加入すれば割引を維持できます。期限を過ぎると失効します。"
       },
       "cta": {
         "notLoggedIn": "ログインして受け取る",
-        "loggedIn": "アーリーバード特典を受け取る",
+        "loggedIn": "受け取る",
         "joining": "受け取り中…",
         "alreadyJoined": "支払いページへ"
       },
@@ -327,7 +326,7 @@
       },
       "ended": {
         "title": "アーリーバードは終了しました",
-        "body": "ご関心ありがとうございます。Pro にアップグレードして引き続きご利用ください。",
+        "body": "Pro に登録して使い続けてください。",
         "cta": "Pro 料金を見る"
       }
     }

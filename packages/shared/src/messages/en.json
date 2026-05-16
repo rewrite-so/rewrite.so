@@ -298,25 +298,24 @@
     },
     "early-bird": {
       "title": "Early Bird",
-      "subtitle": "Limited-time founding member offer.",
       "loading": "Loading…",
       "perks": {
         "title": "What you get",
         "giftDaysLabel": "{days} days of Pro, free",
-        "giftDaysBody": "Activated the moment you sign up; counts down day by day.",
+        "giftDaysBody": "Activated the moment you claim it.",
         "discountLabel": "{percentage}% off Pro for life",
         "discountPricePreview": "${originalMonthly}→${discountedMonthly}/mo · ${originalYearly}→${discountedYearly}/mo annual",
-        "discountBody": "Discount applies automatically at checkout while you stay subscribed."
+        "discountBody": "Auto-applied to every renewal."
       },
       "window": {
-        "title": "How the lifetime discount stays valid",
-        "body": "Your discount stays active as long as you have Pro — both the {giftDays}-day gift at signup and any later active subscription. When any Pro period ends, you have {grace} days to re-subscribe and keep your eligibility. Miss that grace window and the offer expires permanently."
+        "title": "{grace}-day grace period",
+        "body": "Re-subscribe within {grace} days of Pro ending to keep the discount; otherwise it's gone for good."
       },
       "cta": {
         "notLoggedIn": "Sign in to claim",
-        "loggedIn": "Claim my Early Bird benefits",
+        "loggedIn": "Claim it",
         "joining": "Claiming…",
-        "alreadyJoined": "Continue to billing"
+        "alreadyJoined": "Go to billing"
       },
       "errors": {
         "loadFailed": "Couldn't load the campaign. Please try again later.",
@@ -327,7 +326,7 @@
       },
       "ended": {
         "title": "Early Bird has ended",
-        "body": "Thanks for your interest. Upgrade to Pro to keep writing freely.",
+        "body": "Subscribe to Pro to keep going.",
         "cta": "See Pro pricing"
       }
     }

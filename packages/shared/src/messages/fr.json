@@ -298,25 +298,24 @@
     },
     "early-bird": {
       "title": "Early Bird",
-      "subtitle": "Offre limitée pour membres fondateurs.",
       "loading": "Chargement…",
       "perks": {
         "title": "Ce que vous obtenez",
         "giftDaysLabel": "{days} jours de Pro offerts",
-        "giftDaysBody": "Activé dès votre inscription ; compte à rebours quotidien.",
+        "giftDaysBody": "Activé dès que vous le réclamez.",
         "discountLabel": "{percentage} % de remise Pro à vie",
         "discountPricePreview": "${originalMonthly}→${discountedMonthly}/mois · annuel ${originalYearly}→${discountedYearly}/mois",
-        "discountBody": "La remise s'applique automatiquement au paiement tant que vous restez abonné."
+        "discountBody": "Appliquée automatiquement à chaque renouvellement."
       },
       "window": {
-        "title": "Comment la remise à vie reste valable",
-        "body": "La remise reste active tant que vous avez Pro — les {giftDays} jours offerts à l'inscription comme toute période d'abonnement actif. À la fin de chaque période Pro, vous disposez de {grace} jours pour vous réabonner et conserver votre éligibilité. Passé ce délai, l'offre expire définitivement."
+        "title": "Période de grâce de {grace} jours",
+        "body": "Réabonnez-vous dans les {grace} jours suivant la fin de Pro pour conserver la remise ; passé ce délai, elle expire définitivement."
       },
       "cta": {
         "notLoggedIn": "Connectez-vous pour réclamer",
-        "loggedIn": "Réclamer mes avantages Early Bird",
+        "loggedIn": "Réclamer",
         "joining": "Réclamation en cours…",
-        "alreadyJoined": "Continuer vers le paiement"
+        "alreadyJoined": "Aller au paiement"
       },
       "errors": {
         "loadFailed": "Impossible de charger la campagne. Réessayez plus tard.",
@@ -327,7 +326,7 @@
       },
       "ended": {
         "title": "Early Bird est terminé",
-        "body": "Merci pour votre intérêt. Passez à Pro pour continuer à écrire en toute liberté.",
+        "body": "Abonnez-vous à Pro pour continuer.",
         "cta": "Voir les tarifs Pro"
       }
     }

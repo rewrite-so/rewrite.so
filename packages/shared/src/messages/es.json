@@ -298,25 +298,24 @@
     },
     "early-bird": {
       "title": "Early Bird",
-      "subtitle": "Oferta limitada para miembros fundadores.",
       "loading": "Cargando…",
       "perks": {
         "title": "Lo que obtienes",
         "giftDaysLabel": "{days} días de Pro gratis",
-        "giftDaysBody": "Se activa al inscribirte; cuenta atrás por día.",
+        "giftDaysBody": "Se activa en cuanto lo reclamas.",
         "discountLabel": "{percentage}% de descuento Pro de por vida",
         "discountPricePreview": "${originalMonthly}→${discountedMonthly}/mes · anual ${originalYearly}→${discountedYearly}/mes",
-        "discountBody": "El descuento se aplica automáticamente al pagar mientras sigas suscrito."
+        "discountBody": "Aplicado automáticamente en cada renovación."
       },
       "window": {
-        "title": "Cómo se mantiene válido el descuento de por vida",
-        "body": "El descuento permanece activo mientras tengas Pro — tanto los {giftDays} días de Pro gratis al inscribirte como cualquier suscripción activa posterior. Cuando finalice cualquier periodo Pro, tendrás {grace} días para volver a suscribirte y conservar tu elegibilidad. Si dejas pasar ese plazo, la oferta expira de forma permanente."
+        "title": "Periodo de gracia de {grace} días",
+        "body": "Resuscríbete dentro de los {grace} días tras el fin de Pro para conservar el descuento; si lo dejas pasar, expira para siempre."
       },
       "cta": {
         "notLoggedIn": "Inicia sesión para reclamar",
-        "loggedIn": "Reclamar mis beneficios Early Bird",
+        "loggedIn": "Reclamar",
         "joining": "Reclamando…",
-        "alreadyJoined": "Continuar al pago"
+        "alreadyJoined": "Ir al pago"
       },
       "errors": {
         "loadFailed": "No se pudo cargar la campaña. Inténtalo más tarde.",
@@ -327,7 +326,7 @@
       },
       "ended": {
         "title": "Early Bird ha terminado",
-        "body": "Gracias por tu interés. Pasa a Pro para seguir escribiendo con libertad.",
+        "body": "Suscríbete a Pro para seguir.",
         "cta": "Ver precios Pro"
       }
     }

@@ -298,23 +298,22 @@
     },
     "early-bird": {
       "title": "Early Bird",
-      "subtitle": "Begrenztes Angebot für Gründungsmitglieder.",
       "loading": "Lädt …",
       "perks": {
         "title": "Was du bekommst",
         "giftDaysLabel": "{days} Tage Pro gratis",
-        "giftDaysBody": "Sofort nach Anmeldung aktiv; Countdown pro Tag.",
+        "giftDaysBody": "Sofort nach Einlösung aktiv.",
         "discountLabel": "{percentage} % Pro-Rabatt lebenslang",
         "discountPricePreview": "${originalMonthly}→${discountedMonthly}/Monat · jährlich ${originalYearly}→${discountedYearly}/Monat",
-        "discountBody": "Der Rabatt wird beim Checkout automatisch angewendet, solange dein Abo aktiv bleibt."
+        "discountBody": "Bei jeder Verlängerung automatisch angewendet."
       },
       "window": {
-        "title": "So bleibt der lebenslange Rabatt gültig",
-        "body": "Der Rabatt bleibt aktiv, solange du Pro hast — sowohl die {giftDays} kostenlosen Pro-Tage bei der Anmeldung als auch jedes spätere aktive Abo. Wenn eine Pro-Phase endet, hast du {grace} Tage Zeit, um erneut zu abonnieren und deine Berechtigung zu behalten. Verpasst du dieses Fenster, verfällt das Angebot endgültig."
+        "title": "{grace} Tage Karenzzeit",
+        "body": "Schließe innerhalb von {grace} Tagen nach Pro-Ende erneut ab, um den Rabatt zu behalten; sonst verfällt er endgültig."
       },
       "cta": {
         "notLoggedIn": "Anmelden, um einzulösen",
-        "loggedIn": "Early Bird-Vorteile einlösen",
+        "loggedIn": "Einlösen",
         "joining": "Einlösen …",
         "alreadyJoined": "Zur Zahlung"
       },
@@ -327,7 +326,7 @@
       },
       "ended": {
         "title": "Early Bird ist beendet",
-        "body": "Danke für dein Interesse. Wechsle zu Pro, um weiter frei zu schreiben.",
+        "body": "Abonniere Pro, um weiter zu schreiben.",
         "cta": "Pro-Preise anzeigen"
       }
     }
