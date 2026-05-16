@@ -165,7 +165,7 @@
       "earlyBird": {
         "label": "Early Bird",
         "badge": "Founding member",
-        "statusLabel": "Lifetime 30% off",
+        "statusLabel": "Lifetime 70% off",
         "status": {
           "active": "Active",
           "grace": "Grace period · re-subscribe within {days, number} days",
@@ -291,7 +291,7 @@
       },
       "earlyBirdBanner": {
         "title": "Early Bird member",
-        "body": "Lifetime 30% off on every renewal",
+        "body": "Lifetime 70% off on every renewal",
         "tooltip": "Stay subscribed to keep the discount; a 60-day grace period applies after cancellation",
         "subscribedHint": "Your next renewal is automatically discounted."
       }
@@ -373,7 +373,7 @@
   },
   "home": {
     "earlyBirdBadge": {
-      "label": "Early Bird · 90 days free + 30% off forever"
+      "label": "Early Bird · 90 days free + 70% off forever"
     },
     "hero": {
       "eyebrow": "Supported text fields. Open source.",

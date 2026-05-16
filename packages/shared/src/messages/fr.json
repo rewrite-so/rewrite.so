@@ -165,7 +165,7 @@
       "earlyBird": {
         "label": "Early Bird",
         "badge": "Membre fondateur",
-        "statusLabel": "30 % de remise à vie",
+        "statusLabel": "70 % de remise à vie",
         "status": {
           "active": "Actif",
           "grace": "Période de grâce · réabonnez-vous dans {days, number} jours",
@@ -291,7 +291,7 @@
       },
       "earlyBirdBanner": {
         "title": "Membre Early Bird",
-        "body": "30 % de remise à chaque renouvellement, à vie",
+        "body": "70 % de remise à chaque renouvellement, à vie",
         "tooltip": "Restez abonné pour conserver la remise ; 60 jours de grâce après annulation",
         "subscribedHint": "Votre prochain renouvellement sera automatiquement remisé."
       }
@@ -373,7 +373,7 @@
   },
   "home": {
     "earlyBirdBadge": {
-      "label": "Early Bird · 90 jours gratuits + 30 % à vie"
+      "label": "Early Bird · 90 jours gratuits + 70 % à vie"
     },
     "hero": {
       "eyebrow": "Champs pris en charge · Open source",

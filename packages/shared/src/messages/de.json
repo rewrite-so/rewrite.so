@@ -165,7 +165,7 @@
       "earlyBird": {
         "label": "Early Bird",
         "badge": "Gründungsmitglied",
-        "statusLabel": "Lebenslang 30 % Rabatt",
+        "statusLabel": "Lebenslang 70 % Rabatt",
         "status": {
           "active": "Aktiv",
           "grace": "Kulanzzeit · innerhalb von {days, number} Tagen erneut abonnieren",
@@ -291,7 +291,7 @@
       },
       "earlyBirdBanner": {
         "title": "Early Bird-Mitglied",
-        "body": "30 % Rabatt bei jeder Verlängerung, lebenslang",
+        "body": "70 % Rabatt bei jeder Verlängerung, lebenslang",
         "tooltip": "Bleibe abonniert, um den Rabatt zu behalten; 60 Tage Kulanzzeit nach Kündigung",
         "subscribedHint": "Deine nächste Verlängerung wird automatisch rabattiert."
       }
@@ -373,7 +373,7 @@
   },
   "home": {
     "earlyBirdBadge": {
-      "label": "Early Bird · 90 Tage gratis + 30 % lebenslang"
+      "label": "Early Bird · 90 Tage gratis + 70 % lebenslang"
     },
     "hero": {
       "eyebrow": "Unterstützte Eingabefelder · Open Source",

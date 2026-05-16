@@ -165,7 +165,7 @@
       "earlyBird": {
         "label": "アーリーバード",
         "badge": "創設メンバー",
-        "statusLabel": "Pro 生涯 30% オフ",
+        "statusLabel": "Pro 生涯 70% オフ",
         "status": {
           "active": "有効",
           "grace": "猶予期間 · あと {days, number} 日以内に再加入で有効",
@@ -291,7 +291,7 @@
       },
       "earlyBirdBanner": {
         "title": "アーリーバード会員",
-        "body": "更新ごとに自動で 30% オフ",
+        "body": "更新ごとに自動で 70% オフ",
         "tooltip": "サブスクリプションを維持中のみ有効。キャンセル後 60 日間の猶予期間あり",
         "subscribedHint": "次回更新時に自動で割引が適用されます。"
       }
@@ -373,7 +373,7 @@
   },
   "home": {
     "earlyBirdBadge": {
-      "label": "アーリーバード · 90 日間無料 + 30% 永久オフ"
+      "label": "アーリーバード · 90 日間無料 + 70% 永久オフ"
     },
     "hero": {
       "eyebrow": "対応している入力欄 · オープンソース",

@@ -165,7 +165,7 @@
       "earlyBird": {
         "label": "얼리버드",
         "badge": "창립 회원",
-        "statusLabel": "평생 30% 할인",
+        "statusLabel": "평생 70% 할인",
         "status": {
           "active": "유효",
           "grace": "유예 기간 · {days, number}일 이내 재구독 시 유지",
@@ -291,7 +291,7 @@
       },
       "earlyBirdBanner": {
         "title": "얼리버드 회원",
-        "body": "갱신할 때마다 자동 30% 할인",
+        "body": "갱신할 때마다 자동 70% 할인",
         "tooltip": "구독을 유지하는 동안 할인 유효; 해지 후 60일 유예 기간",
         "subscribedHint": "다음 갱신 시 할인이 자동 적용됩니다."
       }
@@ -373,7 +373,7 @@
   },
   "home": {
     "earlyBirdBadge": {
-      "label": "얼리버드 · 90일 무료 + 평생 30% 할인"
+      "label": "얼리버드 · 90일 무료 + 평생 70% 할인"
     },
     "hero": {
       "eyebrow": "지원되는 입력란 · 오픈소스",

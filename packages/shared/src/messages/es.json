@@ -165,7 +165,7 @@
       "earlyBird": {
         "label": "Early Bird",
         "badge": "Miembro fundador",
-        "statusLabel": "30% de descuento de por vida",
+        "statusLabel": "70% de descuento de por vida",
         "status": {
           "active": "Activo",
           "grace": "Período de gracia · vuelve a suscribirte en {days, number} días",
@@ -291,7 +291,7 @@
       },
       "earlyBirdBanner": {
         "title": "Miembro Early Bird",
-        "body": "30% de descuento en cada renovación de por vida",
+        "body": "70% de descuento en cada renovación de por vida",
         "tooltip": "Mantén la suscripción para conservar el descuento; 60 días de gracia tras cancelar",
         "subscribedHint": "Tu próxima renovación tendrá el descuento aplicado automáticamente."
       }
@@ -373,7 +373,7 @@
   },
   "home": {
     "earlyBirdBadge": {
-      "label": "Early Bird · 90 días gratis + 30% para siempre"
+      "label": "Early Bird · 90 días gratis + 70% para siempre"
     },
     "hero": {
       "eyebrow": "Campos compatibles · Código abierto",
