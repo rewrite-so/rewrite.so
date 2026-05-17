@@ -5,34 +5,7 @@ import { getCampaignEntryState } from '../lib/campaign-entry.ts';
 import { getExtensionInstallUrl } from '../lib/extension-install-url.ts';
 import { CtaLink } from './CtaLink.tsx';
 import { LanguageSwitcher } from './LanguageSwitcher.tsx';
-
-const NAV_LINK = {
-  fontSize: 14,
-  color: '#444',
-  textDecoration: 'none',
-  padding: '6px 10px',
-};
-
-const NAV_LINK_PRIMARY = {
-  fontSize: 14,
-  color: '#fff',
-  background: '#111',
-  textDecoration: 'none',
-  padding: '7px 14px',
-  borderRadius: 6,
-  fontWeight: 500,
-};
-
-const NAV_LINK_OUTLINE = {
-  fontSize: 14,
-  color: '#111',
-  background: '#fff',
-  textDecoration: 'none',
-  padding: '6px 13px',
-  borderRadius: 6,
-  border: '1px solid #111',
-  fontWeight: 500,
-};
+import styles from './TopNav.module.css';
 
 interface MeUser {
   id: string;
@@ -41,13 +14,15 @@ interface MeUser {
 }
 
 /**
- * SSR 读 session：从 web 入站 cookie 转发到 api 的 /v1/me。
+ * SSR session readout — forwards web cookies into the api `/v1/me`.
  *
- * - dev: web localhost:3000 → api localhost:8787，cookie 同 host 透传
- * - prod: web rewrite.so → api api.rewrite.so，session cookie domain `.rewrite.so` 共享
+ * - dev: web localhost:3000 → api localhost:8787, cookie shared by host.
+ * - prod: web rewrite.so → api api.rewrite.so, session cookie domain
+ *   `.rewrite.so` shared across subdomains.
  *
- * cache: 'no-store' 必填——session 不能被静态化。
- * 失败时（cookie 不全 / 网络 / api 5xx）返 null，UI 退到匿名态——绝不阻塞渲染。
+ * `cache: 'no-store'` is mandatory — sessions must not be statically cached.
+ * Any failure (missing cookies, network, api 5xx) returns null so the nav
+ * gracefully falls back to anonymous; we never block render on this.
  */
 async function getCurrentUser(): Promise<MeUser | null> {
   try {
@@ -67,7 +42,7 @@ async function getCurrentUser(): Promise<MeUser | null> {
   }
 }
 
-// Early Bird link visibility now flows through the shared
+// Early Bird link visibility flows through the shared
 // `getCampaignEntryState('early-bird')` helper (apps/web/lib/campaign-entry.ts),
 // which also drives the homepage Hero badge. The two surfaces are locked
 // together via the `show_homepage_badge` column on the campaigns row — so
@@ -82,70 +57,27 @@ export async function TopNav() {
   const isAuthed = user !== null;
 
   return (
-    <nav
-      style={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 50,
-        background: 'rgba(255,255,255,0.85)',
-        backdropFilter: 'saturate(180%) blur(8px)',
-        WebkitBackdropFilter: 'saturate(180%) blur(8px)',
-        borderBottom: '1px solid rgba(0,0,0,0.06)',
-      }}
-    >
-      <div
-        style={{
-          maxWidth: 1080,
-          margin: '0 auto',
-          padding: '12px 24px',
-          display: 'flex',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: 4,
-        }}
-      >
-        {/* Brand */}
-        <Link
-          href="/"
-          style={{
-            fontSize: 15,
-            fontWeight: 600,
-            color: '#111',
-            textDecoration: 'none',
-            marginRight: 24,
-            letterSpacing: 0,
-          }}
-        >
-          rewrite.so
-          <span
-            style={{
-              fontSize: 9,
-              fontWeight: 500,
-              verticalAlign: 'super',
-              marginLeft: 1,
-              color: '#888',
-            }}
-          >
-            ™
-          </span>
+    <nav className={styles.nav}>
+      <div className={styles.inner}>
+        <Link href="/" className={styles.brand}>
+          rewrite.so<span className={styles.brandTm}>™</span>
         </Link>
 
-        {/* Center links */}
-        <div style={{ display: 'flex', gap: 4, flex: '1 1 220px', flexWrap: 'wrap', minWidth: 0 }}>
-          <Link href="/try" style={NAV_LINK}>
+        <div className={styles.centerLinks}>
+          <Link href="/try" className={styles.link}>
             {t('try')}
           </Link>
-          <Link href="/pricing" style={NAV_LINK}>
+          <Link href="/pricing" className={styles.link}>
             {t('pricing')}
           </Link>
           {earlyBirdEntry.showBadge && (
-            <Link href="/early-bird" style={{ ...NAV_LINK, color: '#7a5a18', fontWeight: 500 }}>
+            <Link href="/early-bird" className={`${styles.link} ${styles.linkEarlyBird}`}>
               {t('earlyBird')}
             </Link>
           )}
           <a
             href="https://github.com/rewrite-so/rewrite.so"
-            style={NAV_LINK}
+            className={styles.link}
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -153,7 +85,6 @@ export async function TopNav() {
           </a>
         </div>
 
-        {/* Right: language switcher + CTAs（按登录态分支） */}
         <LanguageSwitcher />
         {isAuthed ? (
           <>
@@ -161,28 +92,28 @@ export async function TopNav() {
               cta="install"
               href={getExtensionInstallUrl()}
               external
-              style={{ ...NAV_LINK_OUTLINE, marginLeft: 8 }}
+              className={styles.ctaOutline}
             >
               {t('install')}
             </CtaLink>
-            <Link href="/settings" style={{ ...NAV_LINK_PRIMARY, marginLeft: 8 }}>
+            <Link href="/settings" className={styles.ctaPrimary}>
               {t('settings')}
             </Link>
           </>
         ) : (
           <>
-            <CtaLink cta="signin" href="/login" style={{ ...NAV_LINK, marginLeft: 4 }}>
+            <CtaLink cta="signin" href="/login" className={styles.ctaSignIn}>
               {t('signIn')}
             </CtaLink>
             <CtaLink
               cta="install"
               href={getExtensionInstallUrl()}
               external
-              style={{ ...NAV_LINK_OUTLINE, marginLeft: 8 }}
+              className={styles.ctaOutline}
             >
               {t('install')}
             </CtaLink>
-            <CtaLink cta="try_demo" href="/try" style={{ ...NAV_LINK_PRIMARY, marginLeft: 8 }}>
+            <CtaLink cta="try_demo" href="/try" className={styles.ctaPrimary}>
               {t('tryFree')}
             </CtaLink>
           </>

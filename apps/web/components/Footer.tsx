@@ -1,128 +1,89 @@
 import { useTranslations } from 'next-intl';
 import { Link } from '../i18n/navigation.ts';
 import { getExtensionInstallUrl } from '../lib/extension-install-url.ts';
-
-const COL_HEADING = {
-  fontSize: 12,
-  fontWeight: 600,
-  color: '#888',
-  textTransform: 'uppercase' as const,
-  letterSpacing: 0,
-  margin: 0,
-  marginBottom: 12,
-};
-
-const LINK = {
-  display: 'block',
-  fontSize: 13,
-  color: '#444',
-  textDecoration: 'none',
-  padding: '4px 0',
-};
+import styles from './Footer.module.css';
 
 export function Footer() {
   const t = useTranslations('footer');
   return (
-    <footer
-      style={{
-        marginTop: 80,
-        borderTop: '1px solid #e4e4e7',
-        background: '#fafafa',
-        padding: '40px 24px 32px',
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
-      }}
-    >
-      <div
-        style={{
-          maxWidth: 1080,
-          margin: '0 auto',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-          gap: 32,
-        }}
-      >
+    <footer className={styles.footer}>
+      <div className={styles.grid}>
         <div>
-          <div style={{ fontSize: 14, fontWeight: 600, color: '#111', marginBottom: 6 }}>
-            rewrite.so
-            <span
-              style={{
-                fontSize: 9,
-                fontWeight: 500,
-                verticalAlign: 'super',
-                marginLeft: 1,
-                color: '#888',
-              }}
-            >
-              ™
-            </span>
+          <div className={styles.brand}>
+            rewrite.so<span className={styles.brandTm}>™</span>
           </div>
-          <div style={{ fontSize: 12, color: '#888', lineHeight: 1.55 }}>{t('tagline')}</div>
+          <div className={styles.tagline}>{t('tagline')}</div>
         </div>
 
         <div>
-          <h4 style={COL_HEADING}>{t('heading.product')}</h4>
-          <Link href="/" style={LINK}>
+          <h4 className={styles.colHeading}>{t('heading.product')}</h4>
+          <Link href="/" className={styles.link}>
             {t('link.home')}
           </Link>
-          <a href={getExtensionInstallUrl()} style={LINK} target="_blank" rel="noopener noreferrer">
+          <a
+            href={getExtensionInstallUrl()}
+            className={styles.link}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             {t('link.install')}
           </a>
-          <Link href="/try" style={LINK}>
+          <Link href="/try" className={styles.link}>
             {t('link.tryIt')}
           </Link>
-          <Link href="/pricing" style={LINK}>
+          <Link href="/pricing" className={styles.link}>
             {t('link.pricing')}
           </Link>
         </div>
 
         <div>
-          <h4 style={COL_HEADING}>{t('heading.account')}</h4>
-          <Link href="/login" style={LINK}>
+          <h4 className={styles.colHeading}>{t('heading.account')}</h4>
+          <Link href="/login" className={styles.link}>
             {t('link.signIn')}
           </Link>
-          <Link href="/settings" style={LINK}>
+          <Link href="/settings" className={styles.link}>
             {t('link.settings')}
           </Link>
-          <Link href="/billing" style={LINK}>
+          <Link href="/billing" className={styles.link}>
             {t('link.billing')}
           </Link>
         </div>
 
         <div>
-          <h4 style={COL_HEADING}>{t('heading.legal')}</h4>
-          <Link href="/terms" style={LINK}>
+          <h4 className={styles.colHeading}>{t('heading.legal')}</h4>
+          <Link href="/terms" className={styles.link}>
             {t('link.terms')}
           </Link>
-          <Link href="/privacy" style={LINK}>
+          <Link href="/privacy" className={styles.link}>
             {t('link.privacy')}
           </Link>
-          <Link href="/refund" style={LINK}>
+          <Link href="/refund" className={styles.link}>
             {t('link.refund')}
           </Link>
-          <Link href="/aup" style={LINK}>
+          <Link href="/aup" className={styles.link}>
             {t('link.aup')}
           </Link>
         </div>
 
         <div>
-          <h4 style={COL_HEADING}>{t('heading.support')}</h4>
-          <Link href="/contact" style={LINK}>
+          <h4 className={styles.colHeading}>{t('heading.support')}</h4>
+          <Link href="/contact" className={styles.link}>
             {t('link.contact')}
           </Link>
           <a
             href="https://stats.uptimerobot.com/ISstIMdFhH"
-            style={LINK}
+            className={styles.link}
             target="_blank"
             rel="noopener noreferrer"
           >
             {t('link.serviceStatus')}
           </a>
-          <a href="mailto:hello@rewrite.so" style={LINK}>
+          <a href="mailto:hello@rewrite.so" className={styles.link}>
             hello@rewrite.so
           </a>
           <a
             href="https://github.com/rewrite-so/rewrite.so"
-            style={LINK}
+            className={styles.link}
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -131,40 +92,16 @@ export function Footer() {
         </div>
       </div>
 
-      <div
-        style={{
-          maxWidth: 1080,
-          margin: '24px auto 0',
-          fontSize: 11,
-          color: '#999',
-          lineHeight: 1.5,
-          textAlign: 'center',
-        }}
-      >
-        {t('disclaimer')}
-      </div>
+      <div className={styles.disclaimer}>{t('disclaimer')}</div>
 
-      <div
-        style={{
-          maxWidth: 1080,
-          margin: '20px auto 0',
-          paddingTop: 24,
-          borderTop: '1px solid #e4e4e7',
-          display: 'flex',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: 12,
-          fontSize: 12,
-          color: '#888',
-        }}
-      >
+      <div className={styles.bottomBar}>
         <span>{t('copyright', { year: new Date().getFullYear() })}</span>
         <span>
           {t.rich('paymentsBy', {
             creem: (chunks) => (
               <a
                 href="https://creem.io"
-                style={{ color: '#666', textDecoration: 'none' }}
+                className={styles.creemLink}
                 target="_blank"
                 rel="noopener noreferrer"
               >
