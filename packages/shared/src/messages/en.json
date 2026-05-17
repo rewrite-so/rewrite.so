@@ -439,13 +439,13 @@
           }
         },
         "speed": {
-          "label": "Streaming, sub-second first token",
-          "detail": "Tokens stream in as fast as the model produces them. Most rewrites start landing on screen within ~500 ms.",
+          "label": "Streaming output, no batch wait",
+          "detail": "Tokens stream in as the model produces them — the architecture never blocks on a full batch. Actual latency depends on the upstream model; what we guarantee is that you never wait for a complete response before you can start reading it.",
           "cells": {
-            "us": "~500 ms first token",
+            "us": "Streaming, inline",
             "grammarly": "Suggestion popovers",
             "deepl": "Batch response",
-            "chatgpt": "Streaming, multi-second start"
+            "chatgpt": "Streaming, separate tab"
           }
         },
         "candidates": {
@@ -585,7 +585,7 @@
     "demo": {
       "anyInput": "supported text field",
       "youTyped": "# You typed:",
-      "streams": "→ 3 streams in, ~200ms first token",
+      "streams": "→ 3 streams in, in-place",
       "accepted": "→ accepted, input replaced",
       "selectHint": "Click a rewrite or press 1 / 2 / 3",
       "label": {

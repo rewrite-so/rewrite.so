@@ -517,7 +517,7 @@
     "demo": {
       "anyInput": "unterstütztes Eingabefeld",
       "youTyped": "# Du hast getippt:",
-      "streams": "→ 3 Streams gestartet, ~200ms erstes Token",
+      "streams": "→ 3 Streams gestartet, direkt im Feld",
       "accepted": "→ ins Eingabefeld übernommen",
       "selectHint": "Klicke eine Umschreibung an oder drücke 1 / 2 / 3",
       "label": {
@@ -588,13 +588,13 @@
           }
         },
         "speed": {
-          "label": "Streaming, erster Token unter einer Sekunde",
-          "detail": "Tokens kommen so schnell, wie das Modell sie produziert. Die meisten Umschreibungen erscheinen in ~500 ms.",
+          "label": "Streaming-Ausgabe, kein Stapelwarten",
+          "detail": "Tokens kommen so schnell, wie das Modell sie produziert — die Architektur blockiert nie auf eine vollständige Antwort. Die echte Latenz hängt vom Anbieter-Modell ab; garantiert ist nur, dass du nicht auf die ganze Antwort warten musst, bevor du anfangen kannst zu lesen.",
           "cells": {
-            "us": "Erstes Token in ~500 ms",
+            "us": "Streaming, inline",
             "grammarly": "Vorschlags-Popover",
             "deepl": "Stapelantwort",
-            "chatgpt": "Streaming, mehrere Sekunden bis Start"
+            "chatgpt": "Streaming, separater Tab"
           }
         },
         "candidates": {

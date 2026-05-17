@@ -517,7 +517,7 @@
     "demo": {
       "anyInput": "champ pris en charge",
       "youTyped": "# Vous avez tapé :",
-      "streams": "→ 3 streams démarrés, ~200ms premier token",
+      "streams": "→ 3 streams en parallèle, sur place",
       "accepted": "→ inséré dans le champ",
       "selectHint": "Cliquez sur une réécriture ou appuyez sur 1 / 2 / 3",
       "label": {
@@ -588,13 +588,13 @@
           }
         },
         "speed": {
-          "label": "Streaming, premier token sous la seconde",
-          "detail": "Les tokens arrivent au rythme du modèle. La plupart des réécritures s'affichent en ~500 ms.",
+          "label": "Sortie en streaming, sans attente de lot",
+          "detail": "Les tokens arrivent au rythme du modèle — l'architecture ne bloque jamais sur une réponse complète. La latence réelle dépend du modèle en amont ; ce que nous garantissons, c'est que vous n'avez pas à attendre la réponse complète avant de commencer à lire.",
           "cells": {
-            "us": "Premier token en ~500 ms",
+            "us": "Streaming, en ligne",
             "grammarly": "Pop-up de suggestions",
             "deepl": "Réponse groupée",
-            "chatgpt": "Streaming, démarrage en plusieurs secondes"
+            "chatgpt": "Streaming dans un onglet séparé"
           }
         },
         "candidates": {
