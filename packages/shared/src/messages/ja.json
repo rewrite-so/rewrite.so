@@ -173,8 +173,11 @@
         },
         "giftBalanceLabel": "ギフト Pro 日数",
         "giftBalanceValue": "残り {days, number} 日",
+        "giftScheduledLabel": "無料 Pro",
+        "giftScheduledValue": "{days, number} 日間 · {date} 開始",
         "proSourceLabel": "Pro の出どころ",
-        "proSourceSubscription": "サブスクリプション · {date} 更新"
+        "proSourceSubscription": "サブスクリプション · {date} 更新",
+        "proSourceSubscriptionEnding": "サブスクリプション · {date} 終了"
       },
       "sub": {
         "label": "サブスクリプション",
@@ -255,8 +258,9 @@
         "prefix": "エラー"
       },
       "subscribed": {
-        "line": "Pro（{plan}）に加入中。期末日：{date}",
-        "willCancel": "（期末で解約）",
+        "lineRenewing": "Pro（{plan}）に登録中。次回更新：{date}。",
+        "lineCanceling": "Pro（{plan}）に登録中。{date} に期間終了（期間終了後にキャンセル）。",
+        "lineCancelingWithGift": "Pro（{plan}）に登録中。{date} に期間終了（期間終了後にキャンセル）。終了後、{giftDays} 日間の無料 Pro が開始されます。",
         "manage": "サブスク管理",
         "planMonthly": "月額",
         "planAnnual": "年額"
@@ -279,7 +283,7 @@
       "pro": {
         "title": "Pro",
         "periodMonthly": "/ 月",
-        "periodYearly": "/ 月（年額 ${total}）",
+        "periodYearly": "/ 月（年払い）",
         "feat1": "毎月 2,000 回の書き換え",
         "feat2": "3 スタイル並行ストリーミング",
         "feat3": "API キー設定不要",

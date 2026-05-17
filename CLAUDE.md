@@ -296,6 +296,13 @@ type-specific 配置走 `config_json`（schema 在 `packages/shared/src/campaign
 - **`grace_period_days` 写入 user_discounts 行后是 per-user 字段**：admin
   改活动 config 只影响**新报名**，已有 user 的宽限值不变。`extendProLapsesAt()`
   从 row 自己读 grace（caller 不需要知道）。
+- **`/v1/me` 暴露两个 gift 字段，语义独立不要互相推导**：
+  - `giftBalanceDays`：所有 active gift 的 `MAX(expires_at)` 距 now 天数（含已激活 + 多 source 聚合）。
+    extension 浮窗 quota chip + 「赠送 Pro 天数 · 剩余 N 天」展示用。
+  - `earlyBird.pendingGift`：「下一个待激活」单行（`granted_at > now ORDER BY ASC LIMIT 1`），
+    类型 `{days, activatesAt, expiresAt} | null`。仅用于「报名时已 Pro 用户」场景的
+    UI 提示（sub 期满后 90 天免费 Pro），普通早鸟用户 gift 立即激活时此字段为 null。
+  - 实现位于 `apps/api/src/lib/early-bird.ts`，4 个 query 通过 `db.batch()` 单 RPC 并行。
 - **Creem dashboard 折扣码必须与 `campaigns.config_json.perks.discount.code`
   字符串完全一致**：是**人工同步责任**。当前早鸟码 `ISIZATWC8P`
   （Creem dashboard 生成，duration=forever, percentage=70,

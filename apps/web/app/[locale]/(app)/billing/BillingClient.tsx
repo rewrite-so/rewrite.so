@@ -20,6 +20,7 @@ interface MeResponse {
     isParticipant: boolean;
     discountActive: boolean;
     proLapsesAt: string | null;
+    pendingGift: { days: number; activatesAt: string; expiresAt: string } | null;
   } | null;
 }
 
@@ -155,8 +156,22 @@ export function BillingClient() {
             marginBottom: 24,
           }}
         >
-          {t('subscribed.line', { plan: subscribedPlanLabel, date: subscribedDate })}
-          {me.subscription?.cancelAtPeriodEnd && t('subscribed.willCancel')}
+          {/* 3 个独立 full-sentence keys（不拼接）— ja/ko 等语种 particle/spacing
+              对拼接敏感，每个 locale 完整拥有句子结构。pendingGift 仅在 cancel
+              状态下补充提示（续费用户的 pendingGift 永远启动不了，提示反而困惑）。 */}
+          {(() => {
+            const pending = me.earlyBird?.pendingGift;
+            const bannerKey = me.subscription?.cancelAtPeriodEnd
+              ? pending
+                ? 'subscribed.lineCancelingWithGift'
+                : 'subscribed.lineCanceling'
+              : 'subscribed.lineRenewing';
+            return t(bannerKey, {
+              plan: subscribedPlanLabel,
+              date: subscribedDate,
+              giftDays: pending?.days ?? 0,
+            });
+          })()}
           <button
             type="button"
             onClick={openPortal}
@@ -228,11 +243,7 @@ export function BillingClient() {
                 : `$${PRO_PRICE.yearlyMonthly}`
               : undefined
           }
-          period={
-            plan === 'monthly'
-              ? t('pro.periodMonthly')
-              : t('pro.periodYearly', { total: PRO_PRICE.yearlyTotal })
-          }
+          period={plan === 'monthly' ? t('pro.periodMonthly') : t('pro.periodYearly')}
           features={[t('pro.feat1'), t('pro.feat2'), t('pro.feat3'), t('pro.feat4')]}
           highlight
           cta={
@@ -247,7 +258,7 @@ export function BillingClient() {
           onClick={() => !subscribed && checkout(plan)}
           disabled={subscribed || loading}
         />
-        {subscribed && earlyBirdActive && (
+        {subscribed && earlyBirdActive && !me.subscription?.cancelAtPeriodEnd && (
           <p style={{ fontSize: 12, color: '#888', marginTop: 4, gridColumn: '1 / -1' }}>
             {t('earlyBirdBanner.subscribedHint')}
           </p>

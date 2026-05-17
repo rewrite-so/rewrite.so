@@ -173,8 +173,11 @@
         },
         "giftBalanceLabel": "Días Pro de regalo",
         "giftBalanceValue": "{days, number} días restantes",
+        "giftScheduledLabel": "Pro gratis",
+        "giftScheduledValue": "{days, number} días · activado el {date}",
         "proSourceLabel": "Fuente de Pro",
-        "proSourceSubscription": "Suscripción · se renueva el {date}"
+        "proSourceSubscription": "Suscripción · se renueva el {date}",
+        "proSourceSubscriptionEnding": "Suscripción · termina el {date}"
       },
       "sub": {
         "label": "Suscripción",
@@ -255,8 +258,9 @@
         "prefix": "Error"
       },
       "subscribed": {
-        "line": "Estás en Pro ({plan}). Termina el: {date}",
-        "willCancel": " (se cancelará al final del período)",
+        "lineRenewing": "Estás en Pro ({plan}). Próxima renovación: {date}.",
+        "lineCanceling": "Estás en Pro ({plan}). Termina el: {date} (se cancelará al final del período).",
+        "lineCancelingWithGift": "Estás en Pro ({plan}). Termina el: {date} (se cancelará al final del período). Después, {giftDays} días gratis de Pro comenzarán.",
         "manage": "Gestionar suscripción",
         "planMonthly": "Mensual",
         "planAnnual": "Anual"
@@ -279,7 +283,7 @@
       "pro": {
         "title": "Pro",
         "periodMonthly": "/ mes",
-        "periodYearly": "/ mes (facturado anualmente ${total})",
+        "periodYearly": "/ mes (cobro anual)",
         "feat1": "2.000 reescrituras / mes",
         "feat2": "3 estilos en streaming",
         "feat3": "Sin configurar API key",

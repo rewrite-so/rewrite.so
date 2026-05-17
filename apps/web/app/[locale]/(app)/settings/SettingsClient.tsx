@@ -40,6 +40,7 @@ interface UserInfo {
     isParticipant: boolean;
     discountActive: boolean;
     proLapsesAt: string | null;
+    pendingGift: { days: number; activatesAt: string; expiresAt: string } | null;
   } | null;
   /** Remaining gift Pro days = ceil((max(gift_grants.expires_at) - now) / 1d) */
   giftBalanceDays?: number;
@@ -641,19 +642,40 @@ function EarlyBirdSection({ me }: { me: UserInfo }) {
       {statusKey && (
         <Row label={t('statusLabel')} value={t(`status.${statusKey}`, { days: graceDaysLeft })} />
       )}
-      {giftDays > 0 && (
-        <Row label={t('giftBalanceLabel')} value={t('giftBalanceValue', { days: giftDays })} />
-      )}
-      {me.tier === 'pro' && me.subscription && (
+      {eb?.pendingGift ? (
+        // 待激活 gift（granted_at 在未来）：报名时已 Pro 用户场景，gift 启动时间
+        // 推后到 sub 期满。显示原始 days（90）+ 启用日期，**不要**显示 giftBalanceDays
+        // 因为后者把当前 sub 剩余天数也算进去（115 而非 90，用户视角费解）。
         <Row
-          label={t('proSourceLabel')}
-          value={t('proSourceSubscription', {
-            date: format.dateTime(new Date(me.subscription.currentPeriodEnd), {
+          label={t('giftScheduledLabel')}
+          value={t('giftScheduledValue', {
+            days: eb.pendingGift.days,
+            date: format.dateTime(new Date(eb.pendingGift.activatesAt), {
               year: 'numeric',
               month: 'long',
               day: 'numeric',
             }),
           })}
+        />
+      ) : giftDays > 0 ? (
+        // 已激活 gift：用 MAX 聚合（含多 source 堆叠）显示「剩余总余额」
+        <Row label={t('giftBalanceLabel')} value={t('giftBalanceValue', { days: giftDays })} />
+      ) : null}
+      {me.tier === 'pro' && me.subscription && (
+        <Row
+          label={t('proSourceLabel')}
+          value={t(
+            me.subscription.cancelAtPeriodEnd
+              ? 'proSourceSubscriptionEnding'
+              : 'proSourceSubscription',
+            {
+              date: format.dateTime(new Date(me.subscription.currentPeriodEnd), {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              }),
+            },
+          )}
         />
       )}
     </div>
