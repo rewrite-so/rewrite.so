@@ -17,7 +17,9 @@ export default function RefundPage() {
   return (
     <article className={styles.longDoc}>
       <h1 style={{ fontSize: 32, fontWeight: 700, margin: 0 }}>Refund Policy</h1>
-      <p style={{ color: '#888', fontSize: 13, marginTop: 8 }}>Last updated: May 2, 2026</p>
+      <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 8 }}>
+        Last updated: May 2, 2026
+      </p>
 
       <p style={{ marginTop: 28 }}>
         We want you to be satisfied with rewrite.so Pro. If it&apos;s not the right fit, you can

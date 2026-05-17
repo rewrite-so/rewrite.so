@@ -35,11 +35,16 @@ export const EVENT_NAMES = [
   // ---- Campaigns / promotions ----
   'campaign_join', // props: { campaign_slug, campaign_type } — emitted server-side from POST /v1/campaigns/:slug/join
   // ---- Landing v2 funnel (added in PR-7) ----
+  // `section_view` is wired via SectionViewMarker today. The four below are
+  // declared up front so the whitelist is the single source of truth for the
+  // funnel — their call sites land in a follow-up PR that adds the per-section
+  // client handlers. Until then they are inert (whitelist entries do nothing
+  // by themselves; nothing fires them).
   'section_view', // props: { section: 'hero'|'comparison'|'pricing'|'privacy'|'how'|'features' } — IntersectionObserver, per-pageview dedup
-  'hero_demo_played', // props: { trigger: 'auto'|'manual', platform: 'X'|'Slack'|'Reddit'|'GitHub' } — first streaming-phase entry
-  'compare_row_expand', // props: { row: 'inline'|'speed'|'candidates'|'logging'|'byok'|'multilang'|'openSource' }
-  'pricing_card_focus', // props: { card: 'free'|'pro'|'byok' } — hover or keyboard focus ≥ 500ms
-  'early_bird_banner_click', // props: { surface: 'hero'|'pricing'|'nav' }
+  'hero_demo_played', // props: { trigger: 'auto'|'manual', platform: 'X'|'Slack'|'Reddit'|'GitHub' } — DEFERRED: wiring lives in HomeRewriteDemo
+  'compare_row_expand', // props: { row: 'inline'|'speed'|'candidates'|'logging'|'byok'|'multilang'|'openSource' } — DEFERRED: wiring lives in ComparisonTable details
+  'pricing_card_focus', // props: { card: 'free'|'pro'|'byok' } — DEFERRED: hover or keyboard focus ≥ 500ms
+  'early_bird_banner_click', // props: { surface: 'hero'|'pricing'|'nav' } — DEFERRED: wiring lives on EarlyBirdBadge + pricing banner
 ] as const;
 
 export type EventName = (typeof EVENT_NAMES)[number];

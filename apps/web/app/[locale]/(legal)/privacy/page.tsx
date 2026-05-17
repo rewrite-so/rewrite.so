@@ -17,7 +17,9 @@ export default function PrivacyPage() {
   return (
     <article className={styles.longDoc}>
       <h1 style={{ fontSize: 32, fontWeight: 700, margin: 0 }}>Privacy Policy</h1>
-      <p style={{ color: '#888', fontSize: 13, marginTop: 8 }}>Last updated: May 13, 2026</p>
+      <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 8 }}>
+        Last updated: May 13, 2026
+      </p>
 
       <p style={{ marginTop: 28 }}>
         rewrite.so (&ldquo;we&rdquo;, &ldquo;us&rdquo;, the &ldquo;Service&rdquo;) is built around a
