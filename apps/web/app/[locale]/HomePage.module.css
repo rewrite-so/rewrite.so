@@ -625,10 +625,18 @@
 
 .sectionTitle {
   margin: 0;
-  color: #171713;
-  font-size: 2rem;
-  line-height: 1.15;
+  color: var(--text-primary);
+  font-size: var(--fs-2xl);
+  line-height: var(--lh-tight);
   letter-spacing: 0;
+}
+
+.sectionSubtitle {
+  margin: var(--space-3) 0 0;
+  color: var(--text-secondary);
+  font-size: var(--fs-md);
+  line-height: var(--lh-snug);
+  max-width: 620px;
 }
 
 .useCaseGrid {

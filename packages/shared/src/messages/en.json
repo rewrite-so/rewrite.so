@@ -399,6 +399,51 @@
       "useCase3": "Public posts — tweets, Reddit / HN comments, GitHub issues, PR descriptions.",
       "useCase4": "Cold emails, apologies, hard conversations — places where one wrong word costs you."
     },
+    "compare": {
+      "eyebrow": "How we differ",
+      "h2": "rewrite.so vs the alternatives",
+      "subtitle": "Three styles, in the box you're already typing in, in under a second.",
+      "caption": "Feature comparison of rewrite.so against Grammarly, DeepL Write, and ChatGPT web.",
+      "recommended": "Recommended",
+      "whyMatters": "Why this matters: ",
+      "disclaimer": "Comparison reflects publicly available information as of 2026-05. Competitor features and pricing change frequently — please verify with each vendor before deciding. We do not affiliate with or endorse any listed product.",
+      "col": {
+        "us": "rewrite.so",
+        "grammarly": "Grammarly",
+        "deepl": "DeepL Write",
+        "chatgpt": "ChatGPT (web)"
+      },
+      "rows": {
+        "inline": {
+          "label": "Inline in any input box",
+          "detail": "We replace the text you're typing right where you're typing it — no popover, no sidebar, no second tab."
+        },
+        "speed": {
+          "label": "Streaming, sub-second first token",
+          "detail": "Tokens stream in as fast as the model produces them. Most rewrites start landing on screen within ~500 ms."
+        },
+        "candidates": {
+          "label": "Three styles in parallel (faithful / casual / formal)",
+          "detail": "You get three rewrites at once. Press 1, 2, or 3 to accept — no need to re-prompt to see another tone."
+        },
+        "logging": {
+          "label": "No prompt or output logging",
+          "detail": "We log length, language, style, user id, and error codes. Never the text. The source code is open."
+        },
+        "byok": {
+          "label": "Bring your own API key (any OpenAI-compatible)",
+          "detail": "Plug in your own provider key and we don't apply our monthly quota — your provider's rate is your rate."
+        },
+        "multilang": {
+          "label": "Multi-language source (CJK + EU)",
+          "detail": "Designed for cross-language writers — type Chinese, get English back, or any combination across 7+ UI locales."
+        },
+        "openSource": {
+          "label": "Open source",
+          "detail": "Apache-2.0 on GitHub. Anyone can audit, fork, or self-host."
+        }
+      }
+    },
     "privacy": {
       "eyebrow": "The privacy contract",
       "h2": "Your text is never stored. Period.",

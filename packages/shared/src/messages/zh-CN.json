@@ -399,6 +399,51 @@
       "useCase3": "公开发言——推文、Reddit / HN 评论、GitHub Issues、PR 描述。",
       "useCase4": "陌生人开场、道歉、难开口的话——一个词用错就尴尬的时刻。"
     },
+    "compare": {
+      "eyebrow": "我们的不同",
+      "h2": "rewrite.so 与同类工具的对比",
+      "subtitle": "三种风格、就在你正在打字的输入框里、1 秒内出第一个字。",
+      "caption": "rewrite.so 与 Grammarly、DeepL Write、ChatGPT 网页版的功能对比。",
+      "recommended": "推荐",
+      "whyMatters": "意义在于：",
+      "disclaimer": "对比基于 2026-05 截止的公开信息整理。各家功能与价格会频繁变化，请以厂商官方信息为准。我们与所列产品无任何合作或代言关系。",
+      "col": {
+        "us": "rewrite.so",
+        "grammarly": "Grammarly",
+        "deepl": "DeepL Write",
+        "chatgpt": "ChatGPT 网页版"
+      },
+      "rows": {
+        "inline": {
+          "label": "在任意输入框内 inline 改写",
+          "detail": "在你正在打字的输入框里直接替换，没有侧边栏、没有弹层、不切 tab。"
+        },
+        "speed": {
+          "label": "亚秒级流式输出",
+          "detail": "模型一吐字就开始上屏，多数改写约 500ms 内看到第一个字。"
+        },
+        "candidates": {
+          "label": "三种风格同时给（贴近原文 / 口语 / 正式）",
+          "detail": "一次给三个版本，按 1 / 2 / 3 直接接受——不用换语气再问一次。"
+        },
+        "logging": {
+          "label": "原文与输出不落日志",
+          "detail": "只记长度、语言、风格、用户 ID、错误码。代码开源，可审计。"
+        },
+        "byok": {
+          "label": "BYOK（任意 OpenAI 兼容端点）",
+          "detail": "用自己的 key，我们不再施加月配额——上游的限速就是你的限速。"
+        },
+        "multilang": {
+          "label": "多语言原文（CJK + 欧洲语言）",
+          "detail": "为跨语言写作而设计——中文输入英文输出，7+ UI 语言任意搭配。"
+        },
+        "openSource": {
+          "label": "开源",
+          "detail": "Apache-2.0 协议 on GitHub，可审计、可 fork、可自部署。"
+        }
+      }
+    },
     "privacy": {
       "eyebrow": "关于隐私",
       "h2": "你的文本永不存储。就这么简单。",

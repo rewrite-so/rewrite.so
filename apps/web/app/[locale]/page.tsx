@@ -3,11 +3,84 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { CtaLink } from '../../components/CtaLink.tsx';
 import { EarlyBirdBadge } from '../../components/EarlyBirdBadge.tsx';
+import {
+  type ComparisonCellValue,
+  type ComparisonColumn,
+  type ComparisonRow,
+  ComparisonTable,
+} from '../../components/ui/ComparisonTable.tsx';
 import { getCampaignEntryState } from '../../lib/campaign-entry.ts';
 import { getExtensionInstallUrl } from '../../lib/extension-install-url.ts';
 import styles from './HomePage.module.css';
 import { HomeRewriteDemo } from './HomeRewriteDemo.tsx';
 import type { PlatformName } from './PlatformIcon.tsx';
+
+const COMPARE_ROW_KEYS = [
+  'inline',
+  'speed',
+  'candidates',
+  'logging',
+  'byok',
+  'multilang',
+  'openSource',
+] as const;
+
+/**
+ * Comparison-table cells live here (not in i18n) because each cell mirrors
+ * a public, verifiable fact about a competitor — translating "check / cross
+ * / partial" doesn't add information, and freezing the fact set in code
+ * makes the audit trail tighter when we re-verify the table date.
+ *
+ * Re-verify on every PR that touches this table. Source: each vendor's
+ * public product page / pricing page, captured 2026-05.
+ */
+const COMPARE_CELLS: Record<
+  (typeof COMPARE_ROW_KEYS)[number],
+  Record<string, ComparisonCellValue>
+> = {
+  inline: {
+    us: { kind: 'check' },
+    grammarly: { kind: 'partial', label: 'Sidebar suggestions' },
+    deepl: { kind: 'partial', label: 'Extension on supported sites' },
+    chatgpt: { kind: 'cross', label: 'Copy / paste' },
+  },
+  speed: {
+    us: { kind: 'text', text: '~500 ms first token' },
+    grammarly: { kind: 'text', text: 'Suggestion popovers' },
+    deepl: { kind: 'text', text: 'Batch response' },
+    chatgpt: { kind: 'text', text: 'Streaming, multi-second start' },
+  },
+  candidates: {
+    us: { kind: 'check', label: '3 in parallel' },
+    grammarly: { kind: 'cross', label: 'Single suggestion' },
+    deepl: { kind: 'partial', label: 'Alternative tones' },
+    chatgpt: { kind: 'cross', label: 'Single response' },
+  },
+  logging: {
+    us: { kind: 'check' },
+    grammarly: { kind: 'cross' },
+    deepl: { kind: 'cross' },
+    chatgpt: { kind: 'cross' },
+  },
+  byok: {
+    us: { kind: 'check' },
+    grammarly: { kind: 'cross' },
+    deepl: { kind: 'cross' },
+    chatgpt: { kind: 'cross' },
+  },
+  multilang: {
+    us: { kind: 'check' },
+    grammarly: { kind: 'partial', label: 'EN-focused' },
+    deepl: { kind: 'partial', label: 'EU langs strong' },
+    chatgpt: { kind: 'check' },
+  },
+  openSource: {
+    us: { kind: 'check', label: 'Apache-2.0' },
+    grammarly: { kind: 'cross' },
+    deepl: { kind: 'cross' },
+    chatgpt: { kind: 'cross' },
+  },
+};
 
 const STYLE_KEYS = ['faithful', 'casual', 'formal'] as const;
 // 每个 example 关联一个真实平台,demo chrome bar 显示对应 logo + 平台名,
@@ -25,6 +98,20 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   setRequestLocale(locale);
   const t = await getTranslations('home');
   const earlyBirdEntry = await getCampaignEntryState('early-bird');
+
+  const compareColumns: ComparisonColumn[] = [
+    { key: 'us', name: t('compare.col.us'), isUs: true },
+    { key: 'grammarly', name: t('compare.col.grammarly') },
+    { key: 'deepl', name: t('compare.col.deepl') },
+    { key: 'chatgpt', name: t('compare.col.chatgpt') },
+  ];
+
+  const compareRows: ComparisonRow[] = COMPARE_ROW_KEYS.map((key) => ({
+    key,
+    label: t(`compare.rows.${key}.label`),
+    detail: t(`compare.rows.${key}.detail`),
+    cells: COMPARE_CELLS[key],
+  }));
 
   const demoCopy = {
     anyInput: t('demo.anyInput'),
@@ -112,6 +199,22 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             </article>
           ))}
         </div>
+      </section>
+
+      <section className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <p className={styles.eyebrow}>{t('compare.eyebrow')}</p>
+          <h2 className={styles.sectionTitle}>{t('compare.h2')}</h2>
+          <p className={styles.sectionSubtitle}>{t('compare.subtitle')}</p>
+        </div>
+        <ComparisonTable
+          caption={t('compare.caption')}
+          columns={compareColumns}
+          rows={compareRows}
+          recommendedLabel={t('compare.recommended')}
+          whyMattersLabel={t('compare.whyMatters')}
+          disclaimer={t('compare.disclaimer')}
+        />
       </section>
 
       <section className={`${styles.section} ${styles.howSection}`}>

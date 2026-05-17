@@ -1,0 +1,247 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* === Desktop table === */
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--surface-card);
+  font-size: var(--fs-sm);
+}
+
+.rowHeaderCol {
+  width: 240px;
+}
+
+.colHeader {
+  text-align: left;
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-sm);
+  padding: var(--space-4) var(--space-4);
+  color: var(--text-secondary);
+  background: var(--surface-muted);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.colHeader[data-us="true"] {
+  background: var(--surface-accent-soft);
+  color: var(--text-accent-strong);
+  font-weight: var(--fw-bold);
+}
+
+.rowHeader {
+  text-align: left;
+  font-weight: var(--fw-medium);
+  font-size: var(--fs-sm);
+  color: var(--text-primary);
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--border-default);
+  background: var(--surface-card);
+  vertical-align: top;
+}
+
+.rowDetails {
+  cursor: pointer;
+}
+
+.rowSummary {
+  list-style: none;
+  font-weight: var(--fw-medium);
+  position: relative;
+  padding-right: var(--space-5);
+}
+
+.rowSummary::-webkit-details-marker {
+  display: none;
+}
+
+.rowSummary::after {
+  content: "›";
+  position: absolute;
+  right: 0;
+  top: 0;
+  color: var(--text-muted);
+  transition: transform 120ms ease;
+}
+
+.rowDetails[open] .rowSummary::after {
+  transform: rotate(90deg);
+}
+
+.rowDetailText {
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-xs);
+  color: var(--text-secondary);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-snug);
+}
+
+.rowDetailLabel {
+  font-weight: var(--fw-semibold);
+  color: var(--text-primary);
+  margin-right: var(--space-1);
+}
+
+.cell {
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--border-default);
+  vertical-align: top;
+  font-size: var(--fs-sm);
+  color: var(--text-primary);
+}
+
+.cell[data-us="true"] {
+  background: var(--surface-accent-soft);
+}
+
+tr:last-child .cell,
+tr:last-child .rowHeader {
+  border-bottom: none;
+}
+
+.cellCheck,
+.cellCross,
+.cellPartial {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.cellCheck {
+  color: var(--success-600);
+}
+
+.cellCross {
+  color: var(--neutral-400);
+}
+
+.cellPartial {
+  color: var(--warning-700);
+}
+
+.cellLabel {
+  color: var(--text-primary);
+  font-size: var(--fs-sm);
+}
+
+.cellText {
+  color: var(--text-primary);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-snug);
+}
+
+/* === Mobile cards (hidden by default, swapped below 900px) === */
+
+.cards {
+  display: none;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.card {
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+  padding: var(--space-5);
+}
+
+.card[data-us="true"] {
+  border-color: var(--border-strong);
+  background: var(--surface-accent-soft);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.cardName {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-bold);
+  color: var(--text-primary);
+}
+
+.card[data-us="true"] .cardName {
+  color: var(--text-accent-strong);
+}
+
+.cardPill {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--brand-500);
+  color: var(--text-on-inverse);
+}
+
+.cardList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.cardRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px dashed var(--border-default);
+}
+
+.cardRow:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.cardRowLabel {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  margin: 0;
+  flex: 1;
+}
+
+.cardRowValue {
+  margin: 0;
+  text-align: right;
+}
+
+.disclaimer {
+  font-size: var(--fs-xs);
+  line-height: var(--lh-snug);
+  color: var(--text-muted);
+  margin: 0;
+  padding: var(--space-3) 0 0;
+}
+
+@media (max-width: 900px) {
+  .table {
+    display: none;
+  }
+  .cards {
+    display: flex;
+  }
+}
