@@ -40,6 +40,7 @@ interface UserInfo {
     isParticipant: boolean;
     discountActive: boolean;
     proLapsesAt: string | null;
+    pendingGift: { days: number; activatesAt: string; expiresAt: string } | null;
   } | null;
   /** Remaining gift Pro days = ceil((max(gift_grants.expires_at) - now) / 1d) */
   giftBalanceDays?: number;
@@ -641,19 +642,44 @@ function EarlyBirdSection({ me }: { me: UserInfo }) {
       {statusKey && (
         <Row label={t('statusLabel')} value={t(`status.${statusKey}`, { days: graceDaysLeft })} />
       )}
-      {giftDays > 0 && (
-        <Row label={t('giftBalanceLabel')} value={t('giftBalanceValue', { days: giftDays })} />
-      )}
-      {me.tier === 'pro' && me.subscription && (
+      {eb?.pendingGift ? (
+        // 待激活 gift（granted_at 在未来）：报名时已 Pro 用户场景，gift 启动时间
+        // 推后到 sub 期满。显示原始 days（90）+ 启用日期，**不要**显示 giftBalanceDays
+        // 因为后者把当前 sub 剩余天数也算进去（115 而非 90，用户视角费解）。
+        // Phase 1 已知简化：admin 补偿 tooling 落地后若用户同时有 active admin gift
+        // + pending 早鸟 gift，此分支只会展示 pending 行，admin 那部分 active 余额
+        // 不可见。需 Phase 2 加 source 维度或改成同时展示两行（后端 query 已支持，
+        // 见 early-bird.test.ts 的 stacked grants 用例）。
         <Row
-          label={t('proSourceLabel')}
-          value={t('proSourceSubscription', {
-            date: format.dateTime(new Date(me.subscription.currentPeriodEnd), {
+          label={t('giftScheduledLabel')}
+          value={t('giftScheduledValue', {
+            days: eb.pendingGift.days,
+            date: format.dateTime(new Date(eb.pendingGift.activatesAt), {
               year: 'numeric',
               month: 'long',
               day: 'numeric',
             }),
           })}
+        />
+      ) : giftDays > 0 ? (
+        // 已激活 gift：用 MAX 聚合（含多 source 堆叠）显示「剩余总余额」
+        <Row label={t('giftBalanceLabel')} value={t('giftBalanceValue', { days: giftDays })} />
+      ) : null}
+      {me.tier === 'pro' && me.subscription && (
+        <Row
+          label={t('proSourceLabel')}
+          value={t(
+            me.subscription.cancelAtPeriodEnd
+              ? 'proSourceSubscriptionEnding'
+              : 'proSourceSubscription',
+            {
+              date: format.dateTime(new Date(me.subscription.currentPeriodEnd), {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              }),
+            },
+          )}
         />
       )}
     </div>

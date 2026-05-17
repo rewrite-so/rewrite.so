@@ -173,8 +173,11 @@
         },
         "giftBalanceLabel": "赠送 Pro 天数",
         "giftBalanceValue": "剩余 {days, number} 天",
+        "giftScheduledLabel": "赠送 Pro",
+        "giftScheduledValue": "{days, number} 天 · {date} 启用",
         "proSourceLabel": "Pro 来源",
-        "proSourceSubscription": "订阅 · {date} 续费"
+        "proSourceSubscription": "订阅 · {date} 续费",
+        "proSourceSubscriptionEnding": "订阅 · {date} 到期"
       },
       "sub": {
         "label": "订阅",
@@ -255,8 +258,9 @@
         "prefix": "错误"
       },
       "subscribed": {
-        "line": "你已订阅 Pro（{plan}）。当期到期：{date}",
-        "willCancel": "（到期后取消）",
+        "lineRenewing": "你已订阅 Pro（{plan}）。下次续费：{date}。",
+        "lineCanceling": "你已订阅 Pro（{plan}）。当期到期：{date}（到期后取消）。",
+        "lineCancelingWithGift": "你已订阅 Pro（{plan}）。当期到期：{date}（到期后取消）。到期后还有 {giftDays, number} 天免费 Pro。",
         "manage": "管理订阅",
         "planMonthly": "月付",
         "planAnnual": "年付"
@@ -279,7 +283,7 @@
       "pro": {
         "title": "Pro",
         "periodMonthly": "/ 月",
-        "periodYearly": "/ 月（按年付 ${total}）",
+        "periodYearly": "/ 月（年付）",
         "feat1": "每月 2,000 次改写",
         "feat2": "3 种风格并行流式",
         "feat3": "不用配 API key",

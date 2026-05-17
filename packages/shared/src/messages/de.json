@@ -173,8 +173,11 @@
         },
         "giftBalanceLabel": "Geschenkte Pro-Tage",
         "giftBalanceValue": "Noch {days, number} Tage",
+        "giftScheduledLabel": "Pro gratis",
+        "giftScheduledValue": "{days, number} Tage · ab {date}",
         "proSourceLabel": "Pro-Quelle",
-        "proSourceSubscription": "Abonnement · verlängert am {date}"
+        "proSourceSubscription": "Abonnement · verlängert am {date}",
+        "proSourceSubscriptionEnding": "Abonnement · endet am {date}"
       },
       "sub": {
         "label": "Abonnement",
@@ -255,8 +258,9 @@
         "prefix": "Fehler"
       },
       "subscribed": {
-        "line": "Du bist auf Pro ({plan}). Endet am: {date}",
-        "willCancel": " (wird zum Periodenende gekündigt)",
+        "lineRenewing": "Du nutzt Pro ({plan}). Nächste Verlängerung: {date}.",
+        "lineCanceling": "Du nutzt Pro ({plan}). Endet am: {date} (wird zum Periodenende gekündigt).",
+        "lineCancelingWithGift": "Du nutzt Pro ({plan}). Endet am: {date} (wird zum Periodenende gekündigt). Danach starten {giftDays, number} kostenlose Pro-Tage.",
         "manage": "Abo verwalten",
         "planMonthly": "Monatlich",
         "planAnnual": "Jährlich"
@@ -279,7 +283,7 @@
       "pro": {
         "title": "Pro",
         "periodMonthly": "/ Monat",
-        "periodYearly": "/ Monat (jährlich ${total} abgerechnet)",
+        "periodYearly": "/ Monat (jährliche Abrechnung)",
         "feat1": "2.000 Umschreibungen / Monat",
         "feat2": "3 Stile parallel gestreamt",
         "feat3": "Kein API-Schlüssel-Setup nötig",

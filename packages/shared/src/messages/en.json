@@ -173,8 +173,11 @@
         },
         "giftBalanceLabel": "Gift Pro days",
         "giftBalanceValue": "{days, number} days remaining",
+        "giftScheduledLabel": "Gift Pro",
+        "giftScheduledValue": "{days, number} days · activates {date}",
         "proSourceLabel": "Pro source",
-        "proSourceSubscription": "Subscription · renews {date}"
+        "proSourceSubscription": "Subscription · renews {date}",
+        "proSourceSubscriptionEnding": "Subscription · ends {date}"
       },
       "sub": {
         "label": "Subscription",
@@ -255,8 +258,9 @@
         "prefix": "Error"
       },
       "subscribed": {
-        "line": "You're on Pro ({plan}). Period ends: {date}",
-        "willCancel": " (will cancel at period end)",
+        "lineRenewing": "You're on Pro ({plan}). Next renewal: {date}.",
+        "lineCanceling": "You're on Pro ({plan}). Period ends: {date} (will cancel at period end).",
+        "lineCancelingWithGift": "You're on Pro ({plan}). Period ends: {date} (will cancel at period end). After that, {giftDays, number} free days of Pro kick in.",
         "manage": "Manage subscription",
         "planMonthly": "Monthly",
         "planAnnual": "Annual"
@@ -279,7 +283,7 @@
       "pro": {
         "title": "Pro",
         "periodMonthly": "/ month",
-        "periodYearly": "/ month (billed annually ${total})",
+        "periodYearly": "/ month (billed annually)",
         "feat1": "2,000 rewrites / month with our model",
         "feat2": "All 3 streaming styles",
         "feat3": "No API key setup needed",
