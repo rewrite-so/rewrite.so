@@ -1,10 +1,12 @@
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 import { Link } from '../i18n/navigation.ts';
 import { getExtensionInstallUrl } from '../lib/extension-install-url.ts';
+import { getCurrentUser } from '../lib/get-current-user.ts';
 import styles from './Footer.module.css';
 
-export function Footer() {
-  const t = useTranslations('footer');
+export async function Footer() {
+  const [t, user] = await Promise.all([getTranslations('footer'), getCurrentUser()]);
+  const isAuthed = user !== null;
   return (
     <footer className={styles.footer}>
       <div className={styles.grid}>
@@ -38,9 +40,11 @@ export function Footer() {
 
         <div>
           <h4 className={styles.colHeading}>{t('heading.account')}</h4>
-          <Link href="/login" className={styles.link}>
-            {t('link.signIn')}
-          </Link>
+          {!isAuthed && (
+            <Link href="/login" className={styles.link}>
+              {t('link.signIn')}
+            </Link>
+          )}
           <Link href="/settings" className={styles.link}>
             {t('link.settings')}
           </Link>
