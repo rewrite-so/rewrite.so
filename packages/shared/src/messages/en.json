@@ -396,16 +396,16 @@
     },
     "hero": {
       "eyebrow": "Inline AI rewriting",
-      "h1Line1": "Shift Shift.",
-      "h1Line2": "Rewrite. Done.",
-      "subHeadline": "Inline rewrite for any input box.",
+      "h1Line1": "Write freely.",
+      "h1Line2": "Send confidently.",
+      "subHeadline": "Double-tap Shift, get three native-quality rewrites — works in any language.",
       "polyglot": "Any language in. Any language out.",
       "intro": "Press <kbd>Shift</kbd> <kbd>Shift</kbd> in any input box. We give you three ways to say it. Pick one with <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd>.",
-      "ctaPrimary": "Install on Chrome →",
+      "ctaPrimary": "Install free →",
       "ctaInstall": "Try without installing →",
       "ctaSecondary": "⭐ Star on GitHub",
       "ctaGithub": "View on GitHub →",
-      "fineprint": "{count} free rewrites/month · No card · Bring your own key for unlimited"
+      "fineprint": "{count} free rewrites/month · No card · BYOK"
     },
     "scenarios": {
       "h2": "Sound familiar?",

@@ -396,16 +396,16 @@
     },
     "hero": {
       "eyebrow": "Inline-AI-Umschreibung",
-      "h1Line1": "Shift Shift.",
-      "h1Line2": "Umgeschrieben. Fertig.",
-      "subHeadline": "Inline-Umschreibung in jedem Eingabefeld.",
+      "h1Line1": "Schreib frei,",
+      "h1Line2": "sende mit Zuversicht.",
+      "subHeadline": "Drück Shift zweimal — du bekommst drei muttersprachlich klingende Umschreibungen, in jeder Sprache.",
       "polyglot": "Beliebige Sprache rein. Beliebige Sprache raus.",
       "intro": "Drücke <kbd>Shift</kbd> <kbd>Shift</kbd> in einem beliebigen Eingabefeld. Die KI liefert drei Varianten. Wähle mit <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd>.",
-      "ctaPrimary": "Zu Chrome hinzufügen →",
+      "ctaPrimary": "Kostenlos installieren →",
       "ctaInstall": "Ohne Installation testen →",
       "ctaSecondary": "⭐ Star auf GitHub",
       "ctaGithub": "Auf GitHub ansehen →",
-      "fineprint": "{count} Umschreibungen/Monat gratis · keine Karte · BYOK für unbegrenzte Nutzung"
+      "fineprint": "{count} Umschreibungen/Monat gratis · keine Karte · BYOK"
     },
     "scenarios": {
       "h2": "Kommt dir bekannt vor?",

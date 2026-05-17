@@ -142,18 +142,14 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         <div className={styles.heroInner}>
           <div className={styles.heroCopy}>
             {earlyBirdEntry.showBadge && <EarlyBirdBadge />}
-            <p className={styles.eyebrow}>{t('hero.eyebrow')}</p>
-            <h1 className={styles.heroTitle}>rewrite.so</h1>
-            <p className={styles.heroStatement}>
+            {/* Hero left side intentionally stays at 5 elements: h1 + sub +
+                2 CTAs + fineprint. eyebrow / brand h1 / heroIntro / standalone
+                GitHub link were removed in the PR-2-iter tightening — see plan. */}
+            <h1 className={styles.heroStatement}>
               <span>{t('hero.h1Line1')}</span>
               <span>{t('hero.h1Line2')}</span>
-            </p>
+            </h1>
             <p className={styles.heroLead}>{t('hero.subHeadline')}</p>
-            <p className={styles.heroIntro}>
-              {t.rich('hero.intro', {
-                kbd: (chunks) => <Kbd>{chunks}</Kbd>,
-              })}
-            </p>
             <div className={styles.heroActions}>
               <CtaLink
                 cta="install"
@@ -167,15 +163,18 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 {t('hero.ctaInstall')}
               </CtaLink>
             </div>
-            <p className={styles.fineprint}>{t('hero.fineprint', { count: QUOTA.loggedInFree })}</p>
-            <CtaLink
-              cta="github"
-              href="https://github.com/rewrite-so/rewrite.so"
-              external
-              className={styles.heroGithubLink}
-            >
-              {t('hero.ctaGithub')}
-            </CtaLink>
+            <p className={styles.fineprint}>
+              {t('hero.fineprint', { count: QUOTA.loggedInFree })}
+              {' · '}
+              <CtaLink
+                cta="github"
+                href="https://github.com/rewrite-so/rewrite.so"
+                external
+                className={styles.fineprintLink}
+              >
+                GitHub →
+              </CtaLink>
+            </p>
           </div>
 
           <HomeRewriteDemo copy={demoCopy} />

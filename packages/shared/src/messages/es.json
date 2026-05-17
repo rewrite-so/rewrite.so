@@ -396,16 +396,16 @@
     },
     "hero": {
       "eyebrow": "Reescritura AI en línea",
-      "h1Line1": "Shift Shift.",
-      "h1Line2": "Reescribe. Listo.",
-      "subHeadline": "Reescritura en línea para cualquier campo de entrada.",
+      "h1Line1": "Escribe con libertad,",
+      "h1Line2": "envía con confianza.",
+      "subHeadline": "Pulsa Shift dos veces y recibe tres reescrituras a nivel de nativo — en cualquier idioma.",
       "polyglot": "Cualquier idioma entra. Cualquier idioma sale.",
       "intro": "Pulsa <kbd>Shift</kbd> <kbd>Shift</kbd> en cualquier campo de texto. La IA te da tres formas de decirlo. Elige con <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd>.",
-      "ctaPrimary": "Instalar en Chrome →",
+      "ctaPrimary": "Instalar gratis →",
       "ctaInstall": "Probar sin instalar →",
       "ctaSecondary": "⭐ Estrella en GitHub",
       "ctaGithub": "Ver en GitHub →",
-      "fineprint": "{count} reescrituras gratis al mes · sin tarjeta · BYOK para ilimitado"
+      "fineprint": "{count} reescrituras gratis al mes · sin tarjeta · BYOK"
     },
     "scenarios": {
       "h2": "¿Te suena familiar?",

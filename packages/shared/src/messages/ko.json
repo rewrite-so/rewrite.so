@@ -396,16 +396,16 @@
     },
     "hero": {
       "eyebrow": "입력창에서 바로 AI 리라이트",
-      "h1Line1": "Shift Shift.",
-      "h1Line2": "리라이트. 끝.",
-      "subHeadline": "어떤 입력창에서도 그 자리에서 리라이트.",
+      "h1Line1": "자유롭게 쓰고,",
+      "h1Line2": "자신 있게 보내세요.",
+      "subHeadline": "Shift 를 두 번 누르면 어떤 언어로도 원어민 수준의 리라이트 3 가지를 받습니다.",
       "polyglot": "어떤 언어로 입력하든, 어떤 언어로든 출력.",
       "intro": "아무 입력창에서 <kbd>Shift</kbd> <kbd>Shift</kbd>. AI 가 3 가지 표현을 제안하면 <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> 으로 선택.",
-      "ctaPrimary": "Chrome 에 설치 →",
+      "ctaPrimary": "무료로 설치 →",
       "ctaInstall": "설치 없이 체험하기 →",
       "ctaSecondary": "⭐ GitHub Star",
       "ctaGithub": "GitHub에서 보기 →",
-      "fineprint": "월 {count} 회 무료 · 카드 불필요 · BYOK 시 무제한"
+      "fineprint": "월 {count} 회 무료 · 카드 불필요 · BYOK"
     },
     "scenarios": {
       "h2": "익숙하신가요?",

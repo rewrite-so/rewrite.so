@@ -396,16 +396,16 @@
     },
     "hero": {
       "eyebrow": "Réécriture IA en ligne",
-      "h1Line1": "Shift Shift.",
-      "h1Line2": "Réécrit. Terminé.",
-      "subHeadline": "Réécriture inline dans n'importe quel champ de saisie.",
+      "h1Line1": "Écrivez librement,",
+      "h1Line2": "envoyez en confiance.",
+      "subHeadline": "Appuyez deux fois sur Shift pour obtenir trois réécritures de qualité native — dans n'importe quelle langue.",
       "polyglot": "N'importe quelle langue en entrée. N'importe quelle en sortie.",
       "intro": "Appuyez sur <kbd>Shift</kbd> <kbd>Shift</kbd> dans n'importe quel champ de texte. L'IA propose trois formulations. Choisissez avec <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd>.",
-      "ctaPrimary": "Installer sur Chrome →",
+      "ctaPrimary": "Installer gratuitement →",
       "ctaInstall": "Essayer sans installer →",
       "ctaSecondary": "⭐ Star sur GitHub",
       "ctaGithub": "Voir sur GitHub →",
-      "fineprint": "{count} réécritures gratuites/mois · sans carte · BYOK pour l'illimité"
+      "fineprint": "{count} réécritures gratuites/mois · sans carte · BYOK"
     },
     "scenarios": {
       "h2": "Ça vous parle ?",

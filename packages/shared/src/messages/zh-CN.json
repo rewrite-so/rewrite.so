@@ -396,16 +396,16 @@
     },
     "hero": {
       "eyebrow": "网页输入框 inline AI 改写",
-      "h1Line1": "双击 Shift。",
-      "h1Line2": "改写。搞定。",
-      "subHeadline": "在任意输入框里直接改写。",
+      "h1Line1": "随意写，",
+      "h1Line2": "自信发送。",
+      "subHeadline": "双击 Shift，获取 3 种最地道的说法 — 任意语言都适用。",
       "polyglot": "任意语言进，任意语言出。",
       "intro": "在任意输入框双击 <kbd>Shift</kbd>。AI 当场给你三种说法，按 <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> 选一个。",
-      "ctaPrimary": "安装到 Chrome →",
+      "ctaPrimary": "免费安装 →",
       "ctaInstall": "免安装试用 →",
       "ctaSecondary": "⭐ Star on GitHub",
       "ctaGithub": "在 GitHub 上查看 →",
-      "fineprint": "每月 {count} 次免费 · 无需信用卡 · BYOK 无限改写"
+      "fineprint": "每月 {count} 次免费 · 无需信用卡 · BYOK"
     },
     "scenarios": {
       "h2": "这些场景你眼熟吗？",

@@ -396,16 +396,16 @@
     },
     "hero": {
       "eyebrow": "入力欄での AI リライト",
-      "h1Line1": "Shift Shift。",
-      "h1Line2": "リライト。完了。",
-      "subHeadline": "どんな入力欄でもインラインでリライト。",
+      "h1Line1": "自由に書いて、",
+      "h1Line2": "自信を持って送る。",
+      "subHeadline": "Shift を 2 回押すだけで、どんな言語でも自然な 3 つの書き換えが手に入る。",
       "polyglot": "どの言語で書いても、どの言語でも出力。",
       "intro": "どんな入力欄でも <kbd>Shift</kbd> <kbd>Shift</kbd> を押すだけ。AI が 3 通りの表現を提示するので、<kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> で選択。",
-      "ctaPrimary": "Chrome に追加 →",
+      "ctaPrimary": "無料でインストール →",
       "ctaInstall": "インストール不要で試す →",
       "ctaSecondary": "⭐ GitHub で Star",
       "ctaGithub": "GitHub で見る →",
-      "fineprint": "月 {count} 回まで無料 · クレジットカード不要 · BYOK なら無制限"
+      "fineprint": "月 {count} 回まで無料 · クレジットカード不要 · BYOK"
     },
     "scenarios": {
       "h2": "身に覚えありませんか？",
