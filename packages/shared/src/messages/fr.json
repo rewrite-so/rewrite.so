@@ -481,24 +481,32 @@
       }
     },
     "pricing": {
-      "h2": "Tarifs simples à deux niveaux",
+      "h2": "Three ways to use rewrite.so",
       "free": {
         "title": "Free",
         "price": "$0",
-        "sub": "{count} réécritures / mois pour les utilisateurs connectés",
-        "feat1": "Les 3 styles",
-        "feat2": "Détection auto de la langue",
-        "feat3": "Les entrées ne sont jamais stockées"
+        "sub": "{count} rewrites / month for signed-in users",
+        "feat1": "All 3 styles",
+        "feat2": "Auto language detection",
+        "feat3": "Inputs never stored"
       },
       "pro": {
         "title": "Pro",
-        "price": "${monthly} / mois, facturation annuelle",
-        "sub": "${total} / an (économisez {percent}% vs ${monthlyAlt}/mois mensuel)",
-        "feat1": "{count, number} réécritures / mois",
-        "feat2": "Modèle hébergé, sans configuration",
-        "feat3": "Support prioritaire"
+        "price": "${monthly} / mo, billed annually",
+        "sub": "${total} / year (save {percent}% vs ${monthlyAlt}/mo monthly)",
+        "feat1": "{count, number} rewrites / month",
+        "feat2": "Hosted model, no setup",
+        "feat3": "Priority support"
       },
-      "ctaSeeFull": "Voir tarifs complets & FAQ →"
+      "byok": {
+        "title": "BYOK",
+        "price": "$0 + your key",
+        "sub": "Bring your own OpenAI-compatible endpoint",
+        "feat1": "No tier gate — any signed-in user",
+        "feat2": "No monthly quota from us",
+        "feat3": "Use OpenAI / Anthropic / Azure / Groq / DeepSeek"
+      },
+      "ctaSeeFull": "See full pricing & FAQ →"
     },
     "finalCta": {
       "h2": "Essayez. 30 secondes.",

@@ -526,7 +526,7 @@
       }
     },
     "pricing": {
-      "h2": "极简两档定价",
+      "h2": "三种用法，按需选",
       "free": {
         "title": "Free",
         "price": "$0",
@@ -542,6 +542,14 @@
         "feat1": "每月 {count, number} 次改写",
         "feat2": "托管 model，零配置",
         "feat3": "优先支持"
+      },
+      "byok": {
+        "title": "BYOK",
+        "price": "$0 + 你自己的 key",
+        "sub": "用任意 OpenAI 兼容端点",
+        "feat1": "任何登录用户可配，不限 tier",
+        "feat2": "我们这边不再施加月配额",
+        "feat3": "OpenAI / Anthropic / Azure / Groq / DeepSeek"
       },
       "ctaSeeFull": "查看完整定价与常见问题 →"
     },

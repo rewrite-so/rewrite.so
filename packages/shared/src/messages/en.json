@@ -526,7 +526,7 @@
       }
     },
     "pricing": {
-      "h2": "Simple two-tier pricing",
+      "h2": "Three ways to use rewrite.so",
       "free": {
         "title": "Free",
         "price": "$0",
@@ -542,6 +542,14 @@
         "feat1": "{count, number} rewrites / month",
         "feat2": "Hosted model, no setup",
         "feat3": "Priority support"
+      },
+      "byok": {
+        "title": "BYOK",
+        "price": "$0 + your key",
+        "sub": "Bring your own OpenAI-compatible endpoint",
+        "feat1": "No tier gate — any signed-in user",
+        "feat2": "No monthly quota from us",
+        "feat3": "Use OpenAI / Anthropic / Azure / Groq / DeepSeek"
       },
       "ctaSeeFull": "See full pricing & FAQ →"
     },

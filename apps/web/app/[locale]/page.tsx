@@ -364,6 +364,13 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             ]}
             highlight
           />
+          <PriceTeaser
+            title={t('pricing.byok.title')}
+            price={t('pricing.byok.price')}
+            sub={t('pricing.byok.sub')}
+            features={[t('pricing.byok.feat1'), t('pricing.byok.feat2'), t('pricing.byok.feat3')]}
+            byok
+          />
         </div>
         <div className={styles.pricingActions}>
           <CtaLink cta="pricing" href="/pricing" className={styles.secondaryButton}>
@@ -424,17 +431,24 @@ function PriceTeaser({
   sub,
   features,
   highlight,
+  byok,
 }: {
   title: string;
   price: string;
   sub: string;
   features: string[];
   highlight?: boolean;
+  byok?: boolean;
 }) {
+  const cls = [
+    styles.priceCard,
+    highlight && styles.priceCardHighlight,
+    byok && styles.priceCardByok,
+  ]
+    .filter(Boolean)
+    .join(' ');
   return (
-    <article
-      className={highlight ? `${styles.priceCard} ${styles.priceCardHighlight}` : styles.priceCard}
-    >
+    <article className={cls}>
       <div className={styles.priceName}>{title}</div>
       <div className={styles.priceValue}>{price}</div>
       <p>{sub}</p>

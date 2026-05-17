@@ -481,24 +481,32 @@
       }
     },
     "pricing": {
-      "h2": "シンプル 2 階層料金",
+      "h2": "Three ways to use rewrite.so",
       "free": {
         "title": "Free",
         "price": "$0",
-        "sub": "ログインユーザーは月 {count} 回の書き換え",
-        "feat1": "3 スタイルすべて",
-        "feat2": "自動言語検出",
-        "feat3": "入力は保存されません"
+        "sub": "{count} rewrites / month for signed-in users",
+        "feat1": "All 3 styles",
+        "feat2": "Auto language detection",
+        "feat3": "Inputs never stored"
       },
       "pro": {
         "title": "Pro",
-        "price": "${monthly} / 月（年払い）",
-        "sub": "年額 ${total}（月払い ${monthlyAlt}/月 と比べて {percent}% 節約）",
-        "feat1": "月 {count, number} 回の書き換え",
-        "feat2": "ホスト型モデル、設定不要",
-        "feat3": "優先サポート"
+        "price": "${monthly} / mo, billed annually",
+        "sub": "${total} / year (save {percent}% vs ${monthlyAlt}/mo monthly)",
+        "feat1": "{count, number} rewrites / month",
+        "feat2": "Hosted model, no setup",
+        "feat3": "Priority support"
       },
-      "ctaSeeFull": "完全な料金と FAQ を見る →"
+      "byok": {
+        "title": "BYOK",
+        "price": "$0 + your key",
+        "sub": "Bring your own OpenAI-compatible endpoint",
+        "feat1": "No tier gate — any signed-in user",
+        "feat2": "No monthly quota from us",
+        "feat3": "Use OpenAI / Anthropic / Azure / Groq / DeepSeek"
+      },
+      "ctaSeeFull": "See full pricing & FAQ →"
     },
     "finalCta": {
       "h2": "30 秒で試せます。",
