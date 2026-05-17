@@ -442,7 +442,7 @@
           "label": "Trigger + accept by keyboard alone",
           "detail": "Double-tap Shift to open the panel; press 1, 2, or 3 to accept. Zero mouse needed — the rewrite never pulls your hand off the home row. Other tools need a hover, a text selection, or a tab switch to even get a suggestion.",
           "cells": {
-            "us": "Shift Shift → 1 / 2 / 3",
+            "us": "Shift Shift, that's it",
             "grammarly": "Hover, then click",
             "deepl": "Select text, then click",
             "chatgpt": "Tab switch, then copy"

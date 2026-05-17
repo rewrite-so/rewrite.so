@@ -442,7 +442,7 @@
           "label": "全键盘触发与接受",
           "detail": "双击 Shift 弹出候选，按 1、2、3 直接接受。整个流程不用碰鼠标，手不用离开主键区。其它工具触发改写至少要 hover、选中或切 tab。",
           "cells": {
-            "us": "双击 Shift → 按 1 / 2 / 3",
+            "us": "Shift Shift，搞定",
             "grammarly": "悬浮后点击",
             "deepl": "选中后点击",
             "chatgpt": "切 tab 后复制"

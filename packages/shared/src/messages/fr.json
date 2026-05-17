@@ -591,7 +591,7 @@
           "label": "Déclenchement + acceptation au clavier",
           "detail": "Appuie deux fois sur Shift pour ouvrir le panneau ; appuie sur 1, 2 ou 3 pour valider. Zéro souris — la main ne quitte jamais la rangée de repos pendant la réécriture. Les autres outils exigent un survol, une sélection ou un changement d'onglet.",
           "cells": {
-            "us": "Shift Shift → 1 / 2 / 3",
+            "us": "Shift Shift, c'est tout",
             "grammarly": "Survoler puis cliquer",
             "deepl": "Sélectionner puis cliquer",
             "chatgpt": "Changer d'onglet puis copier"
