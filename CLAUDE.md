@@ -446,6 +446,36 @@ type-specific 配置走 `config_json`（schema 在 `packages/shared/src/campaign
   能看到本月用量。BYOK 模式仍不显示（key 是用户的，无月配额概念）；used/limit
   缺失也不显示。
 
+## Design Tokens 与 UI primitive（apps/web）
+
+- **Design token 单一来源**：`apps/web/app/globals.css`。组件 / module css / inline
+  style **禁止 hex 字面量**（`PlatformSkin.module.css` 是文档化例外，里头 mock
+  X / GitHub / Slack / Reddit 等第三方 UI 的品牌色，必须保留原 hex 并加
+  `/* mock-only */` 注释）。三层架构：primitive scale → semantic → component；
+  组件只能消费 semantic 层（`--surface-*` / `--border-*` / `--text-*` 等）。
+- **UI primitive 边界**：`apps/web/components/ui/` 下的 7 个 primitive（Button /
+  Card / Kbd / Badge / Container / SectionHeader / Disclaimer + 后续 ComparisonTable
+  / PriceCard）**不含业务逻辑**，不 `import { ... } from '@rewrite/shared'`
+  （类型 import 例外）。业务复合组件放 `apps/web/components/` 根目录，可自由
+  消费 shared / api / lib。
+- **Geist 字体本地化**：next/font 在 build 时把 Geist Sans / Geist Mono 拼到
+  bundle，**不要**加 `<link href="fonts.googleapis.com">` 之类的运行时 CDN 加载；
+  CJK 一律走 `--font-sans` fallback 栈的 system 字体（不引 Noto，避免 bundle
+  膨胀）。
+- **新增 events 流程**：
+  1. `packages/shared/src/events.ts` 的 `EVENT_NAMES` 加事件名 + 注释 props 形状
+  2. `apps/api/src/lib/event-metrics.ts` 的 `validateEventProps` 是 deny-list
+     （`FORBIDDEN_KEY_SUBSTRINGS` 拒收含 text/content/prompt/output/email/ip/...
+     等子串的 key），**新事件如果 prop key 名不撞这条 deny-list，API 端不用改**；
+     反之必须先把禁词列表松绑后部署 API 再上线 web 端事件
+  3. 客户端 `lib/analytics.ts` 的 `track()` 调用 fire 事件
+  4. 配套测试 + CLAUDE.md / events.ts 同步更新
+- **landing 文案调性约束**（hero / pricing teaser / 对比表 / privacy band 一律
+  适用）：极简、句号结尾、不堆形容词；"事实 + 一个动作"比"形容词 + 推销"更
+  贴 brand。对比表必须配 footer disclaimer（`Comparison reflects publicly
+  available information as of YYYY-MM. ... We do not affiliate with or endorse
+  any listed product.`），且 PR 上线前每行事实必须人工 review。
+
 ## 基础设施
 
 - **扩展身份信任 = `EXTENSION_ALLOWED_ORIGINS` 白名单**（`apps/api/src/lib/extension-origin.ts`）：

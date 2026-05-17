@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { CtaLink } from '../../components/CtaLink.tsx';
 import { EarlyBirdBadge } from '../../components/EarlyBirdBadge.tsx';
+import { SectionViewMarker } from '../../components/SectionViewMarker.tsx';
 import {
   type ComparisonCellValue,
   type ComparisonColumn,
@@ -134,6 +135,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   return (
     <main className={styles.page}>
+      <SectionViewMarker section="hero" />
       <section className={styles.hero}>
         <div className={styles.heroImage} aria-hidden="true" />
         <div className={styles.heroWash} aria-hidden="true" />
@@ -201,6 +203,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </div>
       </section>
 
+      <SectionViewMarker section="comparison" />
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
           <p className={styles.eyebrow}>{t('compare.eyebrow')}</p>
@@ -217,6 +220,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         />
       </section>
 
+      <SectionViewMarker section="how" />
       <section className={`${styles.section} ${styles.howSection}`}>
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>{t('howItWorks.h2')}</h2>
@@ -256,6 +260,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </div>
       </section>
 
+      <SectionViewMarker section="privacy" />
       <section className={styles.privacyBand}>
         <div className={styles.privacyCopy}>
           <p className={styles.privacyEyebrow}>{t('privacy.eyebrow')}</p>
@@ -296,6 +301,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </div>
       </section>
 
+      <SectionViewMarker section="features" />
       <section className={styles.section}>
         <div className={styles.featureRow}>
           <Feature
@@ -331,6 +337,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </div>
       </section>
 
+      <SectionViewMarker section="pricing" />
       <section className={`${styles.section} ${styles.pricingSection}`}>
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>{t('pricing.h2')}</h2>

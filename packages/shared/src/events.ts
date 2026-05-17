@@ -34,6 +34,12 @@ export const EVENT_NAMES = [
   'byok_save', // props: { has_been_set_before: 0|1 } — never the key
   // ---- Campaigns / promotions ----
   'campaign_join', // props: { campaign_slug, campaign_type } — emitted server-side from POST /v1/campaigns/:slug/join
+  // ---- Landing v2 funnel (added in PR-7) ----
+  'section_view', // props: { section: 'hero'|'comparison'|'pricing'|'privacy'|'how'|'features' } — IntersectionObserver, per-pageview dedup
+  'hero_demo_played', // props: { trigger: 'auto'|'manual', platform: 'X'|'Slack'|'Reddit'|'GitHub' } — first streaming-phase entry
+  'compare_row_expand', // props: { row: 'inline'|'speed'|'candidates'|'logging'|'byok'|'multilang'|'openSource' }
+  'pricing_card_focus', // props: { card: 'free'|'pro'|'byok' } — hover or keyboard focus ≥ 500ms
+  'early_bird_banner_click', // props: { surface: 'hero'|'pricing'|'nav' }
 ] as const;
 
 export type EventName = (typeof EVENT_NAMES)[number];
