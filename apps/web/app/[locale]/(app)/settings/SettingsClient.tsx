@@ -324,21 +324,23 @@ export function SettingsClient() {
   }
 
   if (!me) {
-    return <p style={{ marginTop: 32, color: '#888' }}>{t('loading')}</p>;
+    return <p style={{ marginTop: 32, color: 'var(--text-muted)' }}>{t('loading')}</p>;
   }
 
   if (!me.user) {
     return (
       <section style={{ marginTop: 32 }}>
-        <p style={{ color: '#666', fontSize: 14, lineHeight: 1.55 }}>{t('notSignedIn')}</p>
+        <p style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.55 }}>
+          {t('notSignedIn')}
+        </p>
         <a
           href="/login"
           style={{
             display: 'inline-block',
             marginTop: 12,
             padding: '10px 18px',
-            background: '#111',
-            color: '#fff',
+            background: 'var(--neutral-950)',
+            color: 'var(--neutral-0)',
             textDecoration: 'none',
             borderRadius: 8,
             fontSize: 14,
@@ -384,7 +386,7 @@ export function SettingsClient() {
           <div
             style={{
               padding: '10px 0',
-              borderBottom: '1px solid #f0f0f0',
+              borderBottom: '1px solid var(--neutral-100)',
             }}
           >
             <div
@@ -396,8 +398,8 @@ export function SettingsClient() {
               }}
             >
               <div>
-                <div style={{ fontSize: 14, color: '#111' }}>{t('lang.target')}</div>
-                <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>
+                <div style={{ fontSize: 14, color: 'var(--neutral-950)' }}>{t('lang.target')}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
                   {t('lang.targetHelp')}
                 </div>
               </div>
@@ -408,9 +410,9 @@ export function SettingsClient() {
                 style={{
                   padding: '7px 10px',
                   fontSize: 13,
-                  border: '1px solid #d4d4d8',
+                  border: '1px solid var(--neutral-300)',
                   borderRadius: 6,
-                  background: '#fff',
+                  background: 'var(--neutral-0)',
                   fontFamily: 'inherit',
                   minWidth: 180,
                 }}
@@ -443,13 +445,13 @@ export function SettingsClient() {
                     width: '100%',
                     padding: '7px 10px',
                     fontSize: 13,
-                    border: '1px solid #d4d4d8',
+                    border: '1px solid var(--neutral-300)',
                     borderRadius: 6,
                     fontFamily: 'inherit',
                     boxSizing: 'border-box',
                   }}
                 />
-                <div style={{ fontSize: 12, color: '#888', marginTop: 4 }}>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
                   {tLang('customHelp')}
                 </div>
               </div>
@@ -465,8 +467,10 @@ export function SettingsClient() {
             }}
           >
             <div>
-              <div style={{ fontSize: 14, color: '#111' }}>{t('lang.ui')}</div>
-              <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>{t('lang.uiHelp')}</div>
+              <div style={{ fontSize: 14, color: 'var(--neutral-950)' }}>{t('lang.ui')}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
+                {t('lang.uiHelp')}
+              </div>
             </div>
             <select
               value={settings.uiLocale}
@@ -475,9 +479,9 @@ export function SettingsClient() {
               style={{
                 padding: '7px 10px',
                 fontSize: 13,
-                border: '1px solid #d4d4d8',
+                border: '1px solid var(--neutral-300)',
                 borderRadius: 6,
-                background: '#fff',
+                background: 'var(--neutral-0)',
                 fontFamily: 'inherit',
                 minWidth: 180,
               }}
@@ -508,9 +512,9 @@ export function SettingsClient() {
           style={{
             padding: '8px 14px',
             fontSize: 13,
-            background: '#fff',
-            color: '#dc2626',
-            border: '1px solid #fca5a5',
+            background: 'var(--neutral-0)',
+            color: 'var(--danger-500)',
+            border: '1px solid var(--danger-100)',
             borderRadius: 6,
             cursor: 'pointer',
           }}
@@ -560,9 +564,9 @@ function SubscriptionSection({ me }: { me: UserInfo }) {
             style={{
               padding: '7px 12px',
               fontSize: 13,
-              background: '#fff',
-              color: '#111',
-              border: '1px solid #d4d4d8',
+              background: 'var(--neutral-0)',
+              color: 'var(--neutral-950)',
+              border: '1px solid var(--neutral-300)',
               borderRadius: 6,
               cursor: 'pointer',
             }}
@@ -583,8 +587,8 @@ function SubscriptionSection({ me }: { me: UserInfo }) {
             display: 'inline-block',
             padding: '7px 12px',
             fontSize: 13,
-            background: '#111',
-            color: '#fff',
+            background: 'var(--neutral-950)',
+            color: 'var(--neutral-0)',
             border: 'none',
             borderRadius: 6,
             textDecoration: 'none',
@@ -767,17 +771,22 @@ function ByokSection({
   }
 
   return (
-    <div style={{ ...cardStyle, marginTop: 16 }}>
+    // id="byok" is the deep-link target for the BYOK card CTA on /pricing
+    // (Configure in Settings → /settings#byok). Don't rename without
+    // updating PricingPage's byok.cta href.
+    <section id="byok" style={{ ...cardStyle, marginTop: 16 }}>
       <div
         style={{
           padding: '10px 0',
-          borderBottom: '1px solid #f0f0f0',
+          borderBottom: '1px solid var(--border-default)',
         }}
       >
-        <div style={{ fontSize: 14, color: '#111', fontWeight: 500 }}>{t('title')}</div>
-        <div style={{ fontSize: 12, color: '#888', marginTop: 2, lineHeight: 1.6 }}>
+        <div style={{ fontSize: 14, color: 'var(--neutral-950)', fontWeight: 500 }}>
+          {t('title')}
+        </div>
+        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2, lineHeight: 1.6 }}>
           {t.rich('intro', {
-            strong: (chunks) => <strong style={{ color: '#111' }}>{chunks}</strong>,
+            strong: (chunks) => <strong style={{ color: 'var(--neutral-950)' }}>{chunks}</strong>,
           })}
         </div>
       </div>
@@ -794,7 +803,11 @@ function ByokSection({
             <button
               type="button"
               onClick={onDelete}
-              style={{ ...btnSecondary, color: '#dc2626', borderColor: '#fca5a5' }}
+              style={{
+                ...btnSecondary,
+                color: 'var(--danger-500)',
+                borderColor: 'var(--danger-100)',
+              }}
             >
               {t('delete')}
             </button>
@@ -823,7 +836,9 @@ function ByokSection({
             placeholder="sk-..."
             type="password"
           />
-          {error && <p style={{ color: '#dc2626', fontSize: 12, margin: '4px 0' }}>{error}</p>}
+          {error && (
+            <p style={{ color: 'var(--danger-500)', fontSize: 12, margin: '4px 0' }}>{error}</p>
+          )}
           <div style={{ display: 'flex', gap: 8, marginTop: 8, alignItems: 'center' }}>
             <button
               type="button"
@@ -832,8 +847,8 @@ function ByokSection({
               style={{
                 padding: '7px 12px',
                 fontSize: 13,
-                background: '#111',
-                color: '#fff',
+                background: 'var(--neutral-950)',
+                color: 'var(--neutral-0)',
                 border: 'none',
                 borderRadius: 6,
                 cursor: 'pointer',
@@ -866,19 +881,19 @@ function ByokSection({
               </button>
             )}
             {testState.kind === 'ok' && (
-              <span style={{ fontSize: 12, color: '#16a34a' }}>
+              <span style={{ fontSize: 12, color: 'var(--success-500)' }}>
                 ✓ {t('testOk', { latencyMs: testState.latencyMs })}
               </span>
             )}
             {testState.kind === 'failed' && (
-              <span style={{ fontSize: 12, color: '#dc2626' }}>
+              <span style={{ fontSize: 12, color: 'var(--danger-500)' }}>
                 ✗ {t(`testFailed.${testState.code}` as 'testFailed.unknown')}
               </span>
             )}
           </div>
         </div>
       )}
-    </div>
+    </section>
   );
 }
 
@@ -897,7 +912,7 @@ function Field({
 }) {
   return (
     <label style={{ display: 'block', marginBottom: 10 }}>
-      <span style={{ display: 'block', fontSize: 12, color: '#888', marginBottom: 4 }}>
+      <span style={{ display: 'block', fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>
         {label}
       </span>
       <input
@@ -909,7 +924,7 @@ function Field({
           width: '100%',
           padding: '7px 10px',
           fontSize: 13,
-          border: '1px solid #d4d4d8',
+          border: '1px solid var(--neutral-300)',
           borderRadius: 6,
           fontFamily: 'inherit',
           boxSizing: 'border-box',
@@ -922,9 +937,9 @@ function Field({
 const btnSecondary = {
   padding: '7px 12px',
   fontSize: 13,
-  background: '#fff',
-  color: '#111',
-  border: '1px solid #d4d4d8',
+  background: 'var(--neutral-0)',
+  color: 'var(--neutral-950)',
+  border: '1px solid var(--neutral-300)',
   borderRadius: 6,
   cursor: 'pointer',
 };
@@ -967,12 +982,12 @@ function Row({ label, value }: { label: string; value: string }) {
         display: 'flex',
         justifyContent: 'space-between',
         padding: '10px 0',
-        borderBottom: '1px solid #f0f0f0',
+        borderBottom: '1px solid var(--neutral-100)',
         fontSize: 14,
       }}
     >
-      <span style={{ color: '#888' }}>{label}</span>
-      <span style={{ color: '#111' }}>{value}</span>
+      <span style={{ color: 'var(--text-muted)' }}>{label}</span>
+      <span style={{ color: 'var(--neutral-950)' }}>{value}</span>
     </div>
   );
 }
@@ -987,9 +1002,9 @@ function WelcomeCard({ onDismiss }: { onDismiss: () => void }) {
         position: 'relative',
         padding: '16px 20px',
         marginBottom: 16,
-        border: '1px solid #3b82f6',
+        border: '1px solid var(--info-500)',
         borderRadius: 10,
-        background: '#eff6ff',
+        background: 'var(--info-50)',
       }}
     >
       <button
@@ -1006,17 +1021,17 @@ function WelcomeCard({ onDismiss }: { onDismiss: () => void }) {
           background: 'transparent',
           fontSize: 16,
           cursor: 'pointer',
-          color: '#64748b',
+          color: 'var(--neutral-500)',
           lineHeight: 1,
           padding: 0,
         }}
       >
         ×
       </button>
-      <h2 style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 600, color: '#1e3a8a' }}>
+      <h2 style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 600, color: 'var(--info-900)' }}>
         {t('title')}
       </h2>
-      <p style={{ margin: '0 0 12px', fontSize: 13, color: '#1e40af', lineHeight: 1.55 }}>
+      <p style={{ margin: '0 0 12px', fontSize: 13, color: 'var(--info-800)', lineHeight: 1.55 }}>
         {t('description')}
       </p>
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
@@ -1024,8 +1039,8 @@ function WelcomeCard({ onDismiss }: { onDismiss: () => void }) {
           href="/try"
           style={{
             padding: '7px 14px',
-            background: '#1d4ed8',
-            color: '#fff',
+            background: 'var(--info-700)',
+            color: 'var(--neutral-0)',
             textDecoration: 'none',
             borderRadius: 6,
             fontSize: 13,
@@ -1040,10 +1055,10 @@ function WelcomeCard({ onDismiss }: { onDismiss: () => void }) {
           rel="noopener"
           style={{
             padding: '7px 14px',
-            background: '#fff',
-            color: '#1d4ed8',
+            background: 'var(--neutral-0)',
+            color: 'var(--info-700)',
             textDecoration: 'none',
-            border: '1px solid #93c5fd',
+            border: '1px solid var(--info-200)',
             borderRadius: 6,
             fontSize: 13,
             fontWeight: 500,
@@ -1067,9 +1082,9 @@ function UpgradeBanner({ onDismiss }: { onDismiss: () => void }) {
         position: 'relative',
         padding: '14px 20px',
         marginBottom: 16,
-        border: '1px solid #16a34a',
+        border: '1px solid var(--success-500)',
         borderRadius: 10,
-        background: '#ecfdf5',
+        background: 'var(--success-50)',
       }}
     >
       <button
@@ -1086,17 +1101,17 @@ function UpgradeBanner({ onDismiss }: { onDismiss: () => void }) {
           background: 'transparent',
           fontSize: 16,
           cursor: 'pointer',
-          color: '#15803d',
+          color: 'var(--success-600)',
           lineHeight: 1,
           padding: 0,
         }}
       >
         ×
       </button>
-      <h2 style={{ margin: '0 0 4px', fontSize: 15, fontWeight: 600, color: '#14532d' }}>
+      <h2 style={{ margin: '0 0 4px', fontSize: 15, fontWeight: 600, color: 'var(--success-800)' }}>
         ✓ {t('title')}
       </h2>
-      <p style={{ margin: 0, fontSize: 13, color: '#166534', lineHeight: 1.55 }}>
+      <p style={{ margin: 0, fontSize: 13, color: 'var(--success-700)', lineHeight: 1.55 }}>
         {t('subtitle', { count: QUOTA.pro })}
       </p>
     </div>
@@ -1105,7 +1120,7 @@ function UpgradeBanner({ onDismiss }: { onDismiss: () => void }) {
 
 const cardStyle = {
   padding: '4px 16px',
-  border: '1px solid #e4e4e7',
+  border: '1px solid var(--neutral-200)',
   borderRadius: 10,
-  background: '#fff',
+  background: 'var(--neutral-0)',
 };
