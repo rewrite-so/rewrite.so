@@ -581,15 +581,32 @@
       "rows": {
         "inline": {
           "label": "En línea en cualquier campo",
-          "detail": "Reemplazamos el texto donde lo estás escribiendo — sin emergente, sin barra lateral, sin segunda pestaña."
+          "detail": "Reemplazamos el texto donde lo estás escribiendo — sin emergente, sin barra lateral, sin segunda pestaña.",
+          "cells": {
+            "grammarly": "Sugerencias en barra lateral",
+            "deepl": "Extensión solo en sitios compatibles",
+            "chatgpt": "Copiar / pegar"
+          }
         },
         "speed": {
           "label": "Streaming, primer token en menos de un segundo",
-          "detail": "Los tokens llegan tan rápido como el modelo los produce. La mayoría aparecen en pantalla en ~500 ms."
+          "detail": "Los tokens llegan tan rápido como el modelo los produce. La mayoría aparecen en pantalla en ~500 ms.",
+          "cells": {
+            "us": "Primer token en ~500 ms",
+            "grammarly": "Sugerencias emergentes",
+            "deepl": "Respuesta por lotes",
+            "chatgpt": "Streaming, varios segundos al arranque"
+          }
         },
         "candidates": {
           "label": "Tres estilos en paralelo (fiel / casual / formal)",
-          "detail": "Obtienes tres reescrituras a la vez. Pulsa 1, 2 o 3 para aceptar — no hace falta volver a pedir para ver otro tono."
+          "detail": "Obtienes tres reescrituras a la vez. Pulsa 1, 2 o 3 para aceptar — no hace falta volver a pedir para ver otro tono.",
+          "cells": {
+            "us": "3 en paralelo",
+            "grammarly": "Una sola sugerencia",
+            "deepl": "Tonos alternativos",
+            "chatgpt": "Una sola respuesta"
+          }
         },
         "logging": {
           "label": "Sin registro de prompt ni salida",
@@ -601,11 +618,18 @@
         },
         "multilang": {
           "label": "Origen multilingüe (CJK + lenguas europeas)",
-          "detail": "Pensado para quien escribe entre idiomas — escribe en chino y recibe inglés, en cualquier combinación entre las 7+ locales de la interfaz."
+          "detail": "Pensado para quien escribe entre idiomas — escribe en chino y recibe inglés, en cualquier combinación entre las 7+ locales de la interfaz.",
+          "cells": {
+            "grammarly": "Centrado en inglés",
+            "deepl": "Fuerte en lenguas europeas"
+          }
         },
         "openSource": {
           "label": "Código abierto",
-          "detail": "Apache-2.0 en GitHub. Cualquiera puede auditarlo, hacer fork o autohospedarlo."
+          "detail": "Apache-2.0 en GitHub. Cualquiera puede auditarlo, hacer fork o autohospedarlo.",
+          "cells": {
+            "us": "Apache-2.0"
+          }
         }
       }
     }

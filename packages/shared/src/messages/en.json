@@ -432,15 +432,32 @@
       "rows": {
         "inline": {
           "label": "Inline in any input box",
-          "detail": "We replace the text you're typing right where you're typing it — no popover, no sidebar, no second tab."
+          "detail": "We replace the text you're typing right where you're typing it — no popover, no sidebar, no second tab.",
+          "cells": {
+            "grammarly": "Sidebar suggestions",
+            "deepl": "Extension on supported sites",
+            "chatgpt": "Copy / paste"
+          }
         },
         "speed": {
           "label": "Streaming, sub-second first token",
-          "detail": "Tokens stream in as fast as the model produces them. Most rewrites start landing on screen within ~500 ms."
+          "detail": "Tokens stream in as fast as the model produces them. Most rewrites start landing on screen within ~500 ms.",
+          "cells": {
+            "us": "~500 ms first token",
+            "grammarly": "Suggestion popovers",
+            "deepl": "Batch response",
+            "chatgpt": "Streaming, multi-second start"
+          }
         },
         "candidates": {
           "label": "Three styles in parallel (faithful / casual / formal)",
-          "detail": "You get three rewrites at once. Press 1, 2, or 3 to accept — no need to re-prompt to see another tone."
+          "detail": "You get three rewrites at once. Press 1, 2, or 3 to accept — no need to re-prompt to see another tone.",
+          "cells": {
+            "us": "3 in parallel",
+            "grammarly": "Single suggestion",
+            "deepl": "Alternative tones",
+            "chatgpt": "Single response"
+          }
         },
         "logging": {
           "label": "No prompt or output logging",
@@ -452,11 +469,18 @@
         },
         "multilang": {
           "label": "Multi-language source (CJK + EU)",
-          "detail": "Designed for cross-language writers — type Chinese, get English back, or any combination across 7+ UI locales."
+          "detail": "Designed for cross-language writers — type Chinese, get English back, or any combination across 7+ UI locales.",
+          "cells": {
+            "grammarly": "EN-focused",
+            "deepl": "EU langs strong"
+          }
         },
         "openSource": {
           "label": "Open source",
-          "detail": "Apache-2.0 on GitHub. Anyone can audit, fork, or self-host."
+          "detail": "Apache-2.0 on GitHub. Anyone can audit, fork, or self-host.",
+          "cells": {
+            "us": "Apache-2.0"
+          }
         }
       }
     },

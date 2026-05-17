@@ -581,15 +581,32 @@
       "rows": {
         "inline": {
           "label": "Inline in jedem Eingabefeld",
-          "detail": "Der Text wird genau dort ersetzt, wo du ihn tippst — kein Popover, keine Seitenleiste, kein zweiter Tab."
+          "detail": "Der Text wird genau dort ersetzt, wo du ihn tippst — kein Popover, keine Seitenleiste, kein zweiter Tab.",
+          "cells": {
+            "grammarly": "Vorschläge in der Seitenleiste",
+            "deepl": "Erweiterung auf unterstützten Seiten",
+            "chatgpt": "Kopieren / einfügen"
+          }
         },
         "speed": {
           "label": "Streaming, erster Token unter einer Sekunde",
-          "detail": "Tokens kommen so schnell, wie das Modell sie produziert. Die meisten Umschreibungen erscheinen in ~500 ms."
+          "detail": "Tokens kommen so schnell, wie das Modell sie produziert. Die meisten Umschreibungen erscheinen in ~500 ms.",
+          "cells": {
+            "us": "Erstes Token in ~500 ms",
+            "grammarly": "Vorschlags-Popover",
+            "deepl": "Stapelantwort",
+            "chatgpt": "Streaming, mehrere Sekunden bis Start"
+          }
         },
         "candidates": {
           "label": "Drei Stile parallel (treu / locker / formell)",
-          "detail": "Du erhältst drei Umschreibungen gleichzeitig. Drücke 1, 2 oder 3 zum Akzeptieren — du musst nicht neu prompten, um einen anderen Ton zu sehen."
+          "detail": "Du erhältst drei Umschreibungen gleichzeitig. Drücke 1, 2 oder 3 zum Akzeptieren — du musst nicht neu prompten, um einen anderen Ton zu sehen.",
+          "cells": {
+            "us": "3 parallel",
+            "grammarly": "Ein einzelner Vorschlag",
+            "deepl": "Alternative Tonalitäten",
+            "chatgpt": "Eine einzelne Antwort"
+          }
         },
         "logging": {
           "label": "Keine Prompt- oder Output-Protokollierung",
@@ -601,11 +618,18 @@
         },
         "multilang": {
           "label": "Mehrsprachige Quelle (CJK + EU-Sprachen)",
-          "detail": "Für sprachübergreifende Autoren — schreibe Chinesisch, erhalte Englisch zurück, beliebige Kombinationen mit 7+ UI-Locales."
+          "detail": "Für sprachübergreifende Autoren — schreibe Chinesisch, erhalte Englisch zurück, beliebige Kombinationen mit 7+ UI-Locales.",
+          "cells": {
+            "grammarly": "Englisch-zentriert",
+            "deepl": "Stark in EU-Sprachen"
+          }
         },
         "openSource": {
           "label": "Open Source",
-          "detail": "Apache-2.0 auf GitHub. Jede:r kann auditieren, forken oder selbst hosten."
+          "detail": "Apache-2.0 auf GitHub. Jede:r kann auditieren, forken oder selbst hosten.",
+          "cells": {
+            "us": "Apache-2.0"
+          }
         }
       }
     }

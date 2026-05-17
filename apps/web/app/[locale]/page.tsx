@@ -26,61 +26,30 @@ const COMPARE_ROW_KEYS = [
   'openSource',
 ] as const;
 
+type CompareKind = ComparisonCellValue['kind'];
+
+const COMPARE_COL_KEYS = ['us', 'grammarly', 'deepl', 'chatgpt'] as const;
+
 /**
- * Comparison-table cells live here (not in i18n) because each cell mirrors
- * a public, verifiable fact about a competitor — translating "check / cross
- * / partial" doesn't add information, and freezing the fact set in code
- * makes the audit trail tighter when we re-verify the table date.
+ * Per-cell kind only. The user-facing label (and the 'text' kind's full
+ * string) live in i18n at home.compare.rows.<row>.cells.<col> so every
+ * locale renders consistently. Cells without an i18n entry just show the
+ * icon — see compareRows builder below.
  *
- * Re-verify on every PR that touches this table. Source: each vendor's
- * public product page / pricing page, captured 2026-05.
+ * Source for the kind matrix: each vendor's public product / pricing page,
+ * captured 2026-05. Re-verify on every PR that touches this table.
  */
-const COMPARE_CELLS: Record<
+const COMPARE_KIND: Record<
   (typeof COMPARE_ROW_KEYS)[number],
-  Record<string, ComparisonCellValue>
+  Record<(typeof COMPARE_COL_KEYS)[number], CompareKind>
 > = {
-  inline: {
-    us: { kind: 'check' },
-    grammarly: { kind: 'partial', label: 'Sidebar suggestions' },
-    deepl: { kind: 'partial', label: 'Extension on supported sites' },
-    chatgpt: { kind: 'cross', label: 'Copy / paste' },
-  },
-  speed: {
-    us: { kind: 'text', text: '~500 ms first token' },
-    grammarly: { kind: 'text', text: 'Suggestion popovers' },
-    deepl: { kind: 'text', text: 'Batch response' },
-    chatgpt: { kind: 'text', text: 'Streaming, multi-second start' },
-  },
-  candidates: {
-    us: { kind: 'check', label: '3 in parallel' },
-    grammarly: { kind: 'cross', label: 'Single suggestion' },
-    deepl: { kind: 'partial', label: 'Alternative tones' },
-    chatgpt: { kind: 'cross', label: 'Single response' },
-  },
-  logging: {
-    us: { kind: 'check' },
-    grammarly: { kind: 'cross' },
-    deepl: { kind: 'cross' },
-    chatgpt: { kind: 'cross' },
-  },
-  byok: {
-    us: { kind: 'check' },
-    grammarly: { kind: 'cross' },
-    deepl: { kind: 'cross' },
-    chatgpt: { kind: 'cross' },
-  },
-  multilang: {
-    us: { kind: 'check' },
-    grammarly: { kind: 'partial', label: 'EN-focused' },
-    deepl: { kind: 'partial', label: 'EU langs strong' },
-    chatgpt: { kind: 'check' },
-  },
-  openSource: {
-    us: { kind: 'check', label: 'Apache-2.0' },
-    grammarly: { kind: 'cross' },
-    deepl: { kind: 'cross' },
-    chatgpt: { kind: 'cross' },
-  },
+  inline: { us: 'check', grammarly: 'partial', deepl: 'partial', chatgpt: 'cross' },
+  speed: { us: 'text', grammarly: 'text', deepl: 'text', chatgpt: 'text' },
+  candidates: { us: 'check', grammarly: 'cross', deepl: 'partial', chatgpt: 'cross' },
+  logging: { us: 'check', grammarly: 'cross', deepl: 'cross', chatgpt: 'cross' },
+  byok: { us: 'check', grammarly: 'cross', deepl: 'cross', chatgpt: 'cross' },
+  multilang: { us: 'check', grammarly: 'partial', deepl: 'partial', chatgpt: 'check' },
+  openSource: { us: 'check', grammarly: 'cross', deepl: 'cross', chatgpt: 'cross' },
 };
 
 const STYLE_KEYS = ['faithful', 'casual', 'formal'] as const;
@@ -107,12 +76,29 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     { key: 'chatgpt', name: t('compare.col.chatgpt') },
   ];
 
-  const compareRows: ComparisonRow[] = COMPARE_ROW_KEYS.map((key) => ({
-    key,
-    label: t(`compare.rows.${key}.label`),
-    detail: t(`compare.rows.${key}.detail`),
-    cells: COMPARE_CELLS[key],
-  }));
+  const compareRows: ComparisonRow[] = COMPARE_ROW_KEYS.map((row) => {
+    const cells: Record<string, ComparisonCellValue> = {};
+    for (const col of COMPARE_COL_KEYS) {
+      const kind = COMPARE_KIND[row][col];
+      // i18n key for this cell's label. Some rows (logging / byok) have no
+      // cells block at all — the icon alone is the cell.
+      const cellKey = `compare.rows.${row}.cells.${col}` as const;
+      const hasLabel = t.has(cellKey);
+      if (kind === 'text') {
+        cells[col] = { kind: 'text', text: hasLabel ? t(cellKey) : '' };
+      } else if (hasLabel) {
+        cells[col] = { kind, label: t(cellKey) };
+      } else {
+        cells[col] = { kind };
+      }
+    }
+    return {
+      key: row,
+      label: t(`compare.rows.${row}.label`),
+      detail: t(`compare.rows.${row}.detail`),
+      cells,
+    };
+  });
 
   const demoCopy = {
     anyInput: t('demo.anyInput'),

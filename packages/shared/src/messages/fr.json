@@ -581,15 +581,32 @@
       "rows": {
         "inline": {
           "label": "Inline dans n'importe quel champ",
-          "detail": "Le texte est remplacé là où vous l'écrivez — pas de popover, pas de barre latérale, pas de second onglet."
+          "detail": "Le texte est remplacé là où vous l'écrivez — pas de popover, pas de barre latérale, pas de second onglet.",
+          "cells": {
+            "grammarly": "Suggestions en barre latérale",
+            "deepl": "Extension sur les sites pris en charge",
+            "chatgpt": "Copier / coller"
+          }
         },
         "speed": {
           "label": "Streaming, premier token sous la seconde",
-          "detail": "Les tokens arrivent au rythme du modèle. La plupart des réécritures s'affichent en ~500 ms."
+          "detail": "Les tokens arrivent au rythme du modèle. La plupart des réécritures s'affichent en ~500 ms.",
+          "cells": {
+            "us": "Premier token en ~500 ms",
+            "grammarly": "Pop-up de suggestions",
+            "deepl": "Réponse groupée",
+            "chatgpt": "Streaming, démarrage en plusieurs secondes"
+          }
         },
         "candidates": {
           "label": "Trois styles en parallèle (fidèle / décontracté / formel)",
-          "detail": "Trois propositions d'un coup. Tapez 1, 2 ou 3 pour valider — pas besoin de relancer pour changer de ton."
+          "detail": "Trois propositions d'un coup. Tapez 1, 2 ou 3 pour valider — pas besoin de relancer pour changer de ton.",
+          "cells": {
+            "us": "3 en parallèle",
+            "grammarly": "Une seule suggestion",
+            "deepl": "Tons alternatifs",
+            "chatgpt": "Une seule réponse"
+          }
         },
         "logging": {
           "label": "Aucune journalisation du prompt ni de la sortie",
@@ -601,11 +618,18 @@
         },
         "multilang": {
           "label": "Langue source multilingue (CJK + langues européennes)",
-          "detail": "Pensé pour qui écrit entre les langues — saisissez en chinois, sortez en anglais, combinaisons libres entre 7+ locales d'interface."
+          "detail": "Pensé pour qui écrit entre les langues — saisissez en chinois, sortez en anglais, combinaisons libres entre 7+ locales d'interface.",
+          "cells": {
+            "grammarly": "Centré sur l'anglais",
+            "deepl": "Fort en langues européennes"
+          }
         },
         "openSource": {
           "label": "Open source",
-          "detail": "Apache-2.0 sur GitHub. Auditez, forkez ou auto-hébergez librement."
+          "detail": "Apache-2.0 sur GitHub. Auditez, forkez ou auto-hébergez librement.",
+          "cells": {
+            "us": "Apache-2.0"
+          }
         }
       }
     }
