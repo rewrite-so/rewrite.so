@@ -60,7 +60,7 @@ export async function TopNav() {
     <nav className={styles.nav}>
       <div className={styles.inner}>
         <Link href="/" className={styles.brand}>
-          rewrite.so<span className={styles.brandTm}>™</span>
+          rewrite.so
         </Link>
 
         <div className={styles.centerLinks}>

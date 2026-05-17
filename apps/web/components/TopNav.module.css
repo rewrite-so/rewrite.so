@@ -30,14 +30,6 @@
   margin-right: var(--space-6);
 }
 
-.brandTm {
-  font-size: 9px;
-  font-weight: var(--fw-medium);
-  vertical-align: super;
-  margin-left: 1px;
-  color: var(--text-muted);
-}
-
 .centerLinks {
   display: flex;
   gap: var(--space-1);
