@@ -5,6 +5,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { getCampaignEntryState } from '../../../../lib/campaign-entry.ts';
 import { localizedMetadata } from '../../../metadata.ts';
+import legal from '../Legal.module.css';
 import styles from './Pricing.module.css';
 
 export async function generateMetadata({
@@ -27,7 +28,7 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
   const earlyBird = await getCampaignEntryState('early-bird');
 
   return (
-    <article>
+    <article className={legal.wide}>
       <h1 className={styles.h1}>{t('h1')}</h1>
       <p className={styles.intro}>{t('intro')}</p>
 
@@ -90,33 +91,34 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
       </div>
 
       <h2 className={styles.faqH2}>{t('faq.h2')}</h2>
-
-      <Faq q={t('faq.q1')} a={t('faq.a1')} />
-      <Faq
-        q={t('faq.q2')}
-        a={t.rich('faq.a2', {
-          privacy: (chunks) => <a href="/privacy">{chunks}</a>,
-        })}
-      />
-      <Faq q={t('faq.q3')} a={t('faq.a3')} />
-      <Faq q={t('faq.q4')} a={t('faq.a4')} />
-      <Faq
-        q={t('faq.q5')}
-        a={t.rich('faq.a5', {
-          settings: (chunks) => <Link href="/settings">{chunks}</Link>,
-          refund: (chunks) => <a href="/refund">{chunks}</a>,
-        })}
-      />
-      <Faq
-        q={t('faq.q6')}
-        a={t.rich('faq.a6', {
-          creem: (chunks) => (
-            <a href="https://creem.io" target="_blank" rel="noopener noreferrer">
-              {chunks}
-            </a>
-          ),
-        })}
-      />
+      <div className={styles.faqList}>
+        <Faq q={t('faq.q1')} a={t('faq.a1')} />
+        <Faq
+          q={t('faq.q2')}
+          a={t.rich('faq.a2', {
+            privacy: (chunks) => <a href="/privacy">{chunks}</a>,
+          })}
+        />
+        <Faq q={t('faq.q3')} a={t('faq.a3')} />
+        <Faq q={t('faq.q4')} a={t('faq.a4')} />
+        <Faq
+          q={t('faq.q5')}
+          a={t.rich('faq.a5', {
+            settings: (chunks) => <Link href="/settings">{chunks}</Link>,
+            refund: (chunks) => <a href="/refund">{chunks}</a>,
+          })}
+        />
+        <Faq
+          q={t('faq.q6')}
+          a={t.rich('faq.a6', {
+            creem: (chunks) => (
+              <a href="https://creem.io" target="_blank" rel="noopener noreferrer">
+                {chunks}
+              </a>
+            ),
+          })}
+        />
+      </div>
     </article>
   );
 }
@@ -165,8 +167,13 @@ function PricingCard({
       {subPrice && <div className={styles.subPrice}>{subPrice}</div>}
       {tagline && <p className={styles.tagline}>{tagline}</p>}
       <ul className={styles.featuresList}>
-        {features.map((f) => (
-          <li key={f} className={styles.featureItem}>
+        {features.map((f, i) => (
+          <li
+            key={f}
+            className={
+              i === 0 ? `${styles.featureItem} ${styles.featureItemEmphasis}` : styles.featureItem
+            }
+          >
             {f}
           </li>
         ))}
@@ -180,9 +187,9 @@ function PricingCard({
 
 function Faq({ q, a }: { q: string; a: ReactNode }) {
   return (
-    <div className={styles.faqItem}>
-      <h3 className={styles.faqQ}>{q}</h3>
+    <details className={styles.faqItem}>
+      <summary className={styles.faqQ}>{q}</summary>
       <p className={styles.faqA}>{a}</p>
-    </div>
+    </details>
   );
 }

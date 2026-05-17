@@ -1,0 +1,29 @@
+/* Legal group container styles.
+ *
+ * The layout itself stops setting a max-width — pricing and early-bird are
+ * marketing pages that need wider canvases than terms/privacy/refund/aup/
+ * contact, which are long-form documents. Each page now wraps its content
+ * in either `.longDoc` (720 max — comfortable reading column) or `.wide`
+ * (full --container-max — three-column layouts).
+ */
+
+.main {
+  width: 100%;
+  padding: 64px var(--container-pad) 48px;
+  color: var(--text-primary);
+  font-size: 15px;
+  line-height: var(--lh-normal);
+}
+
+/* Reading column for terms / privacy / refund / aup / contact / early-bird */
+.longDoc {
+  max-width: 720px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* Wide canvas for marketing pages (pricing). */
+.wide {
+  max-width: var(--container-max);
+  margin: 0 auto;
+}

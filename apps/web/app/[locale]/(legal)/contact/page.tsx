@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { localizedMetadata } from '../../../metadata.ts';
+import styles from '../Legal.module.css';
 
 export async function generateMetadata({
   params,
@@ -32,7 +33,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
     );
 
   return (
-    <article>
+    <article className={styles.longDoc}>
       <h1 style={{ fontSize: 32, fontWeight: 700, margin: 0 }}>{t('h1')}</h1>
       <p style={{ marginTop: 16, color: '#555' }}>{t('intro')}</p>
 

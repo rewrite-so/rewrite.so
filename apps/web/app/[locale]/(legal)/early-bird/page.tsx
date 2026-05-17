@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { localizedMetadata } from '../../../metadata.ts';
+import styles from '../Legal.module.css';
 import EarlyBirdClient from './EarlyBirdClient.tsx';
 
 export async function generateMetadata({
@@ -19,5 +20,9 @@ export async function generateMetadata({
 export default async function EarlyBirdPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  return <EarlyBirdClient locale={locale} />;
+  return (
+    <div className={styles.longDoc}>
+      <EarlyBirdClient locale={locale} />
+    </div>
+  );
 }

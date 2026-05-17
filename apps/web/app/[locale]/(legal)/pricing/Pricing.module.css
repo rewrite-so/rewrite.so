@@ -152,6 +152,13 @@
   font-weight: var(--fw-bold);
 }
 
+/* Headline feature on each card — first bullet rendered with extra weight
+   and primary text color so the reader's eye lands on it. */
+.featureItemEmphasis {
+  color: var(--text-primary);
+  font-weight: var(--fw-semibold);
+}
+
 .cta {
   box-sizing: border-box;
   width: 100%;
@@ -196,26 +203,58 @@
 }
 
 .faqH2 {
-  font-size: var(--fs-xl);
-  font-weight: var(--fw-semibold);
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-bold);
   margin-top: var(--space-16);
-  margin-bottom: var(--space-3);
+  margin-bottom: var(--space-2);
   color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.faqList {
+  max-width: 720px;
+  margin-top: var(--space-5);
+  border-top: 1px solid var(--border-default);
 }
 
 .faqItem {
-  margin-top: var(--space-6);
+  border-bottom: 1px solid var(--border-default);
 }
 
 .faqQ {
-  font-size: var(--fs-base);
+  list-style: none;
+  cursor: pointer;
+  padding: var(--space-5) var(--space-6) var(--space-5) 0;
+  font-size: var(--fs-md);
   font-weight: var(--fw-semibold);
-  margin: 0;
   color: var(--text-primary);
+  position: relative;
+}
+
+.faqQ::-webkit-details-marker {
+  display: none;
+}
+
+.faqQ::after {
+  content: "+";
+  position: absolute;
+  right: 0;
+  top: 50%;
+  margin-top: -0.6em;
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-regular);
+  color: var(--text-muted);
+  transition: transform 160ms ease;
+  line-height: 1;
+}
+
+.faqItem[open] .faqQ::after {
+  transform: rotate(45deg);
 }
 
 .faqA {
   color: var(--text-secondary);
-  margin-top: var(--space-2);
+  margin: 0 0 var(--space-5);
   line-height: var(--lh-normal);
+  font-size: var(--fs-sm);
 }
