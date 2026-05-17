@@ -91,6 +91,22 @@
         "feat4": "Cancel anytime; refund within 14 days",
         "cta": "Get Pro →"
       },
+      "byok": {
+        "title": "BYOK",
+        "price": "$0",
+        "period": "+ your provider",
+        "tagline": "Bring your own key. No tier gate. No monthly quota.",
+        "feat1": "No tier gating — available to any signed-in user",
+        "feat2": "No monthly quota from us (100 req/min abuse-prevention bucket)",
+        "feat3": "Any OpenAI-compatible endpoint (OpenAI / Anthropic / Azure / Groq / DeepSeek)",
+        "feat4": "Key stored AES-GCM encrypted; never logged",
+        "cta": "Configure in Settings →"
+      },
+      "earlyBird": {
+        "label": "Early Bird",
+        "perks": "90 days Pro on sign-up · 70% off forever",
+        "cta": "Join →"
+      },
       "faq": {
         "h2": "FAQ",
         "q1": "What does \"rewrite\" mean here?",

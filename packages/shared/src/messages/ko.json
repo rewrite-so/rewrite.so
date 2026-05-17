@@ -105,6 +105,22 @@
         "a5": "네, 언제든. <settings>설정</settings>의 \"Manage subscription\" 포털에서. 현재 청구 주기 종료까지 Pro 액세스 유지. 첫 청구 후 14일 이내 환불 — <refund>환불 정책</refund>을 참조하세요.",
         "q6": "결제는 누가 처리하나요?",
         "a6": "<creem>Creem</creem>이 당사의 Merchant of Record입니다. 결제, 세금, 환불을 대행 처리합니다. 카드 정보는 당사 서버를 거치지 않습니다."
+      },
+      "byok": {
+        "title": "BYOK",
+        "price": "$0",
+        "period": "+ your provider",
+        "tagline": "Bring your own key. No tier gate. No monthly quota.",
+        "feat1": "No tier gating — available to any signed-in user",
+        "feat2": "No monthly quota from us (100 req/min abuse-prevention bucket)",
+        "feat3": "Any OpenAI-compatible endpoint (OpenAI / Anthropic / Azure / Groq / DeepSeek)",
+        "feat4": "Key stored AES-GCM encrypted; never logged",
+        "cta": "Configure in Settings →"
+      },
+      "earlyBird": {
+        "label": "Early Bird",
+        "perks": "90 days Pro on sign-up · 70% off forever",
+        "cta": "Join →"
       }
     },
     "contact": {

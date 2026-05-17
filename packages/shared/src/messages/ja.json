@@ -105,6 +105,22 @@
         "a5": "はい、いつでも。<settings>設定</settings> の「Manage subscription」ポータルから。Pro の特典は現在の請求期間末まで利用可能。初回課金から 14 日以内は返金可能 — <refund>返金ポリシー</refund> をご覧ください。",
         "q6": "決済は誰が処理していますか？",
         "a6": "<creem>Creem</creem> が当社の Merchant of Record として、決済・税金・返金を代行処理しています。カード情報は当社サーバーに一切触れません。"
+      },
+      "byok": {
+        "title": "BYOK",
+        "price": "$0",
+        "period": "+ your provider",
+        "tagline": "Bring your own key. No tier gate. No monthly quota.",
+        "feat1": "No tier gating — available to any signed-in user",
+        "feat2": "No monthly quota from us (100 req/min abuse-prevention bucket)",
+        "feat3": "Any OpenAI-compatible endpoint (OpenAI / Anthropic / Azure / Groq / DeepSeek)",
+        "feat4": "Key stored AES-GCM encrypted; never logged",
+        "cta": "Configure in Settings →"
+      },
+      "earlyBird": {
+        "label": "Early Bird",
+        "perks": "90 days Pro on sign-up · 70% off forever",
+        "cta": "Join →"
       }
     },
     "contact": {

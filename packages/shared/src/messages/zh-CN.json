@@ -91,6 +91,22 @@
         "feat4": "随时取消；14 天内可退款",
         "cta": "升级 Pro →"
       },
+      "byok": {
+        "title": "BYOK",
+        "price": "$0",
+        "period": "+ 你自己的 API key",
+        "tagline": "用你自己的 key。不再限 tier，不再限月配额。",
+        "feat1": "任何登录用户都能配 — 不是 Pro 专属",
+        "feat2": "我们这边不再施加月配额（100 req/min 反代滥用底线）",
+        "feat3": "任意 OpenAI 兼容端点（OpenAI / Anthropic / Azure / Groq / DeepSeek）",
+        "feat4": "Key 用 AES-GCM 加密存储，永不入日志",
+        "cta": "去 Settings 配置 →"
+      },
+      "earlyBird": {
+        "label": "早鸟特惠",
+        "perks": "注册后 90 天 Pro 免费 · 终身 7 折",
+        "cta": "立即加入 →"
+      },
       "faq": {
         "h2": "常见问题",
         "q1": "「改写」具体指什么？",

@@ -105,6 +105,22 @@
         "a5": "Ja, jederzeit, aus <settings>deinen Einstellungen</settings> über das „Manage subscription\"-Portal. Du behältst den Pro-Zugang bis zum Ende des aktuellen Abrechnungszeitraums. Rückerstattung innerhalb von 14 Tagen nach erster Belastung — siehe <refund>Rückerstattungsrichtlinie</refund>.",
         "q6": "Wer wickelt die Zahlung ab?",
         "a6": "<creem>Creem</creem> ist unser Merchant of Record. Sie verarbeiten Zahlungen, Steuern und Rückerstattungen in unserem Auftrag. Deine Kartendaten berühren niemals unsere Server."
+      },
+      "byok": {
+        "title": "BYOK",
+        "price": "$0",
+        "period": "+ your provider",
+        "tagline": "Bring your own key. No tier gate. No monthly quota.",
+        "feat1": "No tier gating — available to any signed-in user",
+        "feat2": "No monthly quota from us (100 req/min abuse-prevention bucket)",
+        "feat3": "Any OpenAI-compatible endpoint (OpenAI / Anthropic / Azure / Groq / DeepSeek)",
+        "feat4": "Key stored AES-GCM encrypted; never logged",
+        "cta": "Configure in Settings →"
+      },
+      "earlyBird": {
+        "label": "Early Bird",
+        "perks": "90 days Pro on sign-up · 70% off forever",
+        "cta": "Join →"
       }
     },
     "contact": {
