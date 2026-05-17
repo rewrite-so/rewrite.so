@@ -47,7 +47,9 @@ function loadCatalog(file) {
   return JSON.parse(raw);
 }
 
-const files = readdirSync(MSG_DIR).filter((f) => f.endsWith('.json'));
+// `*.cache.json` siblings are written by scripts/i18n-translate.mjs (sha1 of
+// en values) and are intentionally a key subset — they're not locale catalogs.
+const files = readdirSync(MSG_DIR).filter((f) => f.endsWith('.json') && !f.endsWith('.cache.json'));
 if (!files.includes(`${SOURCE}.json`)) {
   console.error(`[i18n-validate] missing source ${SOURCE}.json in ${MSG_DIR}`);
   process.exit(1);

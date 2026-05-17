@@ -109,18 +109,18 @@
       "byok": {
         "title": "BYOK",
         "price": "$0",
-        "period": "+ your provider",
-        "tagline": "Bring your own key. No tier gate. No monthly quota.",
-        "feat1": "No tier gating — available to any signed-in user",
-        "feat2": "No monthly quota from us (100 req/min abuse-prevention bucket)",
-        "feat3": "Any OpenAI-compatible endpoint (OpenAI / Anthropic / Azure / Groq / DeepSeek)",
-        "feat4": "Key stored AES-GCM encrypted; never logged",
-        "cta": "Configure in Settings →"
+        "period": "+ 본인 API key",
+        "tagline": "본인의 키로. 티어 제한 없음, 월간 쿼터 없음.",
+        "feat1": "티어 게이팅 없음 — 로그인 사용자 누구나 사용 가능",
+        "feat2": "당사 월간 쿼터 없음(100 req/min 남용 방지 한도만)",
+        "feat3": "임의의 OpenAI 호환 엔드포인트(OpenAI / Anthropic / Azure / Groq / DeepSeek)",
+        "feat4": "키는 AES-GCM 으로 암호화 저장, 로그에 절대 남지 않음",
+        "cta": "Settings 에서 설정 →"
       },
       "earlyBird": {
-        "label": "Early Bird",
-        "perks": "90 days Pro on sign-up · 70% off forever",
-        "cta": "Join →"
+        "label": "얼리버드",
+        "perks": "가입 후 90 일 Pro 무료 · 영구 70% 할인",
+        "cta": "지금 참여 →"
       }
     },
     "contact": {
@@ -395,17 +395,17 @@
       "label": "얼리버드 · 90일 무료 + 평생 70% 할인"
     },
     "hero": {
-      "eyebrow": "지원되는 입력란 · 오픈소스",
-      "h1Line1": "자유롭게 쓰고,",
-      "h1Line2": "자신 있게 보내세요.",
-      "subHeadline": "모든 메시지를 너무 고민하지 마세요.",
+      "eyebrow": "입력창에서 바로 AI 리라이트",
+      "h1Line1": "Shift Shift.",
+      "h1Line2": "리라이트. 끝.",
+      "subHeadline": "어떤 입력창에서도 그 자리에서 리라이트.",
       "polyglot": "어떤 언어로 입력하든, 어떤 언어로든 출력.",
-      "intro": "지원되는 웹 입력란에서 <kbd>Shift</kbd>를 두 번 누르세요. AI가 세 가지 표현을 보여줍니다. <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd>으로 골라 바로 보내세요.",
-      "ctaPrimary": "무료 체험 →",
-      "ctaInstall": "확장 프로그램 설치 →",
+      "intro": "아무 입력창에서 <kbd>Shift</kbd> <kbd>Shift</kbd>. AI 가 3 가지 표현을 제안하면 <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> 으로 선택.",
+      "ctaPrimary": "Chrome 에 설치 →",
+      "ctaInstall": "설치 없이 체험하기 →",
       "ctaSecondary": "⭐ GitHub Star",
       "ctaGithub": "GitHub에서 보기 →",
-      "fineprint": "월 {count}회 무료 · 카드 불필요 · BYOK로 무제한"
+      "fineprint": "월 {count} 회 무료 · 카드 불필요 · BYOK 시 무제한"
     },
     "scenarios": {
       "h2": "익숙하신가요?",
@@ -481,32 +481,32 @@
       }
     },
     "pricing": {
-      "h2": "Three ways to use rewrite.so",
+      "h2": "세 가지 사용 방법",
       "free": {
         "title": "Free",
         "price": "$0",
-        "sub": "{count} rewrites / month for signed-in users",
-        "feat1": "All 3 styles",
-        "feat2": "Auto language detection",
-        "feat3": "Inputs never stored"
+        "sub": "로그인 사용자 월 {count} 회",
+        "feat1": "3 가지 스타일 모두",
+        "feat2": "언어 자동 감지",
+        "feat3": "입력 텍스트는 저장되지 않습니다"
       },
       "pro": {
         "title": "Pro",
-        "price": "${monthly} / mo, billed annually",
-        "sub": "${total} / year (save {percent}% vs ${monthlyAlt}/mo monthly)",
-        "feat1": "{count, number} rewrites / month",
-        "feat2": "Hosted model, no setup",
-        "feat3": "Priority support"
+        "price": "${monthly} / 월(연간 결제)",
+        "sub": "연 ${total}(월 ${monthlyAlt} 의 월간 결제 대비 {percent}% 절약)",
+        "feat1": "월 {count, number} 회 리라이트",
+        "feat2": "호스팅 모델, 설정 불필요",
+        "feat3": "우선 지원"
       },
       "byok": {
         "title": "BYOK",
-        "price": "$0 + your key",
-        "sub": "Bring your own OpenAI-compatible endpoint",
-        "feat1": "No tier gate — any signed-in user",
-        "feat2": "No monthly quota from us",
-        "feat3": "Use OpenAI / Anthropic / Azure / Groq / DeepSeek"
+        "price": "$0 + 본인 키",
+        "sub": "OpenAI 호환 엔드포인트 자유 선택",
+        "feat1": "로그인 사용자 누구나, 티어 제한 없음",
+        "feat2": "당사의 월간 쿼터 적용 없음",
+        "feat3": "OpenAI / Anthropic / Azure / Groq / DeepSeek 지원"
       },
-      "ctaSeeFull": "See full pricing & FAQ →"
+      "ctaSeeFull": "전체 가격 및 FAQ 보기 →"
     },
     "finalCta": {
       "h2": "30초면 됩니다.",
@@ -565,47 +565,47 @@
       }
     },
     "compare": {
-      "eyebrow": "How we differ",
-      "h2": "rewrite.so vs the alternatives",
-      "subtitle": "Three styles, in the box you're already typing in, in under a second.",
-      "caption": "Feature comparison of rewrite.so against Grammarly, DeepL Write, and ChatGPT web.",
-      "recommended": "Recommended",
-      "whyMatters": "Why this matters: ",
-      "disclaimer": "Comparison reflects publicly available information as of 2026-05. Competitor features and pricing change frequently — please verify with each vendor before deciding. We do not affiliate with or endorse any listed product.",
+      "eyebrow": "차별화 포인트",
+      "h2": "rewrite.so vs 비슷한 도구들",
+      "subtitle": "3 가지 스타일이, 지금 타이핑하는 입력창에서, 1 초 안에 첫 글자가 나옵니다.",
+      "caption": "rewrite.so 와 Grammarly, DeepL Write, ChatGPT(웹) 의 기능 비교.",
+      "recommended": "추천",
+      "whyMatters": "왜 중요한가:",
+      "disclaimer": "비교는 2026-05 기준 공개된 정보를 바탕으로 합니다. 각 업체의 기능과 가격은 자주 바뀌므로 실제 결정 전에 공식 정보를 확인해 주세요. 당사는 언급된 어떤 제품과도 제휴·후원 관계가 없습니다.",
       "col": {
         "us": "rewrite.so",
         "grammarly": "Grammarly",
         "deepl": "DeepL Write",
-        "chatgpt": "ChatGPT (web)"
+        "chatgpt": "ChatGPT (웹)"
       },
       "rows": {
         "inline": {
-          "label": "Inline in any input box",
-          "detail": "We replace the text you're typing right where you're typing it — no popover, no sidebar, no second tab."
+          "label": "어떤 입력창에서도 인라인 교체",
+          "detail": "사이드바도 팝업도 없이, 지금 타이핑 중인 자리에서 텍스트가 바로 바뀝니다."
         },
         "speed": {
-          "label": "Streaming, sub-second first token",
-          "detail": "Tokens stream in as fast as the model produces them. Most rewrites start landing on screen within ~500 ms."
+          "label": "스트리밍, 첫 토큰까지 1 초 이내",
+          "detail": "모델이 토큰을 생성하는 즉시 화면에 흘러나옵니다. 대부분 약 500 ms 안에 첫 글자가 표시됩니다."
         },
         "candidates": {
-          "label": "Three styles in parallel (faithful / casual / formal)",
-          "detail": "You get three rewrites at once. Press 1, 2, or 3 to accept — no need to re-prompt to see another tone."
+          "label": "3 가지 스타일 동시 출력(충실 / 캐주얼 / 격식)",
+          "detail": "한 번에 3 개 결과. 1 / 2 / 3 으로 바로 선택 — 톤을 바꾸려고 재요청할 필요가 없습니다."
         },
         "logging": {
-          "label": "No prompt or output logging",
-          "detail": "We log length, language, style, user id, and error codes. Never the text. The source code is open."
+          "label": "원문·결과 로깅 없음",
+          "detail": "길이, 언어, 스타일, 사용자 ID, 에러 코드만 기록. 텍스트는 절대 저장하지 않습니다. 소스 코드 공개."
         },
         "byok": {
-          "label": "Bring your own API key (any OpenAI-compatible)",
-          "detail": "Plug in your own provider key and we don't apply our monthly quota — your provider's rate is your rate."
+          "label": "BYOK(OpenAI 호환 엔드포인트)",
+          "detail": "본인 키를 연결하면 월간 쿼터가 적용되지 않습니다 — 본인 프로바이더의 레이트가 유일한 제한입니다."
         },
         "multilang": {
-          "label": "Multi-language source (CJK + EU)",
-          "detail": "Designed for cross-language writers — type Chinese, get English back, or any combination across 7+ UI locales."
+          "label": "다국어 원문(CJK + 유럽어)",
+          "detail": "크로스랭귀지 작문 전용 설계 — 중국어 입력에 영어 출력, 7+ UI 언어 자유 조합."
         },
         "openSource": {
-          "label": "Open source",
-          "detail": "Apache-2.0 on GitHub. Anyone can audit, fork, or self-host."
+          "label": "오픈소스",
+          "detail": "Apache-2.0, GitHub 공개. 감사·포크·셀프호스팅 가능."
         }
       }
     }

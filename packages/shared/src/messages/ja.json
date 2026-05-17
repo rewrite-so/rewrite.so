@@ -109,18 +109,18 @@
       "byok": {
         "title": "BYOK",
         "price": "$0",
-        "period": "+ your provider",
-        "tagline": "Bring your own key. No tier gate. No monthly quota.",
-        "feat1": "No tier gating — available to any signed-in user",
-        "feat2": "No monthly quota from us (100 req/min abuse-prevention bucket)",
-        "feat3": "Any OpenAI-compatible endpoint (OpenAI / Anthropic / Azure / Groq / DeepSeek)",
-        "feat4": "Key stored AES-GCM encrypted; never logged",
-        "cta": "Configure in Settings →"
+        "period": "+ 自分の API key",
+        "tagline": "自分の key で。ティア制限なし、月次クォータなし。",
+        "feat1": "ティア制限なし — サインイン済みユーザーなら誰でも利用可能",
+        "feat2": "当社からの月次クォータなし（100 req/min の不正利用防止のみ）",
+        "feat3": "任意の OpenAI 互換エンドポイント（OpenAI / Anthropic / Azure / Groq / DeepSeek）",
+        "feat4": "Key は AES-GCM で暗号化保存、ログには一切残しません",
+        "cta": "設定で構成 →"
       },
       "earlyBird": {
-        "label": "Early Bird",
-        "perks": "90 days Pro on sign-up · 70% off forever",
-        "cta": "Join →"
+        "label": "アーリーバード",
+        "perks": "登録後 90 日間 Pro 無料 · 永久 70% オフ",
+        "cta": "今すぐ参加 →"
       }
     },
     "contact": {
@@ -395,17 +395,17 @@
       "label": "アーリーバード · 90 日間無料 + 70% 永久オフ"
     },
     "hero": {
-      "eyebrow": "対応している入力欄 · オープンソース",
-      "h1Line1": "自由に書いて、",
-      "h1Line2": "自信を持って送る。",
-      "subHeadline": "メッセージを送る前に考えすぎない。",
+      "eyebrow": "入力欄での AI リライト",
+      "h1Line1": "Shift Shift。",
+      "h1Line2": "リライト。完了。",
+      "subHeadline": "どんな入力欄でもインラインでリライト。",
       "polyglot": "どの言語で書いても、どの言語でも出力。",
-      "intro": "対応しているウェブ入力欄で <kbd>Shift</kbd> をダブルタップ。AI が 3 つの言い方を提示。<kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> で選んでそのまま送信。",
-      "ctaPrimary": "無料で試す →",
-      "ctaInstall": "拡張機能をインストール →",
+      "intro": "どんな入力欄でも <kbd>Shift</kbd> <kbd>Shift</kbd> を押すだけ。AI が 3 通りの表現を提示するので、<kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> で選択。",
+      "ctaPrimary": "Chrome に追加 →",
+      "ctaInstall": "インストール不要で試す →",
       "ctaSecondary": "⭐ GitHub で Star",
       "ctaGithub": "GitHub で見る →",
-      "fineprint": "月 {count} 回まで無料 · カード不要 · BYOK で無制限"
+      "fineprint": "月 {count} 回まで無料 · クレジットカード不要 · BYOK なら無制限"
     },
     "scenarios": {
       "h2": "身に覚えありませんか？",
@@ -481,32 +481,32 @@
       }
     },
     "pricing": {
-      "h2": "Three ways to use rewrite.so",
+      "h2": "3 通りの使い方",
       "free": {
         "title": "Free",
         "price": "$0",
-        "sub": "{count} rewrites / month for signed-in users",
-        "feat1": "All 3 styles",
-        "feat2": "Auto language detection",
-        "feat3": "Inputs never stored"
+        "sub": "サインイン済みユーザーは月 {count} 回まで",
+        "feat1": "3 つの文体すべて",
+        "feat2": "言語を自動検出",
+        "feat3": "入力テキストは保存されません"
       },
       "pro": {
         "title": "Pro",
-        "price": "${monthly} / mo, billed annually",
-        "sub": "${total} / year (save {percent}% vs ${monthlyAlt}/mo monthly)",
-        "feat1": "{count, number} rewrites / month",
-        "feat2": "Hosted model, no setup",
-        "feat3": "Priority support"
+        "price": "${monthly} / 月（年払い）",
+        "sub": "年間 ${total}（月 ${monthlyAlt} の月払いと比較して {percent}% 割引）",
+        "feat1": "月 {count, number} 回リライト",
+        "feat2": "ホスト型モデル、セットアップ不要",
+        "feat3": "優先サポート"
       },
       "byok": {
         "title": "BYOK",
-        "price": "$0 + your key",
-        "sub": "Bring your own OpenAI-compatible endpoint",
-        "feat1": "No tier gate — any signed-in user",
-        "feat2": "No monthly quota from us",
-        "feat3": "Use OpenAI / Anthropic / Azure / Groq / DeepSeek"
+        "price": "$0 + 自分の key",
+        "sub": "任意の OpenAI 互換エンドポイントを利用",
+        "feat1": "サインインユーザーなら誰でも、ティア制限なし",
+        "feat2": "当社からの月次クォータなし",
+        "feat3": "OpenAI / Anthropic / Azure / Groq / DeepSeek 対応"
       },
-      "ctaSeeFull": "See full pricing & FAQ →"
+      "ctaSeeFull": "完全な価格表と FAQ を見る →"
     },
     "finalCta": {
       "h2": "30 秒で試せます。",
@@ -565,47 +565,47 @@
       }
     },
     "compare": {
-      "eyebrow": "How we differ",
-      "h2": "rewrite.so vs the alternatives",
-      "subtitle": "Three styles, in the box you're already typing in, in under a second.",
-      "caption": "Feature comparison of rewrite.so against Grammarly, DeepL Write, and ChatGPT web.",
-      "recommended": "Recommended",
-      "whyMatters": "Why this matters: ",
-      "disclaimer": "Comparison reflects publicly available information as of 2026-05. Competitor features and pricing change frequently — please verify with each vendor before deciding. We do not affiliate with or endorse any listed product.",
+      "eyebrow": "他と違うところ",
+      "h2": "rewrite.so と類似ツールの比較",
+      "subtitle": "3 つの文体、いま入力中の枠の中で、1 秒未満で最初の文字が現れる。",
+      "caption": "rewrite.so と Grammarly、DeepL Write、ChatGPT(Web) の機能比較。",
+      "recommended": "おすすめ",
+      "whyMatters": "なぜ重要か：",
+      "disclaimer": "比較は 2026-05 時点で公開されている情報に基づきます。各ベンダーの機能と価格は頻繁に変更されますので、利用前に各社の公式情報をご確認ください。当社は記載した製品といかなる提携・推奨関係もありません。",
       "col": {
         "us": "rewrite.so",
         "grammarly": "Grammarly",
         "deepl": "DeepL Write",
-        "chatgpt": "ChatGPT (web)"
+        "chatgpt": "ChatGPT (Web)"
       },
       "rows": {
         "inline": {
-          "label": "Inline in any input box",
-          "detail": "We replace the text you're typing right where you're typing it — no popover, no sidebar, no second tab."
+          "label": "あらゆる入力欄でインライン置換",
+          "detail": "サイドバーもポップアップもなく、いま入力している場所でテキストを直接書き換えます。"
         },
         "speed": {
-          "label": "Streaming, sub-second first token",
-          "detail": "Tokens stream in as fast as the model produces them. Most rewrites start landing on screen within ~500 ms."
+          "label": "ストリーミング、最初の文字が 1 秒未満",
+          "detail": "モデルが生成すると同時にトークンがストリーミング。ほとんどのリライトで約 500 ms 以内に画面に出始めます。"
         },
         "candidates": {
-          "label": "Three styles in parallel (faithful / casual / formal)",
-          "detail": "You get three rewrites at once. Press 1, 2, or 3 to accept — no need to re-prompt to see another tone."
+          "label": "3 つの文体を並列出力（忠実 / カジュアル / フォーマル）",
+          "detail": "一度に 3 案。1 / 2 / 3 を押すだけで採用 — 文体を変えるためにプロンプトを書き直す必要はありません。"
         },
         "logging": {
-          "label": "No prompt or output logging",
-          "detail": "We log length, language, style, user id, and error codes. Never the text. The source code is open."
+          "label": "入出力テキストを一切ログしない",
+          "detail": "長さ・言語・文体・ユーザー ID・エラーコードのみログ。テキストは決して保存しません。ソースコードはオープン。"
         },
         "byok": {
-          "label": "Bring your own API key (any OpenAI-compatible)",
-          "detail": "Plug in your own provider key and we don't apply our monthly quota — your provider's rate is your rate."
+          "label": "BYOK（任意の OpenAI 互換エンドポイント）",
+          "detail": "ご自身のプロバイダ key を接続すれば月次クォータは適用されません — プロバイダ側のレート制限が唯一の制限になります。"
         },
         "multilang": {
-          "label": "Multi-language source (CJK + EU)",
-          "detail": "Designed for cross-language writers — type Chinese, get English back, or any combination across 7+ UI locales."
+          "label": "多言語入力（CJK + 欧州言語）",
+          "detail": "クロスランゲージ・ライティング向け設計 — 中国語を入れて英語を返す、7+ UI 言語と任意の組み合わせ。"
         },
         "openSource": {
-          "label": "Open source",
-          "detail": "Apache-2.0 on GitHub. Anyone can audit, fork, or self-host."
+          "label": "オープンソース",
+          "detail": "Apache-2.0、GitHub 公開。監査・フォーク・セルフホストすべて可能。"
         }
       }
     }

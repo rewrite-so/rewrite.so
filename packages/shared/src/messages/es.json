@@ -109,18 +109,18 @@
       "byok": {
         "title": "BYOK",
         "price": "$0",
-        "period": "+ your provider",
-        "tagline": "Bring your own key. No tier gate. No monthly quota.",
-        "feat1": "No tier gating — available to any signed-in user",
-        "feat2": "No monthly quota from us (100 req/min abuse-prevention bucket)",
-        "feat3": "Any OpenAI-compatible endpoint (OpenAI / Anthropic / Azure / Groq / DeepSeek)",
-        "feat4": "Key stored AES-GCM encrypted; never logged",
-        "cta": "Configure in Settings →"
+        "period": "+ tu proveedor",
+        "tagline": "Trae tu propia key. Sin barrera de plan. Sin cuota mensual.",
+        "feat1": "Sin barrera de plan — disponible para cualquier usuario registrado",
+        "feat2": "Sin cuota mensual por nuestra parte (cubo de 100 req/min anti-abuso)",
+        "feat3": "Cualquier endpoint compatible con OpenAI (OpenAI / Anthropic / Azure / Groq / DeepSeek)",
+        "feat4": "La key se guarda cifrada con AES-GCM y nunca se registra",
+        "cta": "Configurar en Ajustes →"
       },
       "earlyBird": {
         "label": "Early Bird",
-        "perks": "90 days Pro on sign-up · 70% off forever",
-        "cta": "Join →"
+        "perks": "90 días de Pro al registrarse · 70% de descuento de por vida",
+        "cta": "Apúntate →"
       }
     },
     "contact": {
@@ -395,17 +395,17 @@
       "label": "Early Bird · 90 días gratis + 70% para siempre"
     },
     "hero": {
-      "eyebrow": "Campos compatibles · Código abierto",
-      "h1Line1": "Escribe libremente.",
-      "h1Line2": "Envía con confianza.",
-      "subHeadline": "Deja de darle vueltas a cada mensaje.",
+      "eyebrow": "Reescritura AI en línea",
+      "h1Line1": "Shift Shift.",
+      "h1Line2": "Reescribe. Listo.",
+      "subHeadline": "Reescritura en línea para cualquier campo de entrada.",
       "polyglot": "Cualquier idioma entra. Cualquier idioma sale.",
-      "intro": "Pulsa <kbd>Shift</kbd> dos veces en un campo web compatible. La IA te da tres maneras de decirlo. Elige una con <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> y envía.",
-      "ctaPrimary": "Probar gratis →",
-      "ctaInstall": "Instalar la extensión →",
+      "intro": "Pulsa <kbd>Shift</kbd> <kbd>Shift</kbd> en cualquier campo de texto. La IA te da tres formas de decirlo. Elige con <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd>.",
+      "ctaPrimary": "Instalar en Chrome →",
+      "ctaInstall": "Probar sin instalar →",
       "ctaSecondary": "⭐ Estrella en GitHub",
       "ctaGithub": "Ver en GitHub →",
-      "fineprint": "{count} reescrituras gratis al mes · Sin tarjeta · BYOK para uso ilimitado"
+      "fineprint": "{count} reescrituras gratis al mes · sin tarjeta · BYOK para ilimitado"
     },
     "scenarios": {
       "h2": "¿Te suena familiar?",
@@ -481,32 +481,32 @@
       }
     },
     "pricing": {
-      "h2": "Three ways to use rewrite.so",
+      "h2": "Tres formas de usar rewrite.so",
       "free": {
         "title": "Free",
         "price": "$0",
-        "sub": "{count} rewrites / month for signed-in users",
-        "feat1": "All 3 styles",
-        "feat2": "Auto language detection",
-        "feat3": "Inputs never stored"
+        "sub": "{count} reescrituras al mes para usuarios registrados",
+        "feat1": "Los 3 estilos",
+        "feat2": "Detección automática de idioma",
+        "feat3": "Los textos nunca se almacenan"
       },
       "pro": {
         "title": "Pro",
-        "price": "${monthly} / mo, billed annually",
-        "sub": "${total} / year (save {percent}% vs ${monthlyAlt}/mo monthly)",
-        "feat1": "{count, number} rewrites / month",
-        "feat2": "Hosted model, no setup",
-        "feat3": "Priority support"
+        "price": "${monthly} / mes, facturación anual",
+        "sub": "${total} / año (ahorra {percent}% frente a ${monthlyAlt}/mes mensual)",
+        "feat1": "{count, number} reescrituras al mes",
+        "feat2": "Modelo alojado, sin configurar nada",
+        "feat3": "Soporte prioritario"
       },
       "byok": {
         "title": "BYOK",
-        "price": "$0 + your key",
-        "sub": "Bring your own OpenAI-compatible endpoint",
-        "feat1": "No tier gate — any signed-in user",
-        "feat2": "No monthly quota from us",
-        "feat3": "Use OpenAI / Anthropic / Azure / Groq / DeepSeek"
+        "price": "$0 + tu key",
+        "sub": "Trae tu endpoint compatible con OpenAI",
+        "feat1": "Sin barrera de plan — cualquier usuario registrado",
+        "feat2": "Sin cuota mensual por nuestra parte",
+        "feat3": "Usa OpenAI / Anthropic / Azure / Groq / DeepSeek"
       },
-      "ctaSeeFull": "See full pricing & FAQ →"
+      "ctaSeeFull": "Ver precios completos y FAQ →"
     },
     "finalCta": {
       "h2": "Pruébalo. Toma 30 segundos.",
@@ -565,13 +565,13 @@
       }
     },
     "compare": {
-      "eyebrow": "How we differ",
-      "h2": "rewrite.so vs the alternatives",
-      "subtitle": "Three styles, in the box you're already typing in, in under a second.",
-      "caption": "Feature comparison of rewrite.so against Grammarly, DeepL Write, and ChatGPT web.",
-      "recommended": "Recommended",
-      "whyMatters": "Why this matters: ",
-      "disclaimer": "Comparison reflects publicly available information as of 2026-05. Competitor features and pricing change frequently — please verify with each vendor before deciding. We do not affiliate with or endorse any listed product.",
+      "eyebrow": "En qué nos diferenciamos",
+      "h2": "rewrite.so frente a las alternativas",
+      "subtitle": "Tres estilos, en el mismo campo donde escribes, con el primer token en menos de un segundo.",
+      "caption": "Comparativa de funciones de rewrite.so con Grammarly, DeepL Write y ChatGPT (web).",
+      "recommended": "Recomendado",
+      "whyMatters": "Por qué importa: ",
+      "disclaimer": "La comparativa refleja información públicamente disponible a fecha de 2026-05. Las funciones y precios de la competencia cambian con frecuencia; verifícalos con cada proveedor antes de decidir. No tenemos afiliación ni respaldamos ninguno de los productos mencionados.",
       "col": {
         "us": "rewrite.so",
         "grammarly": "Grammarly",
@@ -580,32 +580,32 @@
       },
       "rows": {
         "inline": {
-          "label": "Inline in any input box",
-          "detail": "We replace the text you're typing right where you're typing it — no popover, no sidebar, no second tab."
+          "label": "En línea en cualquier campo",
+          "detail": "Reemplazamos el texto donde lo estás escribiendo — sin emergente, sin barra lateral, sin segunda pestaña."
         },
         "speed": {
-          "label": "Streaming, sub-second first token",
-          "detail": "Tokens stream in as fast as the model produces them. Most rewrites start landing on screen within ~500 ms."
+          "label": "Streaming, primer token en menos de un segundo",
+          "detail": "Los tokens llegan tan rápido como el modelo los produce. La mayoría aparecen en pantalla en ~500 ms."
         },
         "candidates": {
-          "label": "Three styles in parallel (faithful / casual / formal)",
-          "detail": "You get three rewrites at once. Press 1, 2, or 3 to accept — no need to re-prompt to see another tone."
+          "label": "Tres estilos en paralelo (fiel / casual / formal)",
+          "detail": "Obtienes tres reescrituras a la vez. Pulsa 1, 2 o 3 para aceptar — no hace falta volver a pedir para ver otro tono."
         },
         "logging": {
-          "label": "No prompt or output logging",
-          "detail": "We log length, language, style, user id, and error codes. Never the text. The source code is open."
+          "label": "Sin registro de prompt ni salida",
+          "detail": "Registramos longitud, idioma, estilo, ID de usuario y códigos de error. Nunca el texto. El código fuente está abierto."
         },
         "byok": {
-          "label": "Bring your own API key (any OpenAI-compatible)",
-          "detail": "Plug in your own provider key and we don't apply our monthly quota — your provider's rate is your rate."
+          "label": "Trae tu propia API key (cualquier endpoint compatible con OpenAI)",
+          "detail": "Conecta la key de tu proveedor y no aplicamos cuota mensual — tu límite es el de tu proveedor."
         },
         "multilang": {
-          "label": "Multi-language source (CJK + EU)",
-          "detail": "Designed for cross-language writers — type Chinese, get English back, or any combination across 7+ UI locales."
+          "label": "Origen multilingüe (CJK + lenguas europeas)",
+          "detail": "Pensado para quien escribe entre idiomas — escribe en chino y recibe inglés, en cualquier combinación entre las 7+ locales de la interfaz."
         },
         "openSource": {
-          "label": "Open source",
-          "detail": "Apache-2.0 on GitHub. Anyone can audit, fork, or self-host."
+          "label": "Código abierto",
+          "detail": "Apache-2.0 en GitHub. Cualquiera puede auditarlo, hacer fork o autohospedarlo."
         }
       }
     }
