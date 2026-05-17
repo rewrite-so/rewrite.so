@@ -379,14 +379,14 @@
       "label": "早鸟计划 · 90 天免费 + 永久 3 折"
     },
     "hero": {
-      "eyebrow": "支持的输入框 · 开源",
-      "h1Line1": "随意写，",
-      "h1Line2": "自信发送。",
-      "subHeadline": "别再为一句话反复纠结。",
+      "eyebrow": "网页输入框 inline AI 改写",
+      "h1Line1": "双击 Shift。",
+      "h1Line2": "改写。搞定。",
+      "subHeadline": "在任意输入框里直接改写。",
       "polyglot": "任意语言进，任意语言出。",
-      "intro": "在支持的网页输入框双击 <kbd>Shift</kbd>。AI 当场给你三种说法，按 <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> 选一个直接发。",
-      "ctaPrimary": "免费试用 →",
-      "ctaInstall": "安装浏览器扩展 →",
+      "intro": "在任意输入框双击 <kbd>Shift</kbd>。AI 当场给你三种说法，按 <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> 选一个。",
+      "ctaPrimary": "安装到 Chrome →",
+      "ctaInstall": "免安装试用 →",
       "ctaSecondary": "⭐ Star on GitHub",
       "ctaGithub": "在 GitHub 上查看 →",
       "fineprint": "每月 {count} 次免费 · 无需信用卡 · BYOK 无限改写"

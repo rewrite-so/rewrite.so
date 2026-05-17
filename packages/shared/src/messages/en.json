@@ -379,17 +379,17 @@
       "label": "Early Bird · 90 days free + lifetime 70% off"
     },
     "hero": {
-      "eyebrow": "Supported text fields. Open source.",
-      "h1Line1": "Write freely.",
-      "h1Line2": "Send confidently.",
-      "subHeadline": "Stop overthinking every message.",
+      "eyebrow": "Inline AI rewriting",
+      "h1Line1": "Shift Shift.",
+      "h1Line2": "Rewrite. Done.",
+      "subHeadline": "Inline rewrite for any input box.",
       "polyglot": "Any language in. Any language out.",
-      "intro": "Double-tap <kbd>Shift</kbd> in a supported web text field. AI gives you three ways to say it. Pick one with <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> and send.",
-      "ctaPrimary": "Try it free →",
-      "ctaInstall": "Install extension →",
+      "intro": "Press <kbd>Shift</kbd> <kbd>Shift</kbd> in any input box. We give you three ways to say it. Pick one with <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd>.",
+      "ctaPrimary": "Install on Chrome →",
+      "ctaInstall": "Try without installing →",
       "ctaSecondary": "⭐ Star on GitHub",
       "ctaGithub": "View on GitHub →",
-      "fineprint": "{count} free rewrites/month · No card · Bring your own API key for unlimited"
+      "fineprint": "{count} free rewrites/month · No card · Bring your own key for unlimited"
     },
     "scenarios": {
       "h2": "Sound familiar?",

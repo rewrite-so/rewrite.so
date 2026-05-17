@@ -1,7 +1,7 @@
 'use client';
 
 import type { CSSProperties, KeyboardEvent } from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { sliceForStream } from '../../lib/sliceForStream.ts';
 import styles from './HomePage.module.css';
 import { PlatformIcon, type PlatformName } from './PlatformIcon.tsx';
@@ -32,35 +32,67 @@ export type HomeRewriteDemoCopy = {
   examples: DemoExample[];
 };
 
+// PR-2 slowed the pace from (1100/720/2600/2600) so viewers have time to
+// read each phase. Average example cycle 7.2s → 9.4s. Adjust together —
+// streaming = STREAM_TOTAL_MS + 400ms tail so the final output stays on
+// screen briefly before we move to the next example.
 const PHASE_DURATION_MS: Record<DemoPhase, number> = {
-  typing: 1100,
-  triggering: 720,
-  // streaming = STREAM_TOTAL_MS(2200) + 400ms 完整态停顿,让用户在切下一 example 前看清成品
-  streaming: 2600,
-  accepted: 2600,
+  typing: 1500,
+  triggering: 900,
+  streaming: 3000,
+  accepted: 4000,
 };
 
 // typing 阶段的输入框打字机时间轴。TYPING_TOTAL_MS 是 rAF 推进窗口;
-// PHASE_DURATION_MS.typing(1100ms) - TYPING_TOTAL_MS(1000ms) = 100ms 完整态停顿,
-// 让用户看清完整输入后再 Shift Shift 触发。input 长度 20-39 字符 ⇒ 26-50ms/char。
-const TYPING_TOTAL_MS = 1000;
+// PHASE_DURATION_MS.typing(1500ms) - TYPING_TOTAL_MS(1300ms) = 200ms 完整态停顿,
+// 让用户看清完整输入后再 Shift Shift 触发。input 长度 20-39 字符 ⇒ 33-65ms/char。
+const TYPING_TOTAL_MS = 1300;
 
 // streaming 阶段的打字机时间轴。STREAM_TOTAL_MS 是 rAF 推进窗口;
 // 单卡在 STREAM_CARD_OFFSET_BASE + i*STREAM_CARD_OFFSET_STEP 起步,流 STREAM_CARD_DURATION 占比。
-// 最长候选 96 字符 / 1430ms ≈ 14.9ms/char,接近真实 SSE 体感。
-const STREAM_TOTAL_MS = 2200;
+// 最长候选 96 字符 / 1690ms ≈ 17.6ms/char,接近真实 SSE 体感。
+const STREAM_TOTAL_MS = 2600;
 const STREAM_CARD_OFFSET_BASE = 0.08;
 const STREAM_CARD_OFFSET_STEP = 0.06;
 const STREAM_CARD_DURATION = 0.65;
 
 export function HomeRewriteDemo({ copy }: { copy: HomeRewriteDemoCopy }) {
+  const sectionRef = useRef<HTMLElement>(null);
   const [exampleIndex, setExampleIndex] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [phase, setPhase] = useState<DemoPhase>('typing');
   const [acceptedVersion, setAcceptedVersion] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [hasEnteredView, setHasEnteredView] = useState(false);
   const [streamProgress, setStreamProgress] = useState(0);
   const [inputProgress, setInputProgress] = useState(0);
+
+  // Don't burn CPU on the typing/streaming rAFs (and don't make hero scroll
+  // jank) until the demo is actually visible. Once it enters the viewport
+  // we let it run, even if the user later scrolls away — pausing on scroll-
+  // out would feel jittery.
+  useEffect(() => {
+    if (hasEnteredView) return;
+    const el = sectionRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') {
+      setHasEnteredView(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setHasEnteredView(true);
+            io.disconnect();
+            break;
+          }
+        }
+      },
+      { threshold: 0.4 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [hasEnteredView]);
   const example = copy.examples[exampleIndex] ?? copy.examples[0];
   const exampleCount = copy.examples.length;
   const fullInput = example?.input ?? '';
@@ -76,7 +108,7 @@ export function HomeRewriteDemo({ copy }: { copy: HomeRewriteDemoCopy }) {
     phase === 'streaming' ? copy.streams : phase === 'accepted' ? copy.accepted : copy.youTyped;
 
   useEffect(() => {
-    if (isPaused || exampleCount === 0) {
+    if (isPaused || exampleCount === 0 || !hasEnteredView) {
       return;
     }
 
@@ -122,7 +154,7 @@ export function HomeRewriteDemo({ copy }: { copy: HomeRewriteDemoCopy }) {
     }, PHASE_DURATION_MS[phase]);
 
     return () => window.clearTimeout(timeout);
-  }, [copy.examples, exampleCount, exampleIndex, isPaused, phase]);
+  }, [copy.examples, exampleCount, exampleIndex, isPaused, phase, hasEnteredView]);
 
   // typing phase 的输入框打字机时间轴 —— 同款 rAF 续上模式(详见下方 streaming effect 注释)。
   // biome-ignore lint/correctness/useExhaustiveDependencies: inputProgress 是起始锚点的陈旧快照,故意不进 deps
@@ -194,6 +226,7 @@ export function HomeRewriteDemo({ copy }: { copy: HomeRewriteDemoCopy }) {
     // 此时按 1/2/3 通过 onKeyDown 冒泡到这里命中处理；onMouseEnter / onFocus 也仍然
     // 能在 hover / 内部按钮聚焦时暂停轮播。
     <section
+      ref={sectionRef}
       className={styles.demoShell}
       onKeyDown={onKeyDown}
       onMouseEnter={() => setIsPaused(true)}

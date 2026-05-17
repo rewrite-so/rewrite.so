@@ -66,15 +66,15 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               })}
             </p>
             <div className={styles.heroActions}>
-              <CtaLink cta="try_demo" href="/try" className={styles.primaryButton}>
-                {t('hero.ctaPrimary')}
-              </CtaLink>
               <CtaLink
                 cta="install"
                 href={getExtensionInstallUrl()}
                 external
-                className={styles.secondaryButton}
+                className={styles.primaryButton}
               >
+                {t('hero.ctaPrimary')}
+              </CtaLink>
+              <CtaLink cta="try_demo" href="/try" className={styles.secondaryButton}>
                 {t('hero.ctaInstall')}
               </CtaLink>
             </div>
