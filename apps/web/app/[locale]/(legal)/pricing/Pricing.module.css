@@ -205,15 +205,16 @@
 .faqH2 {
   font-size: var(--fs-2xl);
   font-weight: var(--fw-bold);
-  margin-top: var(--space-16);
-  margin-bottom: var(--space-2);
+  margin: var(--space-16) auto var(--space-2);
   color: var(--text-primary);
   letter-spacing: -0.01em;
+  text-align: center;
+  max-width: 720px;
 }
 
 .faqList {
   max-width: 720px;
-  margin-top: var(--space-5);
+  margin: var(--space-5) auto 0;
   border-top: 1px solid var(--border-default);
 }
 
