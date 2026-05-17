@@ -96,12 +96,6 @@
   line-height: var(--lh-snug);
 }
 
-.rowDetailLabel {
-  font-weight: var(--fw-semibold);
-  color: var(--text-primary);
-  margin-right: var(--space-1);
-}
-
 .cell {
   padding: var(--space-4);
   border-bottom: 1px solid var(--border-default);

@@ -31,7 +31,6 @@ type ComparisonTableProps = {
   columns: ComparisonColumn[];
   rows: ComparisonRow[];
   recommendedLabel: string;
-  whyMattersLabel: string;
   disclaimer: ReactNode;
 };
 
@@ -91,7 +90,6 @@ export function ComparisonTable({
   columns,
   rows,
   recommendedLabel,
-  whyMattersLabel,
   disclaimer,
 }: ComparisonTableProps) {
   return (
@@ -120,10 +118,7 @@ export function ComparisonTable({
                 {row.detail ? (
                   <details className={styles.rowDetails}>
                     <summary className={styles.rowSummary}>{row.label}</summary>
-                    <p className={styles.rowDetailText}>
-                      <span className={styles.rowDetailLabel}>{whyMattersLabel}</span>
-                      {row.detail}
-                    </p>
+                    <p className={styles.rowDetailText}>{row.detail}</p>
                   </details>
                 ) : (
                   row.label

@@ -200,7 +200,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           columns={compareColumns}
           rows={compareRows}
           recommendedLabel={t('compare.recommended')}
-          whyMattersLabel={t('compare.whyMatters')}
           disclaimer={t('compare.disclaimer')}
         />
       </section>
