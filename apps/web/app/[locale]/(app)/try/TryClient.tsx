@@ -13,6 +13,7 @@ import { type RefObject, useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from '../../../../i18n/navigation.ts';
 import { track } from '../../../../lib/analytics.ts';
 import { getExtensionInstallUrl } from '../../../../lib/extension-install-url.ts';
+import styles from './Try.module.css';
 
 // 留空让 fetch 走 same-origin（Next rewrites 代理到 wrangler dev）
 // 这样 better-auth session cookie 是 web origin 的，不需跨域
@@ -145,45 +146,17 @@ export function TryClient() {
   }
 
   return (
-    <div style={{ position: 'relative' }}>
-      {TURNSTILE_SITE_KEY && (
-        <div
-          ref={turnstileRef}
-          style={{
-            position: 'absolute',
-            left: -10000,
-            top: 0,
-            width: 1,
-            height: 1,
-            overflow: 'hidden',
-          }}
-        />
-      )}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          marginBottom: 12,
-          fontSize: 13,
-          color: '#555',
-        }}
-      >
-        <label htmlFor="try-target-lang" style={{ fontWeight: 500 }}>
+    <div className={styles.outer}>
+      {TURNSTILE_SITE_KEY && <div ref={turnstileRef} className={styles.turnstile} />}
+      <div className={styles.targetLangRow}>
+        <label htmlFor="try-target-lang" className={styles.targetLangLabel}>
           {t('page.try.targetLangLabel')}
         </label>
         <select
           id="try-target-lang"
           value={targetLang}
           onChange={(e) => onTargetLangChange(e.currentTarget.value as RewriteTarget)}
-          style={{
-            padding: '6px 10px',
-            fontSize: 13,
-            border: '1px solid #d4d4d8',
-            borderRadius: 6,
-            background: '#fff',
-            fontFamily: 'inherit',
-          }}
+          className={styles.targetLangSelect}
         >
           {REWRITE_TARGETS.map((l) => (
             <option key={l} value={l}>
@@ -196,54 +169,12 @@ export function TryClient() {
         ref={taRef}
         defaultValue="hi, can u tell me when is the meeting tmr? i need to prep some slide before that"
         placeholder={t('placeholder.tryHere')}
-        style={{
-          width: '100%',
-          minHeight: 180,
-          padding: '14px 16px',
-          fontSize: 15,
-          lineHeight: 1.55,
-          border: '1px solid #d4d4d8',
-          borderRadius: 12,
-          outline: 'none',
-          resize: 'vertical',
-          fontFamily: 'inherit',
-          boxSizing: 'border-box',
-        }}
+        className={styles.textarea}
       />
       {hintVisible && (
-        <div
-          aria-hidden="true"
-          style={{
-            marginTop: 10,
-            fontSize: 13,
-            color: '#888',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-          }}
-        >
-          <kbd
-            style={{
-              padding: '1px 6px',
-              border: '1px solid #d4d4d8',
-              borderRadius: 4,
-              fontSize: 11,
-              fontFamily: 'inherit',
-            }}
-          >
-            Shift
-          </kbd>
-          <kbd
-            style={{
-              padding: '1px 6px',
-              border: '1px solid #d4d4d8',
-              borderRadius: 4,
-              fontSize: 11,
-              fontFamily: 'inherit',
-            }}
-          >
-            Shift
-          </kbd>
+        <div aria-hidden="true" className={styles.hint}>
+          <kbd className={styles.hintKbd}>Shift</kbd>
+          <kbd className={styles.hintKbd}>Shift</kbd>
           {t('hint.doubleShift')}
         </div>
       )}
@@ -400,22 +331,12 @@ function TryNudge({ count }: { count: number }) {
   // +1 屏幕阅读器都会重新播报，对做多次改写的用户是噪音。这是底部的静态
   // 引导文字，screen reader 用户 tab 到时自然读出
   return (
-    <p
-      style={{
-        marginTop: 14,
-        fontSize: 13,
-        color: '#666',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 6,
-        flexWrap: 'wrap',
-      }}
-    >
-      <span style={{ color: '#16a34a', fontWeight: 600 }} aria-hidden="true">
+    <p className={styles.nudge}>
+      <span className={styles.nudgeCheck} aria-hidden="true">
         ✓
       </span>
       {t('nudge', { count })}{' '}
-      <Link href="/login" style={{ color: '#1d4ed8', textDecoration: 'underline' }}>
+      <Link href="/login" className={styles.nudgeLink}>
         {t('nudgeCta', { signupQuota: QUOTA.loggedInFree })}
       </Link>
     </p>

@@ -1,0 +1,120 @@
+.main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 64px var(--space-6) 48px;
+  line-height: var(--lh-normal);
+}
+
+.header {
+  margin-bottom: var(--space-8);
+}
+
+.h1 {
+  font-size: var(--fs-3xl);
+  font-weight: var(--fw-bold);
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.intro {
+  margin-top: var(--space-2);
+  color: var(--text-secondary);
+  font-size: var(--fs-md);
+}
+
+.outer {
+  position: relative;
+}
+
+.turnstile {
+  position: absolute;
+  left: -10000px;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.targetLangRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.targetLangLabel {
+  font-weight: var(--fw-medium);
+}
+
+.targetLangSelect {
+  padding: 6px 10px;
+  font-size: 13px;
+  border: 1px solid var(--neutral-300);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  color: var(--text-primary);
+  font-family: inherit;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 180px;
+  padding: 14px 16px;
+  font-size: 15px;
+  line-height: var(--lh-normal);
+  border: 1px solid var(--neutral-300);
+  border-radius: var(--radius-lg);
+  outline: none;
+  resize: vertical;
+  font-family: inherit;
+  box-sizing: border-box;
+  background: var(--surface-card);
+  color: var(--text-primary);
+}
+
+.textarea:focus-visible {
+  border-color: var(--border-accent);
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 0;
+}
+
+.hint {
+  margin-top: var(--space-3);
+  font-size: 13px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.hintKbd {
+  padding: 1px 6px;
+  border: 1px solid var(--neutral-300);
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: inherit;
+  background: var(--surface-card);
+  color: var(--text-primary);
+}
+
+.nudge {
+  margin-top: var(--space-4);
+  font-size: 13px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.nudgeCheck {
+  color: var(--success-500);
+  font-weight: var(--fw-semibold);
+}
+
+.nudgeLink {
+  color: var(--info-700);
+  text-decoration: underline;
+}
