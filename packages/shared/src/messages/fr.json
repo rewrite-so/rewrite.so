@@ -587,6 +587,16 @@
             "chatgpt": "Copier / coller"
           }
         },
+        "keyboard": {
+          "label": "Déclenchement + acceptation au clavier",
+          "detail": "Appuie deux fois sur Shift pour ouvrir le panneau ; appuie sur 1, 2 ou 3 pour valider. Zéro souris — la main ne quitte jamais la rangée de repos pendant la réécriture. Les autres outils exigent un survol, une sélection ou un changement d'onglet.",
+          "cells": {
+            "us": "Shift Shift → 1 / 2 / 3",
+            "grammarly": "Survoler puis cliquer",
+            "deepl": "Sélectionner puis cliquer",
+            "chatgpt": "Changer d'onglet puis copier"
+          }
+        },
         "speed": {
           "label": "Sortie en streaming, sans attente de lot",
           "detail": "Les tokens arrivent au rythme du modèle — l'architecture ne bloque jamais sur une réponse complète. La latence réelle dépend du modèle en amont ; ce que nous garantissons, c'est que vous n'avez pas à attendre la réponse complète avant de commencer à lire.",

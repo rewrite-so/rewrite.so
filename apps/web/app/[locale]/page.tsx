@@ -18,6 +18,7 @@ import type { PlatformName } from './PlatformIcon.tsx';
 
 const COMPARE_ROW_KEYS = [
   'inline',
+  'keyboard',
   'speed',
   'candidates',
   'logging',
@@ -44,6 +45,8 @@ const COMPARE_KIND: Record<
   Record<(typeof COMPARE_COL_KEYS)[number], CompareKind>
 > = {
   inline: { us: 'check', grammarly: 'partial', deepl: 'partial', chatgpt: 'cross' },
+  // keyboard: every cell carries a gesture label so the whole row reads as text.
+  keyboard: { us: 'text', grammarly: 'text', deepl: 'text', chatgpt: 'text' },
   speed: { us: 'text', grammarly: 'text', deepl: 'text', chatgpt: 'text' },
   candidates: { us: 'check', grammarly: 'cross', deepl: 'partial', chatgpt: 'cross' },
   logging: { us: 'check', grammarly: 'cross', deepl: 'cross', chatgpt: 'cross' },

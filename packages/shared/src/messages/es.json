@@ -587,6 +587,16 @@
             "chatgpt": "Copiar / pegar"
           }
         },
+        "keyboard": {
+          "label": "Disparar y aceptar solo con teclado",
+          "detail": "Pulsa Shift dos veces para abrir el panel; pulsa 1, 2 o 3 para aceptar. Cero ratón — no separas las manos del teclado durante la reescritura. Las demás herramientas requieren un hover, una selección de texto o un cambio de pestaña.",
+          "cells": {
+            "us": "Shift Shift → 1 / 2 / 3",
+            "grammarly": "Hover y luego clic",
+            "deepl": "Seleccionar y luego clic",
+            "chatgpt": "Cambiar de pestaña y copiar"
+          }
+        },
         "speed": {
           "label": "Salida en streaming, sin esperar lotes",
           "detail": "Los tokens llegan a medida que el modelo los produce: la arquitectura nunca bloquea esperando la respuesta completa. La latencia real depende del modelo proveedor; lo que garantizamos es que no tienes que esperar la respuesta entera para empezar a leer.",

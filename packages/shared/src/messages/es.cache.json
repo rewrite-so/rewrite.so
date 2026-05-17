@@ -77,5 +77,11 @@
   "home.compare.rows.multilang.cells.grammarly": "57217e8653762b5de017b6adbafd2fcc46fe7808",
   "home.compare.rows.multilang.cells.deepl": "266da50675f053ce77f377fc83d0a1a5335d2c2e",
   "home.compare.rows.openSource.cells.us": "9e50bc5c66adf3beca901b35da041ca722d6892c",
-  "home.demo.streams": "f85b013d8b871efb3cc68192e1fd3e7958b2bec8"
+  "home.demo.streams": "f85b013d8b871efb3cc68192e1fd3e7958b2bec8",
+  "home.compare.rows.keyboard.label": "5ce8997d5d840f539298a031fb5a920328a587ca",
+  "home.compare.rows.keyboard.detail": "9a134efbf08b856605af10fe78e93b16040ebcd0",
+  "home.compare.rows.keyboard.cells.us": "223bd64e1d6de430279587816cf5bb2a3c176487",
+  "home.compare.rows.keyboard.cells.grammarly": "1fe0b8e29956bfc372928f587de940b92108a692",
+  "home.compare.rows.keyboard.cells.deepl": "1db52ca9d1c2e3a8f52553ec65e1cc8418a09562",
+  "home.compare.rows.keyboard.cells.chatgpt": "6ba614aa54088c2f952b8301de529ed90045d585"
 }

@@ -438,6 +438,16 @@
             "chatgpt": "Copy / paste"
           }
         },
+        "keyboard": {
+          "label": "Trigger + accept by keyboard alone",
+          "detail": "Double-tap Shift to open the panel; press 1, 2, or 3 to accept. Zero mouse needed — the rewrite never pulls your hand off the home row. Other tools need a hover, a text selection, or a tab switch to even get a suggestion.",
+          "cells": {
+            "us": "Shift Shift → 1 / 2 / 3",
+            "grammarly": "Hover, then click",
+            "deepl": "Select text, then click",
+            "chatgpt": "Tab switch, then copy"
+          }
+        },
         "speed": {
           "label": "Streaming output, no batch wait",
           "detail": "Tokens stream in as the model produces them — the architecture never blocks on a full batch. Actual latency depends on the upstream model; what we guarantee is that you never wait for a complete response before you can start reading it.",

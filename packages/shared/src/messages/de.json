@@ -587,6 +587,16 @@
             "chatgpt": "Kopieren / einfügen"
           }
         },
+        "keyboard": {
+          "label": "Auslösen + Annehmen nur per Tastatur",
+          "detail": "Shift zweimal tippen öffnet das Panel; 1 / 2 / 3 drücken übernimmt. Keine Maus nötig — die Hand bleibt während der Umschreibung auf der Grundreihe. Andere Tools brauchen Hover, Textauswahl oder Tab-Wechsel.",
+          "cells": {
+            "us": "Shift Shift → 1 / 2 / 3",
+            "grammarly": "Hover, dann Klick",
+            "deepl": "Auswählen, dann Klick",
+            "chatgpt": "Tab-Wechsel, dann kopieren"
+          }
+        },
         "speed": {
           "label": "Streaming-Ausgabe, kein Stapelwarten",
           "detail": "Tokens kommen so schnell, wie das Modell sie produziert — die Architektur blockiert nie auf eine vollständige Antwort. Die echte Latenz hängt vom Anbieter-Modell ab; garantiert ist nur, dass du nicht auf die ganze Antwort warten musst, bevor du anfangen kannst zu lesen.",
