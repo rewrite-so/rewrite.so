@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { track } from '../../../../lib/analytics.ts';
+import styles from './Login.module.css';
 
 type Status = 'idle' | 'sending' | 'sent' | 'error';
 
@@ -50,15 +51,15 @@ export function LoginClient() {
 
   if (status === 'sent') {
     return (
-      <div style={{ marginTop: 28, padding: 16, border: '1px solid #d4d4d8', borderRadius: 10 }}>
-        <p style={{ margin: 0, fontSize: 14 }}>{t('sentLine1', { email })}</p>
-        <p style={{ margin: '8px 0 0', color: '#888', fontSize: 12 }}>{t('sentLine2')}</p>
+      <div className={styles.sent}>
+        <p className={styles.sentLine1}>{t('sentLine1', { email })}</p>
+        <p className={styles.sentLine2}>{t('sentLine2')}</p>
       </div>
     );
   }
 
   return (
-    <form onSubmit={onSubmit} style={{ marginTop: 24 }}>
+    <form onSubmit={onSubmit} className={styles.form}>
       <input
         type="email"
         required
@@ -68,36 +69,12 @@ export function LoginClient() {
         placeholder={t('emailPlaceholder')}
         value={email}
         onChange={(e) => setEmail(e.currentTarget.value)}
-        style={{
-          width: '100%',
-          padding: '12px 14px',
-          fontSize: 14,
-          border: '1px solid #d4d4d8',
-          borderRadius: 8,
-          outline: 'none',
-          fontFamily: 'inherit',
-          boxSizing: 'border-box',
-        }}
+        className={styles.input}
       />
-      <button
-        type="submit"
-        disabled={status === 'sending'}
-        style={{
-          width: '100%',
-          marginTop: 12,
-          padding: '12px 16px',
-          fontSize: 14,
-          fontWeight: 500,
-          background: status === 'sending' ? '#444' : '#111',
-          color: '#fff',
-          border: 'none',
-          borderRadius: 8,
-          cursor: status === 'sending' ? 'wait' : 'pointer',
-        }}
-      >
+      <button type="submit" disabled={status === 'sending'} className={styles.submit}>
         {status === 'sending' ? t('submitting') : t('submit')}
       </button>
-      {error && <p style={{ marginTop: 12, color: '#dc2626', fontSize: 13 }}>{error}</p>}
+      {error && <p className={styles.error}>{error}</p>}
     </form>
   );
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { localizedMetadata } from '../../../metadata.ts';
+import styles from '../Legal.module.css';
 
 export async function generateMetadata({
   params,
@@ -14,9 +15,11 @@ export async function generateMetadata({
 
 export default function AcceptableUsePage() {
   return (
-    <article>
+    <article className={styles.longDoc}>
       <h1 style={{ fontSize: 32, fontWeight: 700, margin: 0 }}>Acceptable Use Policy</h1>
-      <p style={{ color: '#888', fontSize: 13, marginTop: 8 }}>Last updated: May 2, 2026</p>
+      <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 8 }}>
+        Last updated: May 2, 2026
+      </p>
 
       <p style={{ marginTop: 28 }}>
         rewrite.so is a productivity tool for rewriting your own text. To keep the Service safe and

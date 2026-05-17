@@ -105,6 +105,22 @@
         "a5": "네, 언제든. <settings>설정</settings>의 \"Manage subscription\" 포털에서. 현재 청구 주기 종료까지 Pro 액세스 유지. 첫 청구 후 14일 이내 환불 — <refund>환불 정책</refund>을 참조하세요.",
         "q6": "결제는 누가 처리하나요?",
         "a6": "<creem>Creem</creem>이 당사의 Merchant of Record입니다. 결제, 세금, 환불을 대행 처리합니다. 카드 정보는 당사 서버를 거치지 않습니다."
+      },
+      "byok": {
+        "title": "BYOK",
+        "price": "$0",
+        "period": "+ 본인 API key",
+        "tagline": "본인의 키로. 티어 제한 없음, 월간 쿼터 없음.",
+        "feat1": "티어 게이팅 없음 — 로그인 사용자 누구나 사용 가능",
+        "feat2": "당사 월간 쿼터 없음(100 req/min 남용 방지 한도만)",
+        "feat3": "임의의 OpenAI 호환 엔드포인트(OpenAI / Anthropic / Azure / Groq / DeepSeek)",
+        "feat4": "키는 AES-GCM 으로 암호화 저장, 로그에 절대 남지 않음",
+        "cta": "Settings 에서 설정 →"
+      },
+      "earlyBird": {
+        "label": "얼리버드",
+        "perks": "가입 후 90 일 Pro 무료 · 영구 70% 할인",
+        "cta": "지금 참여 →"
       }
     },
     "contact": {
@@ -379,17 +395,17 @@
       "label": "얼리버드 · 90일 무료 + 평생 70% 할인"
     },
     "hero": {
-      "eyebrow": "지원되는 입력란 · 오픈소스",
+      "eyebrow": "입력창에서 바로 AI 리라이트",
       "h1Line1": "자유롭게 쓰고,",
       "h1Line2": "자신 있게 보내세요.",
-      "subHeadline": "모든 메시지를 너무 고민하지 마세요.",
+      "subHeadline": "Shift 를 두 번 누르면 어떤 언어로도 원어민 수준의 리라이트 3 가지를 받습니다.",
       "polyglot": "어떤 언어로 입력하든, 어떤 언어로든 출력.",
-      "intro": "지원되는 웹 입력란에서 <kbd>Shift</kbd>를 두 번 누르세요. AI가 세 가지 표현을 보여줍니다. <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd>으로 골라 바로 보내세요.",
-      "ctaPrimary": "무료 체험 →",
-      "ctaInstall": "확장 프로그램 설치 →",
+      "intro": "아무 입력창에서 <kbd>Shift</kbd> <kbd>Shift</kbd>. AI 가 3 가지 표현을 제안하면 <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> 으로 선택.",
+      "ctaPrimary": "무료로 설치 →",
+      "ctaInstall": "설치 없이 체험하기 →",
       "ctaSecondary": "⭐ GitHub Star",
       "ctaGithub": "GitHub에서 보기 →",
-      "fineprint": "월 {count}회 무료 · 카드 불필요 · BYOK로 무제한"
+      "fineprint": "월 {count} 회 무료 · 카드 불필요 · BYOK"
     },
     "scenarios": {
       "h2": "익숙하신가요?",
@@ -465,24 +481,32 @@
       }
     },
     "pricing": {
-      "h2": "심플한 2단계 요금",
+      "h2": "세 가지 사용 방법",
       "free": {
         "title": "Free",
         "price": "$0",
-        "sub": "로그인 사용자에게 월 {count}회 재작성",
-        "feat1": "3가지 스타일 모두",
-        "feat2": "자동 언어 감지",
-        "feat3": "입력은 저장되지 않음"
+        "sub": "로그인 사용자 월 {count} 회",
+        "feat1": "3 가지 스타일 모두",
+        "feat2": "언어 자동 감지",
+        "feat3": "입력 텍스트는 저장되지 않습니다"
       },
       "pro": {
         "title": "Pro",
-        "price": "${monthly} / 월 (연간 청구)",
-        "sub": "연 ${total} (월 ${monthlyAlt}/월 대비 {percent}% 절약)",
-        "feat1": "월 {count, number}회 재작성",
-        "feat2": "호스트 모델, 설정 불필요",
+        "price": "${monthly} / 월(연간 결제)",
+        "sub": "연 ${total}(월 ${monthlyAlt} 의 월간 결제 대비 {percent}% 절약)",
+        "feat1": "월 {count, number} 회 리라이트",
+        "feat2": "호스팅 모델, 설정 불필요",
         "feat3": "우선 지원"
       },
-      "ctaSeeFull": "전체 요금과 FAQ 보기 →"
+      "byok": {
+        "title": "BYOK",
+        "price": "$0 + 본인 키",
+        "sub": "OpenAI 호환 엔드포인트 자유 선택",
+        "feat1": "로그인 사용자 누구나, 티어 제한 없음",
+        "feat2": "당사의 월간 쿼터 적용 없음",
+        "feat3": "OpenAI / Anthropic / Azure / Groq / DeepSeek 지원"
+      },
+      "ctaSeeFull": "전체 가격 및 FAQ 보기 →"
     },
     "finalCta": {
       "h2": "30초면 됩니다.",
@@ -493,7 +517,7 @@
     "demo": {
       "anyInput": "지원되는 입력란",
       "youTyped": "# 입력한 내용:",
-      "streams": "→ 3개가 동시에 출력 시작, 약 200ms",
+      "streams": "→ 3 개가 동시에 그 자리에서 출력",
       "accepted": "→ 입력란에 반영했어요",
       "selectHint": "재작성을 클릭하거나 1 / 2 / 3을 누르세요",
       "label": {
@@ -536,6 +560,84 @@
             "faithful": "This seems incorrect. Could you fix it?",
             "casual": "I think something's off here. Could you take another look?",
             "formal": "This appears to be incorrect. Could you please review and correct it?"
+          }
+        }
+      }
+    },
+    "compare": {
+      "eyebrow": "차별화 포인트",
+      "h2": "rewrite.so vs 비슷한 도구들",
+      "subtitle": "3 가지 스타일이, 지금 타이핑하는 입력창에서, 1 초 안에 첫 글자가 나옵니다.",
+      "caption": "rewrite.so 와 Grammarly, DeepL Write, ChatGPT(웹) 의 기능 비교.",
+      "recommended": "추천",
+      "disclaimer": "비교는 2026-05 기준 공개된 정보를 바탕으로 합니다. 각 업체의 기능과 가격은 자주 바뀌므로 실제 결정 전에 공식 정보를 확인해 주세요. 당사는 언급된 어떤 제품과도 제휴·후원 관계가 없습니다.",
+      "col": {
+        "us": "rewrite.so",
+        "grammarly": "Grammarly",
+        "deepl": "DeepL Write",
+        "chatgpt": "ChatGPT (웹)"
+      },
+      "rows": {
+        "inline": {
+          "label": "어떤 입력창에서도 인라인 교체",
+          "detail": "사이드바도 팝업도 없이, 지금 타이핑 중인 자리에서 텍스트가 바로 바뀝니다.",
+          "cells": {
+            "grammarly": "사이드바 제안",
+            "deepl": "지원 사이트의 확장",
+            "chatgpt": "복사 / 붙여넣기"
+          }
+        },
+        "keyboard": {
+          "label": "키보드만으로 트리거 + 채택",
+          "detail": "Shift 를 두 번 눌러 패널을 열고 1 / 2 / 3 으로 채택. 마우스 불필요 — 리라이트 중 손이 홈 로우에서 떨어지지 않습니다. 다른 도구는 호버, 텍스트 선택, 탭 전환 중 하나가 필요합니다.",
+          "cells": {
+            "us": "Shift Shift, 그게 다",
+            "grammarly": "호버 후 클릭",
+            "deepl": "선택 후 클릭",
+            "chatgpt": "탭 전환 후 복사"
+          }
+        },
+        "speed": {
+          "label": "스트리밍 출력, 배치 대기 없음",
+          "detail": "모델이 토큰을 생성하는 즉시 화면에 흘러나옵니다 — 아키텍처가 완전한 배치를 기다리지 않습니다. 실제 지연 시간은 업스트림 모델에 따라 달라지지만, '완전한 응답을 기다리지 않고 바로 읽기 시작할 수 있다'는 점은 보장됩니다.",
+          "cells": {
+            "us": "스트리밍, 인라인",
+            "grammarly": "추천 팝오버",
+            "deepl": "일괄 응답",
+            "chatgpt": "스트리밍, 별도 탭"
+          }
+        },
+        "candidates": {
+          "label": "3 가지 스타일 동시 출력(충실 / 캐주얼 / 격식)",
+          "detail": "한 번에 3 개 결과. 1 / 2 / 3 으로 바로 선택 — 톤을 바꾸려고 재요청할 필요가 없습니다.",
+          "cells": {
+            "us": "3 가지 동시",
+            "grammarly": "단일 추천",
+            "deepl": "다른 어조 선택 가능",
+            "chatgpt": "단일 응답"
+          }
+        },
+        "logging": {
+          "label": "원문·결과 로깅 없음",
+          "detail": "길이, 언어, 스타일, 사용자 ID, 에러 코드만 기록. 텍스트는 절대 저장하지 않습니다. 소스 코드 공개."
+        },
+        "byok": {
+          "label": "BYOK(OpenAI 호환 엔드포인트)",
+          "detail": "본인 키를 연결하면 월간 쿼터가 적용되지 않습니다 — 본인 프로바이더의 레이트가 유일한 제한입니다."
+        },
+        "multilang": {
+          "label": "다국어 원문(CJK + 유럽어)",
+          "detail": "크로스랭귀지 작문 전용 설계 — 중국어 입력에 영어 출력, 7+ UI 언어 자유 조합.",
+          "cells": {
+            "grammarly": "영어 중심",
+            "deepl": "유럽어 강점"
+          }
+        },
+        "openSource": {
+          "label": "오픈소스",
+          "detail": "Apache-2.0, GitHub 공개. 감사·포크·셀프호스팅 가능.",
+          "cells": {
+            "us": "Apache-2.0"
           }
         }
       }

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { localizedMetadata } from '../../../metadata.ts';
+import styles from './Login.module.css';
 import { LoginClient } from './LoginClient.tsx';
 
 export async function generateMetadata({
@@ -18,16 +19,9 @@ export default async function LoginPage({ params }: { params: Promise<{ locale: 
   setRequestLocale(locale);
   const t = await getTranslations('page.login');
   return (
-    <main
-      style={{
-        maxWidth: 420,
-        margin: '120px auto 64px',
-        padding: '0 24px',
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
-      }}
-    >
-      <h1 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>{t('h1')}</h1>
-      <p style={{ marginTop: 8, color: '#666', fontSize: 14, lineHeight: 1.55 }}>{t('intro')}</p>
+    <main className={styles.main}>
+      <h1 className={styles.h1}>{t('h1')}</h1>
+      <p className={styles.intro}>{t('intro')}</p>
       <LoginClient />
     </main>
   );

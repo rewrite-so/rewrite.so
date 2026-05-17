@@ -1,8 +1,8 @@
 .page {
-  background: #fbfaf7;
-  color: #141412;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-  line-height: 1.55;
+  background: var(--surface-page);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  line-height: var(--lh-normal);
 }
 
 .hero {
@@ -41,47 +41,63 @@
   max-width: 620px;
 }
 
+/* .eyebrow: hero usage removed in PR-2-iter (sub now carries the explainer
+   role). Still consumed by .privacyEyebrow inside the privacy band. */
 .eyebrow,
 .privacyEyebrow {
   margin: 0 0 12px;
-  color: #3a6f55;
-  font-size: 0.75rem;
-  font-weight: 700;
+  color: var(--brand-500);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
   letter-spacing: 0;
   text-transform: uppercase;
 }
 
+/* DEPRECATED: previously held the "rewrite.so" wordmark above heroStatement.
+   PR-2-iter dropped it — TopNav already shows the brand. Kept for one cycle
+   so a future cleanup PR can delete this class + its sole consumer together. */
 .heroTitle {
   margin: 0;
-  color: #11110f;
-  font-size: 4rem;
-  font-weight: 760;
+  color: var(--text-primary);
+  font-size: var(--fs-5xl);
+  font-weight: var(--fw-display);
   letter-spacing: 0;
   line-height: 0.96;
 }
 
+/* heroStatement is now the hero <h1> (was a styled <p> before PR-2-iter).
+   Scaled up so it carries the visual weight that .heroTitle used to. */
 .heroStatement {
   display: flex;
   flex-wrap: wrap;
-  gap: 0 10px;
-  margin: 18px 0 0;
-  color: #23231f;
-  font-size: 1.45rem;
-  font-weight: 680;
-  line-height: 1.24;
+  gap: 0 12px;
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 3rem;
+  font-weight: var(--fw-display);
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+}
+
+@media (max-width: 720px) {
+  .heroStatement {
+    font-size: 2.25rem;
+  }
 }
 
 .heroLead {
-  max-width: 500px;
-  margin: 12px 0 0;
-  color: #48483f;
-  font-size: 1.04rem;
+  max-width: 560px;
+  margin: 16px 0 0;
+  color: var(--text-secondary);
+  font-size: 1.08rem;
+  line-height: 1.5;
 }
 
+/* DEPRECATED: heroIntro merged into heroLead (sub) in PR-2-iter. */
 .heroIntro {
   max-width: 560px;
   margin: 22px 0 0;
-  color: #3d3d36;
+  color: var(--neutral-700);
   font-size: 0.98rem;
 }
 
@@ -107,15 +123,15 @@
 }
 
 .primaryButton {
-  background: #11110f;
-  color: #fff;
+  background: var(--neutral-950);
+  color: var(--neutral-0);
   padding: 0 20px;
 }
 
 .secondaryButton {
   border: 1px solid rgba(17, 17, 15, 0.18);
   background: rgba(255, 255, 255, 0.76);
-  color: #161613;
+  color: var(--neutral-900);
   padding: 0 18px;
 }
 
@@ -129,38 +145,60 @@
 
 .fineprint {
   margin: 15px 0 0;
-  color: #6a6a61;
+  color: var(--text-muted);
   font-size: 0.82rem;
+  line-height: 1.6;
 }
 
+.fineprintLink {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: var(--fw-medium);
+  white-space: nowrap;
+}
+
+.fineprintLink:hover {
+  color: var(--text-primary);
+  text-decoration: underline;
+}
+
+/* DEPRECATED: independent hero GitHub CTA removed in PR-2-iter; the link is
+   now inlined at the end of .fineprint via .fineprintLink. */
 .heroGithubLink {
   display: inline-block;
   margin-top: 8px;
-  color: #6a6a61;
+  color: var(--text-muted);
   font-size: 0.82rem;
   text-decoration: none;
 }
 
 .heroGithubLink:hover {
-  color: #11110f;
+  color: var(--neutral-950);
 }
 
 .demoShell {
   border: 1px solid rgba(17, 17, 15, 0.12);
   border-radius: 12px;
-  background: #fff;
+  background: var(--neutral-0);
   box-shadow:
     0 1px 1px rgba(0, 0, 0, 0.05),
     0 2px 4px rgba(0, 0, 0, 0.05),
     0 4px 8px rgba(0, 0, 0, 0.05),
     0 8px 16px rgba(0, 0, 0, 0.05),
     0 16px 32px rgba(0, 0, 0, 0.05);
-  color: #191916;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  color: var(--neutral-900);
+  font-family: var(--font-mono);
   font-size: 0.78rem;
   overflow: hidden;
 }
 
+/* mock-only zone (begins) — every hex literal in the .demoChrome*,
+   .demoTab*, .demoAddressBar*, .demoChromeNav* and .demoDot rules below
+   reproduces real Google Chrome / macOS chrome colors. They are documented
+   exceptions to the "no hex in module CSS" rule per apps/web/app/globals.css.
+   Do not token-ize: changing them would make the browser mockup look fake.
+   New mock chrome colors must keep their raw hex and stay inside this block
+   (or carry their own inline mock-only annotation). */
 .demoChrome {
   /* 采用现代浏览器常用的浅灰色，营造简洁、专业的首屏印象 */
   display: flex;
@@ -295,7 +333,7 @@
   background: #f1f3f4;
   padding: 0 16px;
   color: #202124;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-sans);
   font-size: 0.72rem;
   transition: background 0.2s;
 }
@@ -325,6 +363,8 @@
   font-size: 1rem;
   line-height: 1;
 }
+/* mock-only zone (ends) — rules below this point are real rewrite.so UI and
+   must consume design tokens. */
 
 .demoInputWrap {
   padding: 24px 24px 0;
@@ -345,9 +385,9 @@
   align-items: center;
   border: 1px solid rgba(17, 17, 15, 0.12);
   border-radius: 999px;
-  background: #171713;
-  color: #fff;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  background: var(--neutral-900);
+  color: var(--neutral-0);
+  font-family: var(--font-sans);
   font-size: 0.68rem;
   font-weight: 700;
   line-height: 1;
@@ -357,13 +397,13 @@
 
 .demoScenarioCount {
   flex: 0 0 auto;
-  color: #929089;
+  color: var(--neutral-400);
   font-size: 0.66rem;
 }
 
 .demoMeta {
   margin-bottom: 8px;
-  color: #77766f;
+  color: var(--neutral-500);
   font-size: 0.7rem;
 }
 
@@ -377,7 +417,7 @@
   vertical-align: middle;
   width: 2px;
   height: 1.45em; /* 显著增加高度，使其略高于文本，更具引导感 */
-  background-color: #3a6f55; /* 使用品牌绿，增加辨识度 */
+  background-color: var(--brand-500); /* 使用品牌绿，增加辨识度 */
   margin-left: 2px;
   border-radius: 1px;
   position: relative;
@@ -410,9 +450,9 @@
   border: 1px solid rgba(17, 17, 15, 0.15);
   border-bottom: 2px solid rgba(17, 17, 15, 0.25);
   border-radius: 6px;
-  background: linear-gradient(to bottom, #ffffff 0%, #f9f9f8 100%);
-  color: #22221e;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  background: linear-gradient(to bottom, #ffffff 0%, var(--surface-page) 100%);
+  color: var(--neutral-800);
+  font-family: var(--font-mono);
   white-space: nowrap;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
 }
@@ -462,8 +502,8 @@
 
 .demoKeyActive {
   border-color: rgba(58, 111, 85, 0.42);
-  background: #e9f5ee;
-  color: #24523b;
+  background: var(--brand-50);
+  color: var(--brand-800);
   transform: translateY(1px);
 }
 
@@ -481,7 +521,7 @@
   width: 100%;
   border: 1px solid rgba(17, 17, 15, 0.08);
   border-radius: 8px;
-  background: #fff;
+  background: var(--neutral-0);
   color: inherit;
   cursor: pointer;
   opacity: 0;
@@ -506,7 +546,7 @@
 
 .demoCandidateSelected {
   border-color: rgba(58, 111, 85, 0.42);
-  background: #f1f8f4;
+  background: var(--brand-50);
 }
 
 .demoCandidateIndex {
@@ -516,21 +556,21 @@
   align-items: center;
   justify-content: center;
   border-radius: 6px;
-  background: #f4f0e9;
-  color: #6a5944;
+  background: var(--warning-50);
+  color: var(--warning-800);
   font-size: 0.68rem;
   font-weight: 700;
 }
 
 .demoCandidateLabel {
-  color: #77766f;
+  color: var(--neutral-500);
   font-size: 0.68rem;
 }
 
 .demoCandidateText {
   min-width: 0;
   overflow-wrap: anywhere;
-  color: #1e1e1a;
+  color: var(--neutral-800);
   line-height: 1.35;
 }
 
@@ -538,7 +578,7 @@
   border-top: 1px solid rgba(17, 17, 15, 0.08);
   padding: 11px 18px;
   background: rgba(244, 240, 233, 0.6);
-  color: #68675f;
+  color: var(--neutral-500);
   font-size: 0.7rem;
 }
 
@@ -548,16 +588,16 @@
   0%,
   100% {
     border-color: rgba(17, 17, 15, 0.18);
-    background-color: #fff;
-    color: #22221e;
+    background-color: var(--neutral-0);
+    color: var(--neutral-800);
     transform: translateY(0);
   }
 
   24%,
   48% {
     border-color: rgba(58, 111, 85, 0.46);
-    background-color: #e9f5ee;
-    color: #24523b;
+    background-color: var(--brand-50);
+    color: var(--brand-800);
     transform: translateY(2px);
   }
 }
@@ -600,7 +640,7 @@
 
 .proofItem strong {
   display: block;
-  color: #11110f;
+  color: var(--neutral-950);
   font-size: 1.35rem;
   line-height: 1;
 }
@@ -608,7 +648,7 @@
 .proofItem span {
   display: block;
   margin-top: 5px;
-  color: #626158;
+  color: var(--neutral-500);
   font-size: 0.84rem;
 }
 
@@ -625,10 +665,18 @@
 
 .sectionTitle {
   margin: 0;
-  color: #171713;
-  font-size: 2rem;
-  line-height: 1.15;
+  color: var(--text-primary);
+  font-size: var(--fs-2xl);
+  line-height: var(--lh-tight);
   letter-spacing: 0;
+}
+
+.sectionSubtitle {
+  margin: var(--space-3) 0 0;
+  color: var(--text-secondary);
+  font-size: var(--fs-md);
+  line-height: var(--lh-snug);
+  max-width: 620px;
 }
 
 .useCaseGrid {
@@ -643,7 +691,7 @@
 .priceCard {
   border: 1px solid rgba(17, 17, 15, 0.1);
   border-radius: 8px;
-  background: #fff;
+  background: var(--neutral-0);
 }
 
 .useCase {
@@ -653,14 +701,14 @@
 .useCaseMark {
   display: block;
   /* 与 .eyebrow 主品牌绿对齐，避免和橙红撞色 */
-  color: #3a6f55;
+  color: var(--brand-500);
   font-size: 0.74rem;
   font-weight: 760;
 }
 
 .useCase p {
   margin: 12px 0 0;
-  color: #3b3b35;
+  color: var(--neutral-700);
   font-size: 0.92rem;
   line-height: 1.55;
 }
@@ -680,7 +728,7 @@
 }
 
 .stepLabel {
-  color: #8a887e;
+  color: var(--neutral-400);
   font-size: 0.7rem;
   font-weight: 760;
   letter-spacing: 0;
@@ -693,13 +741,13 @@
 
 .stepCard h3 {
   margin: 12px 0 0;
-  color: #171713;
+  color: var(--neutral-900);
   font-size: 1.02rem;
 }
 
 .stepCard p {
   margin: 8px 0 0;
-  color: #5a5a51;
+  color: var(--neutral-600);
   font-size: 0.88rem;
   line-height: 1.62;
 }
@@ -728,9 +776,9 @@
   align-items: center;
   border: 1px solid rgba(58, 111, 85, 0.18);
   border-radius: 8px;
-  background: #eef7f2;
-  color: #2c6349;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: var(--brand-50);
+  color: var(--brand-700);
+  font-family: var(--font-mono);
   font-size: 0.78rem;
   padding: 0 11px;
 }
@@ -740,8 +788,8 @@
   grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
   gap: 36px;
   align-items: center;
-  background: #10110f;
-  color: #fff;
+  background: var(--neutral-950);
+  color: var(--neutral-0);
   margin: 24px 0 0;
   padding: 60px max(24px, calc((100vw - 1120px) / 2 + 24px));
 }
@@ -751,7 +799,7 @@
 }
 
 .privacyEyebrow {
-  color: #93d1ad;
+  color: var(--brand-300);
 }
 
 .privacyTitle {
@@ -765,7 +813,7 @@
 .privacyBody {
   max-width: 660px;
   margin: 16px 0 0;
-  color: #d7d6cf;
+  color: var(--neutral-200);
   font-size: 0.98rem;
 }
 
@@ -777,7 +825,7 @@
 }
 
 .privacyLinks a {
-  color: #93d1ad;
+  color: var(--brand-300);
   font-size: 0.9rem;
   font-weight: 650;
   text-decoration: none;
@@ -793,9 +841,9 @@
   gap: 14px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
-  background: #161815;
+  background: var(--neutral-900);
   padding: 18px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
 }
 
 .logGroup {
@@ -804,17 +852,17 @@
 }
 
 .logGroup span {
-  color: #84877c;
+  color: var(--neutral-400);
   font-size: 0.74rem;
 }
 
 .logGroup code {
-  color: #9de0b7;
+  color: var(--brand-300);
   font-size: 0.78rem;
 }
 
 .logGroup .redacted {
-  color: #74766e;
+  color: var(--neutral-500);
   text-decoration: line-through;
 }
 
@@ -830,21 +878,21 @@
 }
 
 .featureItem span {
-  color: #77766f;
+  color: var(--neutral-500);
   font-size: 0.7rem;
   font-weight: 760;
 }
 
 .featureItem h3 {
   margin: 8px 0 0;
-  color: #171713;
+  color: var(--neutral-900);
   font-size: 1.02rem;
   line-height: 1.3;
 }
 
 .featureItem p {
   margin: 8px 0 0;
-  color: #5a5a51;
+  color: var(--neutral-600);
   font-size: 0.86rem;
   line-height: 1.55;
 }
@@ -855,8 +903,14 @@
 
 .priceGrid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
+}
+
+@media (max-width: 900px) {
+  .priceGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .priceCard {
@@ -868,22 +922,27 @@
   box-shadow: inset 0 0 0 1px rgba(20, 20, 18, 0.7);
 }
 
+.priceCardByok {
+  border-style: dashed;
+  border-color: var(--brand-500);
+}
+
 .priceName {
-  color: #727168;
+  color: var(--neutral-500);
   font-size: 0.82rem;
   font-weight: 650;
 }
 
 .priceValue {
   margin-top: 4px;
-  color: #11110f;
+  color: var(--neutral-950);
   font-size: 1.8rem;
   font-weight: 760;
 }
 
 .priceCard p {
   margin: 6px 0 0;
-  color: #66655d;
+  color: var(--neutral-500);
   font-size: 0.86rem;
 }
 
@@ -896,12 +955,12 @@
 }
 
 .priceCard li {
-  color: #3d3d36;
+  color: var(--neutral-700);
   font-size: 0.88rem;
 }
 
 .priceCard li::before {
-  color: #3a6f55;
+  color: var(--brand-500);
   content: "+ ";
 }
 

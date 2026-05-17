@@ -91,6 +91,22 @@
         "feat4": "随时取消；14 天内可退款",
         "cta": "升级 Pro →"
       },
+      "byok": {
+        "title": "BYOK",
+        "price": "$0",
+        "period": "+ 你自己的 API key",
+        "tagline": "用你自己的 key。不再限 tier，不再限月配额。",
+        "feat1": "任何登录用户都能配 — 不是 Pro 专属",
+        "feat2": "我们这边不再施加月配额（100 req/min 反代滥用底线）",
+        "feat3": "任意 OpenAI 兼容端点（OpenAI / Anthropic / Azure / Groq / DeepSeek）",
+        "feat4": "Key 用 AES-GCM 加密存储，永不入日志",
+        "cta": "去 Settings 配置 →"
+      },
+      "earlyBird": {
+        "label": "早鸟特惠",
+        "perks": "注册后 90 天 Pro 免费 · 终身 7 折",
+        "cta": "立即加入 →"
+      },
       "faq": {
         "h2": "常见问题",
         "q1": "「改写」具体指什么？",
@@ -379,17 +395,17 @@
       "label": "早鸟计划 · 90 天免费 + 永久 3 折"
     },
     "hero": {
-      "eyebrow": "支持的输入框 · 开源",
+      "eyebrow": "网页输入框 inline AI 改写",
       "h1Line1": "随意写，",
       "h1Line2": "自信发送。",
-      "subHeadline": "别再为一句话反复纠结。",
+      "subHeadline": "双击 Shift，获取 3 种最地道的说法 — 任意语言都适用。",
       "polyglot": "任意语言进，任意语言出。",
-      "intro": "在支持的网页输入框双击 <kbd>Shift</kbd>。AI 当场给你三种说法，按 <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> 选一个直接发。",
-      "ctaPrimary": "免费试用 →",
-      "ctaInstall": "安装浏览器扩展 →",
+      "intro": "在任意输入框双击 <kbd>Shift</kbd>。AI 当场给你三种说法，按 <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> 选一个。",
+      "ctaPrimary": "免费安装 →",
+      "ctaInstall": "免安装试用 →",
       "ctaSecondary": "⭐ Star on GitHub",
       "ctaGithub": "在 GitHub 上查看 →",
-      "fineprint": "每月 {count} 次免费 · 无需信用卡 · BYOK 无限改写"
+      "fineprint": "每月 {count} 次免费 · 无需信用卡 · BYOK"
     },
     "scenarios": {
       "h2": "这些场景你眼熟吗？",
@@ -398,6 +414,84 @@
       "useCase2": "给客户、合作方回信，语气需要刚刚好的场景。",
       "useCase3": "公开发言——推文、Reddit / HN 评论、GitHub Issues、PR 描述。",
       "useCase4": "陌生人开场、道歉、难开口的话——一个词用错就尴尬的时刻。"
+    },
+    "compare": {
+      "eyebrow": "我们的不同",
+      "h2": "rewrite.so 与同类工具的对比",
+      "subtitle": "三种风格、就在你正在打字的输入框里、1 秒内出第一个字。",
+      "caption": "rewrite.so 与 Grammarly、DeepL Write、ChatGPT 网页版的功能对比。",
+      "recommended": "推荐",
+      "disclaimer": "对比基于 2026-05 截止的公开信息整理。各家功能与价格会频繁变化，请以厂商官方信息为准。我们与所列产品无任何合作或代言关系。",
+      "col": {
+        "us": "rewrite.so",
+        "grammarly": "Grammarly",
+        "deepl": "DeepL Write",
+        "chatgpt": "ChatGPT 网页版"
+      },
+      "rows": {
+        "inline": {
+          "label": "在任意输入框内 inline 改写",
+          "detail": "在你正在打字的输入框里直接替换，没有侧边栏、没有弹层、不切 tab。",
+          "cells": {
+            "grammarly": "侧边栏建议",
+            "deepl": "支持站点的扩展",
+            "chatgpt": "复制 / 粘贴"
+          }
+        },
+        "keyboard": {
+          "label": "全键盘触发与接受",
+          "detail": "双击 Shift 弹出候选，按 1、2、3 直接接受。整个流程不用碰鼠标，手不用离开主键区。其它工具触发改写至少要 hover、选中或切 tab。",
+          "cells": {
+            "us": "Shift Shift，搞定",
+            "grammarly": "悬浮后点击",
+            "deepl": "选中后点击",
+            "chatgpt": "切 tab 后复制"
+          }
+        },
+        "speed": {
+          "label": "流式输出，不等批量",
+          "detail": "模型生成时立即上屏 —— 架构上永远不阻塞等完整批次。真实延迟取决于上游模型；我们保证的是「你不必等完整响应回来才能开始读」。",
+          "cells": {
+            "us": "流式，inline",
+            "grammarly": "悬浮气泡建议",
+            "deepl": "整批返回",
+            "chatgpt": "流式，但要切 tab"
+          }
+        },
+        "candidates": {
+          "label": "三种风格同时给（贴近原文 / 口语 / 正式）",
+          "detail": "一次给三个版本，按 1 / 2 / 3 直接接受——不用换语气再问一次。",
+          "cells": {
+            "us": "并行 3 种",
+            "grammarly": "单条建议",
+            "deepl": "可切语气",
+            "chatgpt": "单条回复"
+          }
+        },
+        "logging": {
+          "label": "原文与输出不落日志",
+          "detail": "只记长度、语言、风格、用户 ID、错误码。代码开源，可审计。"
+        },
+        "byok": {
+          "label": "BYOK（任意 OpenAI 兼容端点）",
+          "detail": "用自己的 key，我们不再施加月配额——上游的限速就是你的限速。"
+        },
+        "multilang": {
+          "label": "多语言原文（CJK + 欧洲语言）",
+          "detail": "为跨语言写作而设计——中文输入英文输出，7+ UI 语言任意搭配。",
+          "cells": {
+            "grammarly": "英文为主",
+            "deepl": "欧洲语言强"
+          }
+        },
+        "openSource": {
+          "label": "开源",
+          "detail": "Apache-2.0 协议 on GitHub，可审计、可 fork、可自部署。",
+          "cells": {
+            "us": "Apache-2.0"
+          }
+        }
+      }
     },
     "privacy": {
       "eyebrow": "关于隐私",
@@ -465,7 +559,7 @@
       }
     },
     "pricing": {
-      "h2": "极简两档定价",
+      "h2": "三种用法，按需选",
       "free": {
         "title": "Free",
         "price": "$0",
@@ -482,6 +576,14 @@
         "feat2": "托管 model，零配置",
         "feat3": "优先支持"
       },
+      "byok": {
+        "title": "BYOK",
+        "price": "$0 + 你自己的 key",
+        "sub": "用任意 OpenAI 兼容端点",
+        "feat1": "任何登录用户可配，不限 tier",
+        "feat2": "我们这边不再施加月配额",
+        "feat3": "OpenAI / Anthropic / Azure / Groq / DeepSeek"
+      },
       "ctaSeeFull": "查看完整定价与常见问题 →"
     },
     "finalCta": {
@@ -493,7 +595,7 @@
     "demo": {
       "anyInput": "支持的输入框",
       "youTyped": "# 你写的：",
-      "streams": "→ 3 路并行开始出字，约 200ms",
+      "streams": "→ 3 路并行就地出字",
       "accepted": "→ 已替换到输入框",
       "selectHint": "点击一个改写，或按 1 / 2 / 3",
       "label": {

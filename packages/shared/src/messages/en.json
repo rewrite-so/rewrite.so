@@ -91,6 +91,22 @@
         "feat4": "Cancel anytime; refund within 14 days",
         "cta": "Get Pro →"
       },
+      "byok": {
+        "title": "BYOK",
+        "price": "$0",
+        "period": "+ your provider",
+        "tagline": "Bring your own key. No tier gate. No monthly quota.",
+        "feat1": "No tier gating — available to any signed-in user",
+        "feat2": "No monthly quota from us (100 req/min abuse-prevention bucket)",
+        "feat3": "Any OpenAI-compatible endpoint (OpenAI / Anthropic / Azure / Groq / DeepSeek)",
+        "feat4": "Key stored AES-GCM encrypted; never logged",
+        "cta": "Configure in Settings →"
+      },
+      "earlyBird": {
+        "label": "Early Bird",
+        "perks": "90 days Pro on sign-up · 70% off forever",
+        "cta": "Join →"
+      },
       "faq": {
         "h2": "FAQ",
         "q1": "What does \"rewrite\" mean here?",
@@ -379,17 +395,17 @@
       "label": "Early Bird · 90 days free + lifetime 70% off"
     },
     "hero": {
-      "eyebrow": "Supported text fields. Open source.",
+      "eyebrow": "Inline AI rewriting",
       "h1Line1": "Write freely.",
       "h1Line2": "Send confidently.",
-      "subHeadline": "Stop overthinking every message.",
+      "subHeadline": "Double-tap Shift, get three native-quality rewrites — works in any language.",
       "polyglot": "Any language in. Any language out.",
-      "intro": "Double-tap <kbd>Shift</kbd> in a supported web text field. AI gives you three ways to say it. Pick one with <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> and send.",
-      "ctaPrimary": "Try it free →",
-      "ctaInstall": "Install extension →",
+      "intro": "Press <kbd>Shift</kbd> <kbd>Shift</kbd> in any input box. We give you three ways to say it. Pick one with <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd>.",
+      "ctaPrimary": "Install free →",
+      "ctaInstall": "Try without installing →",
       "ctaSecondary": "⭐ Star on GitHub",
       "ctaGithub": "View on GitHub →",
-      "fineprint": "{count} free rewrites/month · No card · Bring your own API key for unlimited"
+      "fineprint": "{count} free rewrites/month · No card · BYOK"
     },
     "scenarios": {
       "h2": "Sound familiar?",
@@ -398,6 +414,84 @@
       "useCase2": "Customer or client replies when the tone has to be just right.",
       "useCase3": "Public posts — tweets, Reddit / HN comments, GitHub issues, PR descriptions.",
       "useCase4": "Cold emails, apologies, hard conversations — places where one wrong word costs you."
+    },
+    "compare": {
+      "eyebrow": "How we differ",
+      "h2": "rewrite.so vs the alternatives",
+      "subtitle": "Three styles, in the box you're already typing in, in under a second.",
+      "caption": "Feature comparison of rewrite.so against Grammarly, DeepL Write, and ChatGPT web.",
+      "recommended": "Recommended",
+      "disclaimer": "Comparison reflects publicly available information as of 2026-05. Competitor features and pricing change frequently — please verify with each vendor before deciding. We do not affiliate with or endorse any listed product.",
+      "col": {
+        "us": "rewrite.so",
+        "grammarly": "Grammarly",
+        "deepl": "DeepL Write",
+        "chatgpt": "ChatGPT (web)"
+      },
+      "rows": {
+        "inline": {
+          "label": "Inline in any input box",
+          "detail": "We replace the text you're typing right where you're typing it — no popover, no sidebar, no second tab.",
+          "cells": {
+            "grammarly": "Sidebar suggestions",
+            "deepl": "Extension on supported sites",
+            "chatgpt": "Copy / paste"
+          }
+        },
+        "keyboard": {
+          "label": "Trigger + accept by keyboard alone",
+          "detail": "Double-tap Shift to open the panel; press 1, 2, or 3 to accept. Zero mouse needed — the rewrite never pulls your hand off the home row. Other tools need a hover, a text selection, or a tab switch to even get a suggestion.",
+          "cells": {
+            "us": "Shift Shift, that's it",
+            "grammarly": "Hover, then click",
+            "deepl": "Select text, then click",
+            "chatgpt": "Tab switch, then copy"
+          }
+        },
+        "speed": {
+          "label": "Streaming output, no batch wait",
+          "detail": "Tokens stream in as the model produces them — the architecture never blocks on a full batch. Actual latency depends on the upstream model; what we guarantee is that you never wait for a complete response before you can start reading it.",
+          "cells": {
+            "us": "Streaming, inline",
+            "grammarly": "Suggestion popovers",
+            "deepl": "Batch response",
+            "chatgpt": "Streaming, separate tab"
+          }
+        },
+        "candidates": {
+          "label": "Three styles in parallel (faithful / casual / formal)",
+          "detail": "You get three rewrites at once. Press 1, 2, or 3 to accept — no need to re-prompt to see another tone.",
+          "cells": {
+            "us": "3 in parallel",
+            "grammarly": "Single suggestion",
+            "deepl": "Alternative tones",
+            "chatgpt": "Single response"
+          }
+        },
+        "logging": {
+          "label": "No prompt or output logging",
+          "detail": "We log length, language, style, user id, and error codes. Never the text. The source code is open."
+        },
+        "byok": {
+          "label": "Bring your own API key (any OpenAI-compatible)",
+          "detail": "Plug in your own provider key and we don't apply our monthly quota — your provider's rate is your rate."
+        },
+        "multilang": {
+          "label": "Multi-language source (CJK + EU)",
+          "detail": "Designed for cross-language writers — type Chinese, get English back, or any combination across 7+ UI locales.",
+          "cells": {
+            "grammarly": "EN-focused",
+            "deepl": "EU langs strong"
+          }
+        },
+        "openSource": {
+          "label": "Open source",
+          "detail": "Apache-2.0 on GitHub. Anyone can audit, fork, or self-host.",
+          "cells": {
+            "us": "Apache-2.0"
+          }
+        }
+      }
     },
     "privacy": {
       "eyebrow": "The privacy contract",
@@ -465,7 +559,7 @@
       }
     },
     "pricing": {
-      "h2": "Simple two-tier pricing",
+      "h2": "Three ways to use rewrite.so",
       "free": {
         "title": "Free",
         "price": "$0",
@@ -482,6 +576,14 @@
         "feat2": "Hosted model, no setup",
         "feat3": "Priority support"
       },
+      "byok": {
+        "title": "BYOK",
+        "price": "$0 + your key",
+        "sub": "Bring your own OpenAI-compatible endpoint",
+        "feat1": "No tier gate — any signed-in user",
+        "feat2": "No monthly quota from us",
+        "feat3": "Use OpenAI / Anthropic / Azure / Groq / DeepSeek"
+      },
       "ctaSeeFull": "See full pricing & FAQ →"
     },
     "finalCta": {
@@ -493,7 +595,7 @@
     "demo": {
       "anyInput": "supported text field",
       "youTyped": "# You typed:",
-      "streams": "→ 3 streams in, ~200ms first token",
+      "streams": "→ 3 streams in, in-place",
       "accepted": "→ accepted, input replaced",
       "selectHint": "Click a rewrite or press 1 / 2 / 3",
       "label": {

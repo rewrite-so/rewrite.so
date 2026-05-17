@@ -101,7 +101,7 @@ export function BillingClient() {
   }
 
   if (!me) {
-    return <p style={{ marginTop: 32, color: '#888' }}>{t('loading')}</p>;
+    return <p style={{ marginTop: 32, color: 'var(--text-muted)' }}>{t('loading')}</p>;
   }
 
   const subscribed = me.subscription !== null && me.tier === 'pro';
@@ -132,11 +132,11 @@ export function BillingClient() {
         <div
           style={{
             padding: '12px 16px',
-            background: '#fdfaf2',
-            border: '1px solid #f0e4cf',
+            background: 'var(--warning-50)',
+            border: '1px solid var(--warning-200)',
             borderRadius: 8,
             fontSize: 14,
-            color: '#7a5a18',
+            color: 'var(--warning-700)',
             marginBottom: 16,
           }}
           title={t('earlyBirdBanner.tooltip')}
@@ -148,11 +148,11 @@ export function BillingClient() {
         <div
           style={{
             padding: '12px 16px',
-            background: '#f0fdf4',
-            border: '1px solid #bbf7d0',
+            background: 'var(--success-50)',
+            border: '1px solid var(--success-200)',
             borderRadius: 8,
             fontSize: 14,
-            color: '#166534',
+            color: 'var(--success-700)',
             marginBottom: 24,
           }}
         >
@@ -183,9 +183,9 @@ export function BillingClient() {
               marginLeft: 12,
               padding: '4px 10px',
               fontSize: 12,
-              background: '#fff',
-              color: '#166534',
-              border: '1px solid #86efac',
+              background: 'var(--neutral-0)',
+              color: 'var(--success-700)',
+              border: '1px solid var(--success-200)',
               borderRadius: 4,
               cursor: 'pointer',
             }}
@@ -200,7 +200,7 @@ export function BillingClient() {
         style={{
           display: 'inline-flex',
           padding: 4,
-          background: '#f4f4f5',
+          background: 'var(--surface-muted)',
           borderRadius: 8,
           marginBottom: 24,
         }}
@@ -214,8 +214,8 @@ export function BillingClient() {
             style={{
               marginLeft: 6,
               padding: '2px 6px',
-              background: '#dcfce7',
-              color: '#166534',
+              background: 'var(--success-100)',
+              color: 'var(--success-700)',
               borderRadius: 4,
               fontSize: 11,
               fontWeight: 600,
@@ -262,14 +262,16 @@ export function BillingClient() {
           disabled={subscribed || loading}
         />
         {subscribed && earlyBirdActive && !me.subscription?.cancelAtPeriodEnd && (
-          <p style={{ fontSize: 12, color: '#888', marginTop: 4, gridColumn: '1 / -1' }}>
+          <p
+            style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4, gridColumn: '1 / -1' }}
+          >
             {t('earlyBirdBanner.subscribedHint')}
           </p>
         )}
       </div>
 
       {error && (
-        <p style={{ color: '#dc2626', fontSize: 13, marginTop: 16 }}>
+        <p style={{ color: 'var(--danger-500)', fontSize: 13, marginTop: 16 }}>
           {t('error.prefix')}: {error}
         </p>
       )}
@@ -292,8 +294,8 @@ function ToggleBtn({
       onClick={onClick}
       style={{
         padding: '6px 14px',
-        background: active ? '#fff' : 'transparent',
-        color: active ? '#111' : '#666',
+        background: active ? 'var(--neutral-0)' : 'transparent',
+        color: active ? 'var(--neutral-950)' : 'var(--text-secondary)',
         border: 'none',
         borderRadius: 6,
         fontSize: 13,
@@ -335,24 +337,26 @@ function PlanCard({
     <div
       style={{
         padding: 24,
-        border: highlight ? '2px solid #111' : '1px solid #e4e4e7',
+        border: highlight ? '2px solid var(--neutral-950)' : '1px solid var(--neutral-200)',
         borderRadius: 12,
-        background: '#fff',
+        background: 'var(--neutral-0)',
       }}
     >
-      <div style={{ fontSize: 14, color: '#888', marginBottom: 4 }}>{title}</div>
+      <div style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 4 }}>{title}</div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 16 }}>
         {originalPrice && (
-          <span style={{ fontSize: 18, color: '#999', textDecoration: 'line-through' }}>
+          <span
+            style={{ fontSize: 18, color: 'var(--text-muted)', textDecoration: 'line-through' }}
+          >
             {originalPrice}
           </span>
         )}
         <span style={{ fontSize: 32, fontWeight: 700 }}>{price}</span>
-        <span style={{ fontSize: 13, color: '#888' }}>{period}</span>
+        <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{period}</span>
       </div>
       <ul style={{ listStyle: 'none', padding: 0, margin: 0, marginBottom: 24 }}>
         {features.map((f) => (
-          <li key={f} style={{ fontSize: 13, color: '#444', padding: '4px 0' }}>
+          <li key={f} style={{ fontSize: 13, color: 'var(--text-secondary)', padding: '4px 0' }}>
             ✓ {f}
           </li>
         ))}
@@ -364,8 +368,8 @@ function PlanCard({
         style={{
           width: '100%',
           padding: '10px 14px',
-          background: highlight && !disabled ? '#111' : '#f4f4f5',
-          color: highlight && !disabled ? '#fff' : '#888',
+          background: highlight && !disabled ? 'var(--neutral-950)' : 'var(--surface-muted)',
+          color: highlight && !disabled ? 'var(--neutral-0)' : 'var(--text-muted)',
           border: 'none',
           borderRadius: 8,
           fontSize: 14,

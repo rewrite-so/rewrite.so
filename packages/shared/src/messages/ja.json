@@ -105,6 +105,22 @@
         "a5": "はい、いつでも。<settings>設定</settings> の「Manage subscription」ポータルから。Pro の特典は現在の請求期間末まで利用可能。初回課金から 14 日以内は返金可能 — <refund>返金ポリシー</refund> をご覧ください。",
         "q6": "決済は誰が処理していますか？",
         "a6": "<creem>Creem</creem> が当社の Merchant of Record として、決済・税金・返金を代行処理しています。カード情報は当社サーバーに一切触れません。"
+      },
+      "byok": {
+        "title": "BYOK",
+        "price": "$0",
+        "period": "+ 自分の API key",
+        "tagline": "自分の key で。ティア制限なし、月次クォータなし。",
+        "feat1": "ティア制限なし — サインイン済みユーザーなら誰でも利用可能",
+        "feat2": "当社からの月次クォータなし（100 req/min の不正利用防止のみ）",
+        "feat3": "任意の OpenAI 互換エンドポイント（OpenAI / Anthropic / Azure / Groq / DeepSeek）",
+        "feat4": "Key は AES-GCM で暗号化保存、ログには一切残しません",
+        "cta": "設定で構成 →"
+      },
+      "earlyBird": {
+        "label": "アーリーバード",
+        "perks": "登録後 90 日間 Pro 無料 · 永久 70% オフ",
+        "cta": "今すぐ参加 →"
       }
     },
     "contact": {
@@ -379,17 +395,17 @@
       "label": "アーリーバード · 90 日間無料 + 70% 永久オフ"
     },
     "hero": {
-      "eyebrow": "対応している入力欄 · オープンソース",
+      "eyebrow": "入力欄での AI リライト",
       "h1Line1": "自由に書いて、",
       "h1Line2": "自信を持って送る。",
-      "subHeadline": "メッセージを送る前に考えすぎない。",
+      "subHeadline": "Shift を 2 回押すだけで、どんな言語でも自然な 3 つの書き換えが手に入る。",
       "polyglot": "どの言語で書いても、どの言語でも出力。",
-      "intro": "対応しているウェブ入力欄で <kbd>Shift</kbd> をダブルタップ。AI が 3 つの言い方を提示。<kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> で選んでそのまま送信。",
-      "ctaPrimary": "無料で試す →",
-      "ctaInstall": "拡張機能をインストール →",
+      "intro": "どんな入力欄でも <kbd>Shift</kbd> <kbd>Shift</kbd> を押すだけ。AI が 3 通りの表現を提示するので、<kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> で選択。",
+      "ctaPrimary": "無料でインストール →",
+      "ctaInstall": "インストール不要で試す →",
       "ctaSecondary": "⭐ GitHub で Star",
       "ctaGithub": "GitHub で見る →",
-      "fineprint": "月 {count} 回まで無料 · カード不要 · BYOK で無制限"
+      "fineprint": "月 {count} 回まで無料 · クレジットカード不要 · BYOK"
     },
     "scenarios": {
       "h2": "身に覚えありませんか？",
@@ -465,24 +481,32 @@
       }
     },
     "pricing": {
-      "h2": "シンプル 2 階層料金",
+      "h2": "3 通りの使い方",
       "free": {
         "title": "Free",
         "price": "$0",
-        "sub": "ログインユーザーは月 {count} 回の書き換え",
-        "feat1": "3 スタイルすべて",
-        "feat2": "自動言語検出",
-        "feat3": "入力は保存されません"
+        "sub": "サインイン済みユーザーは月 {count} 回まで",
+        "feat1": "3 つの文体すべて",
+        "feat2": "言語を自動検出",
+        "feat3": "入力テキストは保存されません"
       },
       "pro": {
         "title": "Pro",
         "price": "${monthly} / 月（年払い）",
-        "sub": "年額 ${total}（月払い ${monthlyAlt}/月 と比べて {percent}% 節約）",
-        "feat1": "月 {count, number} 回の書き換え",
-        "feat2": "ホスト型モデル、設定不要",
+        "sub": "年間 ${total}（月 ${monthlyAlt} の月払いと比較して {percent}% 割引）",
+        "feat1": "月 {count, number} 回リライト",
+        "feat2": "ホスト型モデル、セットアップ不要",
         "feat3": "優先サポート"
       },
-      "ctaSeeFull": "完全な料金と FAQ を見る →"
+      "byok": {
+        "title": "BYOK",
+        "price": "$0 + 自分の key",
+        "sub": "任意の OpenAI 互換エンドポイントを利用",
+        "feat1": "サインインユーザーなら誰でも、ティア制限なし",
+        "feat2": "当社からの月次クォータなし",
+        "feat3": "OpenAI / Anthropic / Azure / Groq / DeepSeek 対応"
+      },
+      "ctaSeeFull": "完全な価格表と FAQ を見る →"
     },
     "finalCta": {
       "h2": "30 秒で試せます。",
@@ -493,7 +517,7 @@
     "demo": {
       "anyInput": "対応している入力欄",
       "youTyped": "# 入力したのはこれ：",
-      "streams": "→ 3 つ並行して書き出し開始、約 200ms",
+      "streams": "→ 3 つ並行してその場で書き出し",
       "accepted": "→ 入力欄に反映しました",
       "selectHint": "書き換えをクリック、または 1 / 2 / 3 を押す",
       "label": {
@@ -536,6 +560,84 @@
             "faithful": "This seems incorrect. Could you fix it?",
             "casual": "I think something's off here. Could you take another look?",
             "formal": "This appears to be incorrect. Could you please review and correct it?"
+          }
+        }
+      }
+    },
+    "compare": {
+      "eyebrow": "他と違うところ",
+      "h2": "rewrite.so と類似ツールの比較",
+      "subtitle": "3 つの文体、いま入力中の枠の中で、1 秒未満で最初の文字が現れる。",
+      "caption": "rewrite.so と Grammarly、DeepL Write、ChatGPT(Web) の機能比較。",
+      "recommended": "おすすめ",
+      "disclaimer": "比較は 2026-05 時点で公開されている情報に基づきます。各ベンダーの機能と価格は頻繁に変更されますので、利用前に各社の公式情報をご確認ください。当社は記載した製品といかなる提携・推奨関係もありません。",
+      "col": {
+        "us": "rewrite.so",
+        "grammarly": "Grammarly",
+        "deepl": "DeepL Write",
+        "chatgpt": "ChatGPT (Web)"
+      },
+      "rows": {
+        "inline": {
+          "label": "あらゆる入力欄でインライン置換",
+          "detail": "サイドバーもポップアップもなく、いま入力している場所でテキストを直接書き換えます。",
+          "cells": {
+            "grammarly": "サイドバーの提案",
+            "deepl": "対応サイトの拡張機能",
+            "chatgpt": "コピペ"
+          }
+        },
+        "keyboard": {
+          "label": "キーボードだけでトリガーと採用",
+          "detail": "Shift を 2 回タップしてパネルを開き、1 / 2 / 3 を押して採用。マウス不要 — リライト中ホームポジションから手が離れません。他のツールはホバー、選択、タブ切り替えのいずれかが必要です。",
+          "cells": {
+            "us": "Shift Shift、それだけ",
+            "grammarly": "ホバー後にクリック",
+            "deepl": "選択後にクリック",
+            "chatgpt": "タブ切替後にコピー"
+          }
+        },
+        "speed": {
+          "label": "ストリーミング出力、バッチ待ち無し",
+          "detail": "モデルが生成すると同時にトークンがストリーミング — アーキテクチャ上、完全なバッチを待つことはありません。実際のレイテンシは上流モデル次第ですが、「完全な応答を待たずに読み始められる」ことは保証されます。",
+          "cells": {
+            "us": "ストリーミング、インライン",
+            "grammarly": "サジェスト ポップオーバー",
+            "deepl": "バッチ応答",
+            "chatgpt": "ストリーミング、別タブ"
+          }
+        },
+        "candidates": {
+          "label": "3 つの文体を並列出力（忠実 / カジュアル / フォーマル）",
+          "detail": "一度に 3 案。1 / 2 / 3 を押すだけで採用 — 文体を変えるためにプロンプトを書き直す必要はありません。",
+          "cells": {
+            "us": "3 つ同時",
+            "grammarly": "サジェスト 1 件",
+            "deepl": "別の語調を選択可",
+            "chatgpt": "返答 1 件"
+          }
+        },
+        "logging": {
+          "label": "入出力テキストを一切ログしない",
+          "detail": "長さ・言語・文体・ユーザー ID・エラーコードのみログ。テキストは決して保存しません。ソースコードはオープン。"
+        },
+        "byok": {
+          "label": "BYOK（任意の OpenAI 互換エンドポイント）",
+          "detail": "ご自身のプロバイダ key を接続すれば月次クォータは適用されません — プロバイダ側のレート制限が唯一の制限になります。"
+        },
+        "multilang": {
+          "label": "多言語入力（CJK + 欧州言語）",
+          "detail": "クロスランゲージ・ライティング向け設計 — 中国語を入れて英語を返す、7+ UI 言語と任意の組み合わせ。",
+          "cells": {
+            "grammarly": "英語中心",
+            "deepl": "欧州言語が得意"
+          }
+        },
+        "openSource": {
+          "label": "オープンソース",
+          "detail": "Apache-2.0、GitHub 公開。監査・フォーク・セルフホストすべて可能。",
+          "cells": {
+            "us": "Apache-2.0"
           }
         }
       }

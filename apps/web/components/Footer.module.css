@@ -1,0 +1,90 @@
+/* Footer reuses TopNav's 1080 max-width — kept narrower than section content
+   (1120) so the footer feels lighter than hero/section blocks. */
+
+.footer {
+  margin-top: var(--space-20);
+  border-top: 1px solid var(--neutral-200);
+  background: var(--surface-muted);
+  padding: var(--space-10) var(--space-6) var(--space-8);
+}
+
+.grid {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-8);
+}
+
+.brand {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.brandTm {
+  font-size: 9px;
+  font-weight: var(--fw-medium);
+  vertical-align: super;
+  margin-left: 1px;
+  color: var(--text-muted);
+}
+
+.tagline {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  line-height: var(--lh-normal);
+}
+
+.colHeading {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin: 0 0 var(--space-3);
+}
+
+.link {
+  display: block;
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding: var(--space-1) 0;
+}
+
+.link:hover {
+  color: var(--text-primary);
+}
+
+.disclaimer {
+  max-width: 1080px;
+  margin: var(--space-6) auto 0;
+  font-size: 11px;
+  color: var(--neutral-400);
+  line-height: var(--lh-snug);
+  text-align: center;
+}
+
+.bottomBar {
+  max-width: 1080px;
+  margin: var(--space-5) auto 0;
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--neutral-200);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}
+
+.creemLink {
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+.creemLink:hover {
+  color: var(--text-primary);
+}

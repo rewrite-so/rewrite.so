@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Geist, Geist_Mono } from 'next/font/google';
 import { notFound } from 'next/navigation';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
@@ -7,7 +8,23 @@ import { AnalyticsBootstrap } from '../../components/AnalyticsBootstrap.tsx';
 import { Footer } from '../../components/Footer.tsx';
 import { TopNav } from '../../components/TopNav.tsx';
 import { routing } from '../../i18n/routing.ts';
+import '../globals.css';
 import { localizedMetadata } from '../metadata.ts';
+
+// next/font hosts Geist locally at build time — no FOIT, no third-party CDN.
+// Latin subset only; CJK falls through to system fonts via --font-sans stack
+// in globals.css (intentional — keeps the font payload small).
+const geistSans = Geist({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-geist-sans',
+});
+
+const geistMono = Geist_Mono({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-geist-mono',
+});
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -49,11 +66,14 @@ export default async function LocaleLayout({
     // Grammarly、深色模式切换器、翻译插件）会在 SSR HTML 到达后向 <html>/<body>
     // 注入额外属性（data-* / class），导致 React 报 hydration mismatch。这里只
     // 抑制属性级别的警告，*不会*掩盖 React 树内部真实的 hydration bug——后者仍正常报。
-    <html lang={locale} suppressHydrationWarning>
+    <html
+      lang={locale}
+      className={`${geistSans.variable} ${geistMono.variable}`}
+      suppressHydrationWarning
+    >
       <body
         suppressHydrationWarning
         style={{
-          margin: 0,
           minHeight: '100vh',
           display: 'flex',
           flexDirection: 'column',

@@ -1,0 +1,92 @@
+/* TopNav uses its own narrow max-width (1080) — Container's 1120 is reserved
+   for hero / sections. NAV-specific magic numbers (font-size 14/15/9, blur
+   amounts) intentionally bypass tokens; they are nav-shell concerns. */
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: saturate(180%) blur(8px);
+  -webkit-backdrop-filter: saturate(180%) blur(8px);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: var(--space-3) var(--space-6);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.brand {
+  font-size: 15px;
+  font-weight: var(--fw-semibold);
+  color: var(--text-primary);
+  text-decoration: none;
+  margin-right: var(--space-6);
+}
+
+.centerLinks {
+  display: flex;
+  gap: var(--space-1);
+  flex: 1 1 220px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.link {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+}
+
+.link:hover {
+  background: var(--surface-muted);
+}
+
+.linkEarlyBird {
+  color: var(--warning-700);
+  font-weight: var(--fw-medium);
+}
+
+.ctaPrimary {
+  font-size: var(--fs-sm);
+  color: var(--text-on-inverse);
+  background: var(--surface-inverse);
+  text-decoration: none;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  font-weight: var(--fw-medium);
+  margin-left: var(--space-2);
+}
+
+.ctaOutline {
+  font-size: var(--fs-sm);
+  color: var(--text-primary);
+  background: var(--surface-card);
+  text-decoration: none;
+  padding: var(--space-2) calc(var(--space-4) - 1px);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--text-primary);
+  font-weight: var(--fw-medium);
+  margin-left: var(--space-2);
+}
+
+.ctaSignIn {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  margin-left: var(--space-1);
+}
+
+.ctaSignIn:hover {
+  background: var(--surface-muted);
+}

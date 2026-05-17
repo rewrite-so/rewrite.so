@@ -105,6 +105,22 @@
         "a5": "Ja, jederzeit, aus <settings>deinen Einstellungen</settings> über das „Manage subscription\"-Portal. Du behältst den Pro-Zugang bis zum Ende des aktuellen Abrechnungszeitraums. Rückerstattung innerhalb von 14 Tagen nach erster Belastung — siehe <refund>Rückerstattungsrichtlinie</refund>.",
         "q6": "Wer wickelt die Zahlung ab?",
         "a6": "<creem>Creem</creem> ist unser Merchant of Record. Sie verarbeiten Zahlungen, Steuern und Rückerstattungen in unserem Auftrag. Deine Kartendaten berühren niemals unsere Server."
+      },
+      "byok": {
+        "title": "BYOK",
+        "price": "$0",
+        "period": "+ dein Provider",
+        "tagline": "Bring deinen eigenen Key. Kein Tarif-Gate. Kein Monatskontingent.",
+        "feat1": "Kein Tarif-Gate — für alle angemeldeten Nutzer:innen verfügbar",
+        "feat2": "Kein Monatskontingent von uns (nur 100 req/min Missbrauchsbremse)",
+        "feat3": "Beliebiger OpenAI-kompatibler Endpoint (OpenAI / Anthropic / Azure / Groq / DeepSeek)",
+        "feat4": "Key wird AES-GCM verschlüsselt gespeichert und niemals geloggt",
+        "cta": "In den Einstellungen konfigurieren →"
+      },
+      "earlyBird": {
+        "label": "Early Bird",
+        "perks": "90 Tage Pro nach Anmeldung · 70% Rabatt für immer",
+        "cta": "Jetzt mitmachen →"
       }
     },
     "contact": {
@@ -379,17 +395,17 @@
       "label": "Early Bird · 90 Tage gratis + 70 % lebenslang"
     },
     "hero": {
-      "eyebrow": "Unterstützte Eingabefelder · Open Source",
-      "h1Line1": "Frei schreiben.",
-      "h1Line2": "Sicher senden.",
-      "subHeadline": "Hör auf, jede Nachricht zu zerdenken.",
+      "eyebrow": "Inline-AI-Umschreibung",
+      "h1Line1": "Schreib frei,",
+      "h1Line2": "sende mit Zuversicht.",
+      "subHeadline": "Drück Shift zweimal — du bekommst drei muttersprachlich klingende Umschreibungen, in jeder Sprache.",
       "polyglot": "Beliebige Sprache rein. Beliebige Sprache raus.",
-      "intro": "Drücke <kbd>Shift</kbd> doppelt in einem unterstützten Web-Eingabefeld. Die KI gibt dir drei Formulierungen. Wähle eine mit <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> und sende.",
-      "ctaPrimary": "Kostenlos testen →",
-      "ctaInstall": "Erweiterung installieren →",
+      "intro": "Drücke <kbd>Shift</kbd> <kbd>Shift</kbd> in einem beliebigen Eingabefeld. Die KI liefert drei Varianten. Wähle mit <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd>.",
+      "ctaPrimary": "Kostenlos installieren →",
+      "ctaInstall": "Ohne Installation testen →",
       "ctaSecondary": "⭐ Star auf GitHub",
       "ctaGithub": "Auf GitHub ansehen →",
-      "fineprint": "{count} kostenlose Umschreibungen/Monat · Keine Kreditkarte · BYOK für unbegrenzt"
+      "fineprint": "{count} Umschreibungen/Monat gratis · keine Karte · BYOK"
     },
     "scenarios": {
       "h2": "Kommt dir bekannt vor?",
@@ -465,24 +481,32 @@
       }
     },
     "pricing": {
-      "h2": "Einfache zwei-stufige Preise",
+      "h2": "Drei Wege, rewrite.so zu nutzen",
       "free": {
         "title": "Free",
         "price": "$0",
-        "sub": "{count} Umschreibungen / Monat für angemeldete Nutzer",
+        "sub": "{count} Umschreibungen / Monat für angemeldete Nutzer:innen",
         "feat1": "Alle 3 Stile",
-        "feat2": "Auto-Spracherkennung",
+        "feat2": "Automatische Spracherkennung",
         "feat3": "Eingaben werden nie gespeichert"
       },
       "pro": {
         "title": "Pro",
-        "price": "${monthly} / Mon. (jährlich abgerechnet)",
-        "sub": "${total} / Jahr (spare {percent}% vs ${monthlyAlt}/Mon. monatlich)",
+        "price": "${monthly} / Monat, jährlich abgerechnet",
+        "sub": "${total} / Jahr (spare {percent}% gegenüber ${monthlyAlt}/Monat monatlich)",
         "feat1": "{count, number} Umschreibungen / Monat",
-        "feat2": "Gehostetes Modell, ohne Setup",
-        "feat3": "Priorisierter Support"
+        "feat2": "Gehostetes Modell, kein Setup nötig",
+        "feat3": "Prioritäts-Support"
       },
-      "ctaSeeFull": "Vollständige Preise & FAQ →"
+      "byok": {
+        "title": "BYOK",
+        "price": "$0 + dein Key",
+        "sub": "Bring deinen OpenAI-kompatiblen Endpoint mit",
+        "feat1": "Kein Tarif-Gate — jede:r angemeldete Nutzer:in",
+        "feat2": "Kein Monatskontingent von uns",
+        "feat3": "OpenAI / Anthropic / Azure / Groq / DeepSeek"
+      },
+      "ctaSeeFull": "Komplette Preise & FAQ ansehen →"
     },
     "finalCta": {
       "h2": "Probier's. Dauert 30 Sekunden.",
@@ -493,7 +517,7 @@
     "demo": {
       "anyInput": "unterstütztes Eingabefeld",
       "youTyped": "# Du hast getippt:",
-      "streams": "→ 3 Streams gestartet, ~200ms erstes Token",
+      "streams": "→ 3 Streams gestartet, direkt im Feld",
       "accepted": "→ ins Eingabefeld übernommen",
       "selectHint": "Klicke eine Umschreibung an oder drücke 1 / 2 / 3",
       "label": {
@@ -536,6 +560,84 @@
             "faithful": "This seems incorrect. Could you fix it?",
             "casual": "I think something's off here. Could you take another look?",
             "formal": "This appears to be incorrect. Could you please review and correct it?"
+          }
+        }
+      }
+    },
+    "compare": {
+      "eyebrow": "Was uns unterscheidet",
+      "h2": "rewrite.so im Vergleich zu Alternativen",
+      "subtitle": "Drei Stile, im Eingabefeld, in dem du gerade tippst, mit dem ersten Token in unter einer Sekunde.",
+      "caption": "Funktionsvergleich von rewrite.so mit Grammarly, DeepL Write und ChatGPT (Web).",
+      "recommended": "Empfohlen",
+      "disclaimer": "Der Vergleich basiert auf öffentlich verfügbaren Informationen mit Stand 2026-05. Funktionen und Preise der Wettbewerber ändern sich häufig — bitte vor einer Entscheidung beim jeweiligen Anbieter prüfen. Wir stehen mit keinem der genannten Produkte in einer Geschäftsbeziehung und sprechen keine Empfehlung aus.",
+      "col": {
+        "us": "rewrite.so",
+        "grammarly": "Grammarly",
+        "deepl": "DeepL Write",
+        "chatgpt": "ChatGPT (Web)"
+      },
+      "rows": {
+        "inline": {
+          "label": "Inline in jedem Eingabefeld",
+          "detail": "Der Text wird genau dort ersetzt, wo du ihn tippst — kein Popover, keine Seitenleiste, kein zweiter Tab.",
+          "cells": {
+            "grammarly": "Vorschläge in der Seitenleiste",
+            "deepl": "Erweiterung auf unterstützten Seiten",
+            "chatgpt": "Kopieren / einfügen"
+          }
+        },
+        "keyboard": {
+          "label": "Auslösen + Annehmen nur per Tastatur",
+          "detail": "Shift zweimal tippen öffnet das Panel; 1 / 2 / 3 drücken übernimmt. Keine Maus nötig — die Hand bleibt während der Umschreibung auf der Grundreihe. Andere Tools brauchen Hover, Textauswahl oder Tab-Wechsel.",
+          "cells": {
+            "us": "Shift Shift, fertig",
+            "grammarly": "Hover, dann Klick",
+            "deepl": "Auswählen, dann Klick",
+            "chatgpt": "Tab-Wechsel, dann kopieren"
+          }
+        },
+        "speed": {
+          "label": "Streaming-Ausgabe, kein Stapelwarten",
+          "detail": "Tokens kommen so schnell, wie das Modell sie produziert — die Architektur blockiert nie auf eine vollständige Antwort. Die echte Latenz hängt vom Anbieter-Modell ab; garantiert ist nur, dass du nicht auf die ganze Antwort warten musst, bevor du anfangen kannst zu lesen.",
+          "cells": {
+            "us": "Streaming, inline",
+            "grammarly": "Vorschlags-Popover",
+            "deepl": "Stapelantwort",
+            "chatgpt": "Streaming, separater Tab"
+          }
+        },
+        "candidates": {
+          "label": "Drei Stile parallel (treu / locker / formell)",
+          "detail": "Du erhältst drei Umschreibungen gleichzeitig. Drücke 1, 2 oder 3 zum Akzeptieren — du musst nicht neu prompten, um einen anderen Ton zu sehen.",
+          "cells": {
+            "us": "3 parallel",
+            "grammarly": "Ein einzelner Vorschlag",
+            "deepl": "Alternative Tonalitäten",
+            "chatgpt": "Eine einzelne Antwort"
+          }
+        },
+        "logging": {
+          "label": "Keine Prompt- oder Output-Protokollierung",
+          "detail": "Wir protokollieren Länge, Sprache, Stil, User-ID und Fehlercodes. Niemals den Text. Der Quellcode ist offen."
+        },
+        "byok": {
+          "label": "Eigener API-Key (jeder OpenAI-kompatible Endpoint)",
+          "detail": "Schließe deinen Provider-Key an und wir verhängen kein Monatskontingent — die Rate deines Providers ist deine Rate."
+        },
+        "multilang": {
+          "label": "Mehrsprachige Quelle (CJK + EU-Sprachen)",
+          "detail": "Für sprachübergreifende Autoren — schreibe Chinesisch, erhalte Englisch zurück, beliebige Kombinationen mit 7+ UI-Locales.",
+          "cells": {
+            "grammarly": "Englisch-zentriert",
+            "deepl": "Stark in EU-Sprachen"
+          }
+        },
+        "openSource": {
+          "label": "Open Source",
+          "detail": "Apache-2.0 auf GitHub. Jede:r kann auditieren, forken oder selbst hosten.",
+          "cells": {
+            "us": "Apache-2.0"
           }
         }
       }

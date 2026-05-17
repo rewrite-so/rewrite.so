@@ -37,7 +37,8 @@ function buildMockDraftFiberDOM(opts: {
     getLastBlock: vi.fn(() => mockLastBlock),
   };
   // biome-ignore lint/suspicious/noExplicitAny: mock fiber chain
-  const ContentStateClass: any = function () {};
+  // biome-ignore lint/complexity/useArrowFunction: needs `.prototype` slot — used by Object.create / setPrototypeOf below
+  const ContentStateClass: any = function ContentStateClass() {};
   ContentStateClass.createFromText = vi.fn(() =>
     Object.assign(Object.create(ContentStateClass.prototype), finalContent),
   );
@@ -47,7 +48,8 @@ function buildMockDraftFiberDOM(opts: {
 
   // Mock Draft EditorState 类
   // biome-ignore lint/suspicious/noExplicitAny: mock fiber chain
-  const EditorStateClass: any = function () {};
+  // biome-ignore lint/complexity/useArrowFunction: needs `.prototype` slot — used by Object.create / setPrototypeOf below
+  const EditorStateClass: any = function EditorStateClass() {};
   EditorStateClass.push = opts.pushThrows
     ? vi.fn(() => {
         throw new Error('boom');

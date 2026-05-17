@@ -3,11 +3,57 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { CtaLink } from '../../components/CtaLink.tsx';
 import { EarlyBirdBadge } from '../../components/EarlyBirdBadge.tsx';
+import { SectionViewMarker } from '../../components/SectionViewMarker.tsx';
+import {
+  type ComparisonCellValue,
+  type ComparisonColumn,
+  type ComparisonRow,
+  ComparisonTable,
+} from '../../components/ui/ComparisonTable.tsx';
 import { getCampaignEntryState } from '../../lib/campaign-entry.ts';
 import { getExtensionInstallUrl } from '../../lib/extension-install-url.ts';
 import styles from './HomePage.module.css';
 import { HomeRewriteDemo } from './HomeRewriteDemo.tsx';
 import type { PlatformName } from './PlatformIcon.tsx';
+
+const COMPARE_ROW_KEYS = [
+  'inline',
+  'keyboard',
+  'speed',
+  'candidates',
+  'logging',
+  'byok',
+  'multilang',
+  'openSource',
+] as const;
+
+type CompareKind = ComparisonCellValue['kind'];
+
+const COMPARE_COL_KEYS = ['us', 'grammarly', 'deepl', 'chatgpt'] as const;
+
+/**
+ * Per-cell kind only. The user-facing label (and the 'text' kind's full
+ * string) live in i18n at home.compare.rows.<row>.cells.<col> so every
+ * locale renders consistently. Cells without an i18n entry just show the
+ * icon — see compareRows builder below.
+ *
+ * Source for the kind matrix: each vendor's public product / pricing page,
+ * captured 2026-05. Re-verify on every PR that touches this table.
+ */
+const COMPARE_KIND: Record<
+  (typeof COMPARE_ROW_KEYS)[number],
+  Record<(typeof COMPARE_COL_KEYS)[number], CompareKind>
+> = {
+  inline: { us: 'check', grammarly: 'partial', deepl: 'partial', chatgpt: 'cross' },
+  // keyboard: every cell carries a gesture label so the whole row reads as text.
+  keyboard: { us: 'text', grammarly: 'text', deepl: 'text', chatgpt: 'text' },
+  speed: { us: 'text', grammarly: 'text', deepl: 'text', chatgpt: 'text' },
+  candidates: { us: 'check', grammarly: 'cross', deepl: 'partial', chatgpt: 'cross' },
+  logging: { us: 'check', grammarly: 'cross', deepl: 'cross', chatgpt: 'cross' },
+  byok: { us: 'check', grammarly: 'cross', deepl: 'cross', chatgpt: 'cross' },
+  multilang: { us: 'check', grammarly: 'partial', deepl: 'partial', chatgpt: 'check' },
+  openSource: { us: 'check', grammarly: 'cross', deepl: 'cross', chatgpt: 'cross' },
+};
 
 const STYLE_KEYS = ['faithful', 'casual', 'formal'] as const;
 // 每个 example 关联一个真实平台,demo chrome bar 显示对应 logo + 平台名,
@@ -25,6 +71,37 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   setRequestLocale(locale);
   const t = await getTranslations('home');
   const earlyBirdEntry = await getCampaignEntryState('early-bird');
+
+  const compareColumns: ComparisonColumn[] = [
+    { key: 'us', name: t('compare.col.us'), isUs: true },
+    { key: 'grammarly', name: t('compare.col.grammarly') },
+    { key: 'deepl', name: t('compare.col.deepl') },
+    { key: 'chatgpt', name: t('compare.col.chatgpt') },
+  ];
+
+  const compareRows: ComparisonRow[] = COMPARE_ROW_KEYS.map((row) => {
+    const cells: Record<string, ComparisonCellValue> = {};
+    for (const col of COMPARE_COL_KEYS) {
+      const kind = COMPARE_KIND[row][col];
+      // i18n key for this cell's label. Some rows (logging / byok) have no
+      // cells block at all — the icon alone is the cell.
+      const cellKey = `compare.rows.${row}.cells.${col}` as const;
+      const hasLabel = t.has(cellKey);
+      if (kind === 'text') {
+        cells[col] = { kind: 'text', text: hasLabel ? t(cellKey) : '' };
+      } else if (hasLabel) {
+        cells[col] = { kind, label: t(cellKey) };
+      } else {
+        cells[col] = { kind };
+      }
+    }
+    return {
+      key: row,
+      label: t(`compare.rows.${row}.label`),
+      detail: t(`compare.rows.${row}.detail`),
+      cells,
+    };
+  });
 
   const demoCopy = {
     anyInput: t('demo.anyInput'),
@@ -47,46 +124,46 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   return (
     <main className={styles.page}>
+      <SectionViewMarker section="hero" />
       <section className={styles.hero}>
         <div className={styles.heroImage} aria-hidden="true" />
         <div className={styles.heroWash} aria-hidden="true" />
         <div className={styles.heroInner}>
           <div className={styles.heroCopy}>
             {earlyBirdEntry.showBadge && <EarlyBirdBadge />}
-            <p className={styles.eyebrow}>{t('hero.eyebrow')}</p>
-            <h1 className={styles.heroTitle}>rewrite.so</h1>
-            <p className={styles.heroStatement}>
+            {/* Hero left side intentionally stays at 5 elements: h1 + sub +
+                2 CTAs + fineprint. eyebrow / brand h1 / heroIntro / standalone
+                GitHub link were removed in the PR-2-iter tightening — see plan. */}
+            <h1 className={styles.heroStatement}>
               <span>{t('hero.h1Line1')}</span>
               <span>{t('hero.h1Line2')}</span>
-            </p>
+            </h1>
             <p className={styles.heroLead}>{t('hero.subHeadline')}</p>
-            <p className={styles.heroIntro}>
-              {t.rich('hero.intro', {
-                kbd: (chunks) => <Kbd>{chunks}</Kbd>,
-              })}
-            </p>
             <div className={styles.heroActions}>
-              <CtaLink cta="try_demo" href="/try" className={styles.primaryButton}>
-                {t('hero.ctaPrimary')}
-              </CtaLink>
               <CtaLink
                 cta="install"
                 href={getExtensionInstallUrl()}
                 external
-                className={styles.secondaryButton}
+                className={styles.primaryButton}
               >
+                {t('hero.ctaPrimary')}
+              </CtaLink>
+              <CtaLink cta="try_demo" href="/try" className={styles.secondaryButton}>
                 {t('hero.ctaInstall')}
               </CtaLink>
             </div>
-            <p className={styles.fineprint}>{t('hero.fineprint', { count: QUOTA.loggedInFree })}</p>
-            <CtaLink
-              cta="github"
-              href="https://github.com/rewrite-so/rewrite.so"
-              external
-              className={styles.heroGithubLink}
-            >
-              {t('hero.ctaGithub')}
-            </CtaLink>
+            <p className={styles.fineprint}>
+              {t('hero.fineprint', { count: QUOTA.loggedInFree })}
+              {' · '}
+              <CtaLink
+                cta="github"
+                href="https://github.com/rewrite-so/rewrite.so"
+                external
+                className={styles.fineprintLink}
+              >
+                GitHub →
+              </CtaLink>
+            </p>
           </div>
 
           <HomeRewriteDemo copy={demoCopy} />
@@ -114,6 +191,23 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </div>
       </section>
 
+      <SectionViewMarker section="comparison" />
+      <section className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <p className={styles.eyebrow}>{t('compare.eyebrow')}</p>
+          <h2 className={styles.sectionTitle}>{t('compare.h2')}</h2>
+          <p className={styles.sectionSubtitle}>{t('compare.subtitle')}</p>
+        </div>
+        <ComparisonTable
+          caption={t('compare.caption')}
+          columns={compareColumns}
+          rows={compareRows}
+          recommendedLabel={t('compare.recommended')}
+          disclaimer={t('compare.disclaimer')}
+        />
+      </section>
+
+      <SectionViewMarker section="how" />
       <section className={`${styles.section} ${styles.howSection}`}>
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>{t('howItWorks.h2')}</h2>
@@ -153,6 +247,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </div>
       </section>
 
+      <SectionViewMarker section="privacy" />
       <section className={styles.privacyBand}>
         <div className={styles.privacyCopy}>
           <p className={styles.privacyEyebrow}>{t('privacy.eyebrow')}</p>
@@ -193,6 +288,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </div>
       </section>
 
+      <SectionViewMarker section="features" />
       <section className={styles.section}>
         <div className={styles.featureRow}>
           <Feature
@@ -228,6 +324,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </div>
       </section>
 
+      <SectionViewMarker section="pricing" />
       <section className={`${styles.section} ${styles.pricingSection}`}>
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>{t('pricing.h2')}</h2>
@@ -253,6 +350,13 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               t('pricing.pro.feat3'),
             ]}
             highlight
+          />
+          <PriceTeaser
+            title={t('pricing.byok.title')}
+            price={t('pricing.byok.price')}
+            sub={t('pricing.byok.sub')}
+            features={[t('pricing.byok.feat1'), t('pricing.byok.feat2'), t('pricing.byok.feat3')]}
+            byok
           />
         </div>
         <div className={styles.pricingActions}>
@@ -314,17 +418,24 @@ function PriceTeaser({
   sub,
   features,
   highlight,
+  byok,
 }: {
   title: string;
   price: string;
   sub: string;
   features: string[];
   highlight?: boolean;
+  byok?: boolean;
 }) {
+  const cls = [
+    styles.priceCard,
+    highlight && styles.priceCardHighlight,
+    byok && styles.priceCardByok,
+  ]
+    .filter(Boolean)
+    .join(' ');
   return (
-    <article
-      className={highlight ? `${styles.priceCard} ${styles.priceCardHighlight}` : styles.priceCard}
-    >
+    <article className={cls}>
       <div className={styles.priceName}>{title}</div>
       <div className={styles.priceValue}>{price}</div>
       <p>{sub}</p>

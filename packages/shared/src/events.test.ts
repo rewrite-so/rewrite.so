@@ -25,6 +25,13 @@ describe('events whitelist', () => {
       'subscription_canceled',
       'byok_save',
       'campaign_join',
+      // Landing v2 funnel events — section_view wired today, the other four
+      // are declared with no call sites yet (see events.ts DEFERRED notes).
+      'section_view',
+      'hero_demo_played',
+      'compare_row_expand',
+      'pricing_card_focus',
+      'early_bird_banner_click',
     ]);
   });
 
