@@ -1,0 +1,39 @@
+.card {
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+  border: 1px solid var(--border-default);
+  display: flex;
+  flex-direction: column;
+}
+
+.card[data-variant="highlighted"] {
+  border-color: var(--border-strong);
+  border-width: 2px;
+  box-shadow: var(--shadow-md);
+}
+
+.card[data-variant="inverse"] {
+  background: var(--surface-inverse);
+  color: var(--text-on-inverse);
+  border-color: var(--border-inverse);
+}
+
+.card[data-variant="dashed"] {
+  border-style: dashed;
+  border-color: var(--border-accent);
+}
+
+.card[data-padding="sm"] {
+  padding: var(--space-4);
+  gap: var(--space-3);
+}
+
+.card[data-padding="md"] {
+  padding: var(--space-6);
+  gap: var(--space-4);
+}
+
+.card[data-padding="lg"] {
+  padding: var(--space-8);
+  gap: var(--space-5);
+}

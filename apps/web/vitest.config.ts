@@ -1,11 +1,16 @@
+import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
 
-// web app 当前没有 React 组件级测试基础设施（不引入 RTL/jsdom），
-// 只覆盖纯函数 / 工具模块。组件交互依赖手动验证或未来引入 RTL 时统一加。
+// We don't ship RTL/jsdom — component smoke tests use react-dom/server
+// renderToStaticMarkup in a node environment and assert on HTML output.
+// @vitejs/plugin-react handles JSX transform in the dependency graph of any
+// .tsx component that a test imports (vite's default oxc transformer does
+// not transform JSX).
 export default defineConfig({
+  plugins: [react()],
   test: {
     environment: 'node',
     globals: false,
-    include: ['lib/**/*.test.ts', 'app/**/*.test.ts'],
+    include: ['lib/**/*.test.{ts,tsx}', 'app/**/*.test.{ts,tsx}', 'components/**/*.test.{ts,tsx}'],
   },
 });
