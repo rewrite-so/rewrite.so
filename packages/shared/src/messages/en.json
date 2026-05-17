@@ -260,7 +260,7 @@
       "subscribed": {
         "lineRenewing": "You're on Pro ({plan}). Next renewal: {date}.",
         "lineCanceling": "You're on Pro ({plan}). Period ends: {date} (will cancel at period end).",
-        "lineCancelingWithGift": "You're on Pro ({plan}). Period ends: {date} (will cancel at period end). After that, {giftDays} free days of Pro kick in.",
+        "lineCancelingWithGift": "You're on Pro ({plan}). Period ends: {date} (will cancel at period end). After that, {giftDays, number} free days of Pro kick in.",
         "manage": "Manage subscription",
         "planMonthly": "Monthly",
         "planAnnual": "Annual"

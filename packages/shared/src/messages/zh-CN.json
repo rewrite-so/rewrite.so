@@ -260,7 +260,7 @@
       "subscribed": {
         "lineRenewing": "你已订阅 Pro（{plan}）。下次续费：{date}。",
         "lineCanceling": "你已订阅 Pro（{plan}）。当期到期：{date}（到期后取消）。",
-        "lineCancelingWithGift": "你已订阅 Pro（{plan}）。当期到期：{date}（到期后取消）。到期后还有 {giftDays} 天免费 Pro。",
+        "lineCancelingWithGift": "你已订阅 Pro（{plan}）。当期到期：{date}（到期后取消）。到期后还有 {giftDays, number} 天免费 Pro。",
         "manage": "管理订阅",
         "planMonthly": "月付",
         "planAnnual": "年付"

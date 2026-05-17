@@ -260,7 +260,7 @@
       "subscribed": {
         "lineRenewing": "Pro({plan}) 구독 중. 다음 결제: {date}.",
         "lineCanceling": "Pro({plan}) 구독 중. {date}에 기간 만료 (만료 후 해지).",
-        "lineCancelingWithGift": "Pro({plan}) 구독 중. {date}에 기간 만료 (만료 후 해지). 만료 후 {giftDays}일 무료 Pro가 시작됩니다.",
+        "lineCancelingWithGift": "Pro({plan}) 구독 중. {date}에 기간 만료 (만료 후 해지). 만료 후 {giftDays, number}일 무료 Pro가 시작됩니다.",
         "manage": "구독 관리",
         "planMonthly": "월간",
         "planAnnual": "연간"

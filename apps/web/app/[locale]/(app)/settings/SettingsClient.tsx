@@ -646,6 +646,10 @@ function EarlyBirdSection({ me }: { me: UserInfo }) {
         // 待激活 gift（granted_at 在未来）：报名时已 Pro 用户场景，gift 启动时间
         // 推后到 sub 期满。显示原始 days（90）+ 启用日期，**不要**显示 giftBalanceDays
         // 因为后者把当前 sub 剩余天数也算进去（115 而非 90，用户视角费解）。
+        // Phase 1 已知简化：admin 补偿 tooling 落地后若用户同时有 active admin gift
+        // + pending 早鸟 gift，此分支只会展示 pending 行，admin 那部分 active 余额
+        // 不可见。需 Phase 2 加 source 维度或改成同时展示两行（后端 query 已支持，
+        // 见 early-bird.test.ts 的 stacked grants 用例）。
         <Row
           label={t('giftScheduledLabel')}
           value={t('giftScheduledValue', {

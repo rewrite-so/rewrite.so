@@ -260,7 +260,7 @@
       "subscribed": {
         "lineRenewing": "Du nutzt Pro ({plan}). Nächste Verlängerung: {date}.",
         "lineCanceling": "Du nutzt Pro ({plan}). Endet am: {date} (wird zum Periodenende gekündigt).",
-        "lineCancelingWithGift": "Du nutzt Pro ({plan}). Endet am: {date} (wird zum Periodenende gekündigt). Danach starten {giftDays} kostenlose Pro-Tage.",
+        "lineCancelingWithGift": "Du nutzt Pro ({plan}). Endet am: {date} (wird zum Periodenende gekündigt). Danach starten {giftDays, number} kostenlose Pro-Tage.",
         "manage": "Abo verwalten",
         "planMonthly": "Monatlich",
         "planAnnual": "Jährlich"

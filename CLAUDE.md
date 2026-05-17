@@ -302,7 +302,8 @@ type-specific 配置走 `config_json`（schema 在 `packages/shared/src/campaign
   - `earlyBird.pendingGift`：「下一个待激活」单行（`granted_at > now ORDER BY ASC LIMIT 1`），
     类型 `{days, activatesAt, expiresAt} | null`。仅用于「报名时已 Pro 用户」场景的
     UI 提示（sub 期满后 90 天免费 Pro），普通早鸟用户 gift 立即激活时此字段为 null。
-  - 实现位于 `apps/api/src/lib/early-bird.ts`，4 个 query 通过 `db.batch()` 单 RPC 并行。
+  - 实现位于 `apps/api/src/lib/early-bird.ts`，4 个 query 通过 `db.batch()` 打包成**单 RPC**
+    （D1 服务端仍**顺序执行**，不并发；只省 round-trip，不要假设 isolation）。
 - **Creem dashboard 折扣码必须与 `campaigns.config_json.perks.discount.code`
   字符串完全一致**：是**人工同步责任**。当前早鸟码 `ISIZATWC8P`
   （Creem dashboard 生成，duration=forever, percentage=70,

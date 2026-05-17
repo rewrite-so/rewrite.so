@@ -3,9 +3,11 @@
  *
  * 输出形状对齐 packages/shared/src/me.ts:EarlyBirdSnapshotSchema。
  *
- * 性能：4 个 D1 read 通过 `db.batch([...])` 并行（D1 binding 把 batch 内的多条
- * prepared statement 在一次 RPC 内打包）。比 4 次 sequential await first() 显著
- * 降低 /v1/me 总 latency（每次 read ~5ms × 4 → 一次 ~5–10ms 来回）。
+ * 性能：4 个 D1 read 通过 `db.batch([...])` 打包成**一次 RPC**（D1 在服务端
+ * 仍**顺序执行**这些 statement，不并发——参考 Cloudflare D1 文档）。比 4 次
+ * sequential await first() 显著降低 /v1/me 总 latency（消除 3 次 worker↔D1
+ * round-trip：每次 ~5ms × 4 → 一次 ~5–10ms 往返）。不要假设 batch 内 statement
+ * 之间有 isolation/隔离语义，它就是顺序执行。
  *
  * 语义分层（不要互相推导）：
  *   - `giftBalanceDays` = MAX(expires_at) 聚合 — "用户名下 Pro 余额总剩余天数"
@@ -43,8 +45,8 @@ export async function resolveEarlyBirdSnapshot(
 ): Promise<EarlyBirdQueryResult> {
   const now = Date.now();
 
-  // 4 个 query 一次 batch，比 4 次 sequential first() 节省 round-trip。
-  // D1 contract: batch 返回数组长度 === 输入 stmts 长度，非空断言安全。
+  // 4 个 query 打包到一次 RPC（D1 服务端仍按顺序执行，单纯省 round-trip）。
+  // D1 contract: batch 返回数组长度 === 输入 stmts 长度，解构 4-tuple 安全。
   const batchResults = await db.batch<unknown>([
     // 1) 早鸟参与状态 — 任一 type='early_bird' 的 campaign 都算
     db

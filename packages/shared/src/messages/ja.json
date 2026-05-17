@@ -260,7 +260,7 @@
       "subscribed": {
         "lineRenewing": "Pro（{plan}）に登録中。次回更新：{date}。",
         "lineCanceling": "Pro（{plan}）に登録中。{date} に期間終了（期間終了後にキャンセル）。",
-        "lineCancelingWithGift": "Pro（{plan}）に登録中。{date} に期間終了（期間終了後にキャンセル）。終了後、{giftDays} 日間の無料 Pro が開始されます。",
+        "lineCancelingWithGift": "Pro（{plan}）に登録中。{date} に期間終了（期間終了後にキャンセル）。終了後、{giftDays, number} 日間の無料 Pro が開始されます。",
         "manage": "サブスク管理",
         "planMonthly": "月額",
         "planAnnual": "年額"

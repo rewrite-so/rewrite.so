@@ -158,7 +158,10 @@ export function BillingClient() {
         >
           {/* 3 个独立 full-sentence keys（不拼接）— ja/ko 等语种 particle/spacing
               对拼接敏感，每个 locale 完整拥有句子结构。pendingGift 仅在 cancel
-              状态下补充提示（续费用户的 pendingGift 永远启动不了，提示反而困惑）。 */}
+              状态下补充提示：续费用户的 gift granted_at 在 join 时固定为当时的
+              sub_end，时间到了 gift 技术上会激活，但会跟续费的 sub Pro 期重叠
+              对用户视觉上不可见，提示反而徒增噪声；cancel 用户才是 gift 真正
+              「补位」的场景（sub 到期 → gift 接上 90 天 Pro），提示有价值。 */}
           {(() => {
             const pending = me.earlyBird?.pendingGift;
             const bannerKey = me.subscription?.cancelAtPeriodEnd
