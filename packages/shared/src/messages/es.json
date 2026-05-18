@@ -360,7 +360,8 @@
     "install": "Instalar extensión",
     "tryFree": "Probar gratis",
     "settings": "Mi cuenta",
-    "languageSwitcher": "Idioma"
+    "languageSwitcher": "Idioma",
+    "menu": "Menú"
   },
   "footer": {
     "tagline": "Escribe con libertad. Envía con confianza.",
@@ -410,10 +411,36 @@
     "scenarios": {
       "h2": "¿Te suena familiar?",
       "bridge": "Para esto exactamente fue creado rewrite.so",
-      "useCase1": "Escribir en un idioma que no es el tuyo — aprendizaje, trabajo, hablar con compañeros o clientes en el extranjero.",
-      "useCase2": "Responder a clientes o socios cuando el tono tiene que ser justo el adecuado.",
-      "useCase3": "Publicaciones públicas — tuits, comentarios en Reddit / HN, issues de GitHub, descripciones de PR.",
-      "useCase4": "Emails fríos, disculpas, conversaciones difíciles — donde una palabra mal puesta cuesta caro."
+      "useCaseWork": {
+        "title": "Trabajo entre idiomas",
+        "description": "Cada situación de trabajo necesita un tono distinto. Escribe en tu lengua materna; rewrite.so te da tres tonos en inglés — casual para Slack, neutral para PRs, formal para correos a clientes.",
+        "input": "este código podría ser más simple",
+        "candidates": {
+          "casual": "Could we simplify this a bit?",
+          "faithful": "This code could be more concise.",
+          "formal": "I'd suggest simplifying this implementation."
+        }
+      },
+      "useCaseLearn": {
+        "title": "Aprender un idioma",
+        "description": "La mejor forma de aprender es usar el idioma. Escribe en el que estás aprendiendo; rewrite.so te muestra las tres versiones más naturales para comparar.",
+        "input": "I very like this idea",
+        "candidates": {
+          "casual": "Love this idea!",
+          "faithful": "I really like this idea.",
+          "formal": "I find this idea quite compelling."
+        }
+      },
+      "useCasePublic": {
+        "title": "Publicar en público",
+        "description": "Tuits, comentarios en HN, posts en Reddit — un desliz queda. Escribe en tu lengua materna; rewrite.so te da tres versiones en inglés para que compares antes de enviar.",
+        "input": "esta opinión es claramente errónea",
+        "candidates": {
+          "casual": "This take is just wrong, tbh.",
+          "faithful": "I think this take misses the point.",
+          "formal": "I respectfully disagree with this view."
+        }
+      }
     },
     "privacy": {
       "eyebrow": "El contrato de privacidad",
@@ -582,7 +609,7 @@
           "label": "En línea en cualquier campo",
           "detail": "Reemplazamos el texto donde lo estás escribiendo — sin emergente, sin barra lateral, sin segunda pestaña.",
           "cells": {
-            "grammarly": "Sugerencias en barra lateral",
+            "grammarly": "En línea + ventanas emergentes",
             "deepl": "Extensión solo en sitios compatibles",
             "chatgpt": "Copiar / pegar"
           }
@@ -630,7 +657,7 @@
           "detail": "Pensado para quien escribe entre idiomas — escribe en chino y recibe inglés, en cualquier combinación entre las 7+ locales de la interfaz.",
           "cells": {
             "grammarly": "Centrado en inglés",
-            "deepl": "Fuerte en lenguas europeas"
+            "deepl": "Solo lenguas europeas — sin CJK"
           }
         },
         "openSource": {

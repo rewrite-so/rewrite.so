@@ -360,7 +360,8 @@
     "install": "Install extension",
     "tryFree": "Try free",
     "settings": "Settings",
-    "languageSwitcher": "Language"
+    "languageSwitcher": "Language",
+    "menu": "Menu"
   },
   "footer": {
     "tagline": "Write freely. Send confidently.",
@@ -410,10 +411,36 @@
     "scenarios": {
       "h2": "Sound familiar?",
       "bridge": "This is what rewrite.so was built for",
-      "useCase1": "Writing in a language that isn't your first — learning, working, talking to overseas teammates.",
-      "useCase2": "Customer or client replies when the tone has to be just right.",
-      "useCase3": "Public posts — tweets, Reddit / HN comments, GitHub issues, PR descriptions.",
-      "useCase4": "Cold emails, apologies, hard conversations — places where one wrong word costs you."
+      "useCaseWork": {
+        "title": "Cross-language work",
+        "description": "Different work contexts need different tones. Write in your native language; rewrite.so gives you three English tones — casual for Slack, neutral for PR descriptions, formal for client emails.",
+        "input": "este código podría ser más simple",
+        "candidates": {
+          "casual": "Could we simplify this a bit?",
+          "faithful": "This code could be more concise.",
+          "formal": "I'd suggest simplifying this implementation."
+        }
+      },
+      "useCaseLearn": {
+        "title": "Learning a language",
+        "description": "The best way to learn is to use the language. Just write in the language you're learning — rewrite.so shows you the three most natural versions, side by side.",
+        "input": "I very like this idea",
+        "candidates": {
+          "casual": "Love this idea!",
+          "faithful": "I really like this idea.",
+          "formal": "I find this idea quite compelling."
+        }
+      },
+      "useCasePublic": {
+        "title": "Public posting",
+        "description": "Tweets, HN comments, Reddit posts — one slip stays. Write in your native language; rewrite.so gives you three English versions, compare them before you hit send.",
+        "input": "esta opinión es claramente errónea",
+        "candidates": {
+          "casual": "This take is just wrong, tbh.",
+          "faithful": "I think this take misses the point.",
+          "formal": "I respectfully disagree with this view."
+        }
+      }
     },
     "compare": {
       "eyebrow": "How we differ",
@@ -433,7 +460,7 @@
           "label": "Inline in any input box",
           "detail": "We replace the text you're typing right where you're typing it — no popover, no sidebar, no second tab.",
           "cells": {
-            "grammarly": "Sidebar suggestions",
+            "grammarly": "Inline + popovers",
             "deepl": "Extension on supported sites",
             "chatgpt": "Copy / paste"
           }
@@ -481,7 +508,7 @@
           "detail": "Designed for cross-language writers — type Chinese, get English back, or any combination across 7+ UI locales.",
           "cells": {
             "grammarly": "EN-focused",
-            "deepl": "EU langs strong"
+            "deepl": "EU only — no CJK"
           }
         },
         "openSource": {

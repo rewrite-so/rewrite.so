@@ -5,6 +5,7 @@ export type ComparisonCellValue =
   | { kind: 'check'; label?: string }
   | { kind: 'cross'; label?: string }
   | { kind: 'partial'; label?: string }
+  | { kind: 'unknown'; label?: string }
   | { kind: 'text'; text: string };
 
 export type ComparisonColumn = {
@@ -77,6 +78,23 @@ function CellMark({ value }: { value: ComparisonCellValue }) {
           <title>{value.label ?? 'partial'}</title>
           <circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" strokeWidth="2" />
           <path d="M8 2 A6 6 0 0 1 8 14 Z" fill="currentColor" />
+        </svg>
+        {value.label && <span className={styles.cellLabel}>{value.label}</span>}
+      </span>
+    );
+  }
+  if (value.kind === 'unknown') {
+    return (
+      <span className={styles.cellUnknown}>
+        <svg width="16" height="16" viewBox="0 0 16 16" role="img">
+          <title>{value.label ?? 'unknown'}</title>
+          <path
+            d="M3 8h10"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
         </svg>
         {value.label && <span className={styles.cellLabel}>{value.label}</span>}
       </span>

@@ -360,7 +360,8 @@
     "install": "安装扩展",
     "tryFree": "免费试用",
     "settings": "我的",
-    "languageSwitcher": "语言"
+    "languageSwitcher": "语言",
+    "menu": "菜单"
   },
   "footer": {
     "tagline": "随意写，自信发送。",
@@ -410,10 +411,36 @@
     "scenarios": {
       "h2": "这些场景你眼熟吗？",
       "bridge": "rewrite.so 就是为这些时刻做的：",
-      "useCase1": "用非母语写作——学习中、工作中、跟海外同事或客户沟通的时候。",
-      "useCase2": "给客户、合作方回信，语气需要刚刚好的场景。",
-      "useCase3": "公开发言——推文、Reddit / HN 评论、GitHub Issues、PR 描述。",
-      "useCase4": "陌生人开场、道歉、难开口的话——一个词用错就尴尬的时刻。"
+      "useCaseWork": {
+        "title": "跨语言工作",
+        "description": "工作场景多，语气得跟着变。你用母语写，rewrite.so 给 3 种英文语气：跟同事 Slack 用口语，给客户写邮件用正式，PR 描述用中性。",
+        "input": "这段代码可以更简洁一点",
+        "candidates": {
+          "casual": "Could we simplify this a bit?",
+          "faithful": "This code could be more concise.",
+          "formal": "I'd suggest simplifying this implementation."
+        }
+      },
+      "useCaseLearn": {
+        "title": "学外语",
+        "description": "最好的学习方法是多用外语。你尽管用目标语言写，rewrite.so 提供 3 种最地道的说法，供你对比学习。",
+        "input": "I very like this idea",
+        "candidates": {
+          "casual": "Love this idea!",
+          "faithful": "I really like this idea.",
+          "formal": "I find this idea quite compelling."
+        }
+      },
+      "useCasePublic": {
+        "title": "公开发言",
+        "description": "X、HN、Reddit 这类场合一句不慎就留痕。你用母语写最想说的，rewrite.so 给 3 种英文说法，按发送前对比，挑最稳的那个。",
+        "input": "这观点真离谱",
+        "candidates": {
+          "casual": "This take is just wrong, tbh.",
+          "faithful": "I think this take misses the point.",
+          "formal": "I respectfully disagree with this view."
+        }
+      }
     },
     "compare": {
       "eyebrow": "我们的不同",
@@ -433,7 +460,7 @@
           "label": "在任意输入框内 inline 改写",
           "detail": "在你正在打字的输入框里直接替换，没有侧边栏、没有弹层、不切 tab。",
           "cells": {
-            "grammarly": "侧边栏建议",
+            "grammarly": "Inline + 弹层",
             "deepl": "支持站点的扩展",
             "chatgpt": "复制 / 粘贴"
           }
@@ -481,7 +508,7 @@
           "detail": "为跨语言写作而设计——中文输入英文输出，7+ UI 语言任意搭配。",
           "cells": {
             "grammarly": "英文为主",
-            "deepl": "欧洲语言强"
+            "deepl": "仅欧洲语言，无 CJK"
           }
         },
         "openSource": {

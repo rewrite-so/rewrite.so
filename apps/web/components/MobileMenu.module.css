@@ -1,0 +1,69 @@
+/* MobileMenu: hamburger + 下拉 panel。
+   仅 < 900px 出现(.hamburger 在桌面默认 display:none,由 TopNav.module.css 控制
+   或本文件自带 @media 见下方)。 */
+
+.root {
+  position: relative;
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .root {
+    display: inline-block;
+  }
+}
+
+.hamburger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+.hamburger:hover,
+.hamburger[aria-expanded="true"] {
+  background: var(--surface-muted);
+}
+
+.panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+  padding: var(--space-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.panelItem {
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: var(--fs-sm);
+  text-decoration: none;
+  transition: background 120ms ease;
+}
+
+.panelItem:hover {
+  background: var(--surface-muted);
+}
+
+.panelItemEarlyBird {
+  color: var(--warning-700);
+  font-weight: var(--fw-medium);
+}

@@ -47,6 +47,13 @@ const PLATFORM_TOOLBAR: Record<
     { name: 'code', hideOnMobile: true },
     { name: 'link', hideOnMobile: false },
   ],
+  Discord: [
+    { name: 'image', hideOnMobile: false },
+    { name: 'gif', hideOnMobile: false },
+    { name: 'emoji', hideOnMobile: true },
+    { name: 'at', hideOnMobile: true },
+    { name: 'link', hideOnMobile: true },
+  ],
 };
 
 type ToolbarIconName =
@@ -268,6 +275,12 @@ export function PlatformInputSkin({
         <div className={styles.headerGitHub} aria-hidden="true">
           <span className={`${styles.githubTab} ${styles.githubTabActive}`}>Write</span>
           <span className={styles.githubTab}>Preview</span>
+        </div>
+      )}
+      {platform === 'Discord' && (
+        <div className={styles.headerDiscord}>
+          <span className={styles.headerDiscordHash}>#</span>
+          <span>practice</span>
         </div>
       )}
 

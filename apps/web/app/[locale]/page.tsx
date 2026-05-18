@@ -15,6 +15,7 @@ import { getExtensionInstallUrl } from '../../lib/extension-install-url.ts';
 import styles from './HomePage.module.css';
 import { HomeRewriteDemo } from './HomeRewriteDemo.tsx';
 import type { PlatformName } from './PlatformIcon.tsx';
+import { ScenariosShowcase } from './ScenariosShowcase.tsx';
 
 const COMPARE_ROW_KEYS = [
   'inline',
@@ -49,7 +50,7 @@ const COMPARE_KIND: Record<
   keyboard: { us: 'text', grammarly: 'text', deepl: 'text', chatgpt: 'text' },
   speed: { us: 'text', grammarly: 'text', deepl: 'text', chatgpt: 'text' },
   candidates: { us: 'check', grammarly: 'cross', deepl: 'partial', chatgpt: 'cross' },
-  logging: { us: 'check', grammarly: 'cross', deepl: 'cross', chatgpt: 'cross' },
+  logging: { us: 'check', grammarly: 'unknown', deepl: 'unknown', chatgpt: 'unknown' },
   byok: { us: 'check', grammarly: 'cross', deepl: 'cross', chatgpt: 'cross' },
   multilang: { us: 'check', grammarly: 'partial', deepl: 'partial', chatgpt: 'check' },
   openSource: { us: 'check', grammarly: 'cross', deepl: 'cross', chatgpt: 'cross' },
@@ -64,7 +65,20 @@ const DEMO_EXAMPLES: ReadonlyArray<{ key: string; platform: PlatformName }> = [
   { key: 'jaToEn', platform: 'Reddit' },
   { key: 'tone', platform: 'GitHub' },
 ];
-const USE_CASE_KEYS = ['useCase1', 'useCase2', 'useCase3', 'useCase4'] as const;
+// 3 个使用场景。每个用例的演示会展示 3 候选(faithful/casual/formal)对比,所以
+// 用例本身不再绑定单一 style —— 用例和 platform 一一对应。i18n key 用 semantic
+// 命名(useCaseWork / useCaseLearn / useCasePublic)而非编号,避免历史包袱。
+const USE_CASES: ReadonlyArray<{
+  key: string;
+  platform: PlatformName;
+}> = [
+  { key: 'useCaseWork', platform: 'GitHub' },
+  { key: 'useCaseLearn', platform: 'Discord' },
+  { key: 'useCasePublic', platform: 'X' },
+];
+// 顺序与 hero demo 的 STYLE_KEYS 保持一致(faithful → casual → formal),
+// 三种风格按"贴近原文 → 口语 → 正式"的渐变排列。
+const CANDIDATE_STYLES = ['faithful', 'casual', 'formal'] as const;
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -181,14 +195,20 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           <p className={styles.eyebrow}>{t('scenarios.h2')}</p>
           <h2 className={styles.sectionTitle}>{t('scenarios.bridge')}</h2>
         </div>
-        <div className={styles.useCaseGrid}>
-          {USE_CASE_KEYS.map((key) => (
-            <article className={styles.useCase} key={key}>
-              <span className={styles.useCaseMark}>0{USE_CASE_KEYS.indexOf(key) + 1}</span>
-              <p>{t(`scenarios.${key}`)}</p>
-            </article>
-          ))}
-        </div>
+        <ScenariosShowcase
+          items={USE_CASES.map(({ key, platform }) => ({
+            key,
+            platform,
+            title: t(`scenarios.${key}.title`),
+            description: t(`scenarios.${key}.description`),
+            input: t(`scenarios.${key}.input`),
+            candidates: CANDIDATE_STYLES.map((style) => ({
+              style,
+              label: t(`demo.label.${style}`),
+              text: t(`scenarios.${key}.candidates.${style}`),
+            })),
+          }))}
+        />
       </section>
 
       <SectionViewMarker section="comparison" />

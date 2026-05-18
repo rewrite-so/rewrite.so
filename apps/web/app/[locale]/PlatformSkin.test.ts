@@ -9,7 +9,13 @@ import { PLATFORM_META, shouldShowPlaceholder } from './platform-meta.ts';
 // (2) placeholder/text 切换的纯函数 shouldShowPlaceholder
 // 渲染分支测试靠人工 sample(参考 plan 的"人工 sample 检查清单")。
 
-const EXPECTED_PLATFORMS: ReadonlyArray<PlatformName> = ['X', 'Slack', 'Reddit', 'GitHub'];
+const EXPECTED_PLATFORMS: ReadonlyArray<PlatformName> = [
+  'X',
+  'Slack',
+  'Reddit',
+  'GitHub',
+  'Discord',
+];
 
 describe('PLATFORM_META', () => {
   it.each(EXPECTED_PLATFORMS)('%s 含全部 5 个字段且非空', (platform) => {
@@ -22,7 +28,7 @@ describe('PLATFORM_META', () => {
     expect(meta.primaryLabel).toMatch(/\S/);
   });
 
-  it('覆盖且仅覆盖 4 个 PlatformName,没多余 key', () => {
+  it('覆盖且仅覆盖 EXPECTED_PLATFORMS 列表的 key,没多余', () => {
     expect(Object.keys(PLATFORM_META).sort()).toEqual([...EXPECTED_PLATFORMS].sort());
   });
 
