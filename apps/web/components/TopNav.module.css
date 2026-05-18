@@ -1,6 +1,9 @@
 /* TopNav uses its own narrow max-width (1080) — Container's 1120 is reserved
    for hero / sections. NAV-specific magic numbers (font-size 14/15/9, blur
-   amounts) intentionally bypass tokens; they are nav-shell concerns. */
+   amounts) intentionally bypass tokens; they are nav-shell concerns.
+
+   响应式断点 900px 与 HomePage.module.css 主断点对齐:hero / scenarios 切单列
+   时,nav 同步切 hamburger 形态,视觉一致。 */
 
 .nav {
   position: sticky;
@@ -18,7 +21,6 @@
   padding: var(--space-3) var(--space-6);
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
   gap: var(--space-1);
 }
 
@@ -33,8 +35,7 @@
 .centerLinks {
   display: flex;
   gap: var(--space-1);
-  flex: 1 1 220px;
-  flex-wrap: wrap;
+  flex: 1 1 auto;
   min-width: 0;
 }
 
@@ -89,4 +90,28 @@
 
 .ctaSignIn:hover {
   background: var(--surface-muted);
+}
+
+/* < 900px:隐藏 center links + 次要 CTA (Sign In / Install outline)。
+   保留 brand / LanguageSwitcher / 主 CTA (ctaPrimary) / Hamburger (MobileMenu)。
+   centerLinks 用 flex:1 撑开,让 LanguageSwitcher 和右侧按钮自然右对齐。 */
+@media (max-width: 900px) {
+  .inner {
+    padding: var(--space-2) var(--space-4);
+  }
+
+  .brand {
+    flex: 1 1 auto;
+    margin-right: 0;
+  }
+
+  .centerLinks,
+  .ctaSignIn,
+  .ctaOutline {
+    display: none;
+  }
+
+  .ctaPrimary {
+    margin-left: var(--space-1);
+  }
 }

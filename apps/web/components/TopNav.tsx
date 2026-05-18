@@ -5,6 +5,7 @@ import { getExtensionInstallUrl } from '../lib/extension-install-url.ts';
 import { getCurrentUser } from '../lib/get-current-user.ts';
 import { CtaLink } from './CtaLink.tsx';
 import { LanguageSwitcher } from './LanguageSwitcher.tsx';
+import { MobileMenu } from './MobileMenu.tsx';
 import styles from './TopNav.module.css';
 
 // Early Bird link visibility flows through the shared
@@ -12,6 +13,10 @@ import styles from './TopNav.module.css';
 // which also drives the homepage Hero badge. The two surfaces are locked
 // together via the `show_homepage_badge` column on the campaigns row — so
 // `state.showBadge` is the single condition for showing either.
+//
+// 移动端布局 (< 900px) 把 .centerLinks / .ctaSignIn / .ctaOutline 隐藏,
+// 把这些项收进 MobileMenu (hamburger panel)。
+// LanguageSwitcher + 主 CTA (Try Free / Settings) 在两端都可见。
 
 export async function TopNav() {
   const t = await getTranslations('nav');
@@ -20,6 +25,16 @@ export async function TopNav() {
     getCampaignEntryState('early-bird'),
   ]);
   const isAuthed = user !== null;
+  const installUrl = getExtensionInstallUrl();
+  const mobileMenuLabels = {
+    menu: t('menu'),
+    try: t('try'),
+    pricing: t('pricing'),
+    earlyBird: t('earlyBird'),
+    github: t('github'),
+    signIn: t('signIn'),
+    install: t('install'),
+  };
 
   return (
     <nav className={styles.nav}>
@@ -50,39 +65,29 @@ export async function TopNav() {
           </a>
         </div>
 
-        <LanguageSwitcher />
-        {isAuthed ? (
-          <>
-            <CtaLink
-              cta="install"
-              href={getExtensionInstallUrl()}
-              external
-              className={styles.ctaOutline}
-            >
-              {t('install')}
-            </CtaLink>
-            <Link href="/settings" className={styles.ctaPrimary}>
-              {t('settings')}
-            </Link>
-          </>
-        ) : (
-          <>
-            <CtaLink cta="signin" href="/login" className={styles.ctaSignIn}>
-              {t('signIn')}
-            </CtaLink>
-            <CtaLink
-              cta="install"
-              href={getExtensionInstallUrl()}
-              external
-              className={styles.ctaOutline}
-            >
-              {t('install')}
-            </CtaLink>
-            <CtaLink cta="try_demo" href="/try" className={styles.ctaPrimary}>
-              {t('tryFree')}
-            </CtaLink>
-          </>
+        <LanguageSwitcher ariaLabel={t('languageSwitcher')} />
+
+        {!isAuthed && (
+          <CtaLink cta="signin" href="/login" className={styles.ctaSignIn}>
+            {t('signIn')}
+          </CtaLink>
         )}
+        <CtaLink cta="install" href={installUrl} external className={styles.ctaOutline}>
+          {t('install')}
+        </CtaLink>
+
+        {isAuthed && (
+          <Link href="/settings" className={styles.ctaPrimary}>
+            {t('settings')}
+          </Link>
+        )}
+
+        <MobileMenu
+          isAuthed={isAuthed}
+          installUrl={installUrl}
+          earlyBirdVisible={earlyBirdEntry.showBadge}
+          labels={mobileMenuLabels}
+        />
       </div>
     </nav>
   );

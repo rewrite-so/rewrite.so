@@ -360,7 +360,8 @@
     "install": "Installer l'extension",
     "tryFree": "Essai gratuit",
     "settings": "Mon compte",
-    "languageSwitcher": "Langue"
+    "languageSwitcher": "Langue",
+    "menu": "Menu"
   },
   "footer": {
     "tagline": "Écrivez librement. Envoyez en confiance.",
@@ -410,10 +411,36 @@
     "scenarios": {
       "h2": "Ça vous parle ?",
       "bridge": "C'est exactement pour ça que rewrite.so est fait",
-      "useCase1": "Écrire dans une langue qui n'est pas la vôtre — apprentissage, travail, échanges avec des collègues ou clients à l'étranger.",
-      "useCase2": "Réponses aux clients ou partenaires, quand le ton doit être pile-poil.",
-      "useCase3": "Publications publiques — tweets, commentaires Reddit / HN, GitHub Issues, descriptions de PR.",
-      "useCase4": "Emails à froid, excuses, conversations difficiles — quand un mot de travers coûte cher."
+      "useCaseWork": {
+        "title": "Travailler entre langues",
+        "description": "Chaque situation de travail demande un ton différent. Écrivez dans votre langue maternelle ; rewrite.so vous donne trois tons en anglais — décontracté pour Slack, neutre pour les PR, formel pour les emails clients.",
+        "input": "ce code pourrait être plus simple",
+        "candidates": {
+          "casual": "Could we simplify this a bit?",
+          "faithful": "This code could be more concise.",
+          "formal": "I'd suggest simplifying this implementation."
+        }
+      },
+      "useCaseLearn": {
+        "title": "Apprendre une langue",
+        "description": "La meilleure méthode : utiliser la langue. Écrivez dans celle que vous apprenez ; rewrite.so vous montre les trois versions les plus naturelles à comparer.",
+        "input": "I very like this idea",
+        "candidates": {
+          "casual": "Love this idea!",
+          "faithful": "I really like this idea.",
+          "formal": "I find this idea quite compelling."
+        }
+      },
+      "useCasePublic": {
+        "title": "Publication publique",
+        "description": "Tweets, commentaires HN, posts Reddit — une maladresse reste. Écrivez dans votre langue maternelle ; rewrite.so propose trois versions en anglais à comparer avant d'envoyer.",
+        "input": "cette opinion est clairement à côté",
+        "candidates": {
+          "casual": "This take is just wrong, tbh.",
+          "faithful": "I think this take misses the point.",
+          "formal": "I respectfully disagree with this view."
+        }
+      }
     },
     "privacy": {
       "eyebrow": "Le contrat de confidentialité",

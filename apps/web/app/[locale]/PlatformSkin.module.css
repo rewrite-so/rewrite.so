@@ -87,6 +87,24 @@
   background: #f6f8fa;
 }
 
+.headerDiscord {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  border-bottom: 1px solid rgba(17, 17, 15, 0.05);
+  padding: 10px 14px;
+  background: #fff;
+  color: #313338;
+  font-weight: 600;
+  font-size: 0.84rem;
+}
+
+.headerDiscordHash {
+  color: #80848e;
+  font-weight: 400;
+  font-size: 1.05rem;
+}
+
 .githubTab {
   border: 1px solid transparent;
   border-bottom: 0;
@@ -261,6 +279,17 @@
   padding: 6px 14px;
   background: #2da44e;
   box-shadow: 0 1px 0 rgba(27, 31, 36, 0.1);
+}
+
+.btnDiscord {
+  border-radius: 4px;
+  padding: 6px 14px;
+  background: #5865f2;
+}
+
+.skinDiscord .toolbarIcons {
+  /* Discord light mode secondary text color */
+  color: #4e5058;
 }
 
 /* ─── 响应式 ───────────────────────────────────────────────────── */

@@ -45,6 +45,13 @@ export const PLATFORM_META: Record<
     placeholder: 'Leave a comment',
     primaryLabel: 'Comment',
   },
+  Discord: {
+    tabName: 'Discord',
+    tabSuffix: 'practice',
+    url: 'discord.com/channels/langclub/practice',
+    placeholder: 'Message #practice',
+    primaryLabel: 'Send',
+  },
 };
 
 // 决定输入区是显示 placeholder 还是用户文本。
