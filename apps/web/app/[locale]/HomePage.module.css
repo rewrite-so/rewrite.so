@@ -708,21 +708,31 @@
 }
 
 .scenarioListItem {
+  /* <li> 仅作 list-item 容器(无视觉样式) —— 交互元素是内层 <button>。
+     原 padding / border / hover 全部迁到 .scenarioListItemButton。 */
+}
+
+.scenarioListItemButton {
+  display: block;
+  width: 100%;
   padding: 16px 18px;
   border: 1px solid transparent;
   border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: default;
   transition:
     background 200ms ease,
     border-color 200ms ease;
-  outline: none;
-  cursor: default;
 }
 
-.scenarioListItem:hover {
+.scenarioListItemButton:hover {
   background: rgba(58, 111, 85, 0.04);
 }
 
-.scenarioListItem:focus-visible {
+.scenarioListItemButton:focus-visible {
   outline: 2px solid var(--brand-500);
   outline-offset: 2px;
 }
@@ -746,6 +756,7 @@
 }
 
 .scenarioListTitle {
+  display: block;
   margin: 10px 0 4px;
   color: var(--text-primary);
   font-size: 1.05rem;
@@ -754,6 +765,7 @@
 }
 
 .scenarioListDesc {
+  display: block;
   margin: 0;
   color: var(--neutral-700);
   font-size: 0.9rem;

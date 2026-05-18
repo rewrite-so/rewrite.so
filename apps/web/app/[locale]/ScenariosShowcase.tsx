@@ -185,24 +185,30 @@ export function ScenariosShowcase({ items }: ScenariosShowcaseProps) {
             setPinnedIndex(null);
             setAdvanceIndex((idx) => (idx + 1) % items.length);
           };
+          // <li> 仅作 list-item 容器;真实交互在内层 <button>(focus = pin,
+          // blur = unpin & advance,与鼠标 hover 等价)。h3/p 降为 span 因
+          // HTML 规定 button 不能含 heading / interactive 元素;视觉上靠 CSS
+          // display:block 复原。
           return (
-            // biome-ignore lint/a11y/noNoninteractiveTabindex: scenario tabs act like options;
-            //   focus = pin (parity with mouse hover), blur = unpin & advance.
-            <li
-              key={item.key}
-              className={[styles.scenarioListItem, isActive ? styles.scenarioListItemActive : '']
-                .filter(Boolean)
-                .join(' ')}
-              tabIndex={0}
-              onMouseEnter={pin}
-              onMouseLeave={unpinAndAdvance}
-              onFocus={pin}
-              onBlur={unpinAndAdvance}
-              aria-current={isActive ? 'true' : undefined}
-            >
-              <span className={styles.scenarioListMark}>0{i + 1}</span>
-              <h3 className={styles.scenarioListTitle}>{item.title}</h3>
-              <p className={styles.scenarioListDesc}>{item.description}</p>
+            <li key={item.key} className={styles.scenarioListItem}>
+              <button
+                type="button"
+                className={[
+                  styles.scenarioListItemButton,
+                  isActive ? styles.scenarioListItemActive : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+                onMouseEnter={pin}
+                onMouseLeave={unpinAndAdvance}
+                onFocus={pin}
+                onBlur={unpinAndAdvance}
+                aria-current={isActive ? 'true' : undefined}
+              >
+                <span className={styles.scenarioListMark}>0{i + 1}</span>
+                <span className={styles.scenarioListTitle}>{item.title}</span>
+                <span className={styles.scenarioListDesc}>{item.description}</span>
+              </button>
             </li>
           );
         })}
