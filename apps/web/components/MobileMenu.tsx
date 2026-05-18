@@ -14,7 +14,6 @@ import styles from './MobileMenu.module.css';
 
 interface MobileMenuLabels {
   menu: string;
-  try: string;
   pricing: string;
   earlyBird: string;
   github: string;
@@ -39,7 +38,29 @@ export function MobileMenu({ isAuthed, installUrl, earlyBirdVisible, labels }: M
       if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key === 'Escape') {
+        setOpen(false);
+        return;
+      }
+      const root = rootRef.current;
+      if (!root) return;
+      const items = Array.from(root.querySelectorAll<HTMLElement>('[role="menuitem"]'));
+      if (items.length === 0) return;
+      const idx = items.findIndex((el) => el === document.activeElement);
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        items[(idx + 1 + items.length) % items.length]?.focus();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        const prev = idx <= 0 ? items.length - 1 : idx - 1;
+        items[prev]?.focus();
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        items[0]?.focus();
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        items[items.length - 1]?.focus();
+      }
     };
     document.addEventListener('mousedown', onMouseDown);
     document.addEventListener('keydown', onKey);
@@ -97,9 +118,6 @@ export function MobileMenu({ isAuthed, installUrl, earlyBirdVisible, labels }: M
       </button>
       {open && (
         <div id="mobile-menu-panel" className={styles.panel} role="menu">
-          <Link href="/try" className={styles.panelItem} role="menuitem" onClick={close}>
-            {labels.try}
-          </Link>
           <Link href="/pricing" className={styles.panelItem} role="menuitem" onClick={close}>
             {labels.pricing}
           </Link>

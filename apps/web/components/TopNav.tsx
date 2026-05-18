@@ -28,7 +28,6 @@ export async function TopNav() {
   const installUrl = getExtensionInstallUrl();
   const mobileMenuLabels = {
     menu: t('menu'),
-    try: t('try'),
     pricing: t('pricing'),
     earlyBird: t('earlyBird'),
     github: t('github'),
@@ -76,10 +75,14 @@ export async function TopNav() {
           {t('install')}
         </CtaLink>
 
-        {isAuthed && (
+        {isAuthed ? (
           <Link href="/settings" className={styles.ctaPrimary}>
             {t('settings')}
           </Link>
+        ) : (
+          <CtaLink cta="try_demo" href="/try" className={styles.ctaPrimary}>
+            {t('tryFree')}
+          </CtaLink>
         )}
 
         <MobileMenu

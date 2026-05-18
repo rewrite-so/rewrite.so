@@ -176,21 +176,28 @@ export function ScenariosShowcase({ items }: ScenariosShowcaseProps) {
       <ol className={styles.scenarioList}>
         {items.map((item, i) => {
           const isActive = shownIndex === i;
+          const pin = () => setPinnedIndex(i);
+          // unpin 时 advance forward。否则 shownIndex 切回原 auto 场景会触发
+          // [shownIndex] effect 把 phase reset 到 typing,用户感受是"看了一半
+          // 的 auto 场景又从头开始"。advance 一步后回到一个新场景从头演化反而
+          // 自然(用户本来就该看新东西)。
+          const unpinAndAdvance = () => {
+            setPinnedIndex(null);
+            setAdvanceIndex((idx) => (idx + 1) % items.length);
+          };
           return (
+            // biome-ignore lint/a11y/noNoninteractiveTabindex: scenario tabs act like options;
+            //   focus = pin (parity with mouse hover), blur = unpin & advance.
             <li
               key={item.key}
               className={[styles.scenarioListItem, isActive ? styles.scenarioListItemActive : '']
                 .filter(Boolean)
                 .join(' ')}
-              onMouseEnter={() => setPinnedIndex(i)}
-              onMouseLeave={() => {
-                // unpin 时 advance forward。否则 shownIndex 切回原 auto 场景会触发
-                // [shownIndex] effect 把 phase reset 到 typing,用户感受是"看了一半
-                // 的 auto 场景又从头开始"。advance 一步后回到一个新场景从头演化反而
-                // 自然(用户本来就该看新东西)。
-                setPinnedIndex(null);
-                setAdvanceIndex((idx) => (idx + 1) % items.length);
-              }}
+              tabIndex={0}
+              onMouseEnter={pin}
+              onMouseLeave={unpinAndAdvance}
+              onFocus={pin}
+              onBlur={unpinAndAdvance}
               aria-current={isActive ? 'true' : undefined}
             >
               <span className={styles.scenarioListMark}>0{i + 1}</span>

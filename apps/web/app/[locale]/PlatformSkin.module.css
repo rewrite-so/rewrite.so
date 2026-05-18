@@ -1,4 +1,4 @@
-/* PlatformSkin: 4 个平台的演示输入框 skin (X / Slack / Reddit / GitHub)。
+/* PlatformSkin: 5 个平台的演示输入框 skin (X / Slack / Reddit / GitHub / Discord)。
    字体故意 override 父级 demoShell 的 monospace 回到 system sans-serif —— 真实平台
    都不是 monospace,monospace 是 demo "代码味"叙事,但平台输入框要看着真实。 */
 
@@ -93,14 +93,14 @@
   align-items: center;
   border-bottom: 1px solid rgba(17, 17, 15, 0.05);
   padding: 10px 14px;
-  background: #fff;
-  color: #313338;
+  background: #fff; /* mock-only */
+  color: #313338; /* mock-only — Discord channel-name dark */
   font-weight: 600;
   font-size: 0.84rem;
 }
 
 .headerDiscordHash {
-  color: #80848e;
+  color: #80848e; /* mock-only — Discord hash muted */
   font-weight: 400;
   font-size: 1.05rem;
 }
@@ -284,11 +284,11 @@
 .btnDiscord {
   border-radius: 4px;
   padding: 6px 14px;
-  background: #5865f2;
+  background: #5865f2; /* mock-only — Discord Blurple */
 }
 
 .skinDiscord .toolbarIcons {
-  /* Discord light mode secondary text color */
+  /* mock-only — Discord light-mode secondary text */
   color: #4e5058;
 }
 
