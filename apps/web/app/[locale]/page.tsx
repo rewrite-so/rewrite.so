@@ -50,7 +50,7 @@ const COMPARE_KIND: Record<
   keyboard: { us: 'text', grammarly: 'text', deepl: 'text', chatgpt: 'text' },
   speed: { us: 'text', grammarly: 'text', deepl: 'text', chatgpt: 'text' },
   candidates: { us: 'check', grammarly: 'cross', deepl: 'partial', chatgpt: 'cross' },
-  logging: { us: 'check', grammarly: 'cross', deepl: 'cross', chatgpt: 'cross' },
+  logging: { us: 'check', grammarly: 'unknown', deepl: 'unknown', chatgpt: 'unknown' },
   byok: { us: 'check', grammarly: 'cross', deepl: 'cross', chatgpt: 'cross' },
   multilang: { us: 'check', grammarly: 'partial', deepl: 'partial', chatgpt: 'check' },
   openSource: { us: 'check', grammarly: 'cross', deepl: 'cross', chatgpt: 'cross' },

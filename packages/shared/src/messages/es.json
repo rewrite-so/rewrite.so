@@ -609,7 +609,7 @@
           "label": "En línea en cualquier campo",
           "detail": "Reemplazamos el texto donde lo estás escribiendo — sin emergente, sin barra lateral, sin segunda pestaña.",
           "cells": {
-            "grammarly": "Sugerencias en barra lateral",
+            "grammarly": "En línea + ventanas emergentes",
             "deepl": "Extensión solo en sitios compatibles",
             "chatgpt": "Copiar / pegar"
           }
@@ -657,7 +657,7 @@
           "detail": "Pensado para quien escribe entre idiomas — escribe en chino y recibe inglés, en cualquier combinación entre las 7+ locales de la interfaz.",
           "cells": {
             "grammarly": "Centrado en inglés",
-            "deepl": "Fuerte en lenguas europeas"
+            "deepl": "Solo lenguas europeas — sin CJK"
           }
         },
         "openSource": {

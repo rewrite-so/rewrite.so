@@ -609,7 +609,7 @@
           "label": "Inline dans n'importe quel champ",
           "detail": "Le texte est remplacé là où vous l'écrivez — pas de popover, pas de barre latérale, pas de second onglet.",
           "cells": {
-            "grammarly": "Suggestions en barre latérale",
+            "grammarly": "En ligne + pop-ups",
             "deepl": "Extension sur les sites pris en charge",
             "chatgpt": "Copier / coller"
           }
@@ -657,7 +657,7 @@
           "detail": "Pensé pour qui écrit entre les langues — saisissez en chinois, sortez en anglais, combinaisons libres entre 7+ locales d'interface.",
           "cells": {
             "grammarly": "Centré sur l'anglais",
-            "deepl": "Fort en langues européennes"
+            "deepl": "Langues européennes uniquement — pas de CJK"
           }
         },
         "openSource": {

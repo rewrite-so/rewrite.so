@@ -460,7 +460,7 @@
           "label": "在任意输入框内 inline 改写",
           "detail": "在你正在打字的输入框里直接替换，没有侧边栏、没有弹层、不切 tab。",
           "cells": {
-            "grammarly": "侧边栏建议",
+            "grammarly": "Inline + 弹层",
             "deepl": "支持站点的扩展",
             "chatgpt": "复制 / 粘贴"
           }
@@ -508,7 +508,7 @@
           "detail": "为跨语言写作而设计——中文输入英文输出，7+ UI 语言任意搭配。",
           "cells": {
             "grammarly": "英文为主",
-            "deepl": "欧洲语言强"
+            "deepl": "仅欧洲语言，无 CJK"
           }
         },
         "openSource": {

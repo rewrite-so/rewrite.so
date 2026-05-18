@@ -609,7 +609,7 @@
           "label": "Inline in jedem Eingabefeld",
           "detail": "Der Text wird genau dort ersetzt, wo du ihn tippst — kein Popover, keine Seitenleiste, kein zweiter Tab.",
           "cells": {
-            "grammarly": "Vorschläge in der Seitenleiste",
+            "grammarly": "Inline + Popovers",
             "deepl": "Erweiterung auf unterstützten Seiten",
             "chatgpt": "Kopieren / einfügen"
           }
@@ -657,7 +657,7 @@
           "detail": "Für sprachübergreifende Autoren — schreibe Chinesisch, erhalte Englisch zurück, beliebige Kombinationen mit 7+ UI-Locales.",
           "cells": {
             "grammarly": "Englisch-zentriert",
-            "deepl": "Stark in EU-Sprachen"
+            "deepl": "Nur EU-Sprachen — kein CJK"
           }
         },
         "openSource": {

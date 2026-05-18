@@ -460,7 +460,7 @@
           "label": "Inline in any input box",
           "detail": "We replace the text you're typing right where you're typing it — no popover, no sidebar, no second tab.",
           "cells": {
-            "grammarly": "Sidebar suggestions",
+            "grammarly": "Inline + popovers",
             "deepl": "Extension on supported sites",
             "chatgpt": "Copy / paste"
           }
@@ -508,7 +508,7 @@
           "detail": "Designed for cross-language writers — type Chinese, get English back, or any combination across 7+ UI locales.",
           "cells": {
             "grammarly": "EN-focused",
-            "deepl": "EU langs strong"
+            "deepl": "EU only — no CJK"
           }
         },
         "openSource": {
