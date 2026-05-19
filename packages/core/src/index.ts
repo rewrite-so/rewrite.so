@@ -155,11 +155,16 @@ export function mount(opts: MountOptions): MountHandle {
    * P0-3 globalError race 修复：所有 panel.setGlobalError 调用都走此 helper，统一
    * 清理 applying 期间残留状态（inflight aborts + isApplyingWrite flag）。
    *
-   * 为什么需要：onSelect 内 await replaceEditable 期间，SSE 可能 deliver 一个延迟
-   * 的 quota_exceeded → panel.setGlobalError → wipe panel.innerHTML 进入全局错误态。
-   * await 结束后 setWriteFailed 被 globalErrored 早返跳过，但 `isApplyingWrite` 仍
-   * true 直到 finally → 期间用户点 Retry 会失败（isApplyingWrite 阻断）。本 helper
-   * 直接清 flag 让用户 Retry 可用；lockedEditable 故意保留供 onRetryAll 复用。
+   * 为什么需要：onSelect 内 await replaceEditable 期间，SSE 可能 deliver 延迟的
+   * quota_exceeded → panel.setGlobalError → panel.innerHTML 被 wipe 进入全局错误态。
+   * 旧 onSelect 还在 await，但 panel 已不是原 candidates 视图。await 结束时
+   * setWriteFailed 调到的是被 wipe 的 entry（已 detached），setWriteFailed 内
+   * `if (closed || globalErrored) return` 早返跳过 —— 但 finally 之前 `isApplyingWrite`
+   * 仍是 true。**如果此期间用户触发新的双击 Shift → handleTrigger 重建 panel +
+   * 新 onSelect 进入**，第二次 onSelect 顶部 `if (isApplyingWrite) return` 会把新
+   * trigger 整个吞掉。本 helper 在 globalError 转移时立即清 flag，让新 trigger
+   * 路径不被旧 onSelect 的 stale flag 阻塞。lockedEditable 故意保留供 onRetryAll
+   * 复用（handleTrigger 不查 isApplyingWrite，retryAll 直接拿 lockedEditable 重启）。
    */
   function transitionToGlobalError(
     panel: NonNullable<typeof currentPanel>,

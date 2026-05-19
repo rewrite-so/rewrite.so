@@ -135,6 +135,7 @@ async function replaceContentEditable(el: HTMLElement, newText: string, range: W
   // model reconcile 异常（虽不至于"写 3 次"，可能残留 / 格式异常）。上线后通过 telemetry
   // 监控决定是否升级反射 fallback。CLAUDE.md 已知限制段已记录。
   if ((engine === 'prosemirror' || engine === 'slate') && range === 'all') {
+    warnPmSlateDomFallback(engine);
     replaceContentEditableViaDom(el, newText, range);
     return true;
   }
@@ -293,6 +294,29 @@ function replaceContentEditableViaDom(el: HTMLElement, newText: string, range: W
       composed: true,
     }),
   );
+}
+
+/**
+ * Plan v9 P2-5: ProseMirror / Slate range='all' 走通用 DOM 路径是已知技术债
+ * （注释见 replaceContentEditable 短路 3）。在生产环境 console.warn 一次让开发
+ * 工具 / Sentry 等监控能 grep 这条路径的真实使用，决定是否升级专用反射 fallback。
+ *
+ * 用 module-level Set 防 spam：同一 engine 同一页生命周期仅 warn 一次。SPA 路由
+ * 切换 / 重新 mount extension 时 module 重新加载，Set 自然重置。
+ */
+const warnedPmSlateEngines = new Set<string>();
+function warnPmSlateDomFallback(engine: 'prosemirror' | 'slate'): void {
+  if (warnedPmSlateEngines.has(engine)) return;
+  warnedPmSlateEngines.add(engine);
+  try {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[rewrite.so] ${engine} + range='all' fell back to generic DOM path. ` +
+        `This is an acknowledged technical debt — see CLAUDE.md "已知不支持场景" + plan v9 P2-5.`,
+    );
+  } catch {
+    /* console missing in some sandboxed environments — ignore */
+  }
 }
 
 // 测试 / 调试用导出

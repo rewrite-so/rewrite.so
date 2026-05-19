@@ -378,3 +378,105 @@ describe('PM / Slate range=all short-circuit (P1-3)', () => {
     document.documentElement.removeAttribute('data-rewrite-so-main-world-ready');
   });
 });
+
+// ============================================================================
+// Plan v9 fixup follow-up: PM + range='selection' 仍走 paste 主路径（不被 P1-3 短路误扩）
+// ============================================================================
+
+describe('PM / Slate range=selection boundary (P1-3 短路只对 all)', () => {
+  // paste 主路径走 CustomEvent('rewrite-so:paste-replace') → main-world dispatch ClipboardEvent。
+  // isolated world 端 spy 这个 CustomEvent 计数比 spy contenteditable 'paste' event 更准
+  // （jsdom 下 main-world handler 不存在，contenteditable 端 paste 永远 0）。
+  function spyPasteRequest() {
+    const state = { count: 0 };
+    const handler = () => {
+      state.count++;
+    };
+    window.addEventListener('rewrite-so:paste-replace', handler);
+    return {
+      get count() {
+        return state.count;
+      },
+      cleanup: () => window.removeEventListener('rewrite-so:paste-replace', handler),
+    };
+  }
+
+  it('ProseMirror + range=selection still goes through paste main path (not DOM short-circuit)', async () => {
+    const ce = document.createElement('div');
+    ce.className = 'ProseMirror';
+    ce.contentEditable = 'true';
+    ce.textContent = 'pm content with selection';
+    document.body.appendChild(ce);
+    document.documentElement.setAttribute('data-rewrite-so-main-world-ready', '1');
+
+    // 设真实 DOM selection 选中 'selection' 子串
+    const tn = ce.firstChild!;
+    const range = document.createRange();
+    range.setStart(tn, 'pm content with '.length);
+    range.setEnd(tn, 'pm content with selection'.length);
+    const sel = window.getSelection()!;
+    sel.removeAllRanges();
+    sel.addRange(range);
+
+    const spy = spyPasteRequest();
+    try {
+      // jsdom 下 main-world handler 不存在 → requestPasteReplace 超时返 false
+      // → fallback 到 viaDom（PM 没专用反射 fallback）
+      const ok = await replaceEditable(ce, 'NEW', 'selection');
+      // 关键断言：paste 主路径**被尝试过**（短路 3 只对 range='all' 触发）
+      expect(spy.count).toBe(1);
+      expect(ok).toBe(true);
+    } finally {
+      spy.cleanup();
+      document.documentElement.removeAttribute('data-rewrite-so-main-world-ready');
+    }
+  }, 5000);
+
+  it('Slate + range=selection still goes through paste main path', async () => {
+    const ce = document.createElement('div');
+    ce.setAttribute('data-slate-editor', 'true');
+    ce.contentEditable = 'true';
+    ce.textContent = 'slate text with target';
+    document.body.appendChild(ce);
+    document.documentElement.setAttribute('data-rewrite-so-main-world-ready', '1');
+
+    const tn = ce.firstChild!;
+    const range = document.createRange();
+    range.setStart(tn, 'slate text with '.length);
+    range.setEnd(tn, 'slate text with target'.length);
+    const sel = window.getSelection()!;
+    sel.removeAllRanges();
+    sel.addRange(range);
+
+    const spy = spyPasteRequest();
+    try {
+      const ok = await replaceEditable(ce, 'NEW', 'selection');
+      expect(spy.count).toBe(1);
+      expect(ok).toBe(true);
+    } finally {
+      spy.cleanup();
+      document.documentElement.removeAttribute('data-rewrite-so-main-world-ready');
+    }
+  }, 5000);
+
+  it('ProseMirror + range=all does NOT go through paste main path (short-circuit verified)', async () => {
+    const ce = document.createElement('div');
+    ce.className = 'ProseMirror';
+    ce.contentEditable = 'true';
+    ce.textContent = 'pm content';
+    document.body.appendChild(ce);
+    document.documentElement.setAttribute('data-rewrite-so-main-world-ready', '1');
+
+    const spy = spyPasteRequest();
+    try {
+      const ok = await replaceEditable(ce, 'new', 'all');
+      // 短路 3 验证：range='all' 直接走 DOM 路径，paste 主路径**未被尝试**
+      expect(spy.count).toBe(0);
+      expect(ok).toBe(true);
+      expect(ce.textContent).toContain('new');
+    } finally {
+      spy.cleanup();
+      document.documentElement.removeAttribute('data-rewrite-so-main-world-ready');
+    }
+  });
+});

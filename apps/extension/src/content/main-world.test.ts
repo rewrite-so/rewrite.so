@@ -411,3 +411,96 @@ describe('replaceDraftEditor fast fallback (Plan v9 新增)', () => {
     expect(onChange).toHaveBeenCalled();
   });
 });
+
+// ============================================================================
+// Plan v9 fixup follow-up: WeakMap per-editor cache 隔离 + focus async reject 降级
+// ============================================================================
+
+describe('Lexical capability cache (WeakMap per-editor)', () => {
+  function buildLexicalEditorWithSelection(hasInsertText: boolean) {
+    const el = document.createElement('div');
+    el.contentEditable = 'true';
+    el.setAttribute('data-lexical-editor', 'true');
+    document.body.appendChild(el);
+
+    const insertTextMock = vi.fn();
+    const setEditorStateMock = vi.fn();
+
+    const editor = {
+      update(fn: () => void) {
+        fn();
+      },
+      getEditorState: () => ({
+        toJSON: () => ({
+          root: { children: [], direction: 'ltr', format: '', indent: 0, type: 'root', version: 1 },
+        }),
+      }),
+      parseEditorState: (_json: string) => ({}),
+      setEditorState: setEditorStateMock,
+      _pendingEditorState: {
+        _selection: hasInsertText
+          ? { insertText: insertTextMock }
+          : { /* no insertText method → capability 'unavailable' */ },
+      },
+    };
+
+    (el as unknown as { __lexicalEditor: typeof editor }).__lexicalEditor = editor;
+    return { el, insertTextMock, setEditorStateMock };
+  }
+
+  it('two editor instances cache independently (one ok, one unavailable)', () => {
+    // Editor A: insertText 公开 → fast path 'ok'
+    const a = buildLexicalEditorWithSelection(true);
+    // Editor B: insertText 缺失 → fast path 'unavailable'
+    const b = buildLexicalEditorWithSelection(false);
+
+    // 先调 A 让 cache 标 'ok'
+    const okA = replaceLexicalEditor(a.el, { newText: 'A_TEXT', fullText: 'A_TEXT', range: 'selection' });
+    expect(okA).toBe(true);
+    expect(a.insertTextMock).toHaveBeenCalledWith('A_TEXT');
+    expect(a.setEditorStateMock).not.toHaveBeenCalled();
+
+    // 然后调 B —— 即使 A 已 cache 'ok'，B 必须独立 probe 'unavailable' 走 slow path
+    const okB = replaceLexicalEditor(b.el, { newText: 'B_TEXT', fullText: 'B_TEXT', range: 'selection' });
+    expect(okB).toBe(true);
+    // B 的 setEditorState slow path 被调用（fast path 不可用）
+    expect(b.setEditorStateMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('Lexical focus async reject does NOT fail the write', () => {
+  it('returns true even when editor.focus returns a rejecting Promise', async () => {
+    const el = document.createElement('div');
+    el.contentEditable = 'true';
+    el.setAttribute('data-lexical-editor', 'true');
+    document.body.appendChild(el);
+
+    const setEditorStateMock = vi.fn();
+    // Lexical 0.12+: focus 返 Promise，可能 reject
+    const focusMock = vi.fn(() => Promise.reject(new Error('focus failed')));
+
+    const editor = {
+      update() {},
+      getEditorState: () => ({
+        toJSON: () => ({
+          root: { children: [], direction: 'ltr', format: '', indent: 0, type: 'root', version: 1 },
+        }),
+      }),
+      parseEditorState: (_json: string) => ({}),
+      setEditorState: setEditorStateMock,
+      focus: focusMock,
+      _pendingEditorState: null,
+    };
+    (el as unknown as { __lexicalEditor: typeof editor }).__lexicalEditor = editor;
+
+    // 走 slow path（range='all' 跳过 fast path），setEditorState 后 focus reject
+    const ok = replaceLexicalEditor(el, { newText: 'X', fullText: 'X', range: 'all' });
+    expect(ok).toBe(true); // 内容已写入 → 返 true，focus reject 是降级而非失败
+    expect(setEditorStateMock).toHaveBeenCalledTimes(1);
+    expect(focusMock).toHaveBeenCalledTimes(1);
+
+    // 等下一帧让 Promise.reject 触发 catch handler（不上 unhandled rejection）
+    await new Promise((r) => setTimeout(r, 0));
+    // 无副作用 — 仅验证不上 unhandled rejection。如有则进程退出
+  });
+});
