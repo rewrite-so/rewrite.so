@@ -755,6 +755,8 @@
   "core": {
     "regen": "再生成",
     "retry": "再試行",
+    "copy": "コピー",
+    "writeFailed": "このエディタには書き込めません — コピーしてください",
     "shortcuts": "{accept} 採用 · {regen} 再生成 · {cancel} キャンセル",
     "openSettings": "設定を開く",
     "dismiss": "閉じる",

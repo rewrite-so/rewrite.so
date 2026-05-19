@@ -4,7 +4,7 @@ import { QUOTA } from '@rewrite/shared/quotas';
 import type { MetaStatus } from '@rewrite/shared/sse-frame';
 import { ALL_STYLES, STYLE_LABEL, type Style } from '@rewrite/shared/styles';
 
-type ActionMode = 'hidden' | 'streaming' | 'regen' | 'retry';
+type ActionMode = 'hidden' | 'streaming' | 'regen' | 'retry' | 'applying' | 'copy';
 
 export interface HintStorage {
   getItem(key: string): string | null;
@@ -113,6 +113,18 @@ export interface CandidatesHandle {
   setError(style: Style, code: string): void;
   /** 把单卡复位回 pending（skeleton），用于 regen 启动时清空 */
   resetCard(style: Style): void;
+  /**
+   * 用户点击 Apply 后立即调：当前候选卡 Apply 按钮显示 spinner，整个浮窗
+   * 禁用其它候选 click 避免在 paste 探针期间重复触发。当 replaceEditable
+   * 完成后，panel 要么 close（成功），要么 setWriteFailed（失败）。
+   */
+  setApplying(style: Style): void;
+  /**
+   * replaceEditable 所有 fallback 都失败时调：候选卡显示"无法写入此编辑器"
+   * + Copy 按钮（点 navigator.clipboard.writeText(finalText)）。浮窗保持
+   * 打开让用户兜底，不静默关闭。
+   */
+  setWriteFailed(style: Style, finalText: string): void;
   /**
    * SSE meta 事件来到时调用，更新右上角 chip 为服务端实际用的语言。
    * 服务端 langDetected = DB 偏好（登录用户）or req.lang（匿名）—— 是真实改写用的值，
@@ -259,6 +271,9 @@ function openPanel(
   }
 
   function trySelectStyle(style: Style): boolean {
+    // P0-1 re-entry guard：setApplying 期间 panel 上有 .applying class（CSS 阻挡鼠标 click，
+    // 但 keyboard 1/2/3/Enter 仍能到这里）。检测后早返避免并发 replaceEditable。
+    if (panel.classList.contains('applying')) return false;
     const data = cards.get(style)?.data;
     if (!data || (data.state !== 'done' && data.state !== 'streaming')) return false;
     callbacks.onSelect(style, data.text);
@@ -278,13 +293,14 @@ function openPanel(
 
   function setActionMode(actionEl: HTMLButtonElement, mode: ActionMode) {
     actionEl.className = `card-action card-action-${mode}`;
+    actionEl.dataset.mode = mode;
     if (mode === 'hidden') {
       actionEl.style.display = 'none';
       actionEl.setAttribute('aria-disabled', 'true');
       return;
     }
     actionEl.style.display = '';
-    if (mode === 'streaming') {
+    if (mode === 'streaming' || mode === 'applying') {
       actionEl.innerHTML = '<span class="card-action-spinner" aria-hidden="true"></span>';
       actionEl.setAttribute('aria-disabled', 'true');
       actionEl.title = '';
@@ -298,6 +314,11 @@ function openPanel(
       actionEl.setAttribute('aria-disabled', 'false');
       actionEl.title = '';
       actionEl.setAttribute('aria-label', t('core.retry', opts.locale));
+    } else if (mode === 'copy') {
+      actionEl.textContent = t('core.copy', opts.locale);
+      actionEl.setAttribute('aria-disabled', 'false');
+      actionEl.title = '';
+      actionEl.setAttribute('aria-label', t('core.copy', opts.locale));
     }
   }
 
@@ -330,6 +351,19 @@ function openPanel(
     actionEl.addEventListener('click', (ev) => {
       ev.stopPropagation();
       if (actionEl.getAttribute('aria-disabled') === 'true') return;
+      const mode = actionEl.dataset.mode;
+      if (mode === 'copy') {
+        // 写入失败兜底：把 finalText 复制到系统剪贴板，用户可以手动粘贴。
+        // finalText 通过 dataset.copyText 传入（setWriteFailed 设置）。
+        const text = actionEl.dataset.copyText ?? '';
+        if (text && navigator.clipboard?.writeText) {
+          navigator.clipboard.writeText(text).catch(() => {
+            /* 用户拒绝授权或安全限制；保留浮窗让用户用其它途径复制 */
+          });
+        }
+        return;
+      }
+      // retry / regen 都走 onRegenerate（外层根据 card state 已区分）
       callbacks.onRegenerate?.(style);
     });
 
@@ -637,6 +671,33 @@ function openPanel(
       panel.appendChild(errEl);
       // 重新定位（panel 高度变了）
       positionPanel(panel, opts.target);
+    },
+    setApplying(style) {
+      if (closed || globalErrored) return;
+      // panel 加 applying class，让 CSS 把其它候选 card 的 click 禁用
+      // （pointer-events 由 .applying CSS 控制；JS 端不改 trySelectStyle 逻辑）
+      panel.classList.add('applying');
+      const entry = cards.get(style);
+      if (!entry) return;
+      entry.root.classList.add('applying');
+      setActionMode(entry.actionEl, 'applying');
+    },
+    setWriteFailed(style, finalText) {
+      if (closed || globalErrored) return;
+      panel.classList.remove('applying');
+      const entry = cards.get(style);
+      if (!entry) return;
+      entry.root.classList.remove('applying');
+      entry.root.classList.add('write-failed');
+      // 把 textEl 内容替换为错误提示（保留原 finalText 给 Copy 按钮）
+      entry.textEl.innerHTML = '';
+      const errSpan = document.createElement('span');
+      errSpan.className = 'text dim';
+      errSpan.textContent = t('core.writeFailed', opts.locale);
+      entry.textEl.appendChild(errSpan);
+      // action button 切换到 Copy 模式 + 通过 dataset 传 finalText
+      entry.actionEl.dataset.copyText = finalText;
+      setActionMode(entry.actionEl, 'copy');
     },
     close,
   };

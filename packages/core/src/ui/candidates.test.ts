@@ -672,3 +672,55 @@ describe('createCandidates', () => {
     expect(shadowRoot.querySelector('.global-error-cta')).toBeNull();
   });
 });
+
+// ============================================================================
+// Plan v9 fixup: P0-1 re-entry guard via panel.applying class
+// ============================================================================
+
+describe('setApplying + re-entry guard (Plan v9 P0-1)', () => {
+  it('keyboard 1/2/3 does NOT trigger second onSelect while panel.applying', () => {
+    const { factory, target, onSelect } = setup();
+    const panel = factory.open({ target, locale: 'en', targetLang: 'en' });
+    panel.setDone('faithful', 'TEXT_1');
+    panel.setDone('casual', 'TEXT_2');
+    panel.setDone('formal', 'TEXT_3');
+
+    // 第一次按 1 → onSelect 触发
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: '1', bubbles: true }));
+    expect(onSelect).toHaveBeenCalledTimes(1);
+
+    // 进入 applying 状态
+    panel.setApplying('faithful');
+
+    // 第二次按 1 / 2 / 3 / Enter —— 全部应被 trySelectStyle 内 panel.applying 检测拒绝
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: '1', bubbles: true }));
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: '2', bubbles: true }));
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: '3', bubbles: true }));
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    expect(onSelect).toHaveBeenCalledTimes(1); // 还是 1，没增加
+  });
+
+  it('setApplying then setWriteFailed: panel stays open + Copy button visible', () => {
+    const { factory, target, root } = setup();
+    const panel = factory.open({ target, locale: 'en', targetLang: 'en' });
+    panel.setDone('faithful', 'CANDIDATE_TEXT');
+
+    panel.setApplying('faithful');
+    expect((root.querySelector('.panel') as HTMLElement)?.classList.contains('applying')).toBe(
+      true,
+    );
+
+    // 模拟所有 fallback 都失败 → setWriteFailed
+    panel.setWriteFailed('faithful', 'FINAL_TEXT_TO_COPY');
+    // applying class 应被清掉
+    expect((root.querySelector('.panel') as HTMLElement)?.classList.contains('applying')).toBe(
+      false,
+    );
+    // 候选卡显示 write-failed + Copy 按钮
+    const card = root.querySelector('.card[data-style="faithful"]') as HTMLElement;
+    expect(card.classList.contains('write-failed')).toBe(true);
+    const actionBtn = card.querySelector('button.card-action') as HTMLButtonElement;
+    expect(actionBtn.textContent).toBe('Copy');
+    expect(actionBtn.dataset.copyText).toBe('FINAL_TEXT_TO_COPY');
+  });
+});

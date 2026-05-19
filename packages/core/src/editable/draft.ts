@@ -24,11 +24,12 @@
  * 出去无 listener 监听 → 静默无副作用。
  */
 
+import { waitForMainWorldReady } from './main-world-ready.ts';
+
 const REPLACE_EVENT = 'rewrite-so:draft-replace';
 const RESULT_EVENT = 'rewrite-so:draft-replace-result';
-const READY_EVENT = 'rewrite-so:main-world-ready';
-const READY_ATTR = 'data-rewrite-so-main-world-ready';
-const MARKER_ATTR = 'data-rewrite-so-target';
+/** 独立 marker attr 避免与 paste / lexical adapter race 互相覆盖 */
+const MARKER_ATTR = 'data-rewrite-so-draft-target';
 /**
  * 等 main-world 回响应的超时（ms）。
  * main-world handler 是 sync 跑完（实测 < 50ms），但低端机 / 广告 SDK 占用 CPU /
@@ -36,41 +37,6 @@ const MARKER_ATTR = 'data-rewrite-so-target';
  * 时需要余量。2500ms 与 MV3 service worker 30s 强 kill 留充足距离。
  */
 const REPLACE_TIMEOUT_MS = 2500;
-/**
- * 等 main-world 准备好的最长等待（ms）。Chrome 不保证同 manifest 内多 content_script
- * entry 的注入顺序，inject.ts 可能先于 main-world.ts 运行。500ms 远大于实测
- * 的注入间隔（< 10ms），同时短到对用户不可感知；超时仍尝试 dispatch（让
- * REPLACE_TIMEOUT_MS 做最终兜底）。
- */
-const READY_WAIT_MS = 500;
-
-/**
- * 同步检查 main-world script 是否已 ready —— 它在 mount 时给 documentElement 设
- * `data-rewrite-so-main-world-ready=1`（attribute 跨 world 共享）。
- */
-function isMainWorldReady(): boolean {
-  return !!document.documentElement?.hasAttribute(READY_ATTR);
-}
-
-/**
- * 等到 main-world ready，或超时（无论如何返回，让上层超时机制兜底）。
- * 已 ready 时立即 resolve，不引入额外延迟。
- */
-function waitForMainWorldReady(): Promise<void> {
-  if (isMainWorldReady()) return Promise.resolve();
-  return new Promise<void>((resolve) => {
-    let done = false;
-    const finish = () => {
-      if (done) return;
-      done = true;
-      window.removeEventListener(READY_EVENT, onReady);
-      resolve();
-    };
-    const onReady = () => finish();
-    window.addEventListener(READY_EVENT, onReady, { once: true });
-    window.setTimeout(finish, READY_WAIT_MS);
-  });
-}
 
 /**
  * 是否是 Draft.js 编辑器（DOM 特征匹配，isolated world 也能看 DOM）。
@@ -82,6 +48,20 @@ export function isDraftEditor(el: Element | null | undefined): boolean {
 }
 
 let requestSeq = 0;
+
+export interface DraftReplacePayload {
+  newText: string;
+  /**
+   * 'all' → 现有 fiber 路径整段 `ContentStateClass.createFromText(newText)`；
+   * 'selection' → 反射 5+ immutable class 重建 block 保段落 + 选区外格式 fast fallback，
+   *   失败落 fiber slow fallback。
+   *
+   * 注：Plan v9 把合成 paste 作为 Draft 选区改写的主路径，本反射 fallback 仅在
+   * paste 探针 false negative 时启用。fast fallback 由 main-world 在 Phase 0
+   * verify 后条件启用（X 仍用 Draft.js 时启用）。
+   */
+  range: 'all' | 'selection';
+}
 
 /**
  * 请求 main-world 脚本替换 Draft.js 编辑器内容。
@@ -95,11 +75,14 @@ let requestSeq = 0;
  * Promise resolves to true 表示已成功调到 props.onChange，
  * false 表示 fiber 找不到 / 反射失败 / 超时 / main-world 脚本没装。
  */
-export async function requestDraftReplace(el: Element, newText: string): Promise<boolean> {
+export async function requestDraftReplace(
+  el: Element,
+  payload: DraftReplacePayload,
+): Promise<boolean> {
   // 等 main-world 信号到位再 dispatch；超时仍 proceed 让 REPLACE_TIMEOUT_MS 兜底
   await waitForMainWorldReady();
   return new Promise<boolean>((resolve) => {
-    const id = `rs-${Date.now()}-${++requestSeq}`;
+    const id = `rs-draft-${Date.now()}-${++requestSeq}`;
 
     let settled = false;
     const cleanup = () => {
@@ -128,7 +111,7 @@ export async function requestDraftReplace(el: Element, newText: string): Promise
       el.setAttribute(MARKER_ATTR, id);
       window.dispatchEvent(
         new CustomEvent(REPLACE_EVENT, {
-          detail: { id, marker: MARKER_ATTR, newText },
+          detail: { id, marker: MARKER_ATTR, payload },
         }),
       );
     } catch {

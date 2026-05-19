@@ -216,6 +216,28 @@ export const SHADOW_STYLES = `
 .card.regenerating .text {
   color: light-dark(rgba(0,0,0,0.4), rgba(255,255,255,0.4));
 }
+/* setApplying: 用户点了 Apply，等 paste 探针 + fallback 链。被点的卡保留可见状态，
+ * 其它卡 pointer-events 禁用避免重复触发 onSelect。整个 panel 内除了被 apply 的卡，
+ * 都不可点；同时把"被 apply 的卡"自身的 click 也屏蔽（仍可点 spinner）。 */
+.panel.applying .card { pointer-events: none; }
+.card.applying { opacity: 0.7; }
+/* setWriteFailed: 写入全部失败，候选卡显示错误文案 + Copy 兜底按钮 */
+.card.write-failed {
+  opacity: 0.9;
+  pointer-events: auto;
+}
+.card.write-failed .text { color: light-dark(#a33, #f88); }
+.card-action-copy {
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  background: light-dark(rgba(0,0,0,0.08), rgba(255,255,255,0.16));
+  color: inherit;
+}
+.card-action-copy:hover {
+  background: light-dark(rgba(0,0,0,0.14), rgba(255,255,255,0.22));
+}
 
 .card-action {
   position: absolute;

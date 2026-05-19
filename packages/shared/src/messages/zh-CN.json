@@ -755,6 +755,8 @@
   "core": {
     "regen": "重新生成",
     "retry": "重试",
+    "copy": "复制",
+    "writeFailed": "无法写入此编辑器 —— 请手动复制",
     "shortcuts": "{accept} 选用 · {regen} 重生成 · {cancel} 关闭",
     "openSettings": "打开设置",
     "dismiss": "关闭",

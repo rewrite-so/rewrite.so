@@ -420,35 +420,103 @@ type-specific 配置走 `config_json`（schema 在 `packages/shared/src/campaign
   **Draft.js 例外路径**：`.public-DraftEditor-content` / `.DraftEditor-root` 命中后
   走 `requestDraftReplace` → main-world script → React fiber → props.onChange，**不**走
   以上通用 DOM 路径（Draft 受控树，外部改 DOM 必被 reconcile 回滚）。详见
-  「扩展双 content_script + Draft.js 适配器」段。
-- **扩展双 content_script + Draft.js 适配器**：`apps/extension/src/manifest.config.ts` 有
+  「扩展双 content_script + 受控编辑器适配器（渐进式降级）」段。
+
+  **渐进式合成 paste + 反射 fallback（2026-05 后期 / plan v9）**：
+  受控编辑器（Lexical / Draft / ProseMirror / Slate）写入用三层降级 ——
+  1) **主路径 合成 paste**：`new ClipboardEvent('paste', { clipboardData: new DataTransfer() with setData('text/plain') })`
+     在 main-world dispatch 让 framework 自家 `onPaste` handler 处理（0 反射、保段落、
+     保选区外格式、保 framework undo history、剪贴板零污染）。**Phase 0 实测确认** Reddit
+     Lexical + X Draft 都接受合成 paste。探针：强信号 `dispatchedDefault === false`
+     立即返 true（零延迟）；弱信号 rAF×3 后 textContent 必须变化 + 必须含 newText
+     短前缀（防 false positive）。
+  2) **Framework-specific 反射 fallback**：
+     - Lexical：fast (selection only) `editor.update(() => editor._pendingEditorState._selection.insertText(newText))`
+       保段落 + 选区外格式 ↓ slow `setEditorState(parseEditorState(单段纯文本 JSON))` 保前后文。
+       带 capability probe + cache（`_pendingEditorState._selection.insertText` 私有字段 + prototype，未决态 'undetermined' 不 cache）。
+     - Draft：fast (selection only) 反射 5+ immutable class（CharacterMetadata.EMPTY + List.of + block.merge）
+       重建 block 保段落 + 选区外格式 ↓ slow fiber `ContentStateClass.createFromText(newText)` 整段重建。
+     - ProseMirror / Slate：暂无专用反射 fallback，paste 失败时落通用 DOM 路径（YAGNI；未来报 bug 再加）。
+  3) **短路优化**：
+     - Lexical + range='all' 实测合成 selectNodeContents 被 isTrusted=false reset → 直接走 setEditorState 反射，避免 ~50ms 浪费。
+     - 非受控编辑器（普通 contenteditable）：直接走通用 DOM 路径（合成 paste 无 framework handler 必失败）。
+  4) **失败可见 UX**：所有 fallback 都失败时浮窗保持打开 + 候选卡显示 "无法写入此编辑器 —— 请手动复制" + Copy 按钮
+     （调 `navigator.clipboard.writeText(finalText)`）。`replaceEditable` 返 `Promise<boolean>`；
+     `onSelect` 用返回值决定 close + onAccepted。**写入失败时 onAccepted NOT 触发**（与 index.ts 头注释契约一致）。
+  详见「扩展双 content_script + 受控编辑器适配器（渐进式降级）」段。
+- **扩展双 content_script + 受控编辑器适配器（渐进式降级）**：`apps/extension/src/manifest.config.ts` 有
   **两个** content_scripts entry：
   - `src/content/inject.ts`（默认 isolated world）：主逻辑入口，调 mount()。
-  - `src/content/main-world.ts`（`world: 'MAIN'`，Chrome 102+）：**只**处理 Draft.js
-    替换，通过 React fiber 调 `props.onChange(newEditorState)`。
+  - `src/content/main-world.ts`（`world: 'MAIN'`，Chrome 102+）：处理三类受控编辑器写入：
+    1. **合成 paste 主路径**（plan v9）：`replacePasteEditor` 构造 ClipboardEvent + DataTransfer
+       dispatch 让 framework 自家 onPaste 处理（0 反射、跨 framework）。**Phase 0 实测确认** Reddit
+       Lexical + X Draft 接受合成 paste（**`event.isTrusted=false` 不被检查**）。注意 X Draft
+       的 paste handler 注册在 `.public-DraftEditor-content` 内层 contenteditable，不在 `.DraftEditor-root`
+       wrapper —— `write.ts` 调用方传的 `el` 本来就是 contenteditable 本身，无需特殊处理。
+    2. **Lexical 反射 fallback**：`replaceLexicalEditor` 反射 `__lexicalEditor` expando
+       + 两层 fast/slow（详见上一段「contenteditable 替换」）。
+    3. **Draft fiber 反射 fallback**：`replaceDraftEditor` 通过 React fiber 调
+       `props.onChange(newEditorState)` —— 两层 fast/slow，fast 反射 5+ immutable class 重建
+       block 保格式 / slow `ContentState.createFromText` 整段重建。
   
   **为什么必须 main world**：Chrome MV3 content script 默认 isolated world，**看不到**
-  页面 JS 在 element 上挂的 `__reactFiber$xxx` / `__reactProps$xxx` expando 属性。Draft.js
-  外部更新 EditorState 唯一可靠路径是 fiber → onChange（draft-js-plugins#210；Grammarly
-  blog 称之为 "framework-aware adapter"）。合成 `beforeinput` / `ClipboardEvent` 在 Chrome
-  上不触发 default action / clipboardData 被忽略——全部走不通。
+  页面 JS 在 element 上挂的 `__reactFiber$xxx` / `__lexicalEditor` expando 属性。受控编辑器
+  外部更新 model 的可靠路径必须从 main world 跑（draft-js-plugins#210；Grammarly blog 称
+  "framework-aware adapter"）。**合成 ClipboardEvent + DataTransfer 必须在 main world 构造**
+  避免 framework 做 instance 检查跨 realm 失败。
   
-  **通信契约**：CustomEvent on window，channel 名固定，改名要同步改 `draft.ts` + `main-world.ts` 两边：
-  - 入：`rewrite-so:draft-replace` `{ id, marker, newText }`（marker=临时 data-attribute 名定位元素）
-  - 出：`rewrite-so:draft-replace-result` `{ id, ok }`
-  - ready：`rewrite-so:main-world-ready` + `data-rewrite-so-main-world-ready` attribute on `<html>`
-    （DOM attribute 跨 world 共享，isolated 侧同步可读，避免每次 dispatch 都等 ready）
+  **共享 ready signal**（modular cache 防 3 channel 累加延迟）：
+  `packages/core/src/editable/main-world-ready.ts` 抽出 helper，3 channel client 共用。
+  `waitForMainWorldReady()` 用 module-level promise cache —— 冷启动只等一次 READY_WAIT_MS=500ms，
+  后续调用即返。READY_EVENT='rewrite-so:main-world-ready' + READY_ATTR='data-rewrite-so-main-world-ready'
+  on `<html>`（DOM attribute 跨 world 共享，isolated 侧同步可读）。
   
-  **两个 entry 必须保持 `exclude_matches` 完全一致** —— 新加自家域时两处都要改。
+  **通信契约**：CustomEvent on window，**3 channel 各自独立 marker attr 避免 race**：
+  - paste 主路径：`rewrite-so:paste-replace[-result]`，marker `data-rewrite-so-paste-target`
+  - Lexical fallback：`rewrite-so:lexical-replace[-result]`，marker `data-rewrite-so-lex-target`
+  - Draft fallback：`rewrite-so:draft-replace[-result]`，marker `data-rewrite-so-draft-target`
   
-  **Draft 反射依赖 immutable.js 未 mangle 公开 API**：`EditorState.{push, forceSelection}` /
-  `ContentState.createFromText` / `block.{getKey, getLength}` / `selection.merge`。X 升级
-  编辑器引擎（如迁移 Lexical/ProseMirror）会让 `replaceDraftEditor` 静默失败但不破坏 DOM
-  （`return false` → 通用路径也 skip → UX："什么都没发生" 而不是 "残留+删不掉"）。
+  payload 形态：
+  - paste: `{ newText, range, selectionLength }`
+  - lexical: `{ newText, fullText, range }`（fullText caller 在 isolated world 拼好供 slow path）
+  - draft: `{ newText, range }`
   
-  **失败容错**：fiber lookup 失败 / 反射 throw / `world: 'MAIN'` 不被支持（< Chrome 102；
-  已设 `minimum_chrome_version: "102"` 由商店过滤）→ requestDraftReplace 超时返 false →
-  调用方静默不写 DOM。
+  **两个 content_script entry 必须保持 `exclude_matches` 完全一致** —— 新加自家域时两处都要改。
+  
+  **反射依赖清单**（按降级顺序）：
+  - **Paste 主路径**：`new ClipboardEvent` / `new DataTransfer.setData` 浏览器标准 API（**0 framework 反射**）。
+    Lexical `objectKlassEquals` 用 `constructor.name === objectClass.name` 比较是跨 realm 安全的。
+  - **Lexical fast fallback**：`__lexicalEditor` expando + `editor.update` + `editor._pendingEditorState._selection.insertText`
+    （**私有字段** `_pendingEditorState` 是 Lexical 升级时的潜在风险点；capability probe + cache 减少反射开销）。
+  - **Lexical slow fallback**：`editor.{getEditorState, parseEditorState, setEditorState, toJSON}` +
+    EditorState JSON schema 的 `root.children` 结构（公开稳定）。
+  - **Draft fast fallback**：`__reactFiber$xxx` + `block.{getText, getCharacterList, merge}` +
+    `block.getCharacterList().first().constructor.EMPTY`（CharacterMetadata.EMPTY 静态）+
+    `characterList.constructor.of`（immutable.List.of 静态）+ `currentContent.{getBlockForKey, getBlockMap, merge}` +
+    `editorState.constructor.{push, forceSelection}` + selection.merge。
+  - **Draft slow fallback**：`__reactFiber$xxx` + `ContentStateClass.createFromText` +
+    `editorState.constructor.{push, forceSelection}` + `block.{getKey, getLength}` + selection.merge。
+  
+  **失败容错**：fiber / expando lookup 失败 / 反射 throw / `world: 'MAIN'` 不被支持
+  （< Chrome 102；已设 `minimum_chrome_version: "102"` 由商店过滤）→ requestX 超时返 false →
+  上层 `replaceEditable` 返 false → onSelect 调 `currentPanel?.setWriteFailed(style, finalText)`
+  浮窗保持打开 + Copy 按钮兜底（不静默关闭让用户困惑）。
+  
+  **诊断脚本**（未来 Lexical / Draft 升级 / 新站点接入怀疑失败时跑）：
+  ```js
+  // Lexical
+  const r = document.querySelector('[data-lexical-editor="true"]');
+  const e = r?.__lexicalEditor;
+  console.log({ hasEditor: !!e, hasSetEditorState: typeof e?.setEditorState,
+    hasUpdate: typeof e?.update, jsonSchema: e?.getEditorState()?.toJSON?.() });
+  // Paste 探针（任一站点）
+  const el = document.querySelector('[data-lexical-editor], .public-DraftEditor-content, .ProseMirror, [data-slate-editor]');
+  el?.focus?.();
+  const dt = new DataTransfer(); dt.setData('text/plain', 'PROBE');
+  const evt = new ClipboardEvent('paste', {clipboardData: dt, bubbles: true, cancelable: true, composed: true});
+  const def = el?.dispatchEvent(evt);
+  setTimeout(() => console.log({ frameworkHandled: def === false, textAfter: el?.textContent?.slice(0, 100) }), 500);
+  ```
 - **shadow DOM 内 contenteditable 不在替换范围**：`read.ts` 用 `window.getSelection()`，
   Chrome 102+ shadow DOM 内 selection 在 `shadowRoot.getSelection()`（API 不一致）。
   目前观察到 Reddit / X / Slack / Notion 的 contenteditable 都在 light DOM，shadow DOM
@@ -623,8 +691,33 @@ migration 文件名编号空间按仓库分治：
   依赖 `EditorState.push/forceSelection` / `ContentState.createFromText` / immutable.js
   Record 的 `.merge` / `.getKey` / `.getLength` 等公开 API 名未被 mangle。若 X 重大
   重构（如迁移 Lexical/ProseMirror，或自家 fork 把这些方法名 mangle 了），`replaceDraftEditor`
-  返回 false → 用户体验是"双击 Shift 后什么都没发生"（不是崩溃）。**监控用户反馈**而非
-  自动告警；定位时再走 React fiber DevTools 调研新结构。
+  返回 false → 用户体验"无法写入此编辑器 —— 请手动复制"（plan v9 后的 fail-loud 行为，
+  浮窗保持 + Copy 按钮兜底）。**监控用户反馈**而非自动告警；定位时再走 React fiber
+  DevTools 调研新结构。
+- **Lexical range='all' 走反射 slow path（plan v9 短路）**：实测 Lexical 对 isTrusted=false
+  的合成 selectNodeContents 在 onSelectionChange 重置 → paste 主路径在 range='all' 上必失败。
+  调度直接短路走 `setEditorState(parseEditorState(JSON))`，避免 ~50ms 无效探针延迟。slow path
+  重建为单段纯文本，inline 格式（粗体 / 链接 / 列表 / 剧透）丢失。range='all' 时用户语义就是
+  "重写整段"，无关切。
+- **Lexical fast path 私有字段 `_pendingEditorState` 在大版本升级时可能改名**：capability
+  probe + cache 减少反射开销；失败自动 fallback slow path。'undetermined' 状态（pending state
+  未实例化）不 cache 让下次重试。
+- **Draft fast fallback 反射点 7+ 的 mangle 风险**：immutable.js 标准 API（merge/set/first/slice/concat/of）
+  长期稳定 + Draft.js archived 2022 不再升级 → 长期 mangle 风险低。主要风险点 `CharacterMetadata.EMPTY`
+  静态被 Draft 源码 + 第三方插件大量依赖。若被 mangle 自动落 Draft slow fallback（fiber 整段
+  `createFromText`，与 plan v8 之前行为一致）。
+- **Draft 多 block 选区在 fast fallback 不支持**：首版限制 startKey === endKey 单 block；
+  跨段（含换行）选区自动落 slow fallback fiber 整段。
+- **ProseMirror / Slate 在 paste 主路径失败时落通用 DOM 路径**：plan v9 没有为 ProseMirror /
+  Slate 准备专用反射 fallback（YAGNI，当前用户场景 Reddit + X 主覆盖 Lexical + Draft）。
+  Notion / Discord 等站点若 paste 探针失败 → 通用 DOM 路径可能在受控编辑器上行为异常
+  （PM / Slate 也是受控树），上线后通过用户反馈 + 后续 telemetry 监控决定是否加专用 adapter。
+- **Undo 栈在多层 fallback 下行为不一致**：paste 主路径 / Lexical fast / Draft fast 保留
+  framework 自家 history；setEditorState slow / Draft fiber slow 重置。用户跨层 fallback
+  操作时 Ctrl+Z 行为可能预期紊乱。
+- **三层 fallback 全失败 → 浮窗保持打开 + 显示 Copy 按钮**：用户能手动复制改写结果到剪贴板
+  兜底，不静默关闭让用户困惑。`replaceEditable` 返 `Promise<boolean>`；onSelect 用返回值
+  决定 close + onAccepted。**写入失败时 onAccepted NOT 触发**（与 index.ts 头注释契约一致）。
 
 ## i18n（多语言）
 

@@ -145,10 +145,45 @@ export function mount(opts: MountOptions): MountHandle {
     inflightAborts.clear();
   }
 
+  // P0-1 re-entry guard：onSelect 内 await replaceEditable 期间（paste 探针 ~80ms +
+  // fallback 链可达 150ms），用户可能再次点击 / 按 keyboard 1/2/3 触发第二次 onSelect。
+  // candidates.ts trySelectStyle 已加 panel.applying 阻断，本 flag 是双层防御 +
+  // 兼容 panel.applying 在 globalError 路径被 wipe 后的边界 case。
+  let isApplyingWrite = false;
+
+  /**
+   * P0-3 globalError race 修复：所有 panel.setGlobalError 调用都走此 helper，统一
+   * 清理 applying 期间残留状态（inflight aborts + isApplyingWrite flag）。
+   *
+   * 为什么需要：onSelect 内 await replaceEditable 期间，SSE 可能 deliver 延迟的
+   * quota_exceeded → panel.setGlobalError → panel.innerHTML 被 wipe 进入全局错误态。
+   * 旧 onSelect 还在 await，但 panel 已不是原 candidates 视图。await 结束时
+   * setWriteFailed 调到的是被 wipe 的 entry（已 detached），setWriteFailed 内
+   * `if (closed || globalErrored) return` 早返跳过 —— 但 finally 之前 `isApplyingWrite`
+   * 仍是 true。**如果此期间用户触发新的双击 Shift → handleTrigger 重建 panel +
+   * 新 onSelect 进入**，第二次 onSelect 顶部 `if (isApplyingWrite) return` 会把新
+   * trigger 整个吞掉。本 helper 在 globalError 转移时立即清 flag，让新 trigger
+   * 路径不被旧 onSelect 的 stale flag 阻塞。lockedEditable 故意保留供 onRetryAll
+   * 复用（handleTrigger 不查 isApplyingWrite，retryAll 直接拿 lockedEditable 重启）。
+   */
+  function transitionToGlobalError(
+    panel: NonNullable<typeof currentPanel>,
+    code: string,
+    detail?: Record<string, unknown>,
+  ): void {
+    panel.setGlobalError(code, detail);
+    isApplyingWrite = false;
+    abortAllInflight();
+  }
+
   const candidates = createCandidates(
     root,
     {
-      onSelect: (style, finalText) => {
+      onSelect: async (style, finalText) => {
+        // 双层 re-entry guard：candidates.ts panel.applying CSS class 是第一层（阻断
+        // mouse click + keyboard 1/2/3 调 trySelectStyle）；这里 flag 是第二层（兜底
+        // 万一 panel class 被 globalError 状态机 wipe 但 onSelect 仍被调用）
+        if (isApplyingWrite) return;
         // 用浮层打开时锁定的 editable，避免被中途 focus 切换影响
         const target = lockedEditable;
         if (!target) return;
@@ -164,15 +199,29 @@ export function mount(opts: MountOptions): MountHandle {
           }
         }
         const range = readEditable(target).hasSelection ? 'selection' : 'all';
-        replaceEditable(target, finalText, range);
-        currentPanel?.close();
-        currentPanel = null;
-        lockedEditable = null;
-        abortAllInflight();
-        // 通知 host 用户接受了改写（onAccepted optional；扩展不实现）。
-        // 必须在 replaceEditable 成功之后—— !target early return 或替换 throw 时
-        // 不应触发 "accepted" 事件
-        opts.onAccepted?.(style);
+        // 立即给 Apply 按钮 spinner + disable —— 用户点击后看到 loading 而不是
+        // 浮窗无响应。replaceEditable 可能 ~50-150ms（fallback 路径有 rAF 探针延迟）
+        currentPanel?.setApplying(style);
+        isApplyingWrite = true;
+        try {
+          const ok = await replaceEditable(target, finalText, range);
+          if (ok) {
+            currentPanel?.close();
+            currentPanel = null;
+            lockedEditable = null;
+            abortAllInflight();
+            // 通知 host 用户接受了改写（onAccepted optional；扩展不实现）。
+            // 必须在 replaceEditable 成功之后—— !target early return 或写入失败时
+            // 不应触发 "accepted" 事件
+            opts.onAccepted?.(style);
+          } else {
+            // 写入失败（所有 fallback 都失败）—— 浮窗保持打开，显示 Copy 按钮
+            // 让用户手动复制兜底；不静默关闭让用户困惑
+            currentPanel?.setWriteFailed(style, finalText);
+          }
+        } finally {
+          isApplyingWrite = false;
+        }
       },
       onCancel: () => {
         currentPanel?.close();
@@ -265,7 +314,7 @@ export function mount(opts: MountOptions): MountHandle {
             break;
           case 'error':
             if (ev.data.style) panel.setError(ev.data.style, ev.data.code);
-            else panel.setGlobalError(ev.data.code);
+            else transitionToGlobalError(panel, ev.data.code);
             break;
           case 'end':
             // 终止流（部分 done 已渲染）
@@ -338,7 +387,7 @@ export function mount(opts: MountOptions): MountHandle {
     try {
       turnstileToken = await opts.getTurnstileToken?.();
     } catch (err) {
-      panel.setGlobalError('turnstile_failed');
+      transitionToGlobalError(panel, 'turnstile_failed');
       opts.onError?.(err as Error);
       return;
     }
@@ -350,7 +399,9 @@ export function mount(opts: MountOptions): MountHandle {
       ...(turnstileToken ? { turnstileToken } : {}),
     };
 
-    await runRewrite(req, ac, panel, (code, detail) => panel.setGlobalError(code, detail));
+    await runRewrite(req, ac, panel, (code, detail) =>
+      transitionToGlobalError(panel, code, detail),
+    );
   };
 
   /** 单卡 regenerate：仅 abort 当前 in-flight 中该 style 的（不影响其它）+ 重新单 style 请求 */
@@ -364,7 +415,7 @@ export function mount(opts: MountOptions): MountHandle {
     try {
       turnstileToken = await opts.getTurnstileToken?.();
     } catch (err) {
-      panel.setGlobalError('turnstile_failed');
+      transitionToGlobalError(panel, 'turnstile_failed');
       opts.onError?.(err as Error);
       return;
     }
@@ -380,13 +431,13 @@ export function mount(opts: MountOptions): MountHandle {
     // 单卡 fatal 处理：
     // - 可重试错误（upstream/timeout/network/rate_limit）→ setError 显示 Retry 按钮，
     //   保留其它卡片正常状态
-    // - 不可重试错误（quota_exceeded / unauthorized）→ 升级到 setGlobalError 显示
+    // - 不可重试错误（quota_exceeded / unauthorized）→ 升级到 transitionToGlobalError 显示
     //   正确 CTA（"Configure BYOK or upgrade" / "Sign in"），避免单卡 Retry 死循环
     await runRewrite(req, ac, panel, (code, detail) => {
       if (isRetryableError(code)) {
         panel.setError(style, code);
       } else {
-        panel.setGlobalError(code, detail);
+        transitionToGlobalError(panel, code, detail);
       }
     });
   }
