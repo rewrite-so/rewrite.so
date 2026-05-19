@@ -755,6 +755,8 @@
   "core": {
     "regen": "Regenerar",
     "retry": "Reintentar",
+    "copy": "Copiar",
+    "writeFailed": "No se puede escribir en este editor — copia en su lugar",
     "shortcuts": "{accept} aceptar · {regen} regenerar · {cancel} cerrar",
     "openSettings": "Abrir ajustes",
     "dismiss": "Cerrar",

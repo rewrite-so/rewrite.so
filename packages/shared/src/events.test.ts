@@ -32,6 +32,7 @@ describe('events whitelist', () => {
       'compare_row_expand',
       'pricing_card_focus',
       'early_bird_banner_click',
+      'rewrite_write_layer',
     ]);
   });
 

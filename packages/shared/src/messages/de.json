@@ -755,6 +755,8 @@
   "core": {
     "regen": "Neu generieren",
     "retry": "Erneut versuchen",
+    "copy": "Kopieren",
+    "writeFailed": "Kann nicht in diesen Editor schreiben — bitte kopieren",
     "shortcuts": "{accept} wählen · {regen} regenerieren · {cancel} schließen",
     "openSettings": "Einstellungen öffnen",
     "dismiss": "Schließen",

@@ -45,6 +45,13 @@ export const EVENT_NAMES = [
   'compare_row_expand', // props: { row: 'inline'|'speed'|'candidates'|'logging'|'byok'|'multilang'|'openSource' } — DEFERRED: wiring lives in ComparisonTable details
   'pricing_card_focus', // props: { card: 'free'|'pro'|'byok' } — DEFERRED: hover or keyboard focus ≥ 500ms
   'early_bird_banner_click', // props: { surface: 'hero'|'pricing'|'nav' } — DEFERRED: wiring lives on EarlyBirdBadge + pricing banner
+  // ---- Write-back layer telemetry (Plan v9: 渐进式降级到合成 paste + 反射 fallback) ----
+  // props: { layer, framework } —— layer ∈ paste_strong | paste_weak | lexical_fast |
+  // lexical_slow | draft_fast | draft_slow | dom_generic | silent_fail；framework ∈
+  // lexical | draft | prosemirror | slate | generic。**绝不**带 text payload（CLAUDE.md
+  // 「隐私与安全」段隐私底线）。仅监控 fallback 真实分布、定位 mangle / framework
+  // 升级问题。
+  'rewrite_write_layer',
 ] as const;
 
 export type EventName = (typeof EVENT_NAMES)[number];

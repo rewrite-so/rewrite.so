@@ -146,3 +146,184 @@ describe('replaceEditable — contenteditable', () => {
     expect(changeComposed).toBe(true);
   });
 });
+
+// ============================================================================
+// Plan v9: 渐进式降级 + Lexical/Draft 检测 + buildLexicalSelectionFullText
+// ============================================================================
+
+import { isLexicalEditor, detectControlledEditor } from './detect.ts';
+import { buildLexicalSelectionFullText } from './write.ts';
+
+describe('isLexicalEditor (cross-shadow detection)', () => {
+  it('matches direct element with data-lexical-editor="true"', () => {
+    const el = document.createElement('div');
+    el.setAttribute('data-lexical-editor', 'true');
+    expect(isLexicalEditor(el)).toBe(true);
+  });
+
+  it('matches nested element inside Lexical root', () => {
+    const root = document.createElement('div');
+    root.setAttribute('data-lexical-editor', 'true');
+    const inner = document.createElement('span');
+    root.appendChild(inner);
+    document.body.appendChild(root);
+    expect(isLexicalEditor(inner)).toBe(true);
+  });
+
+  it('does not match plain contenteditable', () => {
+    const el = document.createElement('div');
+    el.contentEditable = 'true';
+    expect(isLexicalEditor(el)).toBe(false);
+  });
+
+  it('does not match Draft.js node', () => {
+    const el = document.createElement('div');
+    el.className = 'public-DraftEditor-content';
+    expect(isLexicalEditor(el)).toBe(false);
+  });
+
+  it('returns false for null / undefined', () => {
+    expect(isLexicalEditor(null)).toBe(false);
+    expect(isLexicalEditor(undefined)).toBe(false);
+  });
+});
+
+describe('detectControlledEditor', () => {
+  it('detects Lexical', () => {
+    const el = document.createElement('div');
+    el.setAttribute('data-lexical-editor', 'true');
+    expect(detectControlledEditor(el)).toBe('lexical');
+  });
+
+  it('detects Draft.js inner', () => {
+    const el = document.createElement('div');
+    el.className = 'public-DraftEditor-content';
+    expect(detectControlledEditor(el)).toBe('draft');
+  });
+
+  it('detects Draft.js via ancestor', () => {
+    const root = document.createElement('div');
+    root.className = 'DraftEditor-root';
+    const inner = document.createElement('div');
+    root.appendChild(inner);
+    document.body.appendChild(root);
+    expect(detectControlledEditor(inner)).toBe('draft');
+  });
+
+  it('detects ProseMirror', () => {
+    const el = document.createElement('div');
+    el.className = 'ProseMirror';
+    expect(detectControlledEditor(el)).toBe('prosemirror');
+  });
+
+  it('detects Slate', () => {
+    const el = document.createElement('div');
+    el.setAttribute('data-slate-editor', 'true');
+    expect(detectControlledEditor(el)).toBe('slate');
+  });
+
+  it('returns null for plain contenteditable', () => {
+    const el = document.createElement('div');
+    el.contentEditable = 'true';
+    expect(detectControlledEditor(el)).toBe(null);
+  });
+});
+
+describe('buildLexicalSelectionFullText', () => {
+  it('returns newText (fallback) when selection is not available', () => {
+    const el = document.createElement('div');
+    el.contentEditable = 'true';
+    el.textContent = 'hello world';
+    document.body.appendChild(el);
+    // 没有 selection 设置 → fallback 返 newText
+    expect(buildLexicalSelectionFullText(el, 'REPLACED')).toBe('REPLACED');
+  });
+
+  it('splices newText at selection range when selection is in element', () => {
+    const el = document.createElement('div');
+    el.contentEditable = 'true';
+    el.textContent = 'hello world this is a test';
+    document.body.appendChild(el);
+
+    // 选中 'world'（offset 6-11）
+    const tn = el.firstChild!;
+    const range = document.createRange();
+    range.setStart(tn, 6);
+    range.setEnd(tn, 11);
+    const sel = window.getSelection()!;
+    sel.removeAllRanges();
+    sel.addRange(range);
+
+    const fullText = buildLexicalSelectionFullText(el, 'REPLACED');
+    expect(fullText).toBe('hello REPLACED this is a test');
+  });
+
+  it('returns newText when selection is outside element', () => {
+    const el = document.createElement('div');
+    el.contentEditable = 'true';
+    el.textContent = 'hello';
+    document.body.appendChild(el);
+
+    const outside = document.createElement('div');
+    outside.textContent = 'other text';
+    document.body.appendChild(outside);
+
+    const range = document.createRange();
+    range.setStart(outside.firstChild!, 0);
+    range.setEnd(outside.firstChild!, 5);
+    const sel = window.getSelection()!;
+    sel.removeAllRanges();
+    sel.addRange(range);
+
+    // selection 不在 el 内 → fallback newText
+    expect(buildLexicalSelectionFullText(el, 'X')).toBe('X');
+  });
+});
+
+describe('replaceEditable returns Promise<boolean>', () => {
+  it('returns true on plain contenteditable (DOM path always succeeds)', async () => {
+    const ce = document.createElement('div');
+    ce.contentEditable = 'true';
+    ce.textContent = 'old';
+    document.body.appendChild(ce);
+
+    const ok = await replaceEditable(ce, 'new', 'all');
+    expect(ok).toBe(true);
+    expect(ce.textContent).toContain('new');
+  });
+
+  it('returns true on textarea (sync form-field path)', async () => {
+    const ta = document.createElement('textarea');
+    ta.value = 'old';
+    document.body.appendChild(ta);
+
+    const ok = await replaceEditable(ta, 'new', 'all');
+    expect(ok).toBe(true);
+    expect(ta.value).toBe('new');
+  });
+
+  it('Lexical + range=all routes to lexical fallback (short-circuit, no DOM path)', async () => {
+    // jsdom 下 main-world handler 不存在 → requestLexicalReplace 超时返 false
+    // 短路 1 直接走 lexical fallback → 失败 → silent (返 false，不动 DOM)
+    const ce = document.createElement('div');
+    ce.contentEditable = 'true';
+    ce.setAttribute('data-lexical-editor', 'true');
+    ce.textContent = 'lexical content';
+    document.body.appendChild(ce);
+    document.documentElement.setAttribute('data-rewrite-so-main-world-ready', '1');
+
+    let beforeInputDispatched = false;
+    ce.addEventListener('beforeinput', () => {
+      beforeInputDispatched = true;
+    });
+
+    const ok = await replaceEditable(ce, 'new', 'all');
+    // 没有 main-world → 静默失败
+    expect(ok).toBe(false);
+    // 关键：未走通用 DOM 路径（否则会写 3 次 + 触发 beforeinput）
+    expect(beforeInputDispatched).toBe(false);
+    expect(ce.textContent).toBe('lexical content');
+
+    document.documentElement.removeAttribute('data-rewrite-so-main-world-ready');
+  }, 5000);
+});

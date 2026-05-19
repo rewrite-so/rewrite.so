@@ -78,3 +78,54 @@ export function getEditableKind(el: HTMLElement): EditableKind | null {
   if (el.isContentEditable || el.getAttribute('role') === 'textbox') return 'contenteditable';
   return null;
 }
+
+/**
+ * 是否是 Lexical 编辑器（DOM 特征：`data-lexical-editor="true"`）。
+ *
+ * 跨 shadow boundary 遍历：closest() 不跨越 shadow root，但 Lexical 可能被宿主
+ * 应用包在 shadow DOM 内（如 Reddit 未来的 Web Component 化）。手工遍历
+ * parentNode + host 链路命中任一层 `data-lexical-editor="true"` 即返 true。
+ */
+export function isLexicalEditor(el: Element | null | undefined): boolean {
+  if (!el) return false;
+  let cur: Node | null = el;
+  while (cur) {
+    if (cur instanceof Element && cur.getAttribute?.('data-lexical-editor') === 'true') {
+      return true;
+    }
+    // ShadowRoot.host 跳出 shadow boundary；普通节点走 parentNode
+    const host: Element | null = (cur as unknown as { host?: Element | null }).host ?? null;
+    const parent: Node | null = cur.parentNode ?? host;
+    if (parent === cur) break;
+    cur = parent;
+  }
+  return false;
+}
+
+export type ControlledEditorEngine = 'lexical' | 'draft' | 'prosemirror' | 'slate';
+
+/**
+ * 检测受控编辑器引擎。返回引擎名或 null（普通 contenteditable / 非编辑器）。
+ *
+ * 用于 write.ts 调度：受控编辑器优先走 main-world 合成 paste 主路径，普通
+ * contenteditable 走通用 DOM 路径（避免无 paste handler 的 contenteditable 上
+ * 浪费 ~50ms 等探针失败）。
+ *
+ * 检测顺序：Lexical (cross-shadow) → Draft (DOM class) → ProseMirror (DOM class)
+ * → Slate (data-attribute)。优先级按用户已覆盖站点估算（Reddit / X / Notion / Discord）。
+ */
+export function detectControlledEditor(el: Element | null | undefined): ControlledEditorEngine | null {
+  if (!el || !(el instanceof Element)) return null;
+  if (isLexicalEditor(el)) return 'lexical';
+  // Draft.js: `.public-DraftEditor-content` 是内层 contenteditable；`.DraftEditor-root` 是外层 wrapper
+  if (el.classList.contains('public-DraftEditor-content') || el.closest('.DraftEditor-root')) {
+    return 'draft';
+  }
+  // ProseMirror: 内层 contenteditable 自带 `.ProseMirror` class
+  if (el.classList.contains('ProseMirror') || el.closest('.ProseMirror')) {
+    return 'prosemirror';
+  }
+  // Slate: `<div data-slate-editor="true" contenteditable>`
+  if (el.closest('[data-slate-editor="true"]')) return 'slate';
+  return null;
+}

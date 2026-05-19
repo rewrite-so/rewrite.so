@@ -148,7 +148,7 @@ export function mount(opts: MountOptions): MountHandle {
   const candidates = createCandidates(
     root,
     {
-      onSelect: (style, finalText) => {
+      onSelect: async (style, finalText) => {
         // 用浮层打开时锁定的 editable，避免被中途 focus 切换影响
         const target = lockedEditable;
         if (!target) return;
@@ -164,15 +164,24 @@ export function mount(opts: MountOptions): MountHandle {
           }
         }
         const range = readEditable(target).hasSelection ? 'selection' : 'all';
-        replaceEditable(target, finalText, range);
-        currentPanel?.close();
-        currentPanel = null;
-        lockedEditable = null;
-        abortAllInflight();
-        // 通知 host 用户接受了改写（onAccepted optional；扩展不实现）。
-        // 必须在 replaceEditable 成功之后—— !target early return 或替换 throw 时
-        // 不应触发 "accepted" 事件
-        opts.onAccepted?.(style);
+        // 立即给 Apply 按钮 spinner + disable —— 用户点击后看到 loading 而不是
+        // 浮窗无响应。replaceEditable 可能 ~50-150ms（fallback 路径有 rAF 探针延迟）
+        currentPanel?.setApplying(style);
+        const ok = await replaceEditable(target, finalText, range);
+        if (ok) {
+          currentPanel?.close();
+          currentPanel = null;
+          lockedEditable = null;
+          abortAllInflight();
+          // 通知 host 用户接受了改写（onAccepted optional；扩展不实现）。
+          // 必须在 replaceEditable 成功之后—— !target early return 或写入失败时
+          // 不应触发 "accepted" 事件
+          opts.onAccepted?.(style);
+        } else {
+          // 写入失败（所有 fallback 都失败）—— 浮窗保持打开，显示 Copy 按钮
+          // 让用户手动复制兜底；不静默关闭让用户困惑
+          currentPanel?.setWriteFailed(style, finalText);
+        }
       },
       onCancel: () => {
         currentPanel?.close();

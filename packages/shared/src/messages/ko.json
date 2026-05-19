@@ -755,6 +755,8 @@
   "core": {
     "regen": "다시 생성",
     "retry": "다시 시도",
+    "copy": "복사",
+    "writeFailed": "이 편집기에 쓸 수 없습니다 — 복사하세요",
     "shortcuts": "{accept} 선택 · {regen} 재생성 · {cancel} 닫기",
     "openSettings": "설정 열기",
     "dismiss": "닫기",

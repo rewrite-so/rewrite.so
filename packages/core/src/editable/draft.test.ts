@@ -69,23 +69,28 @@ describe('requestDraftReplace', () => {
     document.body.appendChild(el);
   });
 
-  it('dispatches rewrite-so:draft-replace with marker + newText', async () => {
+  it('dispatches rewrite-so:draft-replace with marker + payload', async () => {
     const seen: CustomEvent[] = [];
     listenReplace((e) => {
       seen.push(e);
     });
 
-    void requestDraftReplace(el, 'hello');
+    void requestDraftReplace(el, { newText: 'hello', range: 'all' });
     // flush microtask 让 waitForMainWorldReady 解析 + dispatch 真正发生
     await Promise.resolve();
 
     expect(seen).toHaveLength(1);
-    const detail = seen[0]?.detail as { id: string; marker: string; newText: string };
-    expect(detail.newText).toBe('hello');
-    expect(detail.marker).toBe('data-rewrite-so-target');
+    const detail = seen[0]?.detail as {
+      id: string;
+      marker: string;
+      payload: { newText: string; range: string };
+    };
+    expect(detail.payload.newText).toBe('hello');
+    expect(detail.payload.range).toBe('all');
+    expect(detail.marker).toBe('data-rewrite-so-draft-target');
     expect(typeof detail.id).toBe('string');
     // marker attribute 设到了目标元素上，main-world 通过它定位
-    expect(el.getAttribute('data-rewrite-so-target')).toBe(detail.id);
+    expect(el.getAttribute('data-rewrite-so-draft-target')).toBe(detail.id);
   });
 
   it('resolves true when main-world returns ok=true', async () => {
@@ -97,10 +102,10 @@ describe('requestDraftReplace', () => {
       );
     });
 
-    const result = await requestDraftReplace(el, 'x');
+    const result = await requestDraftReplace(el, { newText: 'x', range: 'all' });
     expect(result).toBe(true);
     // marker 应该被清理
-    expect(el.hasAttribute('data-rewrite-so-target')).toBe(false);
+    expect(el.hasAttribute('data-rewrite-so-draft-target')).toBe(false);
   });
 
   it('resolves false when main-world returns ok=false', async () => {
@@ -111,18 +116,18 @@ describe('requestDraftReplace', () => {
       );
     });
 
-    expect(await requestDraftReplace(el, 'x')).toBe(false);
+    expect(await requestDraftReplace(el, { newText: 'x', range: 'all' })).toBe(false);
   });
 
   it('resolves false on timeout when main-world never responds', async () => {
     vi.useFakeTimers();
     // 不挂任何 listener —— 模拟 main-world script 没装上
-    const p = requestDraftReplace(el, 'x');
+    const p = requestDraftReplace(el, { newText: 'x', range: 'all' });
     // 用 async 版本同时处理 microtask（让 await waitForMainWorldReady resolve）+ timer
     await vi.advanceTimersByTimeAsync(3000);
     expect(await p).toBe(false);
     // 即使超时也清理 marker
-    expect(el.hasAttribute('data-rewrite-so-target')).toBe(false);
+    expect(el.hasAttribute('data-rewrite-so-draft-target')).toBe(false);
   });
 
   it('ignores result events with mismatched id (no cross-talk)', async () => {
@@ -135,7 +140,7 @@ describe('requestDraftReplace', () => {
       );
     });
     vi.useFakeTimers();
-    const p = requestDraftReplace(el, 'x');
+    const p = requestDraftReplace(el, { newText: 'x', range: 'all' });
     await vi.advanceTimersByTimeAsync(3000);
     expect(await p).toBe(false); // timeout 兜底，不被 wrong-id 干扰
   });
@@ -145,8 +150,8 @@ describe('requestDraftReplace', () => {
     listenReplace((e) => {
       ids.push(e.detail.id);
     });
-    void requestDraftReplace(el, 'a');
-    void requestDraftReplace(el, 'b');
+    void requestDraftReplace(el, { newText: 'a', range: 'all' });
+    void requestDraftReplace(el, { newText: 'b', range: 'all' });
     // flush microtasks 让两次 await waitForMainWorldReady 都 resolve + dispatch
     await Promise.resolve();
     await Promise.resolve();
@@ -161,7 +166,7 @@ describe('requestDraftReplace', () => {
       seen.push(e);
     });
 
-    const p = requestDraftReplace(el, 'x');
+    const p = requestDraftReplace(el, { newText: 'x', range: 'all' });
     // 立刻还未 dispatch（在等 ready）
     await Promise.resolve();
     expect(seen).toHaveLength(0);
