@@ -106,31 +106,47 @@ async function replaceContentEditable(el: HTMLElement, newText: string, range: W
     }
   }
 
-  // 短路 1：Lexical + range='all' 实测合成 selectNodeContents 被拒，直接走反射 slow path
-  if (isLexicalEditor(el) && range === 'all') {
+  // 检测引擎 + 短路决策。**所有受控编辑器 + range='all' 一律跳过 paste 主路径**：
+  // 实测合成 `selectNodeContents` 是 isTrusted=false，会被 framework selectionchange
+  // handler 重置（Lexical onSelectionChange / Draft onSelect / ProseMirror plugin chain /
+  // Slate insert filter 都有 trusted 校验）→ paste handler 内 model selection 仍是
+  // collapsed at caret → paste 走 insert at caret 而非 replace → "原文 + newText" append。
+  // 直接走 framework-specific fallback 或通用 DOM 路径整段重建。
+  const engine = detectControlledEditor(el);
+
+  // 短路 1：Lexical + range='all' → setEditorState 反射 slow path（实测 100% work）
+  if (engine === 'lexical' && range === 'all') {
     const ok = await requestLexicalReplace(el, { newText, fullText: newText, range });
     if (ok) return true;
-    return false; // Lexical 反射失败 → 静默不走通用 DOM（避免 Lexical 上写 3 次 bug）
+    return false; // 反射失败 → 静默不走通用 DOM（避免 Lexical 上写 3 次 bug）
   }
 
-  // 短路 2：Draft + range='all' 同问题：合成 selectNodeContents 不被 Draft selectionchange
-  // handler 接受 → model selection 保持 collapsed → paste 走 insert at caret 而非 replace
-  // → "原文 + newText" append 而不是整段替换。直接走 fiber slow path createFromText 整段重建。
-  if (isDraftEditor(el) && range === 'all') {
+  // 短路 2：Draft + range='all' → fiber createFromText 整段重建
+  if (engine === 'draft' && range === 'all') {
     const ok = await requestDraftReplace(el, { newText, range });
     if (ok) return true;
-    return false; // Draft 反射失败 → 静默
+    return false;
   }
 
-  // 短路 3：非受控编辑器走通用 DOM 路径（合成 paste 在无 paste handler 的 ce 上必失败）
-  const engine = detectControlledEditor(el);
+  // 短路 3：ProseMirror / Slate + range='all' → 通用 DOM 路径整段重建（无专用反射
+  // fallback）。通用 DOM 路径在 PM / Slate 上：execCommand insertText 在 selectAll 范围
+  // 整段替换 —— 比 paste handler 在 collapsed selection 处 insert 的 append 行为更接近
+  // 用户期望。**已知风险**：PM / Slate 是受控树，通用 DOM 路径可能触发类似 Lexical 的
+  // model reconcile 异常（虽不至于"写 3 次"，可能残留 / 格式异常）。上线后通过 telemetry
+  // 监控决定是否升级反射 fallback。CLAUDE.md 已知限制段已记录。
+  if ((engine === 'prosemirror' || engine === 'slate') && range === 'all') {
+    replaceContentEditableViaDom(el, newText, range);
+    return true;
+  }
+
+  // 短路 4：非受控编辑器走通用 DOM 路径（合成 paste 在无 paste handler 的 ce 上必失败）
   if (!engine) {
     replaceContentEditableViaDom(el, newText, range);
     return true;
   }
 
-  // 主路径：合成 paste（受控编辑器）
-  // 计算 selectionLength 给 main-world 探针做长度差检查
+  // 主路径：合成 paste（受控编辑器 + range='selection'）
+  // 计算 selectionLength 给 main-world 探针做长度差检查（防 false positive）
   const selectionLength = computeSelectionLength(el, range);
   const pasteOk = await requestPasteReplace(el, { newText, range, selectionLength });
   if (pasteOk) return true;

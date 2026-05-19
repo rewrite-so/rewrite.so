@@ -321,9 +321,10 @@ interface LexicalEditorLike {
   getEditorState(): LexicalEditorStateLike;
   parseEditorState(json: string): LexicalEditorStateLike;
   setEditorState(state: LexicalEditorStateLike): void;
-  /** Lexical 公开 API：把 selection 移到 root 末尾 + 设置 DOM focus（异步 via rAF）。
+  /** Lexical 公开 API：把 selection 移到 root 末尾 + 设置 DOM focus。
+   *  Lexical 0.11- 是 sync void；0.12+ 返 Promise<void>（async via rAF）。
    *  setEditorState 全替换 state 时新 state._selection 是 null → 调 focus() 让 caret 显示。 */
-  focus?(): void;
+  focus?(): void | Promise<void>;
   _pendingEditorState?: { _selection?: LexicalSelectionLike | null } | null;
 }
 
@@ -346,26 +347,33 @@ interface LexicalEditorStateJson {
   };
 }
 
-type FastPathCapability = 'ok' | 'unavailable' | null;
+type FastPathCapability = 'ok' | 'unavailable';
 /**
- * Lexical fast path 能力 cache。'ok' / 'unavailable' 是终态（cache 后续调用）；
- * null 表示未决定（如 _pendingEditorState 还未实例化）—— 不 cache，下次重试。
+ * Lexical fast path 能力 per-editor cache。WeakMap<editor, capability> 避免 SPA
+ * 多 Lexical 实例（如 Reddit 帖子页同时有评论框 + 引用回复编辑器）相互污染：
+ * editor A 的探测结果不会被 editor B 看到（不同 Lexical 版本可能 mangle 差异）。
+ *
+ * WeakMap 自动 GC：编辑器 DOM 销毁后 editor 引用失效，cache entry 也释放，
+ * 不持有强引用避免内存泄漏。
+ *
+ * 'ok' / 'unavailable' 是终态（cache 后续调用）；未决定时（如 _pendingEditorState
+ * 未实例化 / _selection 还是 null）返 'undetermined' **不 cache** 让下次重试。
  */
-let lexicalFastPathCapability: FastPathCapability = null;
+const lexicalFastPathCapability = new WeakMap<LexicalEditorLike, FastPathCapability>();
 
 function probeLexicalFastPath(editor: LexicalEditorLike): 'ok' | 'unavailable' | 'undetermined' {
-  if (lexicalFastPathCapability === 'ok') return 'ok';
-  if (lexicalFastPathCapability === 'unavailable') return 'unavailable';
+  const cached = lexicalFastPathCapability.get(editor);
+  if (cached) return cached;
   const pending = editor._pendingEditorState;
   if (!pending) return 'undetermined';
   const sel = pending._selection;
   if (!sel) return 'undetermined';
   try {
     const ok = typeof sel.insertText === 'function';
-    lexicalFastPathCapability = ok ? 'ok' : 'unavailable';
+    lexicalFastPathCapability.set(editor, ok ? 'ok' : 'unavailable');
     return ok ? 'ok' : 'unavailable';
   } catch {
-    lexicalFastPathCapability = 'unavailable';
+    lexicalFastPathCapability.set(editor, 'unavailable');
     return 'unavailable';
   }
 }
@@ -463,12 +471,18 @@ export function replaceLexicalEditor(el: Element, payload: LexicalReplacePayload
     editor.setEditorState(newState);
     // 新 EditorState 的 _selection 是 null（JSON 不含 selection 字段）→ DOM 上 caret
     // 不显示。调 editor.focus() 让 Lexical 把 selection 移到 root 末尾 + 设置 DOM focus。
-    // focus 内部是 rAF 异步调度，return 后下一帧才生效 —— 与 setEditorState 的 reconcile
-    // 时序一致，不会冲突。
+    // Lexical 0.12+ editor.focus(options) 返 Promise<void>（之前版本是 sync）。包
+    // Promise.resolve 兼容同步抛出 + 异步 reject 两种 case，不让 unhandled promise
+    // rejection 上升到 page 控制台。
     try {
-      editor.focus?.();
+      const result = editor.focus?.();
+      if (result && typeof (result as unknown as Promise<void>).catch === 'function') {
+        (result as unknown as Promise<void>).catch(() => {
+          /* async focus reject → caret 显示降级，内容已写入 */
+        });
+      }
     } catch {
-      /* legacy / focus throw → caret 显示问题，但内容已写入；用户体验降级但不崩溃 */
+      /* sync focus throw → 同上 */
     }
     return true;
   } catch {
@@ -539,15 +553,29 @@ export async function replacePasteEditor(el: Element, payload: PasteReplacePaylo
     const dispatchedDefault = el.dispatchEvent(evt);
     if (dispatchedDefault === false) return true; // 强信号
 
-    // 弱信号：rAF×3 后双条件
+    // 弱信号：rAF×5 后三条件（P0-2 plan v9 后强化）。
+    // 5 帧 (~80ms) 比原 3 帧给 framework 更充裕的 reconcile 窗口。再加一个 microtask
+    // tick (Promise.resolve()) 兜底 framework 异步 transaction 在 rAF 之后再 commit。
     await new Promise<void>((r) => requestAnimationFrame(() => r()));
     await new Promise<void>((r) => requestAnimationFrame(() => r()));
     await new Promise<void>((r) => requestAnimationFrame(() => r()));
+    await new Promise<void>((r) => requestAnimationFrame(() => r()));
+    await new Promise<void>((r) => requestAnimationFrame(() => r()));
+    await Promise.resolve();
     const after = (el as HTMLElement).textContent ?? '';
     if (after === before) return false; // 完全没变 → 必失败
     const probeLen = Math.min(16, payload.newText.length);
     if (probeLen === 0) return after !== before; // newText 是空串，仅看变化即可
-    return after.includes(payload.newText.slice(0, probeLen));
+    if (!after.includes(payload.newText.slice(0, probeLen))) return false;
+    // P1-4 长度差校验：防 false positive（原文本来就含 newText 前缀；framework 部分
+    // 写入导致 textContent 变化但 newText 未完整写入）。期望长度差：
+    //   - range='selection': after.length - before.length ≈ newText.length - selectionLength
+    //   - range='all': after.length - before.length ≈ newText.length - before.length (= newText.length - selectionLength)
+    // 容差 ±3 字符给 trailing newline / paragraph break / framework 添加的 zero-width chars。
+    const lenDelta = after.length - before.length;
+    const expectedDelta = payload.newText.length - payload.selectionLength;
+    if (Math.abs(lenDelta - expectedDelta) > 3) return false;
+    return true;
   } catch {
     return false;
   }

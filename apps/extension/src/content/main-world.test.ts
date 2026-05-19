@@ -220,23 +220,45 @@ describe('replacePasteEditor (paste 主路径探针)', () => {
     expect(ok).toBe(true);
   });
 
-  it('weak signal: returns true when textContent changes + contains newText prefix', async () => {
+  it('weak signal: returns true when textContent changes + contains newText prefix + length delta matches', async () => {
     const el = document.createElement('div');
     el.contentEditable = 'true';
     el.textContent = 'before';
     document.body.appendChild(el);
 
-    // 模拟 framework 不 preventDefault 但在 listener 内修改 DOM
+    // 模拟 framework 不 preventDefault 但在 listener 内修改 DOM（整段替换语义）
     el.addEventListener('paste', (_e) => {
       el.textContent = 'NEW_TEXT_FROM_FRAMEWORK';
     });
 
+    // selectionLength=6 模拟用户全选 'before'（lenDelta 校验：23-6=17 == 23-6=17 ✓）
     const ok = await replacePasteEditor(el, {
       newText: 'NEW_TEXT_FROM_FRAMEWORK',
       range: 'selection',
-      selectionLength: 0,
+      selectionLength: 6,
     });
     expect(ok).toBe(true);
+  });
+
+  it('length delta check rejects partial-write false positive', async () => {
+    const el = document.createElement('div');
+    el.contentEditable = 'true';
+    el.textContent = 'Hello world, how are you?';
+    document.body.appendChild(el);
+
+    // 模拟 framework 部分写入：选了 'are you?' (8 chars) 改写成 'X' (1 char)
+    // 但 framework 只写了 'X' 后没删原内容 → 'Hello world, how are you?X'（append）
+    el.addEventListener('paste', (_e) => {
+      el.textContent = 'Hello world, how are you?X';
+    });
+
+    const ok = await replacePasteEditor(el, {
+      newText: 'X',  // 期望替换 'are you?'，结果只 append
+      range: 'selection',
+      selectionLength: 8,  // 'are you?'
+    });
+    // 期望 lenDelta = 26-25=1; expectedDelta = 1-8=-7; |1-(-7)|=8 > 3 → 返 false
+    expect(ok).toBe(false);
   });
 
   it('returns false when textContent does not change (framework ignored paste)', async () => {

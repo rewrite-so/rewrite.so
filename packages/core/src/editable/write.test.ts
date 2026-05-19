@@ -327,3 +327,54 @@ describe('replaceEditable returns Promise<boolean>', () => {
     document.documentElement.removeAttribute('data-rewrite-so-main-world-ready');
   }, 5000);
 });
+
+// ============================================================================
+// Plan v9 fixup: P1-3 ProseMirror / Slate range='all' short-circuit
+// ============================================================================
+
+describe('PM / Slate range=all short-circuit (P1-3)', () => {
+  it('ProseMirror + range=all goes to DOM path (not paste)', async () => {
+    const ce = document.createElement('div');
+    ce.className = 'ProseMirror';
+    ce.contentEditable = 'true';
+    ce.textContent = 'pm content';
+    document.body.appendChild(ce);
+    document.documentElement.setAttribute('data-rewrite-so-main-world-ready', '1');
+
+    // 监听 paste 事件确认 paste 主路径**未被**调用
+    let pasteCount = 0;
+    ce.addEventListener('paste', () => {
+      pasteCount++;
+    });
+
+    const ok = await replaceEditable(ce, 'new', 'all');
+    // PM + all 短路走 DOM 路径 → execCommand insertText 整段替换；happy-dom
+    // 没 execCommand 时走 DOM Range 兜底，仍替换为 'new'
+    expect(ok).toBe(true);
+    expect(pasteCount).toBe(0);  // 关键：没走 paste 主路径
+    expect(ce.textContent).toContain('new');
+
+    document.documentElement.removeAttribute('data-rewrite-so-main-world-ready');
+  });
+
+  it('Slate + range=all goes to DOM path (not paste)', async () => {
+    const ce = document.createElement('div');
+    ce.setAttribute('data-slate-editor', 'true');
+    ce.contentEditable = 'true';
+    ce.textContent = 'slate content';
+    document.body.appendChild(ce);
+    document.documentElement.setAttribute('data-rewrite-so-main-world-ready', '1');
+
+    let pasteCount = 0;
+    ce.addEventListener('paste', () => {
+      pasteCount++;
+    });
+
+    const ok = await replaceEditable(ce, 'new', 'all');
+    expect(ok).toBe(true);
+    expect(pasteCount).toBe(0);
+    expect(ce.textContent).toContain('new');
+
+    document.documentElement.removeAttribute('data-rewrite-so-main-world-ready');
+  });
+});

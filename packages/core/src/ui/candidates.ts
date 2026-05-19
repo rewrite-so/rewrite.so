@@ -271,6 +271,9 @@ function openPanel(
   }
 
   function trySelectStyle(style: Style): boolean {
+    // P0-1 re-entry guard：setApplying 期间 panel 上有 .applying class（CSS 阻挡鼠标 click，
+    // 但 keyboard 1/2/3/Enter 仍能到这里）。检测后早返避免并发 replaceEditable。
+    if (panel.classList.contains('applying')) return false;
     const data = cards.get(style)?.data;
     if (!data || (data.state !== 'done' && data.state !== 'streaming')) return false;
     callbacks.onSelect(style, data.text);
