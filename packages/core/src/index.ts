@@ -399,7 +399,9 @@ export function mount(opts: MountOptions): MountHandle {
       ...(turnstileToken ? { turnstileToken } : {}),
     };
 
-    await runRewrite(req, ac, panel, (code, detail) => transitionToGlobalError(panel, code, detail));
+    await runRewrite(req, ac, panel, (code, detail) =>
+      transitionToGlobalError(panel, code, detail),
+    );
   };
 
   /** 单卡 regenerate：仅 abort 当前 in-flight 中该 style 的（不影响其它）+ 重新单 style 请求 */

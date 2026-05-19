@@ -200,7 +200,7 @@ describe('replaceDraftEditor', () => {
 // Plan v9: replacePasteEditor + replaceLexicalEditor + Draft fast fallback
 // ============================================================================
 
-import { replacePasteEditor, replaceLexicalEditor } from './main-world.ts';
+import { replaceLexicalEditor, replacePasteEditor } from './main-world.ts';
 
 describe('replacePasteEditor (paste 主路径探针)', () => {
   it('strong signal: returns true when framework preventDefault is observed', async () => {
@@ -253,9 +253,9 @@ describe('replacePasteEditor (paste 主路径探针)', () => {
     });
 
     const ok = await replacePasteEditor(el, {
-      newText: 'X',  // 期望替换 'are you?'，结果只 append
+      newText: 'X', // 期望替换 'are you?'，结果只 append
       range: 'selection',
-      selectionLength: 8,  // 'are you?'
+      selectionLength: 8, // 'are you?'
     });
     // 期望 lenDelta = 26-25=1; expectedDelta = 1-8=-7; |1-(-7)|=8 > 3 → 返 false
     expect(ok).toBe(false);
@@ -298,12 +298,14 @@ describe('replacePasteEditor (paste 主路径探针)', () => {
 });
 
 describe('replaceLexicalEditor', () => {
-  function buildMockLexicalDOM(opts: {
-    hasEditor?: boolean;
-    hasFastPath?: boolean;
-    insertTextWorks?: boolean;
-    setEditorStateWorks?: boolean;
-  } = {}) {
+  function buildMockLexicalDOM(
+    opts: {
+      hasEditor?: boolean;
+      hasFastPath?: boolean;
+      insertTextWorks?: boolean;
+      setEditorStateWorks?: boolean;
+    } = {},
+  ) {
     const {
       hasEditor = true,
       hasFastPath = false,
@@ -440,7 +442,9 @@ describe('Lexical capability cache (WeakMap per-editor)', () => {
       _pendingEditorState: {
         _selection: hasInsertText
           ? { insertText: insertTextMock }
-          : { /* no insertText method → capability 'unavailable' */ },
+          : {
+              /* no insertText method → capability 'unavailable' */
+            },
       },
     };
 
@@ -455,13 +459,21 @@ describe('Lexical capability cache (WeakMap per-editor)', () => {
     const b = buildLexicalEditorWithSelection(false);
 
     // 先调 A 让 cache 标 'ok'
-    const okA = replaceLexicalEditor(a.el, { newText: 'A_TEXT', fullText: 'A_TEXT', range: 'selection' });
+    const okA = replaceLexicalEditor(a.el, {
+      newText: 'A_TEXT',
+      fullText: 'A_TEXT',
+      range: 'selection',
+    });
     expect(okA).toBe(true);
     expect(a.insertTextMock).toHaveBeenCalledWith('A_TEXT');
     expect(a.setEditorStateMock).not.toHaveBeenCalled();
 
     // 然后调 B —— 即使 A 已 cache 'ok'，B 必须独立 probe 'unavailable' 走 slow path
-    const okB = replaceLexicalEditor(b.el, { newText: 'B_TEXT', fullText: 'B_TEXT', range: 'selection' });
+    const okB = replaceLexicalEditor(b.el, {
+      newText: 'B_TEXT',
+      fullText: 'B_TEXT',
+      range: 'selection',
+    });
     expect(okB).toBe(true);
     // B 的 setEditorState slow path 被调用（fast path 不可用）
     expect(b.setEditorStateMock).toHaveBeenCalledTimes(1);

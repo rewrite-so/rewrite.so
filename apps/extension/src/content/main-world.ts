@@ -176,7 +176,10 @@ export function findDraftEditorFiber(el: Element): DraftFiberHit | null {
  * `currentContent.{getBlockForKey, getBlockMap, merge}` +
  * `editorState.constructor.{push, forceSelection}` + selection.merge
  */
-function replaceDraftSelectionViaReflection(props: DraftFiberHit['props'], newText: string): boolean {
+function replaceDraftSelectionViaReflection(
+  props: DraftFiberHit['props'],
+  newText: string,
+): boolean {
   try {
     const editorState = props.editorState;
     const selection = editorState.getSelection();
@@ -208,7 +211,10 @@ function replaceDraftSelectionViaReflection(props: DraftFiberHit['props'], newTe
     for (let i = 0; i < newText.length; i++) insertChars.push(CharMetaClass.EMPTY);
     const newCharList = prefixChars.concat(ListClass.of(...insertChars)).concat(suffixChars);
 
-    const newBlock = block.merge({ text: newBlockText, characterList: newCharList }) as DraftContentBlockLike;
+    const newBlock = block.merge({
+      text: newBlockText,
+      characterList: newCharList,
+    }) as DraftContentBlockLike;
     const newBlockMap = currentContent.getBlockMap().set(startKey, newBlock);
     const newContent = currentContent.merge({ blockMap: newBlockMap }) as DraftContentStateLike;
     const EditorStateClass = editorState.constructor;
@@ -522,7 +528,10 @@ function handleLexicalReplaceRequest(ev: Event): void {
  * 内部事件，不读写系统剪贴板。
  * @internal exported for unit tests
  */
-export async function replacePasteEditor(el: Element, payload: PasteReplacePayload): Promise<boolean> {
+export async function replacePasteEditor(
+  el: Element,
+  payload: PasteReplacePayload,
+): Promise<boolean> {
   try {
     const before = (el as HTMLElement).textContent ?? '';
 

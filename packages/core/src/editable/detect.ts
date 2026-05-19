@@ -114,7 +114,9 @@ export type ControlledEditorEngine = 'lexical' | 'draft' | 'prosemirror' | 'slat
  * 检测顺序：Lexical (cross-shadow) → Draft (DOM class) → ProseMirror (DOM class)
  * → Slate (data-attribute)。优先级按用户已覆盖站点估算（Reddit / X / Notion / Discord）。
  */
-export function detectControlledEditor(el: Element | null | undefined): ControlledEditorEngine | null {
+export function detectControlledEditor(
+  el: Element | null | undefined,
+): ControlledEditorEngine | null {
   if (!el || !(el instanceof Element)) return null;
   if (isLexicalEditor(el)) return 'lexical';
   // Draft.js: `.public-DraftEditor-content` 是内层 contenteditable；`.DraftEditor-root` 是外层 wrapper

@@ -1,5 +1,5 @@
-import { detectControlledEditor, getEditableKind, isLexicalEditor } from './detect.ts';
-import { isDraftEditor, requestDraftReplace } from './draft.ts';
+import { detectControlledEditor, getEditableKind } from './detect.ts';
+import { requestDraftReplace } from './draft.ts';
 import { requestLexicalReplace } from './lexical.ts';
 import { requestPasteReplace } from './paste-adapter.ts';
 
@@ -29,7 +29,11 @@ export type WriteRange = 'selection' | 'all';
  *
  * 失败时返 false → 调用方（mount.ts onSelect）显示 setWriteFailed UI（不静默关闭）。
  */
-export async function replaceEditable(el: HTMLElement, newText: string, range: WriteRange): Promise<boolean> {
+export async function replaceEditable(
+  el: HTMLElement,
+  newText: string,
+  range: WriteRange,
+): Promise<boolean> {
   const kind = getEditableKind(el);
 
   if (kind === 'input' || kind === 'textarea') {
@@ -96,7 +100,11 @@ function setNativeValue(el: HTMLInputElement | HTMLTextAreaElement, value: strin
  * 渐进式降级调度 contenteditable 写入。返 true = 任意一层命中；false = 全部失败。
  * 详见函数头注释。
  */
-async function replaceContentEditable(el: HTMLElement, newText: string, range: WriteRange): Promise<boolean> {
+async function replaceContentEditable(
+  el: HTMLElement,
+  newText: string,
+  range: WriteRange,
+): Promise<boolean> {
   // focus 保证操作目标正确（onSelect 已 focus 但保险幂等）
   if (document.activeElement !== el) {
     try {

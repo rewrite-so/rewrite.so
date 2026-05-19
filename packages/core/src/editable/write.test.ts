@@ -151,7 +151,7 @@ describe('replaceEditable — contenteditable', () => {
 // Plan v9: 渐进式降级 + Lexical/Draft 检测 + buildLexicalSelectionFullText
 // ============================================================================
 
-import { isLexicalEditor, detectControlledEditor } from './detect.ts';
+import { detectControlledEditor, isLexicalEditor } from './detect.ts';
 import { buildLexicalSelectionFullText } from './write.ts';
 
 describe('isLexicalEditor (cross-shadow detection)', () => {
@@ -351,7 +351,7 @@ describe('PM / Slate range=all short-circuit (P1-3)', () => {
     // PM + all 短路走 DOM 路径 → execCommand insertText 整段替换；happy-dom
     // 没 execCommand 时走 DOM Range 兜底，仍替换为 'new'
     expect(ok).toBe(true);
-    expect(pasteCount).toBe(0);  // 关键：没走 paste 主路径
+    expect(pasteCount).toBe(0); // 关键：没走 paste 主路径
     expect(ce.textContent).toContain('new');
 
     document.documentElement.removeAttribute('data-rewrite-so-main-world-ready');

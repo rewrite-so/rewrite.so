@@ -706,12 +706,16 @@ describe('setApplying + re-entry guard (Plan v9 P0-1)', () => {
     panel.setDone('faithful', 'CANDIDATE_TEXT');
 
     panel.setApplying('faithful');
-    expect((root.querySelector('.panel') as HTMLElement)?.classList.contains('applying')).toBe(true);
+    expect((root.querySelector('.panel') as HTMLElement)?.classList.contains('applying')).toBe(
+      true,
+    );
 
     // 模拟所有 fallback 都失败 → setWriteFailed
     panel.setWriteFailed('faithful', 'FINAL_TEXT_TO_COPY');
     // applying class 应被清掉
-    expect((root.querySelector('.panel') as HTMLElement)?.classList.contains('applying')).toBe(false);
+    expect((root.querySelector('.panel') as HTMLElement)?.classList.contains('applying')).toBe(
+      false,
+    );
     // 候选卡显示 write-failed + Copy 按钮
     const card = root.querySelector('.card[data-style="faithful"]') as HTMLElement;
     expect(card.classList.contains('write-failed')).toBe(true);
