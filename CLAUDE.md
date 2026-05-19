@@ -5,11 +5,30 @@
 
 ## 产品契约（不可静默更改）
 
-- **3 风格契约**：固定为 `faithful / casual / formal`（中文标签：贴近原文 / 口语 / 正式）。修改 `packages/prompts` 后必须人工 sample ≥5 组中/英输入，确认 3 种风格差异未塌陷。自动测试无法保证语义差异。
-- **选区改写 prompt 区分**：`buildMessages` 在 `hasSelection=true` 且有 context 时
-  走 SELECTION/CONTEXT 双区块结构（明确告诉 LLM "DO NOT rewrite context, output ONLY
-  the rewritten selection"）。修改这部分**同样必须人工 sample**：长文本选段改写场景
-  下 LLM 是否真的只输出选段、是否过度采纳 context 内容。
+- **3 风格契约**：固定为 `faithful / casual / formal`（中文标签：贴近原文 / 口语 / 正式）。
+  **两个动作轴**：faithful = 仅修错（错别字 / 语法 / 标点）+ 微调，**默认**不重组句式，
+  仅在局部修错无法解决严重病句或跨语言翻译语法要求时才允许最小幅度结构调整；
+  casual / formal = Step 1 提取核心意思 → Step 2 丢弃原句结构 → 用目标风格重新组织，
+  可充分重写。**没有长度约束**——长度由 rewrite 质量决定，不是预算。修改
+  `packages/prompts` 后必须人工 sample ≥5 组中/英输入，确认 3 种风格差异未塌陷。
+  自动测试无法保证语义差异。
+- **语族 fallback (zh / en / neutral)**：`packages/prompts/src/system.ts` 的
+  `resolveRuleset(targetLang)` 把目标语言归为 3 个规则集：`zh-*` + 自然语言
+  `中文 / Chinese / Mandarin / 粤语 / Cantonese` → ZH 规则；`en-*` + `English /
+  British English / 英文` → EN 规则；其它（`ja / ko / es / fr / de` + 任意未识别
+  自然语言描述如 `Shakespearean`）→ NEUTRAL 规则集。NEUTRAL 是为 7 个 UI locale
+  中 ja/ko/es/fr/de 准备的 language-agnostic fallback——**不引用**任何具体语种
+  例子（不说 "contractions"、不说"咱"、不说 です ます），让 LLM 根据目标语言的
+  母语者直觉去匹配 register。**粤语归 zh 的有意决策**：粤语口语词汇与普通话差异
+  较大，但 ZH 规则集的核心指令（修错 / 不展开缩写 / 保持语气 / Step 1+2 重组）
+  对泛中文族通用；LLM 在 zh ruleset 下能根据 targetLang="粤语"调用粤语用词。
+- **选区改写 prompt 区分**：`buildMessages` 在 `hasSelection=true` 时**无条件**
+  输出 "Selection to rewrite" 标签（明确告诉 LLM `output ONLY the rewritten
+  selection`）；有 context 时额外加 "Surrounding context" 区块（双区块强约束，
+  `DO NOT rewrite context`），无 context 时仅发 Selection 标签作为兜底。这样
+  即使 `read.ts` 没采到选区周边，LLM 也明确知道这是一段选区，不会误把整段重写。
+  修改这部分**同样必须人工 sample**：长文本选段改写场景下 LLM 是否真的只输出
+  选段、是否过度采纳 context 内容。
 - **触发去抖窗口 500ms**：误触和延迟的权衡值，不要随意调。
 - **候选数固定 3，不能加第 4 个**（产品决策）。
 - **regen 算 1 次配额**：浮窗每张卡的 ↻ Regenerate / Retry 触发独立 `POST /v1/rewrite styles=[N]`，
