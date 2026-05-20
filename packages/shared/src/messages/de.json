@@ -38,6 +38,10 @@
     },
     "aup": {
       "title": "Nutzungsrichtlinie — rewrite.so"
+    },
+    "learn": {
+      "title": "Englisch mit Englisch lernen — rewrite.so",
+      "description": "Schreib Englisch, ohne an jedem Satz zu zweifeln. Drei muttersprachliche Versionen, in den Apps, die du schon nutzt."
     }
   },
   "page": {
@@ -349,6 +353,156 @@
         "body": "Abonniere Pro, um weiter zu schreiben.",
         "cta": "Pro-Preise anzeigen"
       }
+    },
+    "learn": {
+      "hero": {
+        "h1Line1": "Englisch lernst du am besten",
+        "h1Line2": "durch tägliches Benutzen",
+        "subHeadline": "Schreib so oft wie möglich auf Englisch — bei der Arbeit, in Chats, in Posts. Zu jedem Satz gibt dir rewrite.so drei muttersprachliche Versionen zum Vergleichen und Lernen. Je mehr du schreibst, desto besser wirst du — und desto sicherer.",
+        "ctaPrimary": "Kostenlos installieren →",
+        "ctaSecondary": "Ohne Installation testen →",
+        "fineprint": "{count} kostenlose Umschreibungen pro Monat. Ohne Karte."
+      },
+      "contrast": {
+        "h2": "Ein Satz. Drei muttersprachliche Varianten.",
+        "intro": "Du hast einen Satz geschrieben. rewrite.so zeigt dir drei muttersprachliche Versionen. Sieh dir an, was sich geändert hat.",
+        "youWrote": "Du hast geschrieben",
+        "input": "I very like this idea",
+        "faithful": {
+          "label": "Originalnah",
+          "text": "I really like this idea.",
+          "note": "„very“ verändert keine Verben. Muttersprachler sagen hier „really“."
+        },
+        "casual": {
+          "label": "Locker",
+          "text": "Love this idea.",
+          "note": "In kurzen Antworten lassen Muttersprachler oft das Subjekt weg."
+        },
+        "formal": {
+          "label": "Formell",
+          "text": "I find this idea compelling.",
+          "note": "„very“ plus Adjektiv lässt sich durch ein präzises Verb ersetzen."
+        }
+      },
+      "why": {
+        "h2": "Du lernst, indem du die Sprache benutzt.",
+        "point1": {
+          "title": "Schreib dort, wo du ohnehin schreibst",
+          "body": "Slack, E-Mail, Reddit, X. Echte Nachrichten, keine Übungen."
+        },
+        "point2": {
+          "title": "Sieh dir sofort muttersprachliche Formulierungen an",
+          "body": "Kein Warten, kein Nachschlagen. Jeder Satz bekommt eine muttersprachliche Version."
+        },
+        "point3": {
+          "title": "Schreib, bevor du dich bereit fühlst",
+          "body": "Für den Anfang brauchst du kein perfektes Englisch. Schreib es, und schreib mehr."
+        }
+      },
+      "scenarios": {
+        "h2": "Du schreibst jeden Tag Englisch.",
+        "bridge": "rewrite.so macht aus jeder Nachricht eine Übung.",
+        "useCaseChat": {
+          "title": "Mit Mitschülern chatten",
+          "description": "Schreib deine Nachricht. Erhalte drei natürliche Versionen. Sende die passende.",
+          "input": "I am very interesting about this topic",
+          "candidates": {
+            "faithful": "I'm very interested in this topic.",
+            "casual": "This topic really interests me.",
+            "formal": "I find this topic quite interesting."
+          }
+        },
+        "useCasePosting": {
+          "title": "Auf Englisch online posten",
+          "description": "Reddit, Foren, Kommentarspalten. Vergleiche drei Versionen, bevor du postest.",
+          "input": "this is depend on the situation",
+          "candidates": {
+            "faithful": "This depends on the situation.",
+            "casual": "It depends, honestly.",
+            "formal": "This depends on the circumstances."
+          }
+        },
+        "useCaseWork": {
+          "title": "Kollegen schreiben",
+          "description": "Schreib die Arbeitsnachricht in deinen eigenen Worten. Wähle die Version, die richtig klingt.",
+          "input": "please reply me when you have time",
+          "candidates": {
+            "faithful": "Please reply to me when you have time.",
+            "casual": "Let me know when you get a chance.",
+            "formal": "I would appreciate your reply at your convenience."
+          }
+        }
+      },
+      "routine": {
+        "h2": "Eine Routine, die du durchhältst.",
+        "intro": "Fortschritt entsteht, wenn du jeden Tag dranbleibst. Diese vier kleinen Gewohnheiten sind einfach und leicht durchzuhalten.",
+        "item1": {
+          "title": "Auf Englisch antworten",
+          "body": "Beantworte jeden Tag eine Nachricht auf Englisch. Schreib sie vor dem Senden um."
+        },
+        "item2": {
+          "title": "Einmal posten",
+          "body": "Hinterlass jeden Tag einen englischen Kommentar auf Reddit oder X."
+        },
+        "item3": {
+          "title": "Nicht zurückwechseln",
+          "body": "Die nächste E-Mail, die du in deiner Sprache schreiben würdest, schreib auf Englisch."
+        },
+        "item4": {
+          "title": "Die Änderungen lesen",
+          "body": "Bevor du eine Umschreibung übernimmst, sieh dir fünf Sekunden lang an, was sich geändert hat."
+        }
+      },
+      "pricing": {
+        "body": "{count} Umschreibungen pro Monat, ohne Karte. Upgrade, wenn du mehr schreibst.",
+        "cta": "Preise ansehen →"
+      },
+      "finalCta": {
+        "h2": "Fang heute an, Englisch zu benutzen.",
+        "body": "Installiere die Erweiterung oder probiere sie zuerst im Browser.",
+        "primary": "Kostenlos installieren →",
+        "secondary": "Jetzt ausprobieren →"
+      },
+      "demo": {
+        "examples": {
+          "wordChoice": {
+            "badge": "Wortwahl",
+            "input": "Please help me see this issue tomorrow.",
+            "candidate": {
+              "faithful": "Please help me look into this issue tomorrow.",
+              "casual": "Could you take a look at this tomorrow?",
+              "formal": "Could you please review this issue tomorrow?"
+            }
+          },
+          "grammar": {
+            "badge": "Grammatik",
+            "input": "I am agree with your plan",
+            "candidate": {
+              "faithful": "I agree with your plan.",
+              "casual": "Yeah, I'm on board with your plan.",
+              "formal": "I support your proposed plan."
+            }
+          },
+          "phrasing": {
+            "badge": "Formulierung",
+            "input": "I look forward to hear from you soon",
+            "candidate": {
+              "faithful": "I look forward to hearing from you soon.",
+              "casual": "Hope to hear from you soon!",
+              "formal": "I look forward to your reply."
+            }
+          },
+          "tone": {
+            "badge": "Ton",
+            "input": "This is wrong. Fix it.",
+            "candidate": {
+              "faithful": "This seems incorrect. Could you fix it?",
+              "casual": "I think something's off here. Could you take another look?",
+              "formal": "This appears to be incorrect. Could you please review and correct it?"
+            }
+          }
+        }
+      }
     }
   },
   "nav": {
@@ -361,7 +515,8 @@
     "tryFree": "Kostenlos testen",
     "settings": "Mein Konto",
     "languageSwitcher": "Sprache",
-    "menu": "Menü"
+    "menu": "Menü",
+    "learnEnglish": "Englisch lernen"
   },
   "footer": {
     "tagline": "Frei schreiben. Sicher senden.",
@@ -385,7 +540,8 @@
       "aup": "Nutzungsrichtlinie",
       "contact": "Kontakt",
       "serviceStatus": "Service-Status ↗",
-      "github": "GitHub"
+      "github": "GitHub",
+      "learnEnglish": "Englisch lernen"
     },
     "disclaimer": "rewrite.so ist ein unabhängiges Produkt. Nicht assoziiert, befürwortet oder gesponsert von OpenAI, Anthropic, Google oder einem anderen AI-Modell-Anbieter. Zugrundeliegende Sprachmodelle werden über standardmäßige OpenAI-kompatible APIs aufgerufen.",
     "copyright": "© {year} rewrite.so. Alle Rechte vorbehalten.",

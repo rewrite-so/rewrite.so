@@ -38,6 +38,10 @@
     },
     "aup": {
       "title": "利用規定 — rewrite.so"
+    },
+    "learn": {
+      "title": "英語を英語で学ぶ — rewrite.so",
+      "description": "一文ごとに迷わず英語を書く。よく使うアプリの中で、ネイティブな3つの言い方を。"
     }
   },
   "page": {
@@ -349,6 +353,156 @@
         "body": "Pro に登録して使い続けてください。",
         "cta": "Pro 料金を見る"
       }
+    },
+    "learn": {
+      "hero": {
+        "h1Line1": "英語を学ぶ一番の方法は",
+        "h1Line2": "毎日使うことです",
+        "subHeadline": "仕事、チャット、投稿 — できるだけ英語で書きましょう。rewrite.so が文ごとにネイティブな3つの言い方を返すので、見比べて学べます。書けば書くほど、上達し、自信もついていきます。",
+        "ctaPrimary": "無料でインストール →",
+        "ctaSecondary": "インストールせずに試す →",
+        "fineprint": "毎月 {count} 回まで無料。カード不要。"
+      },
+      "contrast": {
+        "h2": "一文に、ネイティブな3つの言い方。",
+        "intro": "あなたが一文を書きました。rewrite.so がネイティブな3つの言い方を見せます。何が変わったか見てみましょう。",
+        "youWrote": "あなたの文",
+        "input": "I very like this idea",
+        "faithful": {
+          "label": "原文に忠実",
+          "text": "I really like this idea.",
+          "note": "「very」は動詞を修飾しません。ここではネイティブは「really」を使います。"
+        },
+        "casual": {
+          "label": "カジュアル",
+          "text": "Love this idea.",
+          "note": "短い返信では、ネイティブはよく主語を省略します。"
+        },
+        "formal": {
+          "label": "フォーマル",
+          "text": "I find this idea compelling.",
+          "note": "「very + 形容詞」は、的確な動詞ひとつで言い換えられます。"
+        }
+      },
+      "why": {
+        "h2": "言語は、使うことで身につきます。",
+        "point1": {
+          "title": "いつも書いている場所で書く",
+          "body": "Slack、メール、Reddit、X。練習問題ではなく、本物のメッセージ。"
+        },
+        "point2": {
+          "title": "ネイティブな表現をすぐに見る",
+          "body": "待つことも、調べることもなし。どの文にもネイティブな言い方が返ります。"
+        },
+        "point3": {
+          "title": "準備ができる前に書く",
+          "body": "始めるのに完璧な英語は要りません。書いて、もっと書く。"
+        }
+      },
+      "scenarios": {
+        "h2": "あなたは毎日英語を書いています。",
+        "bridge": "rewrite.so は、どのメッセージも練習に変えます。",
+        "useCaseChat": {
+          "title": "同級生とのチャット",
+          "description": "メッセージを書く。自然な3つの言い方が手に入る。ぴったりのものを送る。",
+          "input": "I am very interesting about this topic",
+          "candidates": {
+            "faithful": "I'm very interested in this topic.",
+            "casual": "This topic really interests me.",
+            "formal": "I find this topic quite interesting."
+          }
+        },
+        "useCasePosting": {
+          "title": "英語でのオンライン投稿",
+          "description": "Reddit、フォーラム、コメント欄。投稿する前に3つの言い方を比べる。",
+          "input": "this is depend on the situation",
+          "candidates": {
+            "faithful": "This depends on the situation.",
+            "casual": "It depends, honestly.",
+            "formal": "This depends on the circumstances."
+          }
+        },
+        "useCaseWork": {
+          "title": "同僚へのメッセージ",
+          "description": "仕事のメッセージを自分の言葉で書く。しっくりくる言い方を選ぶ。",
+          "input": "please reply me when you have time",
+          "candidates": {
+            "faithful": "Please reply to me when you have time.",
+            "casual": "Let me know when you get a chance.",
+            "formal": "I would appreciate your reply at your convenience."
+          }
+        }
+      },
+      "routine": {
+        "h2": "続けられる習慣を。",
+        "intro": "上達は、毎日続けることから生まれます。下の4つの小さな習慣は、シンプルで続けやすいものです。",
+        "item1": {
+          "title": "英語で返信する",
+          "body": "毎日、英語でメッセージを1つ返す。送る前に書き直す。"
+        },
+        "item2": {
+          "title": "1日1回投稿する",
+          "body": "毎日、Reddit か X に英語のコメントを1つ残す。"
+        },
+        "item3": {
+          "title": "母語に戻らない",
+          "body": "次に母語で書こうとしたメール、代わりに英語で書く。"
+        },
+        "item4": {
+          "title": "差分を読む",
+          "body": "リライトを採用する前に、何が変わったか5秒だけ見る。"
+        }
+      },
+      "pricing": {
+        "body": "毎月 {count} 回のリライト、カード不要。たくさん書くようになったらアップグレード。",
+        "cta": "料金を見る →"
+      },
+      "finalCta": {
+        "h2": "今日から英語を使いはじめよう。",
+        "body": "拡張機能をインストールするか、まずはブラウザで試す。",
+        "primary": "無料でインストール →",
+        "secondary": "今すぐ試す →"
+      },
+      "demo": {
+        "examples": {
+          "wordChoice": {
+            "badge": "言葉選び",
+            "input": "Please help me see this issue tomorrow.",
+            "candidate": {
+              "faithful": "Please help me look into this issue tomorrow.",
+              "casual": "Could you take a look at this tomorrow?",
+              "formal": "Could you please review this issue tomorrow?"
+            }
+          },
+          "grammar": {
+            "badge": "文法",
+            "input": "I am agree with your plan",
+            "candidate": {
+              "faithful": "I agree with your plan.",
+              "casual": "Yeah, I'm on board with your plan.",
+              "formal": "I support your proposed plan."
+            }
+          },
+          "phrasing": {
+            "badge": "言い回し",
+            "input": "I look forward to hear from you soon",
+            "candidate": {
+              "faithful": "I look forward to hearing from you soon.",
+              "casual": "Hope to hear from you soon!",
+              "formal": "I look forward to your reply."
+            }
+          },
+          "tone": {
+            "badge": "トーン",
+            "input": "This is wrong. Fix it.",
+            "candidate": {
+              "faithful": "This seems incorrect. Could you fix it?",
+              "casual": "I think something's off here. Could you take another look?",
+              "formal": "This appears to be incorrect. Could you please review and correct it?"
+            }
+          }
+        }
+      }
     }
   },
   "nav": {
@@ -361,7 +515,8 @@
     "tryFree": "無料で試す",
     "settings": "マイページ",
     "languageSwitcher": "言語",
-    "menu": "メニュー"
+    "menu": "メニュー",
+    "learnEnglish": "英語を学ぶ"
   },
   "footer": {
     "tagline": "自由に書いて、自信を持って送る。",
@@ -385,7 +540,8 @@
       "aup": "利用規定",
       "contact": "お問い合わせ",
       "serviceStatus": "サービス状況 ↗",
-      "github": "GitHub"
+      "github": "GitHub",
+      "learnEnglish": "英語を学ぶ"
     },
     "disclaimer": "rewrite.so は独立した製品です。OpenAI、Anthropic、Google、その他の AI モデルプロバイダーとの提携、推薦、後援はありません。基盤となる言語モデルは標準の OpenAI 互換 API 経由でアクセスされます。",
     "copyright": "© {year} rewrite.so All rights reserved.",

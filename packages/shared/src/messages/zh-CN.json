@@ -38,6 +38,10 @@
     },
     "aup": {
       "title": "可接受使用政策 — rewrite.so"
+    },
+    "learn": {
+      "title": "用英语学英语 — rewrite.so",
+      "description": "写英语，不必逐句犹豫。三种地道版本，就在你常用的应用里。"
     }
   },
   "page": {
@@ -349,6 +353,156 @@
         "body": "订阅 Pro，继续畅写。",
         "cta": "查看 Pro 价格"
       }
+    },
+    "learn": {
+      "hero": {
+        "h1Line1": "学英语最好的方式就是",
+        "h1Line2": "尽可能使用它",
+        "subHeadline": "工作、聊天、发帖，尽量用英语写。rewrite.so 给你 3 种最地道的表达，在对比中学会更好的说法。越写越好，越写越有底气。",
+        "ctaPrimary": "免费安装 →",
+        "ctaSecondary": "免安装试用 →",
+        "fineprint": "每月 {count} 次免费改写。无需信用卡。"
+      },
+      "contrast": {
+        "h2": "一个句子，三种地道说法。",
+        "intro": "你写了一个句子。rewrite.so 给你三种地道版本。看看改了什么。",
+        "youWrote": "你写的",
+        "input": "I very like this idea",
+        "faithful": {
+          "label": "贴近原文",
+          "text": "I really like this idea.",
+          "note": "「very」不能修饰动词，这里母语者用「really」。"
+        },
+        "casual": {
+          "label": "口语",
+          "text": "Love this idea.",
+          "note": "快速回复时，母语者常常省略主语。"
+        },
+        "formal": {
+          "label": "正式",
+          "text": "I find this idea compelling.",
+          "note": "一个精确的动词，就能代替「very + 形容词」。"
+        }
+      },
+      "why": {
+        "h2": "用这门语言，你才学得会它。",
+        "point1": {
+          "title": "在你本来就打字的地方写",
+          "body": "Slack、邮件、Reddit、X。真实的消息，不是练习题。"
+        },
+        "point2": {
+          "title": "立刻看到地道表达",
+          "body": "不用等，不用查。每个句子都有一个地道版本。"
+        },
+        "point3": {
+          "title": "别等准备好了再写",
+          "body": "起步不需要完美的英语。写出来，然后多写。"
+        }
+      },
+      "scenarios": {
+        "h2": "你每天都在写英语。",
+        "bridge": "rewrite.so 把每条消息变成一次练习。",
+        "useCaseChat": {
+          "title": "和同学聊天",
+          "description": "写下你的消息。得到三种自然的版本。发出最合适的那个。",
+          "input": "I am very interesting about this topic",
+          "candidates": {
+            "faithful": "I'm very interested in this topic.",
+            "casual": "This topic really interests me.",
+            "formal": "I find this topic quite interesting."
+          }
+        },
+        "useCasePosting": {
+          "title": "用英语在网上发帖",
+          "description": "Reddit、论坛、评论区。发帖前对比三种版本。",
+          "input": "this is depend on the situation",
+          "candidates": {
+            "faithful": "This depends on the situation.",
+            "casual": "It depends, honestly.",
+            "formal": "This depends on the circumstances."
+          }
+        },
+        "useCaseWork": {
+          "title": "给同事发消息",
+          "description": "用自己的话写工作消息。挑出听起来对的那个版本。",
+          "input": "please reply me when you have time",
+          "candidates": {
+            "faithful": "Please reply to me when you have time.",
+            "casual": "Let me know when you get a chance.",
+            "formal": "I would appreciate your reply at your convenience."
+          }
+        }
+      },
+      "routine": {
+        "h2": "一个你能坚持的习惯。",
+        "intro": "进步靠的是日积月累。下面四个小习惯，简单又好坚持。",
+        "item1": {
+          "title": "用英语回复",
+          "body": "每天用英语回一条消息。发送前改写一遍。"
+        },
+        "item2": {
+          "title": "每天发一次帖",
+          "body": "每天在 Reddit 或 X 上用英语留一条评论。"
+        },
+        "item3": {
+          "title": "别切回母语",
+          "body": "下一封你本想用母语写的邮件，改用英语写。"
+        },
+        "item4": {
+          "title": "看看改了什么",
+          "body": "采纳改写之前，花五秒看看哪里变了。"
+        }
+      },
+      "pricing": {
+        "body": "每月 {count} 次改写，无需信用卡。写得多了再升级。",
+        "cta": "查看价格 →"
+      },
+      "finalCta": {
+        "h2": "今天就开始用英语。",
+        "body": "安装扩展，或先在浏览器里试试。",
+        "primary": "免费安装 →",
+        "secondary": "立即试用 →"
+      },
+      "demo": {
+        "examples": {
+          "wordChoice": {
+            "badge": "用词",
+            "input": "Please help me see this issue tomorrow.",
+            "candidate": {
+              "faithful": "Please help me look into this issue tomorrow.",
+              "casual": "Could you take a look at this tomorrow?",
+              "formal": "Could you please review this issue tomorrow?"
+            }
+          },
+          "grammar": {
+            "badge": "语法",
+            "input": "I am agree with your plan",
+            "candidate": {
+              "faithful": "I agree with your plan.",
+              "casual": "Yeah, I'm on board with your plan.",
+              "formal": "I support your proposed plan."
+            }
+          },
+          "phrasing": {
+            "badge": "表达",
+            "input": "I look forward to hear from you soon",
+            "candidate": {
+              "faithful": "I look forward to hearing from you soon.",
+              "casual": "Hope to hear from you soon!",
+              "formal": "I look forward to your reply."
+            }
+          },
+          "tone": {
+            "badge": "语气",
+            "input": "This is wrong. Fix it.",
+            "candidate": {
+              "faithful": "This seems incorrect. Could you fix it?",
+              "casual": "I think something's off here. Could you take another look?",
+              "formal": "This appears to be incorrect. Could you please review and correct it?"
+            }
+          }
+        }
+      }
     }
   },
   "nav": {
@@ -361,7 +515,8 @@
     "tryFree": "免费试用",
     "settings": "我的",
     "languageSwitcher": "语言",
-    "menu": "菜单"
+    "menu": "菜单",
+    "learnEnglish": "学英语"
   },
   "footer": {
     "tagline": "随意写，自信发送。",
@@ -385,7 +540,8 @@
       "aup": "可接受使用政策",
       "contact": "联系我们",
       "serviceStatus": "服务状态 ↗",
-      "github": "GitHub"
+      "github": "GitHub",
+      "learnEnglish": "学英语"
     },
     "disclaimer": "rewrite.so 是独立产品，与 OpenAI、Anthropic、Google 或其他 AI 模型提供商无任何附属、背书或赞助关系。底层语言模型通过标准 OpenAI 兼容 API 访问。",
     "copyright": "© {year} rewrite.so 版权所有。",

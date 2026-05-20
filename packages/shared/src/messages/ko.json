@@ -38,6 +38,10 @@
     },
     "aup": {
       "title": "이용 정책 — rewrite.so"
+    },
+    "learn": {
+      "title": "영어로 영어를 배우다 — rewrite.so",
+      "description": "문장마다 망설이지 않고 영어를 쓰세요. 이미 쓰는 앱 안에서, 원어민다운 세 가지 표현."
     }
   },
   "page": {
@@ -349,6 +353,156 @@
         "body": "Pro에 가입하고 계속 사용하세요.",
         "cta": "Pro 가격 보기"
       }
+    },
+    "learn": {
+      "hero": {
+        "h1Line1": "영어를 배우는 가장 좋은 방법은",
+        "h1Line2": "매일 사용하는 것입니다",
+        "subHeadline": "업무, 채팅, 게시물 — 되도록 영어로 쓰세요. 문장마다 rewrite.so가 원어민다운 세 가지 표현을 주니, 비교하며 배울 수 있습니다. 쓸수록 영어가 늘고, 자신감도 커집니다.",
+        "ctaPrimary": "무료로 설치 →",
+        "ctaSecondary": "설치 없이 사용해 보기 →",
+        "fineprint": "매월 {count}회 무료. 카드 불필요."
+      },
+      "contrast": {
+        "h2": "한 문장, 원어민다운 세 가지 표현.",
+        "intro": "문장을 하나 썼습니다. rewrite.so가 원어민다운 세 가지 버전을 보여줍니다. 무엇이 바뀌었는지 살펴보세요.",
+        "youWrote": "당신이 쓴 문장",
+        "input": "I very like this idea",
+        "faithful": {
+          "label": "원문에 충실",
+          "text": "I really like this idea.",
+          "note": "'very'는 동사를 수식하지 않습니다. 여기서는 원어민이 'really'를 씁니다."
+        },
+        "casual": {
+          "label": "캐주얼",
+          "text": "Love this idea.",
+          "note": "짧은 답장에서 원어민은 주어를 자주 생략합니다."
+        },
+        "formal": {
+          "label": "격식",
+          "text": "I find this idea compelling.",
+          "note": "'very + 형용사'는 정확한 동사 하나로 바꿀 수 있습니다."
+        }
+      },
+      "why": {
+        "h2": "언어는 써 봐야 익혀집니다.",
+        "point1": {
+          "title": "이미 글을 쓰는 곳에서 쓰세요",
+          "body": "Slack, 이메일, Reddit, X. 연습 문제가 아니라 진짜 메시지."
+        },
+        "point2": {
+          "title": "원어민 표현을 바로 확인하세요",
+          "body": "기다리거나 찾아볼 필요가 없습니다. 모든 문장에 원어민 버전이 옵니다."
+        },
+        "point3": {
+          "title": "준비되기 전에 쓰세요",
+          "body": "시작하는 데 완벽한 영어는 필요 없습니다. 일단 쓰고, 더 쓰세요."
+        }
+      },
+      "scenarios": {
+        "h2": "매일 영어를 씁니다.",
+        "bridge": "rewrite.so는 모든 메시지를 연습으로 바꿉니다.",
+        "useCaseChat": {
+          "title": "반 친구와 채팅하기",
+          "description": "메시지를 쓰세요. 자연스러운 세 가지 버전을 받으세요. 어울리는 것을 보내세요.",
+          "input": "I am very interesting about this topic",
+          "candidates": {
+            "faithful": "I'm very interested in this topic.",
+            "casual": "This topic really interests me.",
+            "formal": "I find this topic quite interesting."
+          }
+        },
+        "useCasePosting": {
+          "title": "영어로 온라인에 글쓰기",
+          "description": "Reddit, 포럼, 댓글. 올리기 전에 세 가지 버전을 비교하세요.",
+          "input": "this is depend on the situation",
+          "candidates": {
+            "faithful": "This depends on the situation.",
+            "casual": "It depends, honestly.",
+            "formal": "This depends on the circumstances."
+          }
+        },
+        "useCaseWork": {
+          "title": "동료에게 메시지 보내기",
+          "description": "업무 메시지를 자신의 말로 쓰세요. 알맞게 들리는 버전을 고르세요.",
+          "input": "please reply me when you have time",
+          "candidates": {
+            "faithful": "Please reply to me when you have time.",
+            "casual": "Let me know when you get a chance.",
+            "formal": "I would appreciate your reply at your convenience."
+          }
+        }
+      },
+      "routine": {
+        "h2": "꾸준히 지킬 수 있는 루틴.",
+        "intro": "실력은 매일 꾸준히 할 때 늡니다. 아래 네 가지 작은 습관은 간단하고 지키기 쉽습니다.",
+        "item1": {
+          "title": "영어로 답장하기",
+          "body": "매일 메시지 하나를 영어로 답하세요. 보내기 전에 다시 쓰세요."
+        },
+        "item2": {
+          "title": "하루 한 번 게시하기",
+          "body": "매일 Reddit이나 X에 영어 댓글을 하나 남기세요."
+        },
+        "item3": {
+          "title": "모국어로 돌아가지 않기",
+          "body": "다음에 모국어로 쓰려던 이메일, 대신 영어로 쓰세요."
+        },
+        "item4": {
+          "title": "바뀐 부분 읽기",
+          "body": "리라이트를 적용하기 전에, 무엇이 바뀌었는지 5초만 살펴보세요."
+        }
+      },
+      "pricing": {
+        "body": "매월 {count}회 리라이트, 카드 불필요. 더 많이 쓰게 되면 업그레이드하세요.",
+        "cta": "요금 보기 →"
+      },
+      "finalCta": {
+        "h2": "오늘부터 영어를 쓰세요.",
+        "body": "확장 프로그램을 설치하거나, 먼저 브라우저에서 사용해 보세요.",
+        "primary": "무료로 설치 →",
+        "secondary": "지금 사용해 보기 →"
+      },
+      "demo": {
+        "examples": {
+          "wordChoice": {
+            "badge": "단어 선택",
+            "input": "Please help me see this issue tomorrow.",
+            "candidate": {
+              "faithful": "Please help me look into this issue tomorrow.",
+              "casual": "Could you take a look at this tomorrow?",
+              "formal": "Could you please review this issue tomorrow?"
+            }
+          },
+          "grammar": {
+            "badge": "문법",
+            "input": "I am agree with your plan",
+            "candidate": {
+              "faithful": "I agree with your plan.",
+              "casual": "Yeah, I'm on board with your plan.",
+              "formal": "I support your proposed plan."
+            }
+          },
+          "phrasing": {
+            "badge": "표현",
+            "input": "I look forward to hear from you soon",
+            "candidate": {
+              "faithful": "I look forward to hearing from you soon.",
+              "casual": "Hope to hear from you soon!",
+              "formal": "I look forward to your reply."
+            }
+          },
+          "tone": {
+            "badge": "어조",
+            "input": "This is wrong. Fix it.",
+            "candidate": {
+              "faithful": "This seems incorrect. Could you fix it?",
+              "casual": "I think something's off here. Could you take another look?",
+              "formal": "This appears to be incorrect. Could you please review and correct it?"
+            }
+          }
+        }
+      }
     }
   },
   "nav": {
@@ -361,7 +515,8 @@
     "tryFree": "무료 체험",
     "settings": "내 계정",
     "languageSwitcher": "언어",
-    "menu": "메뉴"
+    "menu": "메뉴",
+    "learnEnglish": "영어 배우기"
   },
   "footer": {
     "tagline": "자유롭게 쓰고, 자신 있게 보내세요.",
@@ -385,7 +540,8 @@
       "aup": "이용 정책",
       "contact": "문의",
       "serviceStatus": "서비스 상태 ↗",
-      "github": "GitHub"
+      "github": "GitHub",
+      "learnEnglish": "영어 배우기"
     },
     "disclaimer": "rewrite.so는 독립 제품입니다. OpenAI, Anthropic, Google 또는 기타 AI 모델 제공업체와 제휴, 추천, 후원 관계가 없습니다. 기저 언어 모델은 표준 OpenAI 호환 API를 통해 액세스됩니다.",
     "copyright": "© {year} rewrite.so. 판권 소유.",

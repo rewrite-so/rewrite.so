@@ -38,6 +38,10 @@
     },
     "aup": {
       "title": "Acceptable Use — rewrite.so"
+    },
+    "learn": {
+      "title": "Learn English by using English — rewrite.so",
+      "description": "Write English without second-guessing every sentence. Three native versions, right in the apps you already use."
     }
   },
   "page": {
@@ -349,10 +353,161 @@
         "body": "Subscribe to Pro to keep going.",
         "cta": "See Pro pricing"
       }
+    },
+    "learn": {
+      "hero": {
+        "h1Line1": "The best way to learn English",
+        "h1Line2": "is to use it every day",
+        "subHeadline": "Write in English as much as you can — work, chats, posts. For every sentence, rewrite.so gives you three native versions to compare and learn from. The more you write, the better and more confident you get.",
+        "ctaPrimary": "Install free →",
+        "ctaSecondary": "Try without installing →",
+        "fineprint": "{count} free rewrites/month. No card."
+      },
+      "demo": {
+        "examples": {
+          "wordChoice": {
+            "badge": "Word choice",
+            "input": "Please help me see this issue tomorrow.",
+            "candidate": {
+              "faithful": "Please help me look into this issue tomorrow.",
+              "casual": "Could you take a look at this tomorrow?",
+              "formal": "Could you please review this issue tomorrow?"
+            }
+          },
+          "grammar": {
+            "badge": "Grammar",
+            "input": "I am agree with your plan",
+            "candidate": {
+              "faithful": "I agree with your plan.",
+              "casual": "Yeah, I'm on board with your plan.",
+              "formal": "I support your proposed plan."
+            }
+          },
+          "phrasing": {
+            "badge": "Phrasing",
+            "input": "I look forward to hear from you soon",
+            "candidate": {
+              "faithful": "I look forward to hearing from you soon.",
+              "casual": "Hope to hear from you soon!",
+              "formal": "I look forward to your reply."
+            }
+          },
+          "tone": {
+            "badge": "Tone",
+            "input": "This is wrong. Fix it.",
+            "candidate": {
+              "faithful": "This seems incorrect. Could you fix it?",
+              "casual": "I think something's off here. Could you take another look?",
+              "formal": "This appears to be incorrect. Could you please review and correct it?"
+            }
+          }
+        }
+      },
+      "contrast": {
+        "h2": "One sentence. Three native ways to say it.",
+        "intro": "You wrote a sentence. rewrite.so shows you three native versions. Look at what changed.",
+        "youWrote": "You wrote",
+        "input": "I very like this idea",
+        "faithful": {
+          "label": "Faithful",
+          "text": "I really like this idea.",
+          "note": "\"Very\" doesn't modify verbs. Natives use \"really\" here."
+        },
+        "casual": {
+          "label": "Casual",
+          "text": "Love this idea.",
+          "note": "In quick replies, natives often drop the subject."
+        },
+        "formal": {
+          "label": "Formal",
+          "text": "I find this idea compelling.",
+          "note": "A precise verb can replace \"very\" plus an adjective."
+        }
+      },
+      "why": {
+        "h2": "You learn by using the language.",
+        "point1": {
+          "title": "Write where you already write",
+          "body": "Slack, email, Reddit, X. Real messages, not exercises."
+        },
+        "point2": {
+          "title": "See native phrasing instantly",
+          "body": "No waiting, no lookup. Every sentence gets a native version."
+        },
+        "point3": {
+          "title": "Write before you feel ready",
+          "body": "You don't need perfect English to start. Write it, and write more."
+        }
+      },
+      "scenarios": {
+        "h2": "You write English every day.",
+        "bridge": "rewrite.so turns each message into practice.",
+        "useCaseChat": {
+          "title": "Chatting with classmates",
+          "description": "Write your message. Get three natural versions. Send the one that fits.",
+          "input": "I am very interesting about this topic",
+          "candidates": {
+            "faithful": "I'm very interested in this topic.",
+            "casual": "This topic really interests me.",
+            "formal": "I find this topic quite interesting."
+          }
+        },
+        "useCasePosting": {
+          "title": "Posting in English online",
+          "description": "Reddit, forums, comment threads. Compare three versions before you post.",
+          "input": "this is depend on the situation",
+          "candidates": {
+            "faithful": "This depends on the situation.",
+            "casual": "It depends, honestly.",
+            "formal": "This depends on the circumstances."
+          }
+        },
+        "useCaseWork": {
+          "title": "Messaging coworkers",
+          "description": "Write the message at work in your own words. Pick the version that sounds right.",
+          "input": "please reply me when you have time",
+          "candidates": {
+            "faithful": "Please reply to me when you have time.",
+            "casual": "Let me know when you get a chance.",
+            "formal": "I would appreciate your reply at your convenience."
+          }
+        }
+      },
+      "routine": {
+        "h2": "A routine you can keep.",
+        "intro": "Progress comes from showing up every day. These four small habits are simple and easy to keep up.",
+        "item1": {
+          "title": "Reply in English",
+          "body": "Answer one message in English every day. Rewrite it before you send."
+        },
+        "item2": {
+          "title": "Post once",
+          "body": "Leave one English comment on Reddit or X each day."
+        },
+        "item3": {
+          "title": "Don't switch back",
+          "body": "The next email you'd write in your own language, write in English instead."
+        },
+        "item4": {
+          "title": "Read the diff",
+          "body": "Before you accept a rewrite, spend five seconds on what changed."
+        }
+      },
+      "pricing": {
+        "body": "{count} rewrites a month, no card. Upgrade when you write more.",
+        "cta": "See pricing →"
+      },
+      "finalCta": {
+        "h2": "Start using English today.",
+        "body": "Install the extension, or try it first in the browser.",
+        "primary": "Install free →",
+        "secondary": "Try it now →"
+      }
     }
   },
   "nav": {
     "try": "Try",
+    "learnEnglish": "Learn English",
     "pricing": "Pricing",
     "earlyBird": "Early Bird",
     "github": "GitHub",
@@ -373,6 +528,7 @@
     },
     "link": {
       "home": "Home",
+      "learnEnglish": "Learn English",
       "install": "Install extension",
       "tryIt": "Try it",
       "pricing": "Pricing",

@@ -22,6 +22,9 @@ export async function Footer() {
           <Link href="/" className={styles.link}>
             {t('link.home')}
           </Link>
+          <Link href="/learn-english" className={styles.link}>
+            {t('link.learnEnglish')}
+          </Link>
           <a
             href={getExtensionInstallUrl()}
             className={styles.link}

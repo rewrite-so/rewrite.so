@@ -28,6 +28,7 @@ export async function TopNav() {
   const installUrl = getExtensionInstallUrl();
   const mobileMenuLabels = {
     menu: t('menu'),
+    learnEnglish: t('learnEnglish'),
     pricing: t('pricing'),
     earlyBird: t('earlyBird'),
     github: t('github'),
@@ -45,6 +46,9 @@ export async function TopNav() {
         <div className={styles.centerLinks}>
           <Link href="/try" className={styles.link}>
             {t('try')}
+          </Link>
+          <Link href="/learn-english" className={styles.link}>
+            {t('learnEnglish')}
           </Link>
           <Link href="/pricing" className={styles.link}>
             {t('pricing')}
