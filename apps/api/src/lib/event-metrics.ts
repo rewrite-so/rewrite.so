@@ -16,8 +16,8 @@
  *   blob5=utm_source    blob6=utm_medium     blob7=utm_campaign
  *   blob8=country       blob9=device_type    blob10=tier
  *   blob11=subject_kind blob12=subject_id_hash
- *   blob13=event_props (JSON string)
- *   blob14-20: reserved
+ *   blob13=event_props (JSON string)  blob14=site (扩展端粗粒度站点标签)
+ *   blob15-20: reserved
  *   double1=value (numeric prop overflow, e.g. ms / count)
  *   double2-20: reserved
  */
@@ -26,7 +26,7 @@ import { EVENT_LIMITS } from '@rewrite/shared';
 import { hashUserId } from './metrics.ts';
 
 export type EventTier = 'anon' | 'free' | 'pro' | 'byok';
-export type EventSubjectKind = 'user' | 'visitor' | 'anonymous_no_id';
+export type EventSubjectKind = 'user' | 'visitor' | 'install' | 'anonymous_no_id';
 export type EventDeviceType = 'mobile' | 'desktop' | 'tablet';
 
 /**
@@ -48,6 +48,8 @@ export interface EventMetric {
   };
   country?: string;
   deviceType?: EventDeviceType;
+  /** 扩展端粗粒度站点标签（白名单 enum）；web 端事件为 undefined。落 blob14。 */
+  site?: string;
   tier: EventTier;
   subjectKind: EventSubjectKind;
   /** Already-hashed (16 hex). Use hashSubjectId() to derive. */
@@ -60,7 +62,9 @@ export interface EventMetric {
 
 /**
  * Derive subject_id hash with the right namespace for the kind.
- * - 'user'   → hashUserId(rawUserId), same formula as metrics.ts (cross-table JOIN-able)
+ * - 'user'    → hashUserId(rawUserId), same formula as metrics.ts (cross-table JOIN-able)
+ * - 'install' → hashUserId(rawInstallId), same formula as metrics.ts 'anonymous_install'
+ *               (no extra namespace) so web_events install rows JOIN rewrite_requests
  * - 'visitor' → hashUserId(VISITOR_HASH_NAMESPACE + rawVisitorId), independent namespace
  * - 'anonymous_no_id' → returns undefined; caller stores empty blob12
  */
@@ -69,7 +73,7 @@ export async function hashSubjectId(
   raw: string | undefined,
 ): Promise<string | undefined> {
   if (kind === 'anonymous_no_id' || !raw) return undefined;
-  if (kind === 'user') return hashUserId(raw);
+  if (kind === 'user' || kind === 'install') return hashUserId(raw);
   return hashUserId(VISITOR_HASH_NAMESPACE + raw);
 }
 
@@ -118,6 +122,8 @@ export const TOP_LEVEL_FIELD_RULES = {
   referrer_host: { max: 200, pattern: /^[A-Za-z0-9.-]+(?::\d+)?$/ },
   /** UUID v4 or short random id. */
   visitor_id: { max: 64, pattern: /^[A-Za-z0-9_-]+$/ },
+  /** Extension install id — UUID v4 or short random id (same shape as visitor_id). */
+  install_id: { max: 64, pattern: /^[A-Za-z0-9_-]+$/ },
   /** All utm_* tags share the same shape: marketing tooling normalises these. */
   utm: { max: 100, pattern: /^[A-Za-z0-9_\-.]+$/ },
 } as const;
@@ -228,6 +234,7 @@ export function writeEventPoint(
         metric.subjectKind,
         metric.subjectIdHash ?? '',
         metric.propsJson ?? '',
+        metric.site ?? '',
       ],
       doubles: [metric.value ?? 0],
     });

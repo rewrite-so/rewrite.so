@@ -18,9 +18,9 @@ export const EVENT_NAMES = [
   // ---- Landing / /try interactions ----
   'cta_click', // props: { cta: 'install'|'signin'|'try_demo'|'pricing'|'github' }
   'try_input', // props: { length_bucket, lang } — never the text itself
-  'try_select_candidate', // props: { style, position: 1|2|3, was_regen: 0|1 }
+  'try_select_candidate', // props: { style } — regen/position 维度由 rewrite metrics 的 is_regen + try_regenerate 事件覆盖（候选恒按 faithful/casual/formal 固定顺序，position 与 style 冗余）
   'try_regenerate', // props: { style }
-  'try_copy_result',
+  'try_copy_result', // DEFERRED: /try 当前无独立"复制"动作（候选直接写回 textarea；Copy 按钮仅写入失败兜底时出现）
   // ---- Settings ----
   'settings_change', // props: { field: 'targetLang'|'uiLocale'|'triggerEnabled', is_custom?: 0|1 }
   // ---- Auth / conversion ----
@@ -45,12 +45,19 @@ export const EVENT_NAMES = [
   'compare_row_expand', // props: { row: 'inline'|'speed'|'candidates'|'logging'|'byok'|'multilang'|'openSource' } — DEFERRED: wiring lives in ComparisonTable details
   'pricing_card_focus', // props: { card: 'free'|'pro'|'byok' } — DEFERRED: hover or keyboard focus ≥ 500ms
   'early_bird_banner_click', // props: { surface: 'hero'|'pricing'|'nav' } — DEFERRED: wiring lives on EarlyBirdBadge + pricing banner
+  // ---- Extension rewrite lifecycle (content script → SW → /v1/events) ----
+  // 扩展端事件由 apps/extension content script 经 service-worker 代理发出，
+  // 统一带 install_id + site（见 EventPayloadSchema）。匿名扩展用户 subjectKind='install'。
+  'ext_trigger', // props: { has_selection: 0|1 } — 双击 Shift 真正发起一次改写
+  'ext_accept', // props: { style } — 用户采纳某候选且写回成功
+  'ext_regenerate', // props: { style } — 单卡 Regenerate ↻
+  'ext_dismiss', // props: {} — 用户主动关闭浮窗（Esc / 取消按钮）未采纳。不含 error / 重新触发 等其它关闭路径；漏斗里 trigger − accept − dismiss = 这些"其它结局"
   // ---- Write-back layer telemetry (Plan v9: 渐进式降级到合成 paste + 反射 fallback) ----
-  // props: { layer, framework } —— layer ∈ paste_strong | paste_weak | lexical_fast |
-  // lexical_slow | draft_fast | draft_slow | dom_generic | silent_fail；framework ∈
-  // lexical | draft | prosemirror | slate | generic。**绝不**带 text payload（CLAUDE.md
-  // 「隐私与安全」段隐私底线）。仅监控 fallback 真实分布、定位 mangle / framework
-  // 升级问题。
+  // props: { layer, framework } —— layer ∈ input_field | paste_strong | paste_weak |
+  // lexical_fast | lexical_slow | draft_fast | draft_slow | dom_generic | silent_fail；
+  // framework ∈ lexical | draft | prosemirror | slate | generic。由 packages/core 的
+  // WriteLayer / Framework 类型同步定义。**绝不**带 text payload（CLAUDE.md「隐私与
+  // 安全」段隐私底线）。仅监控写回降级链路真实分布、定位 mangle / framework 升级问题。
   'rewrite_write_layer',
 ] as const;
 
@@ -73,6 +80,23 @@ export const EVENT_LIMITS = {
 } as const;
 
 /**
+ * 扩展端粗粒度站点白名单。隐私契约：扩展埋点**绝不**记录真实 URL / path,
+ * 只发这个固定 enum；未识别站点一律归 'other'。新增站点同步更新
+ * apps/extension/src/lib/site-detect.ts 的 hostname 映射。
+ */
+export const SITE_LABELS = [
+  'reddit',
+  'x',
+  'slack',
+  'notion',
+  'github',
+  'linkedin',
+  'discord',
+  'other',
+] as const;
+export type SiteLabel = (typeof SITE_LABELS)[number];
+
+/**
  * Per-event payload schema (client-side enqueue + server-side initial parse).
  *
  * `props` is intentionally narrow: only string | number leaf values are
@@ -93,6 +117,13 @@ export const EventPayloadSchema = z.object({
     })
     .optional(),
   visitor_id: z.string().min(1).max(64).optional(),
+  /**
+   * 扩展安装 ID（扩展端事件专用）。仅传输用：服务端据此推导 subjectKind='install'
+   * 并 hash 落 subject_id blob，**不**单独占 AE blob。web 端事件不带此字段。
+   */
+  install_id: z.string().min(1).max(64).optional(),
+  /** 扩展端粗粒度站点标签（白名单 enum，绝不含 URL/path）。web 端事件不带。 */
+  site: z.enum(SITE_LABELS).optional(),
   device_type: z.enum(['mobile', 'desktop', 'tablet']).optional(),
   props: z.record(z.string(), z.union([z.string(), z.number()])).optional(),
 });

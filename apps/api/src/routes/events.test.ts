@@ -82,6 +82,8 @@ function makeEvent(
     page: string;
     locale: string;
     visitor_id: string;
+    install_id: string;
+    site: string;
     props: Record<string, unknown>;
     referrer_host: string;
     utm: Record<string, string>;
@@ -239,6 +241,56 @@ describe('POST /v1/events — happy path', () => {
     expect(recordedPoints[0]?.blobs[10]).toBe('anonymous_no_id');
     expect(recordedPoints[0]?.blobs[11]).toBe(''); // no hash
   });
+
+  it('anonymous extension event (install_id, no session) gets subject_kind=install + site blob', async () => {
+    const res = await app.request(
+      '/v1/events',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          events: [
+            makeEvent({
+              name: 'ext_trigger',
+              page: '/ext',
+              install_id: 'inst-abc-123',
+              site: 'reddit',
+              props: { has_selection: 1 },
+            }),
+          ],
+        }),
+      },
+      makeEnv(),
+    );
+    expect(res.status).toBe(202);
+    expect(recordedPoints[0]?.blobs[10]).toBe('install'); // subject_kind
+    expect(recordedPoints[0]?.blobs[11]).toMatch(/^[0-9a-f]{16}$/); // hashed install id
+    expect(recordedPoints[0]?.blobs[13]).toBe('reddit'); // site → blob14
+  });
+
+  it('logged-in extension user (cookie session) gets subject_kind=user even when install_id is present', async () => {
+    mockSession = { user: { id: 'u_ext', email: 'ext@test.com' } };
+    const res = await app.request(
+      '/v1/events',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          events: [
+            makeEvent({
+              name: 'ext_accept',
+              page: '/ext',
+              install_id: 'inst-abc-123',
+              props: { style: 'casual' },
+            }),
+          ],
+        }),
+      },
+      makeEnv(),
+    );
+    expect(res.status).toBe(202);
+    expect(recordedPoints[0]?.blobs[10]).toBe('user');
+  });
 });
 
 describe('POST /v1/events — invalid payload', () => {
@@ -372,6 +424,36 @@ describe('POST /v1/events — invalid payload', () => {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
           events: [makeEvent({ visitor_id: 'has space and @' })],
+        }),
+      },
+      makeEnv(),
+    );
+    expect(res.status).toBe(400);
+  });
+
+  it('400 when install_id contains forbidden characters', async () => {
+    const res = await app.request(
+      '/v1/events',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          events: [makeEvent({ name: 'ext_trigger', install_id: 'has space@x' })],
+        }),
+      },
+      makeEnv(),
+    );
+    expect(res.status).toBe(400);
+  });
+
+  it('400 on a non-whitelisted site label', async () => {
+    const res = await app.request(
+      '/v1/events',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          events: [makeEvent({ name: 'ext_trigger', install_id: 'inst-1', site: 'facebook' })],
         }),
       },
       makeEnv(),

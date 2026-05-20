@@ -32,6 +32,11 @@ describe('events whitelist', () => {
       'compare_row_expand',
       'pricing_card_focus',
       'early_bird_banner_click',
+      // Extension rewrite lifecycle events (content script → SW → /v1/events)
+      'ext_trigger',
+      'ext_accept',
+      'ext_regenerate',
+      'ext_dismiss',
       'rewrite_write_layer',
     ]);
   });
@@ -109,6 +114,29 @@ describe('EventPayloadSchema', () => {
   it('rejects unknown device_type', () => {
     const r = EventPayloadSchema.safeParse({ ...validBase, device_type: 'watch' });
     expect(r.success).toBe(false);
+  });
+
+  it('accepts an extension payload with install_id + site', () => {
+    const r = EventPayloadSchema.safeParse({
+      ...validBase,
+      name: 'ext_trigger',
+      install_id: 'install-uuid-abc',
+      site: 'reddit',
+      props: { has_selection: 1 },
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it('rejects a non-whitelisted site label', () => {
+    const r = EventPayloadSchema.safeParse({ ...validBase, site: 'facebook' });
+    expect(r.success).toBe(false);
+  });
+
+  it('rejects an empty or overlong install_id', () => {
+    expect(EventPayloadSchema.safeParse({ ...validBase, install_id: '' }).success).toBe(false);
+    expect(EventPayloadSchema.safeParse({ ...validBase, install_id: 'x'.repeat(65) }).success).toBe(
+      false,
+    );
   });
 });
 

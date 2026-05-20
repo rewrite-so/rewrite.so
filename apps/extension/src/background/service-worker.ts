@@ -146,6 +146,27 @@ chrome.runtime.onMessage.addListener((rawMsg: unknown, _sender, sendResponse) =>
     return true;
   }
 
+  if (msg?.type === 'events:send') {
+    // 扩展端 user-behavior events 代理 —— content script 不能跨域且拿不到
+    // .rewrite.so cookie，经 SW fetch /v1/events。fire-and-forget：失败静默吞。
+    // 隐私契约：events payload 只含 install_id / site(粗粒度) / 受控 props，
+    // 不含原文/输出/URL，**不写日志**（同 onConnect rewrite 路径的日志纪律）。
+    const events = (msg as { events?: unknown }).events;
+    if (!Array.isArray(events) || events.length === 0) {
+      sendResponse({ ok: false });
+      return false;
+    }
+    fetch(`${API_BASE}/v1/events`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ events }),
+    })
+      .then((res) => sendResponse({ ok: res.ok }))
+      .catch(() => sendResponse({ ok: false }));
+    return true;
+  }
+
   return false;
 });
 
