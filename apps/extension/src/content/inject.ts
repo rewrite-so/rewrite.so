@@ -1,6 +1,8 @@
 import { type MountHandle, type MountOptions, mount } from '@rewrite/core';
 import { type Locale, pickLocale } from '@rewrite/shared/locales';
 import { WEB_BASE } from '../lib/config.ts';
+import { initEvents, trackEvent } from '../lib/events.ts';
+import { detectSite } from '../lib/site-detect.ts';
 import {
   claimInstallQuota,
   fetchCloudPrefs,
@@ -15,6 +17,29 @@ import { createPortApiClient } from './port-client.ts';
 function resolveUiLocale(prefs: UserPrefs): Locale {
   if (prefs.uiLocale === 'auto') return pickLocale(navigator.language);
   return prefs.uiLocale;
+}
+
+/**
+ * 取 events kill switch（GET /v1/me 的 eventsEnabled 字段，经 background SW 代理）。
+ * 失败默认 true —— 服务端 EVENTS_DISABLED 仍是硬关停，前端 gate 只是少发一次请求的优化。
+ */
+function fetchEventsEnabled(): Promise<boolean> {
+  return new Promise((resolve) => {
+    try {
+      chrome.runtime.sendMessage(
+        { type: 'me:get' },
+        (res: { ok?: boolean; data?: { eventsEnabled?: boolean } }) => {
+          if (chrome.runtime.lastError || !res?.ok) {
+            resolve(true);
+            return;
+          }
+          resolve(res.data?.eventsEnabled !== false);
+        },
+      );
+    } catch {
+      resolve(true);
+    }
+  });
 }
 
 /**
@@ -42,6 +67,17 @@ async function bootstrap(): Promise<void> {
   const [prefs, installId] = await Promise.all([getUserPrefs(), getOrCreateInstallId()]);
   const apiClient = createPortApiClient();
   let currentPrefs = prefs;
+
+  // 初始化扩展端 events sender。site 由 hostname 粗粒度映射（绝不发真实 URL）；
+  // eventsEnabled kill switch 经 /v1/me 取（失败默认开，服务端 EVENTS_DISABLED 兜底）。
+  void fetchEventsEnabled().then((eventsEnabled) => {
+    initEvents({
+      installId,
+      site: detectSite(location.hostname),
+      locale: resolveUiLocale(prefs),
+      eventsEnabled,
+    });
+  });
   let suppressNextTargetLangRemount = false;
   let claimedInstallQuota = false;
   let claimInFlight = false;
@@ -106,6 +142,22 @@ async function bootstrap(): Promise<void> {
     showFirstDotTooltip: !p.hasSeenDotTooltip,
     onFirstDotTooltipShown: () => {
       void patchUserPrefs({ hasSeenDotTooltip: true });
+    },
+    // ---- user-behavior events（core 生命周期回调 → Phase 3 sender → SW → /v1/events）----
+    onTrigger: ({ hasSelection }) => {
+      trackEvent('ext_trigger', { has_selection: hasSelection ? 1 : 0 });
+    },
+    onAccepted: (style) => {
+      trackEvent('ext_accept', { style });
+    },
+    onRegenerate: (style) => {
+      trackEvent('ext_regenerate', { style });
+    },
+    onDismiss: () => {
+      trackEvent('ext_dismiss');
+    },
+    onWriteLayer: ({ layer, framework }) => {
+      trackEvent('rewrite_write_layer', { layer, framework });
     },
   });
 

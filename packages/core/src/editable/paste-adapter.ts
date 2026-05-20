@@ -52,18 +52,25 @@ export interface PasteReplacePayload {
   selectionLength: number;
 }
 
+/** 合成 paste 主路径的结果：是否成功 + 命中的探针子路径（strong/weak）。 */
+export interface PasteReplaceResult {
+  ok: boolean;
+  /** 'strong' = framework 主动 preventDefault；'weak' = rAF 探针检测。ok=false 时无意义。 */
+  path?: 'strong' | 'weak';
+}
+
 /**
  * 请求 main-world 用合成 paste 替换编辑器内容。
  *
- * Promise resolves to true 表示 framework paste handler 已写入；
- * false 表示 framework 不响应合成 paste / 探针失败 / main-world 没装 / 超时。
+ * resolve `{ ok: true, path }` 表示 framework paste handler 已写入；
+ * `{ ok: false }` 表示 framework 不响应合成 paste / 探针失败 / main-world 没装 / 超时。
  */
 export async function requestPasteReplace(
   el: Element,
   payload: PasteReplacePayload,
-): Promise<boolean> {
+): Promise<PasteReplaceResult> {
   await waitForMainWorldReady();
-  return new Promise<boolean>((resolve) => {
+  return new Promise<PasteReplaceResult>((resolve) => {
     const id = `rs-paste-${Date.now()}-${++requestSeq}`;
 
     let settled = false;
@@ -73,17 +80,18 @@ export async function requestPasteReplace(
         el.removeAttribute(MARKER_ATTR);
       }
     };
-    const settle = (ok: boolean) => {
+    const settle = (result: PasteReplaceResult) => {
       if (settled) return;
       settled = true;
       cleanup();
-      resolve(ok);
+      resolve(result);
     };
 
     const onResult = (ev: Event) => {
-      const detail = (ev as CustomEvent<{ id: string; ok: boolean }>).detail;
+      const detail = (ev as CustomEvent<{ id: string; ok: boolean; path?: 'strong' | 'weak' }>)
+        .detail;
       if (!detail || detail.id !== id) return;
-      settle(!!detail.ok);
+      settle({ ok: !!detail.ok, path: detail.path });
     };
 
     window.addEventListener(RESULT_EVENT, onResult as EventListener);
@@ -96,10 +104,10 @@ export async function requestPasteReplace(
         }),
       );
     } catch {
-      settle(false);
+      settle({ ok: false });
       return;
     }
 
-    window.setTimeout(() => settle(false), REPLACE_TIMEOUT_MS);
+    window.setTimeout(() => settle({ ok: false }), REPLACE_TIMEOUT_MS);
   });
 }

@@ -92,7 +92,9 @@
   `hashUserId(userId)` 与 `rewrite_requests` 表 subject_id 串联。
 - **subject_id hash 公式**：登录用户用 `hashUserId(userId)` **不加额外前缀**，
   与 `apps/api/src/lib/metrics.ts` rewrite 埋点公式完全一致，admin 看板可跨表 JOIN；
-  匿名用 `hashUserId('visitor_v1:'+rs_vid)` 独立 namespace 确保两类 hash 不串。
+  扩展匿名用户（`subjectKind='install'`）用 `hashUserId(install_id)`（同样不加前缀，
+  与 metrics `anonymous_install` 同公式，可跨表 JOIN）；web 匿名访客用
+  `hashUserId('visitor_v1:'+rs_vid)` 独立 namespace 确保与前两者不串。
   改 namespace 需 bump 版本号且接受历史数据失联。
 - **visitor → user 跨会话关联**：仅靠 `signin_success` 事件 props 里的
   `linked_visitor_id`（登录时把当前 `rs_vid` 一并发送）一处锚点。admin 看板按此
@@ -102,14 +104,30 @@
   是 "用户点了订阅按钮"，前端能同时带 visitor_id + UTM，比后端纯 server-side
   truth 更贴产品意图。后端内部事件（`subscription_paid` / `subscription_canceled` /
   `byok_save`）不带 visitor_id（webhook 无浏览器上下文）。
+- **扩展端 events 管线**：content script 经 `apps/extension/src/lib/events.ts` sender →
+  `chrome.runtime.sendMessage({type:'events:send'})` → background SW 代理 `POST /v1/events`
+  （content script 不能跨域 + 拿不到 `.rewrite.so` cookie；**走 onMessage 一次性请求，
+  不碰 rewrite 的 port 协议**）。`ext_trigger / ext_accept / ext_regenerate / ext_dismiss /
+  rewrite_write_layer` 五个事件由 `packages/core` 的 `mount()` 生命周期 callback
+  （`onTrigger / onAccepted / onRegenerate / onDismiss / onWriteLayer`）驱动；每条统一带
+  `install_id`（服务端推导 `subjectKind`）+ `site` + `page='/ext'` 哨兵。登录的扩展用户
+  SW 代理请求带 cookie → 服务端落 `subjectKind='user'` 自动与 web 活动归并。
+- **`site` 维度（隐私松绑）**：扩展端事件带一个 `site` 标签，取自 `packages/shared`
+  的 `SITE_LABELS` 固定白名单（`reddit/x/slack/notion/github/linkedin/discord/other`），
+  落 events `blob14`。**绝不**记录真实域名 / path / 第三方 URL；未识别站点归 `other`，
+  `page` 恒为 `/ext` 哨兵。这是对本段「不记 URL」的有意、有界松绑——只为运营判断
+  「该优先给哪些站点做适配器」。新增站点同步更新 `SITE_LABELS` +
+  `apps/extension/src/lib/site-detect.ts`。
 - **Kill switch**：`apps/api/wrangler.toml [vars] EVENTS_DISABLED='1'` 全局关停。
   前端 sender 通过 `GET /v1/me` 响应 `eventsEnabled` 字段拿状态，false → SDK 整个
   降级 no-op；后端路由直接返 204、不计 rate limit、不写 AE。改值仅需
   `wrangler deploy`（< 30s 生效）。
 - **AE binding 上限**：1 index + 20 blobs + 20 doubles 每次 writeDataPoint，单
-  blob ≤ 16KB。我们用 1 个 index（event_name）+ 13 个 blob（event_name / page_path /
-  locale / referrer_host / utm × 3 / country / device_type / tier / subject_kind /
-  subject_id_hash / event_props_json）+ 1 个 double。blob14-20 / double2-20 保留扩展。
+  blob ≤ 16KB。`web_events` 用 1 个 index（event_name）+ 14 个 blob（event_name /
+  page_path / locale / referrer_host / utm × 3 / country / device_type / tier /
+  subject_kind / subject_id_hash / event_props_json / site）+ 1 个 double。
+  blob15-20 / double2-20 保留扩展。`rewrite_requests`（metrics）用 9 个 blob
+  （…/ target_lang_is_custom / is_regen）+ 4 个 double。
   来源：<https://developers.cloudflare.com/analytics/analytics-engine/limits/>
 - **Rate limit 独立桶**：`/v1/events` 走 `consumeEventsIp`（DO 名 `events:ip:<hashed>`，
   30 req/min/ip），**不**与 rewrite 的 `ip` 桶共享 —— 高频 events 不会噬伤 rewrite
@@ -692,8 +710,9 @@ migration 文件名编号空间按仓库分治：
   Record 的 `.merge` / `.getKey` / `.getLength` 等公开 API 名未被 mangle。若 X 重大
   重构（如迁移 Lexical/ProseMirror，或自家 fork 把这些方法名 mangle 了），`replaceDraftEditor`
   返回 false → 用户体验"无法写入此编辑器 —— 请手动复制"（plan v9 后的 fail-loud 行为，
-  浮窗保持 + Copy 按钮兜底）。**监控用户反馈**而非自动告警；定位时再走 React fiber
-  DevTools 调研新结构。
+  浮窗保持 + Copy 按钮兜底）。`rewrite_write_layer` 事件已上报写回降级分布
+  （`layer='silent_fail'` / `draft_slow` 占比），可在 admin 看板监控 Draft 失败率；
+  定位时再走 React fiber DevTools 调研新结构。
 - **Lexical range='all' 走反射 slow path（plan v9 短路）**：实测 Lexical 对 isTrusted=false
   的合成 selectNodeContents 在 onSelectionChange 重置 → paste 主路径在 range='all' 上必失败。
   调度直接短路走 `setEditorState(parseEditorState(JSON))`，避免 ~50ms 无效探针延迟。slow path

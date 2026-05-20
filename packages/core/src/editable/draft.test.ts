@@ -93,22 +93,25 @@ describe('requestDraftReplace', () => {
     expect(el.getAttribute('data-rewrite-so-draft-target')).toBe(detail.id);
   });
 
-  it('resolves true when main-world returns ok=true', async () => {
+  it('resolves { ok: true, path } when main-world returns ok=true', async () => {
     listenReplace((e) => {
       const { id } = e.detail;
-      // 模拟 main-world 处理后回响应
+      // 模拟 main-world 处理后回响应（带命中的子路径 path）
       window.dispatchEvent(
-        new CustomEvent('rewrite-so:draft-replace-result', { detail: { id, ok: true } }),
+        new CustomEvent('rewrite-so:draft-replace-result', {
+          detail: { id, ok: true, path: 'fast' },
+        }),
       );
     });
 
     const result = await requestDraftReplace(el, { newText: 'x', range: 'all' });
-    expect(result).toBe(true);
+    expect(result.ok).toBe(true);
+    expect(result.path).toBe('fast'); // path 从 main-world 透传回 isolated 侧
     // marker 应该被清理
     expect(el.hasAttribute('data-rewrite-so-draft-target')).toBe(false);
   });
 
-  it('resolves false when main-world returns ok=false', async () => {
+  it('resolves { ok: false } when main-world returns ok=false', async () => {
     listenReplace((e) => {
       const { id } = e.detail;
       window.dispatchEvent(
@@ -116,7 +119,7 @@ describe('requestDraftReplace', () => {
       );
     });
 
-    expect(await requestDraftReplace(el, { newText: 'x', range: 'all' })).toBe(false);
+    expect((await requestDraftReplace(el, { newText: 'x', range: 'all' })).ok).toBe(false);
   });
 
   it('resolves false on timeout when main-world never responds', async () => {
@@ -125,7 +128,7 @@ describe('requestDraftReplace', () => {
     const p = requestDraftReplace(el, { newText: 'x', range: 'all' });
     // 用 async 版本同时处理 microtask（让 await waitForMainWorldReady resolve）+ timer
     await vi.advanceTimersByTimeAsync(3000);
-    expect(await p).toBe(false);
+    expect((await p).ok).toBe(false);
     // 即使超时也清理 marker
     expect(el.hasAttribute('data-rewrite-so-draft-target')).toBe(false);
   });
@@ -142,7 +145,7 @@ describe('requestDraftReplace', () => {
     vi.useFakeTimers();
     const p = requestDraftReplace(el, { newText: 'x', range: 'all' });
     await vi.advanceTimersByTimeAsync(3000);
-    expect(await p).toBe(false); // timeout 兜底，不被 wrong-id 干扰
+    expect((await p).ok).toBe(false); // timeout 兜底，不被 wrong-id 干扰
   });
 
   it('subsequent calls get unique ids', async () => {

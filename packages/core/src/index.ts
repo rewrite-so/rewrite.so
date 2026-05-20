@@ -4,7 +4,7 @@ import { parseSSEStream } from '@rewrite/shared/sse-frame';
 import { ALL_STYLES, type Style } from '@rewrite/shared/styles';
 import { isUsableEditable } from './editable/detect.ts';
 import { readEditable } from './editable/read.ts';
-import { replaceEditable } from './editable/write.ts';
+import { type Framework, replaceEditable, type WriteLayer } from './editable/write.ts';
 import { detectTargetLang } from './lang/detect.ts';
 import type { RewriteApiClient } from './transport/api-client.ts';
 import { attachDoubleShift } from './trigger/double-shift.ts';
@@ -60,6 +60,25 @@ export interface MountOptions {
    */
   onAccepted?: (style: Style) => void;
   onError?: (e: Error) => void;
+  /**
+   * 用户点「Regenerate ↻」单卡重生成时调用 —— 给 host 埋点(/try `try_regenerate`、
+   * 扩展 `ext_regenerate`)。可选,web 与扩展各自实现。
+   */
+  onRegenerate?: (style: Style) => void;
+  /**
+   * 双击 Shift 真正发起一次改写时调用（panel 已开、请求已构造）。扩展端发 `ext_trigger`。
+   */
+  onTrigger?: (detail: { hasSelection: boolean }) => void;
+  /**
+   * 用户主动关闭浮窗（Esc / 取消按钮）且未采纳时调用。扩展端发 `ext_dismiss`。
+   * 仅 explicit cancel —— error / 重新触发 / unmount 等关闭路径**不**触发。
+   */
+  onDismiss?: () => void;
+  /**
+   * 每次写回尝试后调用（成功 / 失败都触发）。扩展端发 `rewrite_write_layer`,
+   * 监控写回降级链路真实分布。`layer='silent_fail'` = 三层 fallback 全失败。
+   */
+  onWriteLayer?: (detail: { layer: WriteLayer; framework: Framework }) => void;
 }
 
 export interface MountHandle {
@@ -204,13 +223,16 @@ export function mount(opts: MountOptions): MountHandle {
         currentPanel?.setApplying(style);
         isApplyingWrite = true;
         try {
-          const ok = await replaceEditable(target, finalText, range);
-          if (ok) {
+          const result = await replaceEditable(target, finalText, range);
+          // 每次写回尝试都通知 host（含失败）—— 扩展端发 rewrite_write_layer，
+          // 监控合成 paste / 反射 fallback 的真实命中分布。
+          opts.onWriteLayer?.({ layer: result.layer, framework: result.framework });
+          if (result.ok) {
             currentPanel?.close();
             currentPanel = null;
             lockedEditable = null;
             abortAllInflight();
-            // 通知 host 用户接受了改写（onAccepted optional；扩展不实现）。
+            // 通知 host 用户接受了改写（onAccepted optional；扩展发 ext_accept）。
             // 必须在 replaceEditable 成功之后—— !target early return 或写入失败时
             // 不应触发 "accepted" 事件
             opts.onAccepted?.(style);
@@ -228,6 +250,8 @@ export function mount(opts: MountOptions): MountHandle {
         currentPanel = null;
         lockedEditable = null;
         abortAllInflight();
+        // 用户主动关闭（Esc / 取消）且未采纳 —— 扩展端发 ext_dismiss。
+        opts.onDismiss?.();
       },
       onRegenerate: (style) => {
         void regenerateOne(style);
@@ -382,6 +406,8 @@ export function mount(opts: MountOptions): MountHandle {
       ...(opts.upgradeUrl ? { upgradeUrl: opts.upgradeUrl } : {}),
     });
     currentPanel = panel;
+    // 改写已发起（panel 已开、target 已锁定）—— 通知 host 埋点（扩展 ext_trigger）。
+    opts.onTrigger?.({ hasSelection: read.hasSelection });
 
     let turnstileToken: string | undefined;
     try {
@@ -410,6 +436,7 @@ export function mount(opts: MountOptions): MountHandle {
     if (!panel || !lastRequestContext) return;
 
     panel.resetCard(style);
+    opts.onRegenerate?.(style);
 
     let turnstileToken: string | undefined;
     try {
@@ -423,6 +450,7 @@ export function mount(opts: MountOptions): MountHandle {
     const req: RewriteRequest = {
       ...lastRequestContext,
       styles: [style],
+      regen: true,
       ...(opts.installId ? { installId: opts.installId } : {}),
       ...(turnstileToken ? { turnstileToken } : {}),
     };
@@ -494,6 +522,8 @@ export function mount(opts: MountOptions): MountHandle {
   };
 }
 
+// 粗粒度脚本启发式语言检测 —— /try `try_input` 埋点用（只产出语言码，绝不回传原文）
+export { scriptHeuristic } from './lang/detect.ts';
 // re-exports for consumers
 export type { RewriteApiClient } from './transport/api-client.ts';
 export { createWebApiClient } from './transport/api-client.ts';

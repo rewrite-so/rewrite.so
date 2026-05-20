@@ -6,6 +6,31 @@ import { requestPasteReplace } from './paste-adapter.ts';
 export type WriteRange = 'selection' | 'all';
 
 /**
+ * 写回命中的精确层 —— `rewrite_write_layer` 埋点用,监控 fallback 真实分布、
+ * 定位 framework 升级 / mangle 问题。**绝不**带 text payload。
+ */
+export type WriteLayer =
+  | 'input_field' // <input>/<textarea> 直接 setter（最可靠）
+  | 'paste_strong' // 合成 paste 主路径,framework 主动 preventDefault 接管
+  | 'paste_weak' // 合成 paste 主路径,rAF 探针检测到写入
+  | 'lexical_fast' // Lexical 反射 fallback:selection.insertText（保格式）
+  | 'lexical_slow' // Lexical 反射 fallback:setEditorState 整段重建
+  | 'draft_fast' // Draft 反射 fallback:immutable class 原位重建 block
+  | 'draft_slow' // Draft 反射 fallback:fiber createFromText 整段重建
+  | 'dom_generic' // 通用 DOM 路径（非受控 ce / PM / Slate range=all / 终极兜底）
+  | 'silent_fail'; // 三层 fallback 全失败,未写入
+
+/** 目标编辑器框架 —— `rewrite_write_layer` 埋点用。 */
+export type Framework = 'lexical' | 'draft' | 'prosemirror' | 'slate' | 'generic';
+
+/** replaceEditable 的结果：是否写入成功 + 命中层 + 框架。 */
+export interface WriteResult {
+  ok: boolean;
+  layer: WriteLayer;
+  framework: Framework;
+}
+
+/**
  * 安全替换输入框内容（保持框架受控状态 + undo 栈尽可能保留）。
  *
  * 分级策略：
@@ -27,23 +52,24 @@ export type WriteRange = 'selection' | 'all';
  *       / fiber createFromText slow path（双层；详见 main-world.ts）。
  *    f. **终极兜底**：未识别的受控编辑器走通用 DOM 路径。
  *
- * 失败时返 false → 调用方（mount.ts onSelect）显示 setWriteFailed UI（不静默关闭）。
+ * 返回 WriteResult：`ok=false`（layer='silent_fail'）时调用方（mount.ts onSelect）
+ * 显示 setWriteFailed UI（不静默关闭）；`layer`/`framework` 供 rewrite_write_layer 埋点。
  */
 export async function replaceEditable(
   el: HTMLElement,
   newText: string,
   range: WriteRange,
-): Promise<boolean> {
+): Promise<WriteResult> {
   const kind = getEditableKind(el);
 
   if (kind === 'input' || kind === 'textarea') {
     replaceFormField(el as HTMLInputElement | HTMLTextAreaElement, newText, range);
-    return true;
+    return { ok: true, layer: 'input_field', framework: 'generic' };
   }
   if (kind === 'contenteditable') {
     return await replaceContentEditable(el, newText, range);
   }
-  return false;
+  return { ok: false, layer: 'silent_fail', framework: 'generic' };
 }
 
 function replaceFormField(
@@ -104,7 +130,7 @@ async function replaceContentEditable(
   el: HTMLElement,
   newText: string,
   range: WriteRange,
-): Promise<boolean> {
+): Promise<WriteResult> {
   // focus 保证操作目标正确（onSelect 已 focus 但保险幂等）
   if (document.activeElement !== el) {
     try {
@@ -121,19 +147,19 @@ async function replaceContentEditable(
   // collapsed at caret → paste 走 insert at caret 而非 replace → "原文 + newText" append。
   // 直接走 framework-specific fallback 或通用 DOM 路径整段重建。
   const engine = detectControlledEditor(el);
+  const framework: Framework = engine ?? 'generic';
 
   // 短路 1：Lexical + range='all' → setEditorState 反射 slow path（实测 100% work）
   if (engine === 'lexical' && range === 'all') {
-    const ok = await requestLexicalReplace(el, { newText, fullText: newText, range });
-    if (ok) return true;
-    return false; // 反射失败 → 静默不走通用 DOM（避免 Lexical 上写 3 次 bug）
+    const r = await requestLexicalReplace(el, { newText, fullText: newText, range });
+    // 反射失败 → silent_fail，静默不走通用 DOM（避免 Lexical 上写 3 次 bug）
+    return { ok: r.ok, layer: r.ok ? 'lexical_slow' : 'silent_fail', framework };
   }
 
   // 短路 2：Draft + range='all' → fiber createFromText 整段重建
   if (engine === 'draft' && range === 'all') {
-    const ok = await requestDraftReplace(el, { newText, range });
-    if (ok) return true;
-    return false;
+    const r = await requestDraftReplace(el, { newText, range });
+    return { ok: r.ok, layer: r.ok ? 'draft_slow' : 'silent_fail', framework };
   }
 
   // 短路 3：ProseMirror / Slate + range='all' → 通用 DOM 路径整段重建（无专用反射
@@ -145,35 +171,51 @@ async function replaceContentEditable(
   if ((engine === 'prosemirror' || engine === 'slate') && range === 'all') {
     warnPmSlateDomFallback(engine);
     replaceContentEditableViaDom(el, newText, range);
-    return true;
+    return { ok: true, layer: 'dom_generic', framework };
   }
 
   // 短路 4：非受控编辑器走通用 DOM 路径（合成 paste 在无 paste handler 的 ce 上必失败）
   if (!engine) {
     replaceContentEditableViaDom(el, newText, range);
-    return true;
+    return { ok: true, layer: 'dom_generic', framework };
   }
 
   // 主路径：合成 paste（受控编辑器 + range='selection'）
   // 计算 selectionLength 给 main-world 探针做长度差检查（防 false positive）
   const selectionLength = computeSelectionLength(el, range);
-  const pasteOk = await requestPasteReplace(el, { newText, range, selectionLength });
-  if (pasteOk) return true;
+  const paste = await requestPasteReplace(el, { newText, range, selectionLength });
+  if (paste.ok) {
+    return {
+      ok: true,
+      layer: paste.path === 'strong' ? 'paste_strong' : 'paste_weak',
+      framework,
+    };
+  }
 
   // Fallback 1：Lexical 反射（range='selection' fast / slow path）
   if (engine === 'lexical') {
     const fullText = range === 'selection' ? buildLexicalSelectionFullText(el, newText) : newText;
-    return await requestLexicalReplace(el, { newText, fullText, range });
+    const r = await requestLexicalReplace(el, { newText, fullText, range });
+    return {
+      ok: r.ok,
+      layer: r.ok ? (r.path === 'fast' ? 'lexical_fast' : 'lexical_slow') : 'silent_fail',
+      framework,
+    };
   }
 
   // Fallback 2：Draft 反射（fast: 5+ class 重建 block / slow: fiber createFromText）
   if (engine === 'draft') {
-    return await requestDraftReplace(el, { newText, range });
+    const r = await requestDraftReplace(el, { newText, range });
+    return {
+      ok: r.ok,
+      layer: r.ok ? (r.path === 'fast' ? 'draft_fast' : 'draft_slow') : 'silent_fail',
+      framework,
+    };
   }
 
   // 终极兜底：ProseMirror / Slate / 其它未识别受控编辑器 → 通用 DOM 路径
   replaceContentEditableViaDom(el, newText, range);
-  return true;
+  return { ok: true, layer: 'dom_generic', framework };
 }
 
 /**
