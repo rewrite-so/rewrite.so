@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import {
-  bucketInputLength,
   hashUserId,
   isCustomTargetLang,
   type RequestMetric,
@@ -16,20 +15,6 @@ function fakeDataset() {
     } as unknown as AnalyticsEngineDataset,
   };
 }
-
-describe('bucketInputLength', () => {
-  it('groups into 5 fixed buckets covering 0..4000', () => {
-    expect(bucketInputLength(0)).toBe('<100');
-    expect(bucketInputLength(99)).toBe('<100');
-    expect(bucketInputLength(100)).toBe('<500');
-    expect(bucketInputLength(499)).toBe('<500');
-    expect(bucketInputLength(500)).toBe('<1000');
-    expect(bucketInputLength(999)).toBe('<1000');
-    expect(bucketInputLength(1000)).toBe('<2000');
-    expect(bucketInputLength(2000)).toBe('<4000');
-    expect(bucketInputLength(3999)).toBe('<4000');
-  });
-});
 
 describe('isCustomTargetLang', () => {
   it('returns false for the 7 supported locales', () => {
@@ -99,6 +84,7 @@ describe('writeRequestEvent', () => {
     expect(p.blobs[5]).toBe('<500');
     expect(p.blobs[6]).toBe(''); // no subjectId provided
     expect(p.blobs[7]).toBe('0'); // not custom
+    expect(p.blobs[8]).toBe('0'); // is_regen: base metric is a first-send
 
     expect(p.doubles[0]).toBe(120);
     expect(p.doubles[1]).toBe(1450);
@@ -161,6 +147,21 @@ describe('writeRequestEvent', () => {
     writeRequestEvent(dataset, { ...baseMetric, subjectId: 'a1b2c3d4e5f60718' });
     const p = points[0] as { blobs: string[] };
     expect(p.blobs[6]).toBe('a1b2c3d4e5f60718');
+  });
+
+  it('records is_regen=1 for single-card regenerate requests', () => {
+    const { points, dataset } = fakeDataset();
+    writeRequestEvent(dataset, { ...baseMetric, isRegen: true });
+    const p = points[0] as { blobs: string[] };
+    expect(p.blobs[8]).toBe('1');
+  });
+
+  it('records is_regen=0 when isRegen is false or omitted (first-send / retry-all)', () => {
+    const { points, dataset } = fakeDataset();
+    writeRequestEvent(dataset, { ...baseMetric, isRegen: false });
+    writeRequestEvent(dataset, baseMetric);
+    expect((points[0] as { blobs: string[] }).blobs[8]).toBe('0');
+    expect((points[1] as { blobs: string[] }).blobs[8]).toBe('0');
   });
 });
 

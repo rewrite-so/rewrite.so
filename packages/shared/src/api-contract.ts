@@ -17,6 +17,8 @@ export const RewriteRequestSchema = z.object({
     .array(z.enum(ALL_STYLES as readonly [string, ...string[]]))
     .min(1)
     .max(3),
+  /** true = 单卡 regenerate 重发；首发不带。用于 rewrite metrics 的 regen 率统计 */
+  regen: z.boolean().optional(),
   /** 扩展安装 ID（匿名维度） */
   installId: z.string().min(1).max(64).optional(),
   /** 网页体验页 Turnstile token，扩展端不必填 */

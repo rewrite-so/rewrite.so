@@ -169,6 +169,7 @@ rewriteRoute.post('/v1/rewrite', async (c) => {
         targetLangRaw: req.lang,
         inputLength: req.text.length,
         upstream: isBYOK ? 'byok' : 'platform',
+        isRegen: req.regen,
         status: 'quota_exceeded',
         userId,
         subjectKind: subject.kind,
@@ -282,6 +283,7 @@ rewriteRoute.post('/v1/rewrite', async (c) => {
         targetLangRaw: req.lang,
         inputLength: req.text.length,
         upstream: isBYOK ? 'byok' : 'platform',
+        isRegen: req.regen,
         status,
         errorCode,
         msToFirstByte: firstByteMs,
@@ -353,6 +355,8 @@ interface MetricInput {
   targetLangRaw: string;
   inputLength: number;
   upstream: 'platform' | 'byok';
+  /** true = 单卡 regenerate 重发；首发 / retry-all 不带 */
+  isRegen?: boolean;
   status: RewriteStatus;
   errorCode?: string;
   msToFirstByte?: number;
@@ -385,6 +389,7 @@ async function buildAndWriteMetric(env: AppEnv['Bindings'], input: MetricInput):
     targetLangIsCustom: isCustomTargetLang(input.targetLangRaw),
     inputLength: input.inputLength,
     upstream: input.upstream,
+    isRegen: input.isRegen ?? false,
     status: input.status,
     ...(input.errorCode ? { errorCode: input.errorCode } : {}),
     ...(input.msToFirstByte !== undefined ? { msToFirstByte: input.msToFirstByte } : {}),

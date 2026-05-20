@@ -73,3 +73,29 @@ describe('RewriteRequestSchema styles length', () => {
     ).toBe(false);
   });
 });
+
+describe('RewriteRequestSchema regen field', () => {
+  it('accepts regen: true (single-card regenerate)', () => {
+    const r = RewriteRequestSchema.safeParse({ ...baseReq, styles: ['casual'], regen: true });
+    expect(r.success).toBe(true);
+  });
+
+  it('accepts regen: false', () => {
+    const r = RewriteRequestSchema.safeParse({ ...baseReq, styles: ['casual'], regen: false });
+    expect(r.success).toBe(true);
+  });
+
+  it('accepts a first-send request without regen (optional)', () => {
+    const r = RewriteRequestSchema.safeParse({
+      ...baseReq,
+      styles: ['faithful', 'casual', 'formal'],
+    });
+    expect(r.success).toBe(true);
+    if (r.success) expect(r.data.regen).toBeUndefined();
+  });
+
+  it('rejects non-boolean regen', () => {
+    const r = RewriteRequestSchema.safeParse({ ...baseReq, styles: ['casual'], regen: 'yes' });
+    expect(r.success).toBe(false);
+  });
+});
