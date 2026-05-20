@@ -71,7 +71,8 @@ export function initEvents(opts: {
   config = { installId: opts.installId, site: opts.site, locale: opts.locale };
   enabled = opts.eventsEnabled;
   if (!enabled) return;
-  // pagehide 兜底 flush —— content script 随页面卸载,最后一批不丢。
+  // pagehide 时 best-effort flush 最后一批。注意:经 SW 代理(非 navigator.sendBeacon),
+  // 页面销毁极快时 sendMessage 可能来不及投递 → 最后一批丢失。telemetry 可接受。
   window.addEventListener('pagehide', () => flush());
 }
 

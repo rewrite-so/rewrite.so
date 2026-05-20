@@ -157,6 +157,10 @@ eventsRoute.post('/v1/events', async (c) => {
     // web visitor_id > no id. A logged-in extension user proxies through the SW
     // with the .rewrite.so cookie, so they land as 'user' here (auto-merged
     // with their web activity), even though the SDK still sends install_id.
+    //
+    // Unlike /v1/rewrite, this route does NOT gate install_id behind
+    // EXTENSION_ALLOWED_ORIGINS — deliberate: events are non-billing analytics
+    // on their own rate-limit bucket, and install_id is client-forgeable anyway.
     let subjectKind: EventSubjectKind;
     let subjectRaw: string | undefined;
     if (userId) {
