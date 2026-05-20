@@ -566,7 +566,7 @@
     },
     "scenarios": {
       "h2": "这些场景你眼熟吗？",
-      "bridge": "rewrite.so 就是为这些时刻做的：",
+      "bridge": "rewrite.so 就是为这些时刻做的",
       "useCaseWork": {
         "title": "跨语言工作",
         "description": "工作场景多，语气得跟着变。你用母语写，rewrite.so 给 3 种英文语气：跟同事 Slack 用口语，给客户写邮件用正式，PR 描述用中性。",
