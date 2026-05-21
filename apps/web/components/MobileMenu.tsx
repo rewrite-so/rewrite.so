@@ -6,7 +6,7 @@ import { track } from '../lib/analytics.ts';
 import styles from './MobileMenu.module.css';
 
 // Hamburger 触发的下拉 panel。仅 < 900px 显示(由父级 TopNav.module.css 控制).
-// panel 内容:Pricing / Early Bird(条件) / Sign In(未登录) / Install。
+// panel 内容:Learn English / Pricing / Early Bird(条件) / Sign In(未登录) / Install。
 // Settings / Try Free 是主 CTA,始终在 nav 上,不重复进 panel。
 //
 // 不复用 CtaLink:它内部 onClick 固定为 track(),不接受外层 onClick / role,
@@ -14,6 +14,7 @@ import styles from './MobileMenu.module.css';
 
 interface MobileMenuLabels {
   menu: string;
+  learnEnglish: string;
   pricing: string;
   earlyBird: string;
   github: string;
@@ -118,6 +119,9 @@ export function MobileMenu({ isAuthed, installUrl, earlyBirdVisible, labels }: M
       </button>
       {open && (
         <div id="mobile-menu-panel" className={styles.panel} role="menu">
+          <Link href="/learn-english" className={styles.panelItem} role="menuitem" onClick={close}>
+            {labels.learnEnglish}
+          </Link>
           <Link href="/pricing" className={styles.panelItem} role="menuitem" onClick={close}>
             {labels.pricing}
           </Link>

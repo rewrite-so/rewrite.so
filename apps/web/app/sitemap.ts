@@ -8,6 +8,7 @@ const SITE_ORIGIN = process.env.NEXT_PUBLIC_SITE_ORIGIN ?? 'https://rewrite.so';
 const PUBLIC_PATHS = [
   '/',
   '/try',
+  '/learn-english',
   '/pricing',
   '/early-bird',
   '/login',
