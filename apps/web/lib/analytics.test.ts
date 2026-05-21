@@ -21,29 +21,37 @@ function installBrowserGlobals(
     pathname?: string;
     referrer?: string;
     userAgent?: string;
-    sessionStorageThrows?: boolean;
+    storageThrows?: boolean;
     noSendBeacon?: boolean;
+    /** Pre-seed a legacy rs_vid in sessionStorage to exercise the migration. */
+    seedSessionVid?: string;
   } = {},
 ) {
-  const store = new Map<string, string>();
-  const sessionStorage = {
-    getItem: (k: string) => {
-      if (opts.sessionStorageThrows) throw new Error('blocked');
-      return store.get(k) ?? null;
-    },
-    setItem: (k: string, v: string) => {
-      if (opts.sessionStorageThrows) throw new Error('blocked');
-      store.set(k, v);
-    },
-    removeItem: (k: string) => {
-      store.delete(k);
-    },
-    clear: () => {
-      store.clear();
-    },
-    length: 0,
-    key: () => null,
-  } as unknown as Storage;
+  const makeStorage = (store: Map<string, string>): Storage =>
+    ({
+      getItem: (k: string) => {
+        if (opts.storageThrows) throw new Error('blocked');
+        return store.get(k) ?? null;
+      },
+      setItem: (k: string, v: string) => {
+        if (opts.storageThrows) throw new Error('blocked');
+        store.set(k, v);
+      },
+      removeItem: (k: string) => {
+        store.delete(k);
+      },
+      clear: () => {
+        store.clear();
+      },
+      length: 0,
+      key: () => null,
+    }) as unknown as Storage;
+
+  const localStore = new Map<string, string>();
+  const sessionStore = new Map<string, string>();
+  if (opts.seedSessionVid) sessionStore.set('rs_vid', opts.seedSessionVid);
+  const localStorage = makeStorage(localStore);
+  const sessionStorage = makeStorage(sessionStore);
 
   const listeners = new Map<string, EventListener[]>();
   const beaconCalls: Array<{ url: string; body: unknown }> = [];
@@ -52,6 +60,7 @@ function installBrowserGlobals(
   );
 
   vi.stubGlobal('window', {
+    localStorage,
     sessionStorage,
     addEventListener: (type: string, listener: EventListener) => {
       const arr = listeners.get(type) ?? [];
@@ -86,7 +95,10 @@ function installBrowserGlobals(
   vi.stubGlobal('fetch', fetchMock);
 
   return {
+    localStorage,
     sessionStorage,
+    localStore,
+    sessionStore,
     beaconCalls,
     fetchMock,
     listeners,
@@ -222,11 +234,68 @@ describe('visitor_id management', () => {
     expect(id2).toBe(id1);
   });
 
-  it('tolerates sessionStorage being blocked (private browsing)', () => {
-    installBrowserGlobals({ sessionStorageThrows: true });
+  it('tolerates storage being blocked (private browsing)', () => {
+    installBrowserGlobals({ storageThrows: true });
     init({ locale: 'en', eventsEnabled: true });
     expect(() => track('page_view')).not.toThrow();
     expect(getVisitorId()).toBeUndefined();
+  });
+
+  it('persists the visitor id in localStorage, not sessionStorage', () => {
+    const env = installBrowserGlobals();
+    init({ locale: 'en', eventsEnabled: true });
+    track('page_view');
+    expect(env.localStore.has('rs_vid')).toBe(true);
+    expect(env.sessionStore.has('rs_vid')).toBe(false);
+  });
+
+  it('migrates a legacy sessionStorage rs_vid into localStorage', () => {
+    const env = installBrowserGlobals({ seedSessionVid: 'legacy-vid-123' });
+    init({ locale: 'en', eventsEnabled: true });
+    track('page_view');
+    // The pre-existing session id is promoted, not replaced — identity (and
+    // the signin_success anchor) survives the sessionStorage→localStorage move.
+    expect(getVisitorId()).toBe('legacy-vid-123');
+    expect(env.localStore.get('rs_vid')).toBe('legacy-vid-123');
+  });
+});
+
+describe('session_id', () => {
+  function sessionIdOfCall(env: ReturnType<typeof installBrowserGlobals>, i: number) {
+    const body = JSON.parse(env.fetchMock.mock.calls[i]?.[1]?.body as string) as {
+      events: Array<{ session_id?: string }>;
+    };
+    return body.events[0]?.session_id;
+  }
+
+  it('attaches a session_id stored in sessionStorage, reused within 30 min idle', () => {
+    const env = installBrowserGlobals();
+    init({ locale: 'en', eventsEnabled: true });
+    track('page_view');
+    flush();
+    const sid1 = sessionIdOfCall(env, 0);
+    expect(sid1).toBeTruthy();
+    expect(env.sessionStore.has('rs_sid')).toBe(true);
+
+    vi.advanceTimersByTime(20 * 60 * 1000); // within the 30-min idle window
+    track('page_view');
+    flush();
+    expect(sessionIdOfCall(env, 1)).toBe(sid1);
+  });
+
+  it('rolls the session_id after 30 min of inactivity', () => {
+    const env = installBrowserGlobals();
+    init({ locale: 'en', eventsEnabled: true });
+    track('page_view');
+    flush();
+    const sid1 = sessionIdOfCall(env, 0);
+
+    vi.advanceTimersByTime(31 * 60 * 1000); // past the idle window
+    track('page_view');
+    flush();
+    const sid2 = sessionIdOfCall(env, 1);
+    expect(sid2).toBeTruthy();
+    expect(sid2).not.toBe(sid1);
   });
 });
 

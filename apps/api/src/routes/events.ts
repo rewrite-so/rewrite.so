@@ -126,11 +126,16 @@ eventsRoute.post('/v1/events', async (c) => {
     // otherwise smuggle PII into page / referrer_host / utm.* / visitor_id —
     // the zod schema only caps their length, not their content.
     const topFieldChecks: Array<
-      [string, 'page' | 'referrer_host' | 'visitor_id' | 'install_id' | 'utm', string | undefined]
+      [
+        string,
+        'page' | 'referrer_host' | 'visitor_id' | 'session_id' | 'install_id' | 'utm',
+        string | undefined,
+      ]
     > = [
       ['page', 'page', ev.page],
       ['referrer_host', 'referrer_host', ev.referrer_host],
       ['visitor_id', 'visitor_id', ev.visitor_id],
+      ['session_id', 'session_id', ev.session_id],
       ['install_id', 'install_id', ev.install_id],
       ['utm.source', 'utm', ev.utm?.source],
       ['utm.medium', 'utm', ev.utm?.medium],

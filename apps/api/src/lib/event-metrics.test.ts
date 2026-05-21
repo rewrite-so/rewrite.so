@@ -268,6 +268,23 @@ describe('validateTopLevelField', () => {
   ])('install_id rejects %s', (id) => {
     expect(validateTopLevelField('install_id', id).ok).toBe(false);
   });
+
+  it.each([
+    ['018f5c64-9a4d-7f5e-8001-fe8c9c54f0e1'],
+    ['sid_abc123'],
+    ['ABC-def_123'],
+  ])('session_id accepts %s', (sid) => {
+    expect(validateTopLevelField('session_id', sid)).toEqual({ ok: true });
+  });
+
+  it.each([
+    ['has space'],
+    ['sid@x.com'],
+    ['<>'],
+    ['x'.repeat(65)],
+  ])('session_id rejects %s', (sid) => {
+    expect(validateTopLevelField('session_id', sid).ok).toBe(false);
+  });
 });
 
 describe('writeEventPoint', () => {

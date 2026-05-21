@@ -82,6 +82,7 @@ function makeEvent(
     page: string;
     locale: string;
     visitor_id: string;
+    session_id: string;
     install_id: string;
     site: string;
     props: Record<string, unknown>;
@@ -125,6 +126,36 @@ describe('POST /v1/events — happy path', () => {
     expect(recordedPoints).toHaveLength(1);
     expect(recordedPoints[0]?.blobs[10]).toBe('visitor'); // subject_kind
     expect(recordedPoints[0]?.blobs[9]).toBe('anon'); // tier
+  });
+
+  it('accepts an event carrying a valid session_id', async () => {
+    const res = await app.request(
+      '/v1/events',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          events: [
+            makeEvent({ visitor_id: 'vid-1', session_id: '018f5c64-9a4d-7f5e-8001-fe8c9c54f0e1' }),
+          ],
+        }),
+      },
+      makeEnv(),
+    );
+    expect(res.status).toBe(202);
+  });
+
+  it('accepts an event with no session_id (field is optional)', async () => {
+    const res = await app.request(
+      '/v1/events',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ events: [makeEvent({ visitor_id: 'vid-1' })] }),
+      },
+      makeEnv(),
+    );
+    expect(res.status).toBe(202);
   });
 
   it('accepts a batch of multiple events', async () => {
@@ -444,6 +475,24 @@ describe('POST /v1/events — invalid payload', () => {
       makeEnv(),
     );
     expect(res.status).toBe(400);
+  });
+
+  it('400 when session_id contains forbidden characters', async () => {
+    const res = await app.request(
+      '/v1/events',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          events: [makeEvent({ session_id: 'has space@x' })],
+        }),
+      },
+      makeEnv(),
+    );
+    expect(res.status).toBe(400);
+    const body = (await res.json()) as { error: string; field?: string };
+    expect(body.error).toBe('invalid_field');
+    expect(body.field).toBe('session_id');
   });
 
   it('400 on a non-whitelisted site label', async () => {

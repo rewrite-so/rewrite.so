@@ -122,6 +122,8 @@ export const TOP_LEVEL_FIELD_RULES = {
   referrer_host: { max: 200, pattern: /^[A-Za-z0-9.-]+(?::\d+)?$/ },
   /** UUID v4 or short random id. */
   visitor_id: { max: 64, pattern: /^[A-Za-z0-9_-]+$/ },
+  /** Per-session id — UUID v4 or short random id (same shape as visitor_id). */
+  session_id: { max: 64, pattern: /^[A-Za-z0-9_-]+$/ },
   /** Extension install id — UUID v4 or short random id (same shape as visitor_id). */
   install_id: { max: 64, pattern: /^[A-Za-z0-9_-]+$/ },
   /** All utm_* tags share the same shape: marketing tooling normalises these. */

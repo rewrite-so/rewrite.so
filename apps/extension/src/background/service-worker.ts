@@ -1,6 +1,41 @@
 import { API_BASE } from '../lib/config.ts';
 import { type FromBackground, type FromContent, PORT_NAME_REWRITE } from '../lib/port-protocol.ts';
 
+// ---- Per-session id for extension events (mirrors the web sender's rs_sid) ----
+// Lives in chrome.storage.session: survives SW recycling, resets on browser
+// restart. Rolls after 30 min idle. Resolved here (a trusted context) rather
+// than in the content script because chrome.storage.session is async while the
+// content-script trackEvent() is sync.
+const EXT_SESSION_KEY = 'rs_sid';
+const EXT_SESSION_IDLE_MS = 30 * 60 * 1000;
+let sessionCache: { id: string; lastSeen: number } | null = null;
+
+async function resolveEventSessionId(): Promise<string> {
+  const now = Date.now();
+  if (!sessionCache) {
+    try {
+      const stored = (await chrome.storage.session.get(EXT_SESSION_KEY))[EXT_SESSION_KEY] as
+        | { id?: unknown; lastSeen?: unknown }
+        | undefined;
+      if (stored && typeof stored.id === 'string' && typeof stored.lastSeen === 'number') {
+        sessionCache = { id: stored.id, lastSeen: stored.lastSeen };
+      }
+    } catch {
+      // chrome.storage.session unavailable — fall through to mint in-memory
+    }
+  }
+  if (sessionCache && now - sessionCache.lastSeen > EXT_SESSION_IDLE_MS) {
+    sessionCache = null;
+  }
+  sessionCache = { id: sessionCache?.id ?? crypto.randomUUID(), lastSeen: now };
+  try {
+    await chrome.storage.session.set({ [EXT_SESSION_KEY]: sessionCache });
+  } catch {
+    // best-effort persistence
+  }
+  return sessionCache.id;
+}
+
 chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === 'install') {
     chrome.runtime.openOptionsPage();
@@ -151,17 +186,25 @@ chrome.runtime.onMessage.addListener((rawMsg: unknown, _sender, sendResponse) =>
     // .rewrite.so cookie，经 SW fetch /v1/events。fire-and-forget：失败静默吞。
     // 隐私契约：events payload 只含 install_id / site(粗粒度) / 受控 props，
     // 不含原文/输出/URL，**不写日志**（同 onConnect rewrite 路径的日志纪律）。
+    // SW 在此统一盖 session_id —— content script 是同步、storage.session 是异步。
     const events = (msg as { events?: unknown }).events;
     if (!Array.isArray(events) || events.length === 0) {
       sendResponse({ ok: false });
       return false;
     }
-    fetch(`${API_BASE}/v1/events`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ events }),
-    })
+    resolveEventSessionId()
+      .then((sessionId) => {
+        const stamped = (events as Array<Record<string, unknown>>).map((e) => ({
+          ...e,
+          session_id: sessionId,
+        }));
+        return fetch(`${API_BASE}/v1/events`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ events: stamped }),
+        });
+      })
       .then((res) => sendResponse({ ok: res.ok }))
       .catch(() => sendResponse({ ok: false }));
     return true;

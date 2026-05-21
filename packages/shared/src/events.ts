@@ -118,6 +118,13 @@ export const EventPayloadSchema = z.object({
     .optional(),
   visitor_id: z.string().min(1).max(64).optional(),
   /**
+   * Per-session 标记。30 分钟无活动后滚动为新 id。与持久 visitor_id 区分开：
+   * 用于把事件归入「同一次浏览会话」做时间线 / pulse 分析。web sender 存
+   * sessionStorage（新标签页 = 新会话），扩展由 background SW 自管。
+   * D1-only —— 不占 AE blob（blob15-20 仍保留）。
+   */
+  session_id: z.string().min(1).max(64).optional(),
+  /**
    * 扩展安装 ID（扩展端事件专用）。仅传输用：服务端据此推导 subjectKind='install'
    * 并 hash 落 subject_id blob，**不**单独占 AE blob。web 端事件不带此字段。
    */
