@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server';
-import { Link } from '../i18n/navigation.ts';
 import styles from './EarlyBirdBadge.module.css';
+import { EarlyBirdLink } from './EarlyBirdLink.tsx';
 
 /**
  * Hero-region eyebrow-style pill that links to /early-bird. Rendered only
@@ -15,7 +15,7 @@ import styles from './EarlyBirdBadge.module.css';
 export async function EarlyBirdBadge() {
   const t = await getTranslations('home.earlyBirdBadge');
   return (
-    <Link href="/early-bird" className={styles.badge}>
+    <EarlyBirdLink surface="hero" className={styles.badge}>
       <span aria-hidden="true" className={styles.bolt}>
         ⚡
       </span>
@@ -23,6 +23,6 @@ export async function EarlyBirdBadge() {
       <span aria-hidden="true" className={styles.arrow}>
         →
       </span>
-    </Link>
+    </EarlyBirdLink>
   );
 }

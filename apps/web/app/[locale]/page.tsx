@@ -15,6 +15,7 @@ import { getExtensionInstallUrl } from '../../lib/extension-install-url.ts';
 import styles from './HomePage.module.css';
 import { HomeRewriteDemo } from './HomeRewriteDemo.tsx';
 import type { PlatformName } from './PlatformIcon.tsx';
+import { PriceTeaser } from './PriceTeaser.tsx';
 import { ScenariosShowcase } from './ScenariosShowcase.tsx';
 
 const COMPARE_ROW_KEYS = [
@@ -360,12 +361,14 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </div>
         <div className={styles.priceGrid}>
           <PriceTeaser
+            card="free"
             title={t('pricing.free.title')}
             price={t('pricing.free.price')}
             sub={t('pricing.free.sub', { count: QUOTA.loggedInFree })}
             features={[t('pricing.free.feat1'), t('pricing.free.feat2'), t('pricing.free.feat3')]}
           />
           <PriceTeaser
+            card="pro"
             title={t('pricing.pro.title')}
             price={t('pricing.pro.price', { monthly: PRO_PRICE.yearlyMonthly })}
             sub={t('pricing.pro.sub', {
@@ -378,14 +381,13 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               t('pricing.pro.feat2'),
               t('pricing.pro.feat3'),
             ]}
-            highlight
           />
           <PriceTeaser
+            card="byok"
             title={t('pricing.byok.title')}
             price={t('pricing.byok.price')}
             sub={t('pricing.byok.sub')}
             features={[t('pricing.byok.feat1'), t('pricing.byok.feat2'), t('pricing.byok.feat3')]}
-            byok
           />
         </div>
         <div className={styles.pricingActions}>
@@ -453,42 +455,6 @@ function Feature({ label, title, body }: { label: string; title: string; body: R
       <span>{label}</span>
       <h3>{title}</h3>
       <p>{body}</p>
-    </article>
-  );
-}
-
-function PriceTeaser({
-  title,
-  price,
-  sub,
-  features,
-  highlight,
-  byok,
-}: {
-  title: string;
-  price: string;
-  sub: string;
-  features: string[];
-  highlight?: boolean;
-  byok?: boolean;
-}) {
-  const cls = [
-    styles.priceCard,
-    highlight && styles.priceCardHighlight,
-    byok && styles.priceCardByok,
-  ]
-    .filter(Boolean)
-    .join(' ');
-  return (
-    <article className={cls}>
-      <div className={styles.priceName}>{title}</div>
-      <div className={styles.priceValue}>{price}</div>
-      <p>{sub}</p>
-      <ul>
-        {features.map((feature) => (
-          <li key={feature}>{feature}</li>
-        ))}
-      </ul>
     </article>
   );
 }
