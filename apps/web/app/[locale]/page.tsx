@@ -1,14 +1,14 @@
 import { PRO_PRICE, QUOTA } from '@rewrite/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { ReactNode } from 'react';
+import { ComparisonTableTracked } from '../../components/ComparisonTableTracked.tsx';
 import { CtaLink } from '../../components/CtaLink.tsx';
 import { EarlyBirdBadge } from '../../components/EarlyBirdBadge.tsx';
 import { SectionViewMarker } from '../../components/SectionViewMarker.tsx';
-import {
-  type ComparisonCellValue,
-  type ComparisonColumn,
-  type ComparisonRow,
-  ComparisonTable,
+import type {
+  ComparisonCellValue,
+  ComparisonColumn,
+  ComparisonRow,
 } from '../../components/ui/ComparisonTable.tsx';
 import { getCampaignEntryState } from '../../lib/campaign-entry.ts';
 import { getExtensionInstallUrl } from '../../lib/extension-install-url.ts';
@@ -265,7 +265,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           <h2 className={styles.sectionTitle}>{t('compare.h2')}</h2>
           <p className={styles.sectionSubtitle}>{t('compare.subtitle')}</p>
         </div>
-        <ComparisonTable
+        <ComparisonTableTracked
           caption={t('compare.caption')}
           columns={compareColumns}
           rows={compareRows}
