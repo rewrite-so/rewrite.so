@@ -369,7 +369,7 @@
         "youWrote": "당신이 쓴 문장",
         "input": "I very like this idea",
         "faithful": {
-          "label": "원문에 충실",
+          "label": "충실",
           "text": "I really like this idea.",
           "note": "'very'는 동사를 수식하지 않습니다. 여기서는 원어민이 'really'를 씁니다."
         },

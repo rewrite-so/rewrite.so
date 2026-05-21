@@ -369,7 +369,7 @@
         "youWrote": "あなたの文",
         "input": "I very like this idea",
         "faithful": {
-          "label": "原文に忠実",
+          "label": "忠実",
           "text": "I really like this idea.",
           "note": "「very」は動詞を修飾しません。ここではネイティブは「really」を使います。"
         },
