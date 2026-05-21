@@ -1,14 +1,14 @@
 {
   "meta": {
     "home": {
-      "title": "rewrite.so — 자유롭게 쓰고, 자신 있게 보내세요",
-      "description": "입력란 수준 AI 재작성 엔진. 3가지 스타일, 키보드만, 작업 흐름을 끊지 않습니다."
+      "title": "rewrite.so — 어떤 언어로 써도, 원어민처럼",
+      "description": "제2언어로 일하든, 배우는 중인 언어든. Shift를 두 번 누르면 원어민 수준의 고쳐쓰기 3 가지가 그 자리에. 어떤 입력창에서나. 무료, 오픈소스, 텍스트는 절대 저장하지 않습니다."
     },
     "login": {
       "title": "로그인 — rewrite.so"
     },
     "try": {
-      "title": "rewrite.so 체험 — 자유롭게 쓰고, 자신 있게 보내세요"
+      "title": "rewrite.so 체험 — 어떤 언어로 써도, 원어민처럼"
     },
     "settings": {
       "title": "설정 — rewrite.so"
@@ -519,7 +519,7 @@
     "learnEnglish": "영어 배우기"
   },
   "footer": {
-    "tagline": "자유롭게 쓰고, 자신 있게 보내세요.",
+    "tagline": "어떤 언어로 써도, 원어민처럼.",
     "heading": {
       "product": "제품",
       "account": "계정",
@@ -552,21 +552,16 @@
       "label": "얼리버드 · 90일 무료 + 평생 70% 할인"
     },
     "hero": {
-      "eyebrow": "입력창에서 바로 AI 리라이트",
-      "h1Line1": "자유롭게 쓰고,",
-      "h1Line2": "자신 있게 보내세요.",
-      "subHeadline": "Shift 를 두 번 누르면 어떤 언어로도 원어민 수준의 리라이트 3 가지를 받습니다.",
-      "polyglot": "어떤 언어로 입력하든, 어떤 언어로든 출력.",
-      "intro": "아무 입력창에서 <kbd>Shift</kbd> <kbd>Shift</kbd>. AI 가 3 가지 표현을 제안하면 <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> 으로 선택.",
+      "h1Line1": "어떤 언어로든 쓰세요.",
+      "h1Line2": "쓸수록 더 좋아집니다.",
+      "subHeadline": "제2언어로 하는 업무도, 배우는 중인 언어도——Shift를 두 번 누르면 원어민 수준의 고쳐쓰기 3 가지가 입력하던 자리에 바로 나타납니다.",
       "ctaPrimary": "무료로 설치 →",
       "ctaInstall": "설치 없이 체험하기 →",
-      "ctaSecondary": "⭐ GitHub Star",
-      "ctaGithub": "GitHub에서 보기 →",
-      "fineprint": "월 {count} 회 무료 · 카드 불필요 · BYOK"
+      "fineprint": "매월 {count} 회 무료 · 카드 불필요"
     },
     "scenarios": {
       "h2": "익숙하신가요?",
-      "bridge": "rewrite.so가 바로 이런 순간을 위해 만들어졌습니다",
+      "bridge": "바로 여기서 rewrite.so가 진가를 발휘합니다",
       "useCaseWork": {
         "title": "언어를 넘나드는 업무",
         "description": "업무 상황마다 톤이 달라진다. 모국어로 쓰면 rewrite.so가 영어 톤 3가지를 준다 — Slack은 캐주얼하게, 이메일은 격식 있게, PR은 중립적으로.",
@@ -596,12 +591,12 @@
           "faithful": "I think this take misses the point.",
           "formal": "I respectfully disagree with this view."
         }
-      }
+      },
+      "learnLink": "영어를 배우고 있나요? 매일 쓰는 것이 가장 좋은 방법이에요. 자세히 보기 →"
     },
     "privacy": {
       "eyebrow": "프라이버시 계약",
       "h2": "텍스트는 저장되지 않습니다. 그것뿐입니다.",
-      "body": "데이터베이스에 저장하지 않습니다. 로그에 남기지 않습니다. 에러 리포터에 들어가지 않습니다. 분석에 사용하지 않습니다. 재작성하는 텍스트는 worker를 한 번 통과하면 사라집니다. Sentry, Datadog 등 서드파티 APM도 사용하지 않습니다 —— APM이 기본적으로 요청 내용을 기록하기 때문입니다. 이는 약속이 아닌 —— 아키텍처 그 자체이며, 소스 코드는 검증을 위해 공개되어 있습니다.",
       "shortBody": "로그에는 length / lang / style / userId / 오류 코드만 남길 수 있습니다. 원문과 재작성 결과는 어디에도 기록되지 않습니다.",
       "linkDoc": "기술 프라이버시 문서 보기 →",
       "linkSource": "rewrite 핸들러 소스 보기 →",
@@ -615,7 +610,8 @@
       }
     },
     "howItWorks": {
-      "h2": "작동 방식",
+      "eyebrow": "작동 방식",
+      "h2": "세 단계, 마우스 없이",
       "stepLabel": "단계 {num}",
       "step1": {
         "title": "Shift 두 번 누르기",
@@ -637,20 +633,10 @@
         "title": "코드를 직접 읽어보세요",
         "body": "셀프 호스팅, 감사, 포크 가능. 위의 프라이버시 주장은 마케팅이 아닌 — <repo>github.com/rewrite-so/rewrite.so</repo>에서 읽을 수 있는 코드입니다."
       },
-      "byok": {
-        "label": "BYOK",
-        "title": "자신의 API 키 사용",
-        "body": "OpenAI 호환 base URL + 키 + 모델을 입력하세요. 재작성은 당신의 제공업체로 직접 전송되고, AES-GCM으로 정적 암호화되며, 로그되지 않습니다. 월간 할당량에 포함되지 않습니다."
-      },
       "pii": {
         "label": "PII 하드 제외",
         "title": "비밀번호 필드에서 작동하지 않음",
-        "body": "Password / cc-* / current-password / new-password / one-time-code / name 또는 id가 password|pin|cvv|cvc|otp|secret|token을 포함하는 필드 — 모두 하드코딩되어 무시됩니다. 설정이 아닙니다. 기능 플래그가 아닙니다."
-      },
-      "stack": {
-        "label": "스택",
-        "title": "Cloudflare Workers + D1 + Hono",
-        "body": "엣지 배포 worker, OpenAI Chat Completions 와이어 포맷, 클라이언트 중단을 캐스케이드하는 3-way 동시 fan-out. 약 5000줄의 TypeScript. Strict 모드. 비즈니스 테이블에 ORM 없음."
+        "body": "비밀번호, 일회용 코드, 신용카드 같은 입력란은 코드에 고정되어 무시됩니다——설정도 기능 플래그도 아닙니다."
       },
       "crossLang": {
         "label": "다국어",
@@ -692,10 +678,10 @@
       "ctaSeeFull": "전체 가격 및 FAQ 보기 →"
     },
     "finalCta": {
-      "h2": "30초면 됩니다.",
-      "body": "가입 불필요. 데모는 <code>/try</code>를 여세요. 지원되는 사이트에서 쓰려면 확장 프로그램을 설치하세요.",
-      "primary": "무료 체험 →",
-      "secondary": "로그인"
+      "h2": "오늘부터 어떤 언어로든 써 보세요.",
+      "body": "가입 불필요. 브라우저에서 데모를 써 보거나, 확장 프로그램을 설치해 글 쓰는 모든 곳에서 사용하세요.",
+      "primary": "무료로 설치 →",
+      "secondary": "설치 없이 사용해 보기 →"
     },
     "demo": {
       "anyInput": "지원되는 입력란",
@@ -750,7 +736,7 @@
     "compare": {
       "eyebrow": "차별화 포인트",
       "h2": "rewrite.so vs 비슷한 도구들",
-      "subtitle": "3 가지 스타일이, 지금 타이핑하는 입력창에서, 1 초 안에 첫 글자가 나옵니다.",
+      "subtitle": "언어를 넘나드는 글쓰기를 위해——익숙한 언어로 쓰면 상대는 자연스러운 모국어로 읽습니다.",
       "caption": "rewrite.so 와 Grammarly, DeepL Write, ChatGPT(웹) 의 기능 비교.",
       "recommended": "추천",
       "disclaimer": "비교는 2026-05 기준 공개된 정보를 바탕으로 합니다. 각 업체의 기능과 가격은 자주 바뀌므로 실제 결정 전에 공식 정보를 확인해 주세요. 당사는 언급된 어떤 제품과도 제휴·후원 관계가 없습니다.",
@@ -763,7 +749,7 @@
       "rows": {
         "inline": {
           "label": "어떤 입력창에서도 인라인 교체",
-          "detail": "사이드바도 팝업도 없이, 지금 타이핑 중인 자리에서 텍스트가 바로 바뀝니다.",
+          "detail": "사이드바도 새 탭도 없이, 지금 타이핑 중인 자리에서 텍스트가 바로 바뀝니다.",
           "cells": {
             "grammarly": "인라인 + 팝오버",
             "deepl": "지원 사이트의 확장",
@@ -824,11 +810,20 @@
           }
         }
       }
+    },
+    "proofBand": {
+      "ariaLabel": "한눈에",
+      "item1Value": "모든",
+      "item1Label": "언어로 입력, 언어로 출력",
+      "item2Value": "3",
+      "item2Label": "원어민 스타일",
+      "item3Value": "0",
+      "item3Label": "저장되는 텍스트"
     }
   },
   "ext": {
     "popup": {
-      "tagline": "자유롭게 쓰고, 자신 있게 보내세요.",
+      "tagline": "어떤 언어로 써도, 원어민처럼.",
       "usageError": "할당량 로딩 실패:",
       "loading": "로딩 중…",
       "remainingThisMonth": "이번 달 남은 횟수",

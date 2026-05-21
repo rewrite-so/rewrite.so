@@ -16,7 +16,7 @@ import { track } from '../lib/analytics.ts';
  * The `cta` prop is the analytics tag — match the allowed values listed in
  * packages/shared/src/events.ts:cta_click props.
  */
-export type CtaName = 'install' | 'signin' | 'try_demo' | 'pricing' | 'github';
+export type CtaName = 'install' | 'signin' | 'try_demo' | 'pricing' | 'github' | 'learn_english';
 
 interface BaseProps {
   cta: CtaName;

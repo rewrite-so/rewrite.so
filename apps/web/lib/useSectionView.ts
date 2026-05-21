@@ -17,7 +17,7 @@ import { track } from './analytics.ts';
  *   return <section ref={ref}>...</section>;
  */
 export function useSectionView<E extends HTMLElement = HTMLElement>(
-  section: 'hero' | 'comparison' | 'pricing' | 'privacy' | 'how' | 'features',
+  section: 'hero' | 'comparison' | 'pricing' | 'privacy' | 'how' | 'features' | 'finalCta',
 ) {
   const ref = useRef<E>(null);
   const firedRef = useRef(false);

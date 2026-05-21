@@ -1,14 +1,14 @@
 {
   "meta": {
     "home": {
-      "title": "rewrite.so — Write freely. Send confidently.",
-      "description": "Input-box-level AI rewrite engine. 3 styles, keyboard-only, never breaks your flow."
+      "title": "rewrite.so — Write in any language, sound native",
+      "description": "Write in a second language, or one you're learning. Double-tap Shift for three native rewrites — right in any input box. Free, open source, text never stored."
     },
     "login": {
       "title": "Sign in — rewrite.so"
     },
     "try": {
-      "title": "Try rewrite.so — Write freely. Send confidently."
+      "title": "Try rewrite.so — Write in any language, sound native"
     },
     "settings": {
       "title": "Settings — rewrite.so"
@@ -519,7 +519,7 @@
     "menu": "Menu"
   },
   "footer": {
-    "tagline": "Write freely. Send confidently.",
+    "tagline": "Write in any language, sound native.",
     "heading": {
       "product": "Product",
       "account": "Account",
@@ -552,21 +552,16 @@
       "label": "Early Bird · 90 days free + lifetime 70% off"
     },
     "hero": {
-      "eyebrow": "Inline AI rewriting",
-      "h1Line1": "Write freely.",
-      "h1Line2": "Send confidently.",
-      "subHeadline": "Double-tap Shift, get three native-quality rewrites — works in any language.",
-      "polyglot": "Any language in. Any language out.",
-      "intro": "Press <kbd>Shift</kbd> <kbd>Shift</kbd> in any input box. We give you three ways to say it. Pick one with <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd>.",
+      "h1Line1": "Write in any language.",
+      "h1Line2": "Get better every time.",
+      "subHeadline": "For work in a second language, or a language you're learning — double-tap Shift and three native rewrites stream in, right where you type.",
       "ctaPrimary": "Install free →",
       "ctaInstall": "Try without installing →",
-      "ctaSecondary": "⭐ Star on GitHub",
-      "ctaGithub": "View on GitHub →",
-      "fineprint": "{count} free rewrites/month · No card · BYOK"
+      "fineprint": "{count} free rewrites/month · No card needed"
     },
     "scenarios": {
       "h2": "Sound familiar?",
-      "bridge": "This is what rewrite.so was built for",
+      "bridge": "This is exactly where rewrite.so shines",
       "useCaseWork": {
         "title": "Cross-language work",
         "description": "Different work contexts need different tones. Write in your native language; rewrite.so gives you three English tones — casual for Slack, neutral for PR descriptions, formal for client emails.",
@@ -596,12 +591,13 @@
           "faithful": "I think this take misses the point.",
           "formal": "I respectfully disagree with this view."
         }
-      }
+      },
+      "learnLink": "Learning English? The best way is to use it every day. Learn more →"
     },
     "compare": {
       "eyebrow": "How we differ",
       "h2": "rewrite.so vs the alternatives",
-      "subtitle": "Three styles, in the box you're already typing in, in under a second.",
+      "subtitle": "Built for cross-language writing — type in your language, and it reads native in theirs.",
       "caption": "Feature comparison of rewrite.so against Grammarly, DeepL Write, and ChatGPT web.",
       "recommended": "Recommended",
       "disclaimer": "Comparison reflects publicly available information as of 2026-05. Competitor features and pricing change frequently — please verify with each vendor before deciding. We do not affiliate with or endorse any listed product.",
@@ -614,7 +610,7 @@
       "rows": {
         "inline": {
           "label": "Inline in any input box",
-          "detail": "We replace the text you're typing right where you're typing it — no popover, no sidebar, no second tab.",
+          "detail": "We replace the text you're typing right where you're typing it — no sidebar, no second tab.",
           "cells": {
             "grammarly": "Inline + popovers",
             "deepl": "Extension on supported sites",
@@ -679,7 +675,6 @@
     "privacy": {
       "eyebrow": "The privacy contract",
       "h2": "Your text is never stored. Period.",
-      "body": "Not in databases. Not in logs. Not in error reporters. Not in analytics. The text you rewrite passes through the worker once and is gone. We don't use any third-party APM (Sentry, Datadog, etc.) precisely because they'd capture request bodies by default. This is not a promise — it's the architecture, and the source code is open for you to verify.",
       "shortBody": "Only length, language, style, userId, and error codes can be logged. Original text and rewrite results are excluded everywhere.",
       "linkDoc": "Read the technical privacy doc →",
       "linkSource": "See the rewrite handler source →",
@@ -693,7 +688,8 @@
       }
     },
     "howItWorks": {
-      "h2": "How it works",
+      "eyebrow": "How it works",
+      "h2": "Three steps, never touch the mouse",
       "stepLabel": "STEP {num}",
       "step1": {
         "title": "Double-tap Shift",
@@ -715,20 +711,10 @@
         "title": "Read the code yourself",
         "body": "Self-host, audit, fork. The privacy claims above aren't marketing — they're code you can read at <repo>github.com/rewrite-so/rewrite.so</repo>."
       },
-      "byok": {
-        "label": "BYOK",
-        "title": "Bring Your Own Key",
-        "body": "Plug in your OpenAI-compatible base URL + key + model. Rewrites go directly to your provider, AES-GCM-encrypted at rest, never logged. Doesn't count against the monthly quota."
-      },
       "pii": {
         "label": "HARD PII EXCLUSION",
         "title": "Won't fire in password fields",
-        "body": "Password / cc-* / current-password / new-password / one-time-code / fields with name or id matching password|pin|cvv|cvc|otp|secret|token — all hard-coded to be ignored. Not a setting. Not a feature flag."
-      },
-      "stack": {
-        "label": "STACK",
-        "title": "Cloudflare Workers + D1 + Hono",
-        "body": "Edge-deployed worker, OpenAI Chat Completions wire format, 3-way concurrent fan-out with cascading client-abort. ~5000 lines of TypeScript. Strict mode. No ORM for business tables."
+        "body": "Password, OTP, credit-card and similar fields are hard-coded to be ignored — not a setting, not a feature flag."
       },
       "crossLang": {
         "label": "CROSS-LANGUAGE",
@@ -770,10 +756,10 @@
       "ctaSeeFull": "See full pricing & FAQ →"
     },
     "finalCta": {
-      "h2": "Try it. Takes 30 seconds.",
-      "body": "No signup. Open <code>/try</code> for the demo. Install the extension to use it on supported sites.",
-      "primary": "Try it free →",
-      "secondary": "Sign in"
+      "h2": "Start writing in any language today.",
+      "body": "No signup needed. Try the demo in your browser, or install the extension to use it everywhere you write.",
+      "primary": "Install free →",
+      "secondary": "Try without installing →"
     },
     "demo": {
       "anyInput": "supported text field",
@@ -824,11 +810,20 @@
           }
         }
       }
+    },
+    "proofBand": {
+      "ariaLabel": "At a glance",
+      "item1Value": "Any",
+      "item1Label": "language in, language out",
+      "item2Value": "3",
+      "item2Label": "native styles, side by side",
+      "item3Value": "0",
+      "item3Label": "text ever stored"
     }
   },
   "ext": {
     "popup": {
-      "tagline": "Write freely. Send confidently.",
+      "tagline": "Write in any language, sound native.",
       "usageError": "Failed to load quota:",
       "loading": "Loading…",
       "remainingThisMonth": "remaining this month",

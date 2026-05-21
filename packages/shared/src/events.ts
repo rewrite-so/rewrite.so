@@ -16,7 +16,7 @@ export const EVENT_NAMES = [
   // ---- Page traffic ----
   'page_view',
   // ---- Landing / /try interactions ----
-  'cta_click', // props: { cta: 'install'|'signin'|'try_demo'|'pricing'|'github' }
+  'cta_click', // props: { cta: 'install'|'signin'|'try_demo'|'pricing'|'github'|'learn_english' }
   'try_input', // props: { length_bucket, lang } — never the text itself
   'try_select_candidate', // props: { style } — regen/position 维度由 rewrite metrics 的 is_regen + try_regenerate 事件覆盖（候选恒按 faithful/casual/formal 固定顺序，position 与 style 冗余）
   'try_regenerate', // props: { style }
@@ -40,9 +40,9 @@ export const EVENT_NAMES = [
   // funnel — their call sites land in a follow-up PR that adds the per-section
   // client handlers. Until then they are inert (whitelist entries do nothing
   // by themselves; nothing fires them).
-  'section_view', // props: { section: 'hero'|'comparison'|'pricing'|'privacy'|'how'|'features' } — IntersectionObserver, per-pageview dedup
+  'section_view', // props: { section: 'hero'|'comparison'|'pricing'|'privacy'|'how'|'features'|'finalCta' } — IntersectionObserver, per-pageview dedup
   'hero_demo_played', // props: { trigger: 'auto'|'manual', platform: 'X'|'Slack'|'Reddit'|'GitHub' } — DEFERRED: wiring lives in HomeRewriteDemo
-  'compare_row_expand', // props: { row: 'inline'|'speed'|'candidates'|'logging'|'byok'|'multilang'|'openSource' } — DEFERRED: wiring lives in ComparisonTable details
+  'compare_row_expand', // props: { row: 'inline'|'multilang'|'keyboard'|'candidates'|'speed'|'logging'|'byok'|'openSource' } — DEFERRED: wiring lives in ComparisonTable details
   'pricing_card_focus', // props: { card: 'free'|'pro'|'byok' } — DEFERRED: hover or keyboard focus ≥ 500ms
   'early_bird_banner_click', // props: { surface: 'hero'|'pricing'|'nav' } — DEFERRED: wiring lives on EarlyBirdBadge + pricing banner
   // ---- Extension rewrite lifecycle (content script → SW → /v1/events) ----

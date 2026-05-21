@@ -787,12 +787,6 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  opacity: 0;
-  transition: opacity 280ms ease;
-}
-
-.scenarioCandidates[data-visible="true"] {
-  opacity: 1;
 }
 
 .scenarioCandidate {
@@ -806,16 +800,6 @@
   background: var(--neutral-0);
   font-size: 0.86rem;
   line-height: 1.45;
-  opacity: 0;
-  transform: translateY(4px);
-  transition:
-    opacity 240ms ease,
-    transform 240ms ease;
-}
-
-.scenarioCandidates[data-visible="true"] .scenarioCandidate {
-  opacity: 1;
-  transform: translateY(0);
 }
 
 .scenarioCandidateIndex {
@@ -1199,4 +1183,59 @@
   .demoCandidate {
     transition: none;
   }
+}
+
+/* Final CTA — centered closing section after pricing. Combined with .section
+   so it inherits the 1120 max-width + vertical rhythm; a hairline top border
+   sets it apart from the pricing grid above. h2 reuses .sectionTitle. */
+.finalCta {
+  text-align: center;
+  border-top: 1px solid var(--border-default);
+}
+
+.finalCtaBody {
+  max-width: 520px;
+  margin: 12px auto 0;
+  color: var(--text-secondary);
+  font-size: var(--fs-md);
+}
+
+.finalCtaActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+/* scenarios → /learn-english contextual link — a brand-tinted pill centered
+   below ScenariosShowcase, matching the .streamPill brand vocabulary. */
+.scenariosLearnLink {
+  margin: 28px 0 0;
+  text-align: center;
+}
+
+.scenariosLearnPill {
+  display: inline-block;
+  padding: 10px 20px;
+  border: 1px solid rgba(58, 111, 85, 0.18);
+  border-radius: var(--radius-pill);
+  background: var(--brand-50);
+  color: var(--text-accent-strong);
+  font-size: 0.92rem;
+  font-weight: var(--fw-semibold);
+  text-decoration: none;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.scenariosLearnPill:hover {
+  background: var(--brand-100);
+  border-color: rgba(58, 111, 85, 0.32);
+}
+
+.scenariosLearnPill:focus-visible {
+  outline: 3px solid rgba(58, 111, 85, 0.28);
+  outline-offset: 3px;
 }
