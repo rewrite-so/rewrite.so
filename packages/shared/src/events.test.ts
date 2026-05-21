@@ -15,7 +15,6 @@ describe('events whitelist', () => {
       'try_input',
       'try_select_candidate',
       'try_regenerate',
-      'try_copy_result',
       'settings_change',
       'signin_attempt',
       'signin_success',

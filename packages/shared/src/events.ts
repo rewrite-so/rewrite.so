@@ -20,7 +20,6 @@ export const EVENT_NAMES = [
   'try_input', // props: { length_bucket, lang } — never the text itself
   'try_select_candidate', // props: { style } — regen/position 维度由 rewrite metrics 的 is_regen + try_regenerate 事件覆盖（候选恒按 faithful/casual/formal 固定顺序，position 与 style 冗余）
   'try_regenerate', // props: { style }
-  'try_copy_result', // DEFERRED: /try 当前无独立"复制"动作（候选直接写回 textarea；Copy 按钮仅写入失败兜底时出现）
   // ---- Settings ----
   'settings_change', // props: { field: 'targetLang'|'uiLocale'|'triggerEnabled', is_custom?: 0|1 }
   // ---- Auth / conversion ----
