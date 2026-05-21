@@ -57,7 +57,11 @@ const fakeEvents = {
 } as unknown as AnalyticsEngineDataset;
 
 function makeEnv(
-  overrides: Partial<{ EVENTS_DISABLED: string; EVENTS: AnalyticsEngineDataset }> = {},
+  overrides: Partial<{
+    EVENTS_DISABLED: string;
+    EVENTS: AnalyticsEngineDataset;
+    DB: D1Database;
+  }> = {},
 ) {
   return {
     OPENAI_BASE_URL: 'https://upstream.test/v1',
@@ -598,6 +602,64 @@ describe('POST /v1/events — fire-and-forget contract', () => {
         body: JSON.stringify({ events: [makeEvent({ visitor_id: 'vid-1' })] }),
       },
       makeEnv({ EVENTS: undefined }),
+    );
+    expect(res.status).toBe(202);
+  });
+});
+
+describe('POST /v1/events — D1 dual-write', () => {
+  /** D1 fake that records the bound args of each batched behavior_events row. */
+  function recordingDB() {
+    const binds: unknown[][] = [];
+    const db = {
+      prepare: () => ({
+        bind: (...args: unknown[]) => ({ __args: args }),
+        first: async () => null,
+      }),
+      batch: async (stmts: Array<{ __args: unknown[] }>) => {
+        for (const s of stmts) binds.push(s.__args);
+        return stmts.map(() => ({ success: true }));
+      },
+    } as unknown as D1Database;
+    return { db, binds };
+  }
+
+  it('mirrors accepted events into D1 behavior_events', async () => {
+    const { db, binds } = recordingDB();
+    const res = await app.request(
+      '/v1/events',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          events: [makeEvent({ name: 'cta_click', visitor_id: 'vid-1', session_id: 'sess-1' })],
+        }),
+      },
+      makeEnv({ DB: db }),
+    );
+    expect(res.status).toBe(202);
+    expect(binds).toHaveLength(1);
+    // bind order: ts, event_name, subject_kind, subject_id_hash, session_id, ...
+    expect(binds[0]?.[1]).toBe('cta_click');
+    expect(binds[0]?.[2]).toBe('visitor');
+    expect(binds[0]?.[4]).toBe('sess-1');
+  });
+
+  it('still returns 202 when the D1 mirror write fails', async () => {
+    const db = {
+      prepare: () => ({ bind: () => ({}), first: async () => null }),
+      batch: async () => {
+        throw new Error('d1 down');
+      },
+    } as unknown as D1Database;
+    const res = await app.request(
+      '/v1/events',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ events: [makeEvent({ visitor_id: 'vid-1' })] }),
+      },
+      makeEnv({ DB: db }),
     );
     expect(res.status).toBe(202);
   });
