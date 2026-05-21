@@ -1,7 +1,8 @@
 'use client';
 
-import { createWebApiClient, mount } from '@rewrite/core';
+import { createWebApiClient, mount, scriptHeuristic } from '@rewrite/core';
 import {
+  bucketInputLength,
   type Locale,
   QUOTA,
   REWRITE_TARGET_LABELS,
@@ -29,6 +30,7 @@ export function TryClient() {
   const locale = useLocale() as Locale;
   const t = useTranslations();
   const taRef = useRef<HTMLTextAreaElement | null>(null);
+  const inputDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [hintVisible, setHintVisible] = useState(false);
   // 试用页**始终默认英语**作为目标——不用 auto。
   // 用户切换的偏好持久到 localStorage（仅影响 /try，不影响登录用户的 settings）。
@@ -99,13 +101,15 @@ export function TryClient() {
       // abort / Esc / 失败的改写不算。localStorage 持久化在独立 effect
       // 里 watch rewriteCount——避免在 React updater 里做 side effect。
       //
-      // try_select_candidate is the closest analytics signal we can emit
-      // without expanding @rewrite/core's mount() hook surface. position
-      // and was_regen would need new hook params and a matching wire-up
-      // on the extension side; that's left for a future commit.
+      // try_select_candidate 只发 { style }：候选恒按 faithful/casual/formal
+      // 固定顺序渲染，position 与 style 冗余；regen 维度由独立 try_regenerate
+      // 事件 + rewrite metrics 的 is_regen 覆盖。
       onAccepted: (style) => {
         setRewriteCount((n) => n + 1);
         track('try_select_candidate', { style });
+      },
+      onRegenerate: (style) => {
+        track('try_regenerate', { style });
       },
     });
     return () => handle.unmount();
@@ -140,6 +144,27 @@ export function TryClient() {
     };
   }, []);
 
+  // 卸载时清掉未触发的 try_input 去抖计时器
+  useEffect(() => {
+    return () => {
+      if (inputDebounceRef.current) clearTimeout(inputDebounceRef.current);
+    };
+  }, []);
+
+  // try_input:输入框 500ms 去抖,只发长度桶 + 检测语言码,绝不发原文(隐私契约)
+  function handleTextareaInput(e: React.ChangeEvent<HTMLTextAreaElement>) {
+    const value = e.currentTarget.value;
+    if (inputDebounceRef.current) clearTimeout(inputDebounceRef.current);
+    inputDebounceRef.current = setTimeout(() => {
+      const text = value.trim();
+      if (!text) return;
+      track('try_input', {
+        length_bucket: bucketInputLength(text.length),
+        lang: scriptHeuristic(text),
+      });
+    }, 500);
+  }
+
   function onTargetLangChange(value: RewriteTarget) {
     setTargetLang(value);
     window.localStorage.setItem(TARGET_LANG_STORAGE, value);
@@ -170,6 +195,7 @@ export function TryClient() {
         defaultValue="hi, can u tell me when is the meeting tmr? i need to prep some slide before that"
         placeholder={t('placeholder.tryHere')}
         className={styles.textarea}
+        onChange={handleTextareaInput}
       />
       {hintVisible && (
         <div aria-hidden="true" className={styles.hint}>

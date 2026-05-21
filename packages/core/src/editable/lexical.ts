@@ -44,18 +44,25 @@ export interface LexicalReplacePayload {
   range: 'all' | 'selection';
 }
 
+/** Lexical 反射 fallback 的结果：是否成功 + 命中的子路径（fast/slow）。 */
+export interface LexicalReplaceResult {
+  ok: boolean;
+  /** 'fast' = selection.insertText（保格式）；'slow' = setEditorState。ok=false 时无意义。 */
+  path?: 'fast' | 'slow';
+}
+
 /**
  * 请求 main-world 用 Lexical 反射 fallback 替换编辑器内容。
  *
- * Promise resolves to true 表示已成功调到 editor.update / setEditorState；
- * false 表示 expando 找不到 / 反射 throw / 超时 / main-world 没装。
+ * resolve `{ ok: true, path }` 表示已成功调到 editor.update / setEditorState；
+ * `{ ok: false }` 表示 expando 找不到 / 反射 throw / 超时 / main-world 没装。
  */
 export async function requestLexicalReplace(
   el: Element,
   payload: LexicalReplacePayload,
-): Promise<boolean> {
+): Promise<LexicalReplaceResult> {
   await waitForMainWorldReady();
-  return new Promise<boolean>((resolve) => {
+  return new Promise<LexicalReplaceResult>((resolve) => {
     const id = `rs-lex-${Date.now()}-${++requestSeq}`;
 
     let settled = false;
@@ -65,17 +72,18 @@ export async function requestLexicalReplace(
         el.removeAttribute(MARKER_ATTR);
       }
     };
-    const settle = (ok: boolean) => {
+    const settle = (result: LexicalReplaceResult) => {
       if (settled) return;
       settled = true;
       cleanup();
-      resolve(ok);
+      resolve(result);
     };
 
     const onResult = (ev: Event) => {
-      const detail = (ev as CustomEvent<{ id: string; ok: boolean }>).detail;
+      const detail = (ev as CustomEvent<{ id: string; ok: boolean; path?: 'fast' | 'slow' }>)
+        .detail;
       if (!detail || detail.id !== id) return;
-      settle(!!detail.ok);
+      settle({ ok: !!detail.ok, path: detail.path });
     };
 
     window.addEventListener(RESULT_EVENT, onResult as EventListener);
@@ -88,10 +96,10 @@ export async function requestLexicalReplace(
         }),
       );
     } catch {
-      settle(false);
+      settle({ ok: false });
       return;
     }
 
-    window.setTimeout(() => settle(false), REPLACE_TIMEOUT_MS);
+    window.setTimeout(() => settle({ ok: false }), REPLACE_TIMEOUT_MS);
   });
 }

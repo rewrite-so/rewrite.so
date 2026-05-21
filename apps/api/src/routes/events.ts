@@ -126,11 +126,12 @@ eventsRoute.post('/v1/events', async (c) => {
     // otherwise smuggle PII into page / referrer_host / utm.* / visitor_id —
     // the zod schema only caps their length, not their content.
     const topFieldChecks: Array<
-      [string, 'page' | 'referrer_host' | 'visitor_id' | 'utm', string | undefined]
+      [string, 'page' | 'referrer_host' | 'visitor_id' | 'install_id' | 'utm', string | undefined]
     > = [
       ['page', 'page', ev.page],
       ['referrer_host', 'referrer_host', ev.referrer_host],
       ['visitor_id', 'visitor_id', ev.visitor_id],
+      ['install_id', 'install_id', ev.install_id],
       ['utm.source', 'utm', ev.utm?.source],
       ['utm.medium', 'utm', ev.utm?.medium],
       ['utm.campaign', 'utm', ev.utm?.campaign],
@@ -152,11 +153,22 @@ eventsRoute.post('/v1/events', async (c) => {
       return c.json({ error: 'invalid_props', reason: propsResult.error }, 400);
     }
 
+    // Subject priority: logged-in cookie session > extension install_id >
+    // web visitor_id > no id. A logged-in extension user proxies through the SW
+    // with the .rewrite.so cookie, so they land as 'user' here (auto-merged
+    // with their web activity), even though the SDK still sends install_id.
+    //
+    // Unlike /v1/rewrite, this route does NOT gate install_id behind
+    // EXTENSION_ALLOWED_ORIGINS — deliberate: events are non-billing analytics
+    // on their own rate-limit bucket, and install_id is client-forgeable anyway.
     let subjectKind: EventSubjectKind;
     let subjectRaw: string | undefined;
     if (userId) {
       subjectKind = 'user';
       subjectRaw = userId;
+    } else if (ev.install_id) {
+      subjectKind = 'install';
+      subjectRaw = ev.install_id;
     } else if (ev.visitor_id) {
       subjectKind = 'visitor';
       subjectRaw = ev.visitor_id;
@@ -174,6 +186,7 @@ eventsRoute.post('/v1/events', async (c) => {
         utm: ev.utm,
         country,
         deviceType: ev.device_type,
+        site: ev.site,
         tier,
         subjectKind,
         propsJson: propsResult.json || undefined,

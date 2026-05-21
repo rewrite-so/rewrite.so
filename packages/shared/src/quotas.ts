@@ -1,6 +1,21 @@
 // 单次输入字符上限（成本控制 + UX 平衡）
 export const MAX_INPUT_CHARS = 4000;
 
+/** 输入长度分桶 —— rewrite metrics 与 /try `try_input` 事件共用同一口径 */
+export type InputLengthBucket = '<100' | '<500' | '<1000' | '<2000' | '<4000';
+
+/**
+ * 把字符数归入固定 5 桶。隐私设计：埋点只记桶不记明文长度。
+ * metrics（`rewrite_requests`）与 events（`try_input`）单源共用,避免两端口径漂移。
+ */
+export function bucketInputLength(n: number): InputLengthBucket {
+  if (n < 100) return '<100';
+  if (n < 500) return '<500';
+  if (n < 1000) return '<1000';
+  if (n < 2000) return '<2000';
+  return '<4000';
+}
+
 // 月配额（按 UTC 自然月聚合，非按日）
 export const QUOTA = {
   /** 网页匿名访客（IP 维度）每月 */

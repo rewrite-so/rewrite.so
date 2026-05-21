@@ -63,6 +63,13 @@ export interface DraftReplacePayload {
   range: 'all' | 'selection';
 }
 
+/** Draft 反射 fallback 的结果：是否成功 + 命中的子路径（fast/slow）。 */
+export interface DraftReplaceResult {
+  ok: boolean;
+  /** 'fast' = 反射原位重建 block（保格式）；'slow' = fiber createFromText。ok=false 时无意义。 */
+  path?: 'fast' | 'slow';
+}
+
 /**
  * 请求 main-world 脚本替换 Draft.js 编辑器内容。
  *
@@ -72,16 +79,16 @@ export interface DraftReplacePayload {
  * 3. 等 'rewrite-so:draft-replace-result' 回响应（或超时）
  * 4. 清理 marker
  *
- * Promise resolves to true 表示已成功调到 props.onChange，
- * false 表示 fiber 找不到 / 反射失败 / 超时 / main-world 脚本没装。
+ * resolve `{ ok: true, path }` 表示已成功调到 props.onChange，
+ * `{ ok: false }` 表示 fiber 找不到 / 反射失败 / 超时 / main-world 脚本没装。
  */
 export async function requestDraftReplace(
   el: Element,
   payload: DraftReplacePayload,
-): Promise<boolean> {
+): Promise<DraftReplaceResult> {
   // 等 main-world 信号到位再 dispatch；超时仍 proceed 让 REPLACE_TIMEOUT_MS 兜底
   await waitForMainWorldReady();
-  return new Promise<boolean>((resolve) => {
+  return new Promise<DraftReplaceResult>((resolve) => {
     const id = `rs-draft-${Date.now()}-${++requestSeq}`;
 
     let settled = false;
@@ -92,17 +99,18 @@ export async function requestDraftReplace(
         el.removeAttribute(MARKER_ATTR);
       }
     };
-    const settle = (ok: boolean) => {
+    const settle = (result: DraftReplaceResult) => {
       if (settled) return;
       settled = true;
       cleanup();
-      resolve(ok);
+      resolve(result);
     };
 
     const onResult = (ev: Event) => {
-      const detail = (ev as CustomEvent<{ id: string; ok: boolean }>).detail;
+      const detail = (ev as CustomEvent<{ id: string; ok: boolean; path?: 'fast' | 'slow' }>)
+        .detail;
       if (!detail || detail.id !== id) return;
-      settle(!!detail.ok);
+      settle({ ok: !!detail.ok, path: detail.path });
     };
 
     window.addEventListener(RESULT_EVENT, onResult as EventListener);
@@ -115,11 +123,11 @@ export async function requestDraftReplace(
         }),
       );
     } catch {
-      settle(false);
+      settle({ ok: false });
       return;
     }
 
     // 超时兜底 —— main-world script 没装 / 处理 throw 未发回响应时不能挂死
-    window.setTimeout(() => settle(false), REPLACE_TIMEOUT_MS);
+    window.setTimeout(() => settle({ ok: false }), REPLACE_TIMEOUT_MS);
   });
 }

@@ -42,6 +42,12 @@ describe('hashSubjectId', () => {
     expect(visitorHash).toMatch(/^[0-9a-f]{16}$/);
     expect(visitorHash).not.toBe(userHash);
   });
+
+  it("'install' kind uses hashUserId(raw) bare — JOIN-compatible with rewrite_requests anonymous_install", async () => {
+    const direct = await hashUserId('install_xyz');
+    const subject = await hashSubjectId('install', 'install_xyz');
+    expect(subject).toBe(direct);
+  });
 });
 
 describe('validateEventProps', () => {
@@ -245,6 +251,23 @@ describe('validateTopLevelField', () => {
   ])('visitor_id rejects %s', (vid) => {
     expect(validateTopLevelField('visitor_id', vid).ok).toBe(false);
   });
+
+  it.each([
+    ['018f5c64-9a4d-7f5e-8001-fe8c9c54f0e1'],
+    ['install_abc'],
+    ['ABC-def_123'],
+  ])('install_id accepts %s', (id) => {
+    expect(validateTopLevelField('install_id', id)).toEqual({ ok: true });
+  });
+
+  it.each([
+    ['has space'],
+    ['id@x.com'],
+    ['<>'],
+    ['x'.repeat(65)],
+  ])('install_id rejects %s', (id) => {
+    expect(validateTopLevelField('install_id', id).ok).toBe(false);
+  });
 });
 
 describe('writeEventPoint', () => {
@@ -270,6 +293,7 @@ describe('writeEventPoint', () => {
       utm: { source: 'twitter', medium: 'social', campaign: 'launch' },
       country: 'US',
       deviceType: 'desktop',
+      site: 'reddit',
       propsJson: '{"length_bucket":"<500"}',
       value: 42,
     });
@@ -292,6 +316,7 @@ describe('writeEventPoint', () => {
       'visitor', // blob11
       '0123456789abcdef', // blob12
       '{"length_bucket":"<500"}', // blob13
+      'reddit', // blob14
     ]);
     expect(p.doubles).toEqual([42]);
   });
@@ -307,6 +332,7 @@ describe('writeEventPoint', () => {
     expect(p.blobs[7]).toBe(''); // country
     expect(p.blobs[8]).toBe(''); // device_type
     expect(p.blobs[12]).toBe(''); // event_props
+    expect(p.blobs[13]).toBe(''); // site
     expect(p.doubles).toEqual([0]);
   });
 

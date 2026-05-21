@@ -7,14 +7,18 @@
  * - user_id_hash 算法固定为 SHA-256("user_id_v1:" + raw) 截前 16 hex 字符；
  *   admin 仓库使用同一公式做关联（见 docs/admin-rollout-plan.md）
  *
- * 字段映射到 Analytics Engine（25 blob slots / 25 double slots）：
+ * 字段映射到 Analytics Engine（≤ 20 blob / 20 double / 1 index — Cloudflare AE 硬上限，
+ * docs: https://developers.cloudflare.com/analytics/analytics-engine/limits/）：
  *   indexes: tier
  *   blob1=style_csv, blob2=target_lang, blob3=status, blob4=error_code,
  *   blob5=upstream, blob6=input_length_bucket, blob7=user_id_hash,
- *   blob8=target_lang_is_custom('1'|'0')
+ *   blob8=target_lang_is_custom('1'|'0'), blob9=is_regen('1'|'0')
+ *   blob10-20: reserved
  *   double1=ms_to_first_byte, double2=ms_total, double3=style_count,
  *   double4=input_length
+ *   double5-20: reserved
  */
+import { bucketInputLength } from '@rewrite/shared';
 import { sanitizeTargetLang } from './sanitize-target-lang.ts';
 
 export type RewriteTier = 'anonymous_ip' | 'anonymous_install' | 'free' | 'pro' | 'byok';
@@ -26,7 +30,6 @@ export type RewriteStatus =
   | 'banned'
   | 'invalid';
 export type RewriteUpstream = 'platform' | 'byok';
-export type InputLengthBucket = '<100' | '<500' | '<1000' | '<2000' | '<4000';
 
 export interface RequestMetric {
   tier: RewriteTier;
@@ -49,6 +52,8 @@ export interface RequestMetric {
   /** 原始输入字符数（用于落入 bucket，不写明文） */
   inputLength: number;
   upstream: RewriteUpstream;
+  /** true = 单卡 regenerate 重发；首发 / retry-all = false/undefined。用于 regen 率统计 */
+  isRegen?: boolean;
   status: RewriteStatus;
   errorCode?: string;
   msToFirstByte?: number;
@@ -67,14 +72,6 @@ export interface RequestMetric {
 const STANDARD_LOCALES = new Set(['en', 'zh-CN', 'ja', 'ko', 'es', 'fr', 'de']);
 
 const TARGET_LANG_MAX_LEN = 30;
-
-export function bucketInputLength(n: number): InputLengthBucket {
-  if (n < 100) return '<100';
-  if (n < 500) return '<500';
-  if (n < 1000) return '<1000';
-  if (n < 2000) return '<2000';
-  return '<4000';
-}
 
 export function isCustomTargetLang(raw: string): boolean {
   return !STANDARD_LOCALES.has(raw);
@@ -126,6 +123,7 @@ export function writeRequestEvent(
         bucketInputLength(metric.inputLength),
         metric.subjectId ?? '',
         metric.targetLangIsCustom ? '1' : '0',
+        metric.isRegen ? '1' : '0',
       ],
       doubles: [
         metric.msToFirstByte ?? 0,

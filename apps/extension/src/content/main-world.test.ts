@@ -146,8 +146,9 @@ describe('replaceDraftEditor', () => {
   it('calls onChange with new EditorState (selection forced to end) when fiber + classes are healthy', () => {
     const { el, onChange, ContentStateClass, EditorStateClass, mergeSpy, mockLastBlock } =
       buildMockDraftFiberDOM({});
-    const ok = replaceDraftEditor(el, { newText: 'hello world', range: 'all' });
-    expect(ok).toBe(true);
+    const r = replaceDraftEditor(el, { newText: 'hello world', range: 'all' });
+    expect(r.ok).toBe(true);
+    expect(r.path).toBe('slow'); // range='all' → 整段 createFromText
     expect(ContentStateClass.createFromText).toHaveBeenCalledWith('hello world');
     expect(EditorStateClass.push).toHaveBeenCalledTimes(1);
     // selection 构造：用 lastBlock.getKey() + lastBlock.getLength() merge 到末尾
@@ -169,30 +170,30 @@ describe('replaceDraftEditor', () => {
   it('returns false (silent fallback) when fiber lookup fails', () => {
     const el = document.createElement('div');
     document.body.appendChild(el);
-    expect(replaceDraftEditor(el, { newText: 'x', range: 'all' })).toBe(false);
+    expect(replaceDraftEditor(el, { newText: 'x', range: 'all' }).ok).toBe(false);
   });
 
   it('returns false when ContentState.createFromText is missing', () => {
     const { el, onChange } = buildMockDraftFiberDOM({ brokenContentClass: true });
-    expect(replaceDraftEditor(el, { newText: 'x', range: 'all' })).toBe(false);
+    expect(replaceDraftEditor(el, { newText: 'x', range: 'all' }).ok).toBe(false);
     expect(onChange).not.toHaveBeenCalled();
   });
 
   it('returns false when EditorState static methods are missing', () => {
     const { el, onChange } = buildMockDraftFiberDOM({ brokenEditorClass: true });
-    expect(replaceDraftEditor(el, { newText: 'x', range: 'all' })).toBe(false);
+    expect(replaceDraftEditor(el, { newText: 'x', range: 'all' }).ok).toBe(false);
     expect(onChange).not.toHaveBeenCalled();
   });
 
   it('catches throws inside reflection (never bubbles to caller)', () => {
     const { el, onChange } = buildMockDraftFiberDOM({ pushThrows: true });
-    expect(replaceDraftEditor(el, { newText: 'x', range: 'all' })).toBe(false);
+    expect(replaceDraftEditor(el, { newText: 'x', range: 'all' }).ok).toBe(false);
     expect(onChange).not.toHaveBeenCalled();
   });
 
   it('returns false when fiber has editorState but no onChange', () => {
     const { el } = buildMockDraftFiberDOM({ noOnChange: true });
-    expect(replaceDraftEditor(el, { newText: 'x', range: 'all' })).toBe(false);
+    expect(replaceDraftEditor(el, { newText: 'x', range: 'all' }).ok).toBe(false);
   });
 });
 
@@ -212,12 +213,13 @@ describe('replacePasteEditor (paste 主路径探针)', () => {
     // 模拟 framework 接管 paste
     el.addEventListener('paste', (e) => e.preventDefault());
 
-    const ok = await replacePasteEditor(el, {
+    const r = await replacePasteEditor(el, {
       newText: 'NEW',
       range: 'all',
       selectionLength: 6,
     });
-    expect(ok).toBe(true);
+    expect(r.ok).toBe(true);
+    expect(r.path).toBe('strong');
   });
 
   it('weak signal: returns true when textContent changes + contains newText prefix + length delta matches', async () => {
@@ -232,12 +234,13 @@ describe('replacePasteEditor (paste 主路径探针)', () => {
     });
 
     // selectionLength=6 模拟用户全选 'before'（lenDelta 校验：23-6=17 == 23-6=17 ✓）
-    const ok = await replacePasteEditor(el, {
+    const r = await replacePasteEditor(el, {
       newText: 'NEW_TEXT_FROM_FRAMEWORK',
       range: 'selection',
       selectionLength: 6,
     });
-    expect(ok).toBe(true);
+    expect(r.ok).toBe(true);
+    expect(r.path).toBe('weak');
   });
 
   it('length delta check rejects partial-write false positive', async () => {
@@ -252,13 +255,13 @@ describe('replacePasteEditor (paste 主路径探针)', () => {
       el.textContent = 'Hello world, how are you?X';
     });
 
-    const ok = await replacePasteEditor(el, {
+    const r = await replacePasteEditor(el, {
       newText: 'X', // 期望替换 'are you?'，结果只 append
       range: 'selection',
       selectionLength: 8, // 'are you?'
     });
     // 期望 lenDelta = 26-25=1; expectedDelta = 1-8=-7; |1-(-7)|=8 > 3 → 返 false
-    expect(ok).toBe(false);
+    expect(r.ok).toBe(false);
   });
 
   it('returns false when textContent does not change (framework ignored paste)', async () => {
@@ -268,12 +271,12 @@ describe('replacePasteEditor (paste 主路径探针)', () => {
     document.body.appendChild(el);
     // 无 listener → dispatchedDefault === true + textContent 不变 → 返 false
 
-    const ok = await replacePasteEditor(el, {
+    const r = await replacePasteEditor(el, {
       newText: 'NEW',
       range: 'selection',
       selectionLength: 0,
     });
-    expect(ok).toBe(false);
+    expect(r.ok).toBe(false);
     expect(el.textContent).toBe('before');
   });
 
@@ -288,12 +291,12 @@ describe('replacePasteEditor (paste 主路径探针)', () => {
       el.textContent = 'SOMETHING_ELSE';
     });
 
-    const ok = await replacePasteEditor(el, {
+    const r = await replacePasteEditor(el, {
       newText: 'NEW_TEXT',
       range: 'selection',
       selectionLength: 0,
     });
-    expect(ok).toBe(false);
+    expect(r.ok).toBe(false);
   });
 });
 
@@ -356,22 +359,24 @@ describe('replaceLexicalEditor', () => {
 
   it('returns false when __lexicalEditor expando is missing', () => {
     const { el } = buildMockLexicalDOM({ hasEditor: false });
-    const ok = replaceLexicalEditor(el, { newText: 'X', fullText: 'X', range: 'all' });
+    const ok = replaceLexicalEditor(el, { newText: 'X', fullText: 'X', range: 'all' }).ok;
     expect(ok).toBe(false);
   });
 
   it('range=all goes directly to slow path (setEditorState)', () => {
     const { el, setEditorStateMock, insertTextMock } = buildMockLexicalDOM({ hasFastPath: true });
-    const ok = replaceLexicalEditor(el, { newText: 'X', fullText: 'X', range: 'all' });
-    expect(ok).toBe(true);
+    const r = replaceLexicalEditor(el, { newText: 'X', fullText: 'X', range: 'all' });
+    expect(r.ok).toBe(true);
+    expect(r.path).toBe('slow');
     expect(setEditorStateMock).toHaveBeenCalledTimes(1);
     expect(insertTextMock).not.toHaveBeenCalled();
   });
 
   it('range=selection uses fast path (insertText) when capability ok', () => {
     const { el, setEditorStateMock, insertTextMock } = buildMockLexicalDOM({ hasFastPath: true });
-    const ok = replaceLexicalEditor(el, { newText: 'X', fullText: 'X', range: 'selection' });
-    expect(ok).toBe(true);
+    const r = replaceLexicalEditor(el, { newText: 'X', fullText: 'X', range: 'selection' });
+    expect(r.ok).toBe(true);
+    expect(r.path).toBe('fast');
     expect(insertTextMock).toHaveBeenCalledWith('X');
     // 应不调 setEditorState（fast path 命中）
     expect(setEditorStateMock).not.toHaveBeenCalled();
@@ -382,9 +387,9 @@ describe('replaceLexicalEditor', () => {
       hasFastPath: true,
       insertTextWorks: false,
     });
-    const ok = replaceLexicalEditor(el, { newText: 'X', fullText: 'FULL', range: 'selection' });
-    expect(ok).toBe(true);
-    // fast path throw → slow path 接管
+    const r = replaceLexicalEditor(el, { newText: 'X', fullText: 'FULL', range: 'selection' });
+    expect(r.ok).toBe(true);
+    expect(r.path).toBe('slow'); // fast path throw → slow path 接管
     expect(setEditorStateMock).toHaveBeenCalledTimes(1);
   });
 
@@ -394,7 +399,7 @@ describe('replaceLexicalEditor', () => {
       insertTextWorks: false,
       setEditorStateWorks: false,
     });
-    const ok = replaceLexicalEditor(el, { newText: 'X', fullText: 'X', range: 'selection' });
+    const ok = replaceLexicalEditor(el, { newText: 'X', fullText: 'X', range: 'selection' }).ok;
     expect(ok).toBe(false);
   });
 });
@@ -406,8 +411,9 @@ describe('replaceDraftEditor fast fallback (Plan v9 新增)', () => {
   // 完整 fast fallback 集成测试需要真实 immutable.js fixture，留给后续 e2e。
   it('range=selection falls back to slow path when fast reflection fails', () => {
     const { el, ContentStateClass, onChange } = buildMockDraftFiberDOM({});
-    const ok = replaceDraftEditor(el, { newText: 'X', range: 'selection' });
-    expect(ok).toBe(true);
+    const r = replaceDraftEditor(el, { newText: 'X', range: 'selection' });
+    expect(r.ok).toBe(true);
+    expect(r.path).toBe('slow'); // fast 反射 throw → slow path
     // fast path throw（mock selection 没 getStartKey 等）→ slow path 接管
     expect(ContentStateClass.createFromText).toHaveBeenCalledWith('X');
     expect(onChange).toHaveBeenCalled();
@@ -463,7 +469,7 @@ describe('Lexical capability cache (WeakMap per-editor)', () => {
       newText: 'A_TEXT',
       fullText: 'A_TEXT',
       range: 'selection',
-    });
+    }).ok;
     expect(okA).toBe(true);
     expect(a.insertTextMock).toHaveBeenCalledWith('A_TEXT');
     expect(a.setEditorStateMock).not.toHaveBeenCalled();
@@ -473,7 +479,7 @@ describe('Lexical capability cache (WeakMap per-editor)', () => {
       newText: 'B_TEXT',
       fullText: 'B_TEXT',
       range: 'selection',
-    });
+    }).ok;
     expect(okB).toBe(true);
     // B 的 setEditorState slow path 被调用（fast path 不可用）
     expect(b.setEditorStateMock).toHaveBeenCalledTimes(1);
@@ -506,7 +512,7 @@ describe('Lexical focus async reject does NOT fail the write', () => {
     (el as unknown as { __lexicalEditor: typeof editor }).__lexicalEditor = editor;
 
     // 走 slow path（range='all' 跳过 fast path），setEditorState 后 focus reject
-    const ok = replaceLexicalEditor(el, { newText: 'X', fullText: 'X', range: 'all' });
+    const ok = replaceLexicalEditor(el, { newText: 'X', fullText: 'X', range: 'all' }).ok;
     expect(ok).toBe(true); // 内容已写入 → 返 true，focus reject 是降级而非失败
     expect(setEditorStateMock).toHaveBeenCalledTimes(1);
     expect(focusMock).toHaveBeenCalledTimes(1);

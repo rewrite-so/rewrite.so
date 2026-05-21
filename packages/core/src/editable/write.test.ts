@@ -280,31 +280,35 @@ describe('buildLexicalSelectionFullText', () => {
   });
 });
 
-describe('replaceEditable returns Promise<boolean>', () => {
-  it('returns true on plain contenteditable (DOM path always succeeds)', async () => {
+describe('replaceEditable returns WriteResult { ok, layer, framework }', () => {
+  it('plain contenteditable → ok + layer=dom_generic (DOM path always succeeds)', async () => {
     const ce = document.createElement('div');
     ce.contentEditable = 'true';
     ce.textContent = 'old';
     document.body.appendChild(ce);
 
-    const ok = await replaceEditable(ce, 'new', 'all');
-    expect(ok).toBe(true);
+    const r = await replaceEditable(ce, 'new', 'all');
+    expect(r.ok).toBe(true);
+    expect(r.layer).toBe('dom_generic');
+    expect(r.framework).toBe('generic');
     expect(ce.textContent).toContain('new');
   });
 
-  it('returns true on textarea (sync form-field path)', async () => {
+  it('textarea → ok + layer=input_field (sync form-field path)', async () => {
     const ta = document.createElement('textarea');
     ta.value = 'old';
     document.body.appendChild(ta);
 
-    const ok = await replaceEditable(ta, 'new', 'all');
-    expect(ok).toBe(true);
+    const r = await replaceEditable(ta, 'new', 'all');
+    expect(r.ok).toBe(true);
+    expect(r.layer).toBe('input_field');
+    expect(r.framework).toBe('generic');
     expect(ta.value).toBe('new');
   });
 
-  it('Lexical + range=all routes to lexical fallback (short-circuit, no DOM path)', async () => {
-    // jsdom 下 main-world handler 不存在 → requestLexicalReplace 超时返 false
-    // 短路 1 直接走 lexical fallback → 失败 → silent (返 false，不动 DOM)
+  it('Lexical + range=all with no main-world → ok=false + layer=silent_fail (no DOM path)', async () => {
+    // happy-dom 下 main-world handler 不存在 → requestLexicalReplace 超时返 ok=false
+    // 短路 1 直接走 lexical fallback → 失败 → silent_fail（不动 DOM）
     const ce = document.createElement('div');
     ce.contentEditable = 'true';
     ce.setAttribute('data-lexical-editor', 'true');
@@ -317,9 +321,11 @@ describe('replaceEditable returns Promise<boolean>', () => {
       beforeInputDispatched = true;
     });
 
-    const ok = await replaceEditable(ce, 'new', 'all');
+    const r = await replaceEditable(ce, 'new', 'all');
     // 没有 main-world → 静默失败
-    expect(ok).toBe(false);
+    expect(r.ok).toBe(false);
+    expect(r.layer).toBe('silent_fail');
+    expect(r.framework).toBe('lexical');
     // 关键：未走通用 DOM 路径（否则会写 3 次 + 触发 beforeinput）
     expect(beforeInputDispatched).toBe(false);
     expect(ce.textContent).toBe('lexical content');
@@ -347,7 +353,7 @@ describe('PM / Slate range=all short-circuit (P1-3)', () => {
       pasteCount++;
     });
 
-    const ok = await replaceEditable(ce, 'new', 'all');
+    const ok = (await replaceEditable(ce, 'new', 'all')).ok;
     // PM + all 短路走 DOM 路径 → execCommand insertText 整段替换；happy-dom
     // 没 execCommand 时走 DOM Range 兜底，仍替换为 'new'
     expect(ok).toBe(true);
@@ -370,7 +376,7 @@ describe('PM / Slate range=all short-circuit (P1-3)', () => {
       pasteCount++;
     });
 
-    const ok = await replaceEditable(ce, 'new', 'all');
+    const ok = (await replaceEditable(ce, 'new', 'all')).ok;
     expect(ok).toBe(true);
     expect(pasteCount).toBe(0);
     expect(ce.textContent).toContain('new');
@@ -422,7 +428,7 @@ describe('PM / Slate range=selection boundary (P1-3 短路只对 all)', () => {
     try {
       // jsdom 下 main-world handler 不存在 → requestPasteReplace 超时返 false
       // → fallback 到 viaDom（PM 没专用反射 fallback）
-      const ok = await replaceEditable(ce, 'NEW', 'selection');
+      const ok = (await replaceEditable(ce, 'NEW', 'selection')).ok;
       // 关键断言：paste 主路径**被尝试过**（短路 3 只对 range='all' 触发）
       expect(spy.count).toBe(1);
       expect(ok).toBe(true);
@@ -450,7 +456,7 @@ describe('PM / Slate range=selection boundary (P1-3 短路只对 all)', () => {
 
     const spy = spyPasteRequest();
     try {
-      const ok = await replaceEditable(ce, 'NEW', 'selection');
+      const ok = (await replaceEditable(ce, 'NEW', 'selection')).ok;
       expect(spy.count).toBe(1);
       expect(ok).toBe(true);
     } finally {
@@ -469,7 +475,7 @@ describe('PM / Slate range=selection boundary (P1-3 短路只对 all)', () => {
 
     const spy = spyPasteRequest();
     try {
-      const ok = await replaceEditable(ce, 'new', 'all');
+      const ok = (await replaceEditable(ce, 'new', 'all')).ok;
       // 短路 3 验证：range='all' 直接走 DOM 路径，paste 主路径**未被尝试**
       expect(spy.count).toBe(0);
       expect(ok).toBe(true);

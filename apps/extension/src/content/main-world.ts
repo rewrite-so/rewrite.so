@@ -17,7 +17,8 @@
  *   - 入：`rewrite-so:<engine>-replace` { detail: { id, marker, payload } }
  *     marker 是临时 data-attribute 名，值是 id。main-world 通过 `[marker="id"]`
  *     查找目标元素（不能跨 world 传 DOM 引用）。
- *   - 出：`rewrite-so:<engine>-replace-result` { detail: { id, ok } }
+ *   - 出：`rewrite-so:<engine>-replace-result` { detail: { id, ok, path } }
+ *     path 是命中的子路径标签（fast/slow/strong/weak），isolated 侧据此映射 WriteLayer。
  *
  * 失败契约：返 false 让上层 fallback；最深层失败时 isolated world 显示
  * 浮窗错误 UI（不静默关闭）。
@@ -54,8 +55,12 @@ function findElByMarker(marker: string, id: string): Element | null {
   return document.querySelector(`[${marker}="${CSS.escape(id)}"]`);
 }
 
-function dispatchResult(channel: string, id: string, ok: boolean): void {
-  window.dispatchEvent(new CustomEvent(channel, { detail: { id, ok } }));
+/**
+ * 回传结果给 isolated world。`path` 是命中的子路径标签（fast/slow/strong/weak），
+ * 供 isolated 侧映射成精确的 rewrite_write_layer。只传字符串原始值（跨 realm 安全）。
+ */
+function dispatchResult(channel: string, id: string, ok: boolean, path?: string): void {
+  window.dispatchEvent(new CustomEvent(channel, { detail: { id, ok, path } }));
 }
 
 // ============================================================================
@@ -245,15 +250,20 @@ function replaceDraftSelectionViaReflection(
  * 成功返回 true；失败返回 false（不动 DOM）。
  * @internal exported for unit tests
  */
-export function replaceDraftEditor(el: Element, payload: DraftReplacePayload): boolean {
+export function replaceDraftEditor(
+  el: Element,
+  payload: DraftReplacePayload,
+): { ok: boolean; path: 'fast' | 'slow' } {
   try {
     const hit = findDraftEditorFiber(el);
-    if (!hit) return false;
+    if (!hit) return { ok: false, path: 'slow' };
     const { props } = hit;
 
     // Fast fallback：仅 selection 路径
     if (payload.range === 'selection') {
-      if (replaceDraftSelectionViaReflection(props, payload.newText)) return true;
+      if (replaceDraftSelectionViaReflection(props, payload.newText)) {
+        return { ok: true, path: 'fast' };
+      }
       // fast 失败 → 继续 slow
     }
 
@@ -267,7 +277,7 @@ export function replaceDraftEditor(el: Element, payload: DraftReplacePayload): b
       typeof EditorStateClass?.push !== 'function' ||
       typeof EditorStateClass?.forceSelection !== 'function'
     ) {
-      return false;
+      return { ok: false, path: 'slow' };
     }
     const newContent = ContentStateClass.createFromText(payload.newText);
     const pushed = EditorStateClass.push(editorState, newContent, 'insert-characters');
@@ -282,7 +292,7 @@ export function replaceDraftEditor(el: Element, payload: DraftReplacePayload): b
     if (typeof lastBlock?.getKey !== 'function' || typeof lastBlock?.getLength !== 'function') {
       // ContentBlock API 不可用：兜底 fire onChange 但不调 selection（光标错位但内容对）
       props.onChange(pushed);
-      return true;
+      return { ok: true, path: 'slow' };
     }
     const endKey = lastBlock.getKey();
     const endOffset = lastBlock.getLength();
@@ -296,9 +306,9 @@ export function replaceDraftEditor(el: Element, payload: DraftReplacePayload): b
     });
     const moved = EditorStateClass.forceSelection(pushed, endSelection);
     props.onChange(moved);
-    return true;
+    return { ok: true, path: 'slow' };
   } catch {
-    return false;
+    return { ok: false, path: 'slow' };
   }
 }
 
@@ -306,16 +316,16 @@ function handleDraftReplaceRequest(ev: Event): void {
   const detail = (ev as CustomEvent<ReplaceRequestDetail<DraftReplacePayload>>).detail;
   if (!detail || typeof detail.id !== 'string') return;
   const { id, marker, payload } = detail;
-  let ok = false;
+  let result: { ok: boolean; path: 'fast' | 'slow' } = { ok: false, path: 'slow' };
   try {
     const el = findElByMarker(marker, id);
     if (el && payload && typeof payload.newText === 'string') {
-      ok = replaceDraftEditor(el, payload);
+      result = replaceDraftEditor(el, payload);
     }
   } catch {
     /* swallow */
   }
-  dispatchResult('rewrite-so:draft-replace-result', id, ok);
+  dispatchResult('rewrite-so:draft-replace-result', id, result.ok, result.path);
 }
 
 // ============================================================================
@@ -407,16 +417,19 @@ function getLexicalEditor(el: Element): LexicalEditorLike | null {
  *   - slow (range='all' / fast 失败)：setEditorState(parseEditorState(单段纯文本 JSON))
  * @internal exported for unit tests
  */
-export function replaceLexicalEditor(el: Element, payload: LexicalReplacePayload): boolean {
+export function replaceLexicalEditor(
+  el: Element,
+  payload: LexicalReplacePayload,
+): { ok: boolean; path: 'fast' | 'slow' } {
   try {
     const editor = getLexicalEditor(el);
-    if (!editor) return false;
+    if (!editor) return { ok: false, path: 'slow' };
     if (
       typeof editor.getEditorState !== 'function' ||
       typeof editor.parseEditorState !== 'function' ||
       typeof editor.setEditorState !== 'function'
     ) {
-      return false;
+      return { ok: false, path: 'slow' };
     }
 
     // Fast path：仅 selection
@@ -435,7 +448,7 @@ export function replaceLexicalEditor(el: Element, payload: LexicalReplacePayload
         } catch {
           /* fall to slow */
         }
-        if (inserted) return true;
+        if (inserted) return { ok: true, path: 'fast' };
       }
     }
 
@@ -490,9 +503,9 @@ export function replaceLexicalEditor(el: Element, payload: LexicalReplacePayload
     } catch {
       /* sync focus throw → 同上 */
     }
-    return true;
+    return { ok: true, path: 'slow' };
   } catch {
-    return false;
+    return { ok: false, path: 'slow' };
   }
 }
 
@@ -500,16 +513,16 @@ function handleLexicalReplaceRequest(ev: Event): void {
   const detail = (ev as CustomEvent<ReplaceRequestDetail<LexicalReplacePayload>>).detail;
   if (!detail || typeof detail.id !== 'string') return;
   const { id, marker, payload } = detail;
-  let ok = false;
+  let result: { ok: boolean; path: 'fast' | 'slow' } = { ok: false, path: 'slow' };
   try {
     const el = findElByMarker(marker, id);
     if (el && payload && typeof payload.newText === 'string') {
-      ok = replaceLexicalEditor(el, payload);
+      result = replaceLexicalEditor(el, payload);
     }
   } catch {
     /* swallow */
   }
-  dispatchResult('rewrite-so:lexical-replace-result', id, ok);
+  dispatchResult('rewrite-so:lexical-replace-result', id, result.ok, result.path);
 }
 
 // ============================================================================
@@ -531,7 +544,7 @@ function handleLexicalReplaceRequest(ev: Event): void {
 export async function replacePasteEditor(
   el: Element,
   payload: PasteReplacePayload,
-): Promise<boolean> {
+): Promise<{ ok: boolean; path: 'strong' | 'weak' }> {
   try {
     const before = (el as HTMLElement).textContent ?? '';
 
@@ -560,7 +573,7 @@ export async function replacePasteEditor(
       composed: true,
     });
     const dispatchedDefault = el.dispatchEvent(evt);
-    if (dispatchedDefault === false) return true; // 强信号
+    if (dispatchedDefault === false) return { ok: true, path: 'strong' }; // 强信号
 
     // 弱信号：rAF×5 后三条件（P0-2 plan v9 后强化）。
     // 5 帧 (~80ms) 比原 3 帧给 framework 更充裕的 reconcile 窗口。再加一个 microtask
@@ -572,10 +585,11 @@ export async function replacePasteEditor(
     await new Promise<void>((r) => requestAnimationFrame(() => r()));
     await Promise.resolve();
     const after = (el as HTMLElement).textContent ?? '';
-    if (after === before) return false; // 完全没变 → 必失败
+    if (after === before) return { ok: false, path: 'weak' }; // 完全没变 → 必失败
     const probeLen = Math.min(16, payload.newText.length);
-    if (probeLen === 0) return after !== before; // newText 是空串，仅看变化即可
-    if (!after.includes(payload.newText.slice(0, probeLen))) return false;
+    // newText 是空串，仅看变化即可
+    if (probeLen === 0) return { ok: after !== before, path: 'weak' };
+    if (!after.includes(payload.newText.slice(0, probeLen))) return { ok: false, path: 'weak' };
     // P1-4 长度差校验：防 false positive（原文本来就含 newText 前缀；framework 部分
     // 写入导致 textContent 变化但 newText 未完整写入）。期望长度差：
     //   - range='selection': after.length - before.length ≈ newText.length - selectionLength
@@ -583,10 +597,10 @@ export async function replacePasteEditor(
     // 容差 ±3 字符给 trailing newline / paragraph break / framework 添加的 zero-width chars。
     const lenDelta = after.length - before.length;
     const expectedDelta = payload.newText.length - payload.selectionLength;
-    if (Math.abs(lenDelta - expectedDelta) > 3) return false;
-    return true;
+    if (Math.abs(lenDelta - expectedDelta) > 3) return { ok: false, path: 'weak' };
+    return { ok: true, path: 'weak' };
   } catch {
-    return false;
+    return { ok: false, path: 'weak' };
   }
 }
 
@@ -595,16 +609,16 @@ function handlePasteReplaceRequest(ev: Event): void {
   if (!detail || typeof detail.id !== 'string') return;
   const { id, marker, payload } = detail;
   (async () => {
-    let ok = false;
+    let result: { ok: boolean; path: 'strong' | 'weak' } = { ok: false, path: 'weak' };
     try {
       const el = findElByMarker(marker, id);
       if (el && payload && typeof payload.newText === 'string') {
-        ok = await replacePasteEditor(el, payload);
+        result = await replacePasteEditor(el, payload);
       }
     } catch {
       /* swallow */
     }
-    dispatchResult('rewrite-so:paste-replace-result', id, ok);
+    dispatchResult('rewrite-so:paste-replace-result', id, result.ok, result.path);
   })();
 }
 
