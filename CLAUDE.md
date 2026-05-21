@@ -77,19 +77,25 @@
   双击 Shift 才触发，非被动数据采集。**绝不**通过此通道传敏感字段（如 BYOK key、userId、
   api token 等）。
 
-- **唯一通道是 `POST /v1/events` + binding `EVENTS` (dataset `web_events`)**：禁止
+- **遥测双写 AE + D1，唯一入口是 `POST /v1/events`（binding `EVENTS`）**：禁止
   接入 GA / PostHog / Mixpanel / Plausible / Vercel Analytics 等任何第三方 analytics，
   Privacy Policy 对外已承诺 "no third-party tracking"。后端内部事件（webhook /
   me/byok / billing/verify-checkout）直接调 `writeEventPoint`，不走 HTTP 端点。
+  事件同时写 AE dataset `web_events`（采样聚合，喂现成看板）+ D1 表 `behavior_events`
+  （无采样精确镜像）；rewrite metrics 同理双写 AE `rewrite_requests` + D1
+  `rewrite_request_log`。详见下方「D1 行为日志镜像」。
 - **事件白名单**在 `packages/shared/src/events.ts`（`EVENT_NAMES`）。新加事件必须
   先扩白名单。**字段禁用**（前端 zod `EventPayloadSchema` + 后端 `validateEventProps`
   双重拒收）：键名含 `text/content/prompt/output/email/ip/password/secret/token/apikey`、
   键名非 `[a-z][a-z0-9_]*`、字符串 value > 50 字、值含控制字符 / 引号 / 反斜杠 /
   尖括号 / 大括号 / 方括号、props 总键数 > 8、props JSON 序列化总字节 > 200、嵌套
   对象 / 数组 / 布尔 / null 值。原文 / 输出 / 邮箱 / 完整 IP 永远禁止落 events。
-- **匿名标识用 sessionStorage UUID `rs_vid`**（不写 cookie）。Privacy Policy 据此
-  宣称 "no tracking cookies"。跨会话匿名漏斗不可见是有意为之；登录用户靠
-  `hashUserId(userId)` 与 `rewrite_requests` 表 subject_id 串联。
+- **匿名标识用 localStorage UUID `rs_vid` + sessionStorage `rs_sid`**（均非 cookie，
+  Privacy Policy 据此宣称 "no tracking cookies"）。`rs_vid` 持久（跨会话，可分析回访
+  游客）；`rs_sid` 是 per-session 标记，存 `{id,lastSeen}`，30min 无活动滚新。扩展端
+  `rs_sid` 由 background SW 自管（`chrome.storage.session`，SW 在 `events:send` 时统一
+  盖戳）。`rs_vid` 从 sessionStorage 迁 localStorage 有一次性迁移（旧值提升，避免身份
+  断裂）。登录用户靠 `hashUserId(userId)` 与 `rewrite_requests` subject_id 串联。
 - **subject_id hash 公式**：登录用户用 `hashUserId(userId)` **不加额外前缀**，
   与 `apps/api/src/lib/metrics.ts` rewrite 埋点公式完全一致，admin 看板可跨表 JOIN；
   扩展匿名用户（`subjectKind='install'`）用 `hashUserId(install_id)`（同样不加前缀，
@@ -129,6 +135,16 @@
   blob15-20 / double2-20 保留扩展。`rewrite_requests`（metrics）用 9 个 blob
   （…/ target_lang_is_custom / is_regen）+ 4 个 double。
   来源：<https://developers.cloudflare.com/analytics/analytics-engine/limits/>
+- **D1 行为日志镜像（`behavior_events` / `rewrite_request_log`）**：AE 采样且 SQL
+  函数子集受限，无法可靠做逐实体分析；故 `/v1/events` 与 `/v1/rewrite` 在写 AE 的
+  同时双写 D1 两张表（migration `0011`），作为无采样、全 SQL、可 JOIN 业务表的逐实体
+  真相源。D1 写经 `waitUntil` fire-and-forget，失败仅 `log.warn` 不影响响应。保留
+  90 天（与 AE 一致），由 `cron/prune-behavior-log.ts` 搭车既有 `0 9 * * *` 触发器删
+  旧行——`behavior_events` 按服务端 `created_at` prune（客户端 `ts` 不可信、落库时
+  clamp 到 `created_at` 附近，仅供时间线展示排序），`rewrite_request_log` 按 `ts`
+  （服务端 emit 时间）。所有服务端分析（prune / 小时桶 / 漏斗时间窗）一律用
+  `created_at`。**这两张表由本仓 migration 建、admin 仓只读**（做逐用户时间线 / 真
+  漏斗 / 脉搏看板）：schema 变更须知会 admin 维护者，同 AE blob-map 跨仓同步纪律。
 - **Rate limit 独立桶**：`/v1/events` 走 `consumeEventsIp`（DO 名 `events:ip:<hashed>`，
   30 req/min/ip），**不**与 rewrite 的 `ip` 桶共享 —— 高频 events 不会噬伤 rewrite
   反爆刷配额（反之亦然）。
