@@ -19,12 +19,12 @@ import { ScenariosShowcase } from './ScenariosShowcase.tsx';
 
 const COMPARE_ROW_KEYS = [
   'inline',
+  'multilang',
   'keyboard',
-  'speed',
   'candidates',
+  'speed',
   'logging',
   'byok',
-  'multilang',
   'openSource',
 ] as const;
 
@@ -184,52 +184,16 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </div>
       </section>
 
-      <section className={styles.proofBand} aria-label={t('howItWorks.h2')}>
-        <ProofItem value="3" label={t('howItWorks.step2.title')} />
-        <ProofItem value="500ms" label={t('howItWorks.step1.title')} />
-        <ProofItem value="0" label={t('privacy.h2')} />
-      </section>
-
-      <section className={styles.section}>
-        <div className={styles.sectionHeader}>
-          <p className={styles.eyebrow}>{t('scenarios.h2')}</p>
-          <h2 className={styles.sectionTitle}>{t('scenarios.bridge')}</h2>
-        </div>
-        <ScenariosShowcase
-          items={USE_CASES.map(({ key, platform }) => ({
-            key,
-            platform,
-            title: t(`scenarios.${key}.title`),
-            description: t(`scenarios.${key}.description`),
-            input: t(`scenarios.${key}.input`),
-            candidates: CANDIDATE_STYLES.map((style) => ({
-              style,
-              label: t(`demo.label.${style}`),
-              text: t(`scenarios.${key}.candidates.${style}`),
-            })),
-          }))}
-        />
-      </section>
-
-      <SectionViewMarker section="comparison" />
-      <section className={styles.section}>
-        <div className={styles.sectionHeader}>
-          <p className={styles.eyebrow}>{t('compare.eyebrow')}</p>
-          <h2 className={styles.sectionTitle}>{t('compare.h2')}</h2>
-          <p className={styles.sectionSubtitle}>{t('compare.subtitle')}</p>
-        </div>
-        <ComparisonTable
-          caption={t('compare.caption')}
-          columns={compareColumns}
-          rows={compareRows}
-          recommendedLabel={t('compare.recommended')}
-          disclaimer={t('compare.disclaimer')}
-        />
+      <section className={styles.proofBand} aria-label={t('proofBand.ariaLabel')}>
+        <ProofItem value={t('proofBand.item1Value')} label={t('proofBand.item1Label')} />
+        <ProofItem value={t('proofBand.item2Value')} label={t('proofBand.item2Label')} />
+        <ProofItem value={t('proofBand.item3Value')} label={t('proofBand.item3Label')} />
       </section>
 
       <SectionViewMarker section="how" />
       <section className={`${styles.section} ${styles.howSection}`}>
         <div className={styles.sectionHeader}>
+          <p className={styles.eyebrow}>{t('howItWorks.eyebrow')}</p>
           <h2 className={styles.sectionTitle}>{t('howItWorks.h2')}</h2>
         </div>
         <div className={styles.stepGrid}>
@@ -265,6 +229,48 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             body={t.rich('howItWorks.step3.body')}
           />
         </div>
+      </section>
+
+      <section className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <p className={styles.eyebrow}>{t('scenarios.h2')}</p>
+          <h2 className={styles.sectionTitle}>{t('scenarios.bridge')}</h2>
+        </div>
+        <ScenariosShowcase
+          items={USE_CASES.map(({ key, platform }) => ({
+            key,
+            platform,
+            title: t(`scenarios.${key}.title`),
+            description: t(`scenarios.${key}.description`),
+            input: t(`scenarios.${key}.input`),
+            candidates: CANDIDATE_STYLES.map((style) => ({
+              style,
+              label: t(`demo.label.${style}`),
+              text: t(`scenarios.${key}.candidates.${style}`),
+            })),
+          }))}
+        />
+        <p className={styles.scenariosLearnLink}>
+          <CtaLink cta="learn_english" href="/learn-english" className={styles.scenariosLearnPill}>
+            {t('scenarios.learnLink')}
+          </CtaLink>
+        </p>
+      </section>
+
+      <SectionViewMarker section="comparison" />
+      <section className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <p className={styles.eyebrow}>{t('compare.eyebrow')}</p>
+          <h2 className={styles.sectionTitle}>{t('compare.h2')}</h2>
+          <p className={styles.sectionSubtitle}>{t('compare.subtitle')}</p>
+        </div>
+        <ComparisonTable
+          caption={t('compare.caption')}
+          columns={compareColumns}
+          rows={compareRows}
+          recommendedLabel={t('compare.recommended')}
+          disclaimer={t('compare.disclaimer')}
+        />
       </section>
 
       <SectionViewMarker section="privacy" />
@@ -310,21 +316,24 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
       <SectionViewMarker section="features" />
       <section className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>{t('features.h2')}</h2>
+        </div>
         <div className={styles.featureRow}>
-          <Feature
-            label={t('features.keyboard.label')}
-            title={t('features.keyboard.title')}
-            body={t('features.keyboard.body')}
-          />
           <Feature
             label={t('features.crossLang.label')}
             title={t('features.crossLang.title')}
             body={t('features.crossLang.body')}
           />
           <Feature
-            label={t('features.byok.label')}
-            title={t('features.byok.title')}
-            body={t('features.byok.body')}
+            label={t('features.keyboard.label')}
+            title={t('features.keyboard.title')}
+            body={t('features.keyboard.body')}
+          />
+          <Feature
+            label={t('features.pii.label')}
+            title={t('features.pii.title')}
+            body={t('features.pii.body')}
           />
           <Feature
             label={t('features.openSource.label')}
@@ -383,8 +392,24 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           <CtaLink cta="pricing" href="/pricing" className={styles.secondaryButton}>
             {t('pricing.ctaSeeFull')}
           </CtaLink>
-          <CtaLink cta="try_demo" href="/try" className={styles.primaryButton}>
+        </div>
+      </section>
+
+      <SectionViewMarker section="finalCta" />
+      <section className={`${styles.section} ${styles.finalCta}`}>
+        <h2 className={styles.sectionTitle}>{t('finalCta.h2')}</h2>
+        <p className={styles.finalCtaBody}>{t('finalCta.body')}</p>
+        <div className={styles.finalCtaActions}>
+          <CtaLink
+            cta="install"
+            href={getExtensionInstallUrl()}
+            external
+            className={styles.primaryButton}
+          >
             {t('finalCta.primary')}
+          </CtaLink>
+          <CtaLink cta="try_demo" href="/try" className={styles.secondaryButton}>
+            {t('finalCta.secondary')}
           </CtaLink>
         </div>
       </section>

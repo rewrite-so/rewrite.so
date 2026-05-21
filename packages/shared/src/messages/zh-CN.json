@@ -1,14 +1,14 @@
 {
   "meta": {
     "home": {
-      "title": "rewrite.so — 随意写，自信发送",
-      "description": "输入框级 AI 改写引擎。3 种风格，纯键盘操作，不打断写作流。"
+      "title": "rewrite.so — 任何语言，都写得地道",
+      "description": "用第二语言工作，或在学一门新语言？双击 Shift，当场得到三种地道说法——就在你打字的输入框里。免费、开源，绝不保存你写的内容。"
     },
     "login": {
       "title": "登录 — rewrite.so"
     },
     "try": {
-      "title": "试用 rewrite.so — 随意写，自信发送"
+      "title": "试用 rewrite.so — 任何语言，都写得地道"
     },
     "settings": {
       "title": "设置 — rewrite.so"
@@ -519,7 +519,7 @@
     "learnEnglish": "学英语"
   },
   "footer": {
-    "tagline": "随意写，自信发送。",
+    "tagline": "任何语言，都写得地道。",
     "heading": {
       "product": "产品",
       "account": "账户",
@@ -552,21 +552,16 @@
       "label": "早鸟计划 · 90 天免费 + 永久 3 折"
     },
     "hero": {
-      "eyebrow": "网页输入框 inline AI 改写",
-      "h1Line1": "随意写，",
-      "h1Line2": "自信发送。",
-      "subHeadline": "双击 Shift，获取 3 种最地道的说法 — 任意语言都适用。",
-      "polyglot": "任意语言进，任意语言出。",
-      "intro": "在任意输入框双击 <kbd>Shift</kbd>。AI 当场给你三种说法，按 <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> 选一个。",
+      "h1Line1": "任何语言，都写得地道。",
+      "h1Line2": "越写越好。",
+      "subHeadline": "在用第二语言工作，或者在学一门新语言？双击 Shift，三种地道说法立刻出现在你打字的输入框里。",
       "ctaPrimary": "免费安装 →",
       "ctaInstall": "免安装试用 →",
-      "ctaSecondary": "⭐ Star on GitHub",
-      "ctaGithub": "在 GitHub 上查看 →",
-      "fineprint": "每月 {count} 次免费 · 无需信用卡 · BYOK"
+      "fineprint": "每月 {count} 次免费改写 · 无需信用卡"
     },
     "scenarios": {
       "h2": "这些场景你眼熟吗？",
-      "bridge": "rewrite.so 就是为这些时刻做的",
+      "bridge": "这就是 rewrite.so 的用武之地",
       "useCaseWork": {
         "title": "跨语言工作",
         "description": "工作场景多，语气得跟着变。你用母语写，rewrite.so 给 3 种英文语气：跟同事 Slack 用口语，给客户写邮件用正式，PR 描述用中性。",
@@ -596,12 +591,13 @@
           "faithful": "I think this take misses the point.",
           "formal": "I respectfully disagree with this view."
         }
-      }
+      },
+      "learnLink": "在学英语？最好的办法就是每天用英语。了解更多 →"
     },
     "compare": {
       "eyebrow": "我们的不同",
       "h2": "rewrite.so 与同类工具的对比",
-      "subtitle": "三种风格、就在你正在打字的输入框里、1 秒内出第一个字。",
+      "subtitle": "专为跨语言沟通而生——你用顺手的语言写，对方读到的是地道的母语。",
       "caption": "rewrite.so 与 Grammarly、DeepL Write、ChatGPT 网页版的功能对比。",
       "recommended": "推荐",
       "disclaimer": "对比基于 2026-05 截止的公开信息整理。各家功能与价格会频繁变化，请以厂商官方信息为准。我们与所列产品无任何合作或代言关系。",
@@ -614,7 +610,7 @@
       "rows": {
         "inline": {
           "label": "在任意输入框内 inline 改写",
-          "detail": "在你正在打字的输入框里直接替换，没有侧边栏、没有弹层、不切 tab。",
+          "detail": "在你正在打字的输入框里直接替换，没有侧边栏、不切 tab。",
           "cells": {
             "grammarly": "Inline + 弹层",
             "deepl": "支持站点的扩展",
@@ -679,7 +675,6 @@
     "privacy": {
       "eyebrow": "关于隐私",
       "h2": "你的文本永不存储。就这么简单。",
-      "body": "不存数据库。不进日志。不上报错监控。不入分析。改写文本仅在 worker 处理一次后立即丢弃。我们刻意不接入第三方 APM（Sentry、Datadog 等）——因为它们默认会记录请求内容。这不是承诺——这是架构本身，源码完全开放给你审计。",
       "shortBody": "日志只允许记录 length / lang / style / userId / 错误码。原文和改写结果一律不写日志。",
       "linkDoc": "阅读技术隐私文档 →",
       "linkSource": "查看 rewrite handler 源码 →",
@@ -693,7 +688,8 @@
       }
     },
     "howItWorks": {
-      "h2": "怎么用",
+      "eyebrow": "怎么用",
+      "h2": "三步搞定，全程不碰鼠标",
       "stepLabel": "步骤 {num}",
       "step1": {
         "title": "双击 Shift",
@@ -715,20 +711,10 @@
         "title": "代码全公开，自己可读",
         "body": "可自部署、可审计、可 fork。上面的隐私声明不是营销话术——是你能在 <repo>github.com/rewrite-so/rewrite.so</repo> 读到的代码。"
       },
-      "byok": {
-        "label": "BYOK",
-        "title": "自带 API key",
-        "body": "填入 OpenAI 兼容的 base URL + key + model。改写直达你的 provider，AES-GCM 加密静态存储，永不记录日志。不计入月配额。"
-      },
       "pii": {
         "label": "PII 硬排除",
         "title": "在密码框完全不响应",
-        "body": "Password / cc-* / current-password / new-password / one-time-code / 名称或 id 含 password|pin|cvv|cvc|otp|secret|token —— 全部硬编码忽略。不是设置项，不是 feature flag。"
-      },
-      "stack": {
-        "label": "技术栈",
-        "title": "Cloudflare Workers + D1 + Hono",
-        "body": "边缘部署 worker，OpenAI Chat Completions 协议，3 路并发 fan-out 含级联客户端中止。约 5000 行 TypeScript。Strict mode。业务表不用 ORM。"
+        "body": "密码、验证码、银行卡这类输入框，代码里写死了直接跳过——不是设置项，也不是开关。"
       },
       "crossLang": {
         "label": "跨语言",
@@ -770,10 +756,10 @@
       "ctaSeeFull": "查看完整定价与常见问题 →"
     },
     "finalCta": {
-      "h2": "30 秒试一下。",
-      "body": "无需注册。打开 <code>/try</code> 体验。装上扩展即可在支持的网站使用。",
-      "primary": "免费试用 →",
-      "secondary": "登录"
+      "h2": "今天就开始，任何语言都写得地道。",
+      "body": "无需注册。可以先在浏览器里直接试用，或者装上扩展，在所有要打字的地方随手用。",
+      "primary": "免费安装 →",
+      "secondary": "无需安装，先试试 →"
     },
     "demo": {
       "anyInput": "支持的输入框",
@@ -824,11 +810,20 @@
           }
         }
       }
+    },
+    "proofBand": {
+      "ariaLabel": "概览",
+      "item1Value": "任意",
+      "item1Label": "语言都能改",
+      "item2Value": "3",
+      "item2Label": "种地道说法",
+      "item3Value": "绝不",
+      "item3Label": "保存你的文字"
     }
   },
   "ext": {
     "popup": {
-      "tagline": "随意写，自信发送。",
+      "tagline": "任何语言，都写得地道。",
       "usageError": "无法加载配额：",
       "loading": "加载中…",
       "remainingThisMonth": "本月剩余",

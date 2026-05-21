@@ -2,7 +2,7 @@
 
 import { useSectionView } from '../lib/useSectionView.ts';
 
-type SectionKey = 'hero' | 'comparison' | 'pricing' | 'privacy' | 'how' | 'features';
+type SectionKey = 'hero' | 'comparison' | 'pricing' | 'privacy' | 'how' | 'features' | 'finalCta';
 
 /**
  * Drop one of these at the top of each tracked landing section. It renders

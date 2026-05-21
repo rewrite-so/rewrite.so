@@ -1,14 +1,14 @@
 {
   "meta": {
     "home": {
-      "title": "rewrite.so — Frei schreiben. Sicher senden.",
-      "description": "AI-Umschreibungs-Engine auf Eingabefeld-Ebene. 3 Stile, nur Tastatur, unterbricht deinen Flow nicht."
+      "title": "rewrite.so — Schreib in jeder Sprache, klinge muttersprachlich",
+      "description": "Schreib in einer Zweitsprache oder einer Sprache, die du lernst. Drück zweimal Shift für drei muttersprachliche Umschreibungen — in jedem Textfeld. Kostenlos, Open Source, Text wird nie gespeichert."
     },
     "login": {
       "title": "Anmelden — rewrite.so"
     },
     "try": {
-      "title": "rewrite.so testen — Frei schreiben. Sicher senden."
+      "title": "rewrite.so testen — Schreib in jeder Sprache, klinge muttersprachlich"
     },
     "settings": {
       "title": "Einstellungen — rewrite.so"
@@ -519,7 +519,7 @@
     "learnEnglish": "Englisch lernen"
   },
   "footer": {
-    "tagline": "Frei schreiben. Sicher senden.",
+    "tagline": "Schreib in jeder Sprache, klinge muttersprachlich.",
     "heading": {
       "product": "Produkt",
       "account": "Konto",
@@ -552,21 +552,16 @@
       "label": "Early Bird · 90 Tage gratis + 70 % lebenslang"
     },
     "hero": {
-      "eyebrow": "Inline-AI-Umschreibung",
-      "h1Line1": "Schreib frei,",
-      "h1Line2": "sende mit Zuversicht.",
-      "subHeadline": "Drück Shift zweimal — du bekommst drei muttersprachlich klingende Umschreibungen, in jeder Sprache.",
-      "polyglot": "Beliebige Sprache rein. Beliebige Sprache raus.",
-      "intro": "Drücke <kbd>Shift</kbd> <kbd>Shift</kbd> in einem beliebigen Eingabefeld. Die KI liefert drei Varianten. Wähle mit <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd>.",
+      "h1Line1": "Schreib in jeder Sprache.",
+      "h1Line2": "Werde jedes Mal besser.",
+      "subHeadline": "Ob du in einer Zweitsprache arbeitest oder eine neue Sprache lernst — drück zweimal Shift, und drei muttersprachliche Umschreibungen erscheinen direkt dort, wo du schreibst.",
       "ctaPrimary": "Kostenlos installieren →",
       "ctaInstall": "Ohne Installation testen →",
-      "ctaSecondary": "⭐ Star auf GitHub",
-      "ctaGithub": "Auf GitHub ansehen →",
-      "fineprint": "{count} Umschreibungen/Monat gratis · keine Karte · BYOK"
+      "fineprint": "{count} kostenlose Umschreibungen/Monat · Keine Karte nötig"
     },
     "scenarios": {
       "h2": "Kommt dir bekannt vor?",
-      "bridge": "Genau dafür wurde rewrite.so gebaut",
+      "bridge": "Genau dafür ist rewrite.so da",
       "useCaseWork": {
         "title": "Sprachübergreifende Arbeit",
         "description": "Jeder Arbeitskontext braucht den passenden Ton. Schreib in deiner Muttersprache; rewrite.so liefert drei englische Tonarten — locker für Slack, neutral für PRs, formell für Kundenmails.",
@@ -596,12 +591,12 @@
           "faithful": "I think this take misses the point.",
           "formal": "I respectfully disagree with this view."
         }
-      }
+      },
+      "learnLink": "Lernst du Englisch? Am besten nutzt du es jeden Tag. Mehr erfahren →"
     },
     "privacy": {
       "eyebrow": "Der Datenschutzvertrag",
       "h2": "Dein Text wird nie gespeichert. Punkt.",
-      "body": "Nicht in Datenbanken. Nicht in Logs. Nicht in Fehler-Reportern. Nicht in Analytics. Der Text, den du umschreibst, durchläuft den Worker einmal und ist weg. Wir nutzen kein Drittanbieter-APM (Sentry, Datadog usw.) — genau weil sie standardmäßig Request-Bodies erfassen würden. Das ist kein Versprechen — es ist die Architektur, und der Quellcode ist offen für deine Überprüfung.",
       "shortBody": "Geloggte Daten dürfen nur length, lang, style, userId und Fehlercodes sein. Originaltext und Umschreibungen sind überall ausgeschlossen.",
       "linkDoc": "Technisches Datenschutzdokument lesen →",
       "linkSource": "Rewrite-Handler-Quelltext ansehen →",
@@ -615,7 +610,8 @@
       }
     },
     "howItWorks": {
-      "h2": "So funktioniert's",
+      "eyebrow": "So funktioniert's",
+      "h2": "Drei Schritte, ganz ohne Maus",
       "stepLabel": "SCHRITT {num}",
       "step1": {
         "title": "Doppel-Shift",
@@ -637,20 +633,10 @@
         "title": "Lies den Code selbst",
         "body": "Selbst hosten, prüfen, forken. Die obigen Datenschutz-Aussagen sind kein Marketing — es ist Code, den du auf <repo>github.com/rewrite-so/rewrite.so</repo> lesen kannst."
       },
-      "byok": {
-        "label": "BYOK",
-        "title": "Bring deinen eigenen Schlüssel",
-        "body": "Stecke deine OpenAI-kompatible Base URL + Schlüssel + Modell ein. Umschreibungen gehen direkt zu deinem Provider, AES-GCM-verschlüsselt at rest, nie geloggt. Zählt nicht gegen das Monatskontingent."
-      },
       "pii": {
         "label": "PII HART AUSGESCHLOSSEN",
         "title": "Wird in Passwortfeldern nicht ausgelöst",
-        "body": "Password / cc-* / current-password / new-password / one-time-code / Felder mit name oder id, die password|pin|cvv|cvc|otp|secret|token enthalten — alle hart codiert, um ignoriert zu werden. Keine Einstellung. Kein Feature-Flag."
-      },
-      "stack": {
-        "label": "STACK",
-        "title": "Cloudflare Workers + D1 + Hono",
-        "body": "Edge-deployed Worker, OpenAI-Chat-Completions-Wire-Format, 3-Wege gleichzeitiges Fan-out mit kaskadierendem Client-Abort. ~5000 Zeilen TypeScript. Strict-Modus. Kein ORM für Geschäftstabellen."
+        "body": "Felder für Passwort, Einmalcode, Kreditkarte und Ähnliches werden direkt im Code ausgeschlossen — keine Einstellung, kein Feature-Flag."
       },
       "crossLang": {
         "label": "SPRACHENÜBERGREIFEND",
@@ -692,10 +678,10 @@
       "ctaSeeFull": "Komplette Preise & FAQ ansehen →"
     },
     "finalCta": {
-      "h2": "Probier's. Dauert 30 Sekunden.",
-      "body": "Keine Anmeldung. Öffne <code>/try</code> für die Demo. Installiere die Erweiterung, um sie auf unterstützten Seiten zu nutzen.",
-      "primary": "Kostenlos testen →",
-      "secondary": "Anmelden"
+      "h2": "Fang heute an, in jeder Sprache zu schreiben.",
+      "body": "Keine Anmeldung nötig. Probier die Demo im Browser, oder installiere die Erweiterung, um sie überall zu nutzen, wo du schreibst.",
+      "primary": "Kostenlos installieren →",
+      "secondary": "Ohne Installation ausprobieren →"
     },
     "demo": {
       "anyInput": "unterstütztes Eingabefeld",
@@ -750,7 +736,7 @@
     "compare": {
       "eyebrow": "Was uns unterscheidet",
       "h2": "rewrite.so im Vergleich zu Alternativen",
-      "subtitle": "Drei Stile, im Eingabefeld, in dem du gerade tippst, mit dem ersten Token in unter einer Sekunde.",
+      "subtitle": "Gemacht fürs Schreiben über Sprachgrenzen hinweg: Schreib in deiner Sprache, und es liest sich muttersprachlich in ihrer.",
       "caption": "Funktionsvergleich von rewrite.so mit Grammarly, DeepL Write und ChatGPT (Web).",
       "recommended": "Empfohlen",
       "disclaimer": "Der Vergleich basiert auf öffentlich verfügbaren Informationen mit Stand 2026-05. Funktionen und Preise der Wettbewerber ändern sich häufig — bitte vor einer Entscheidung beim jeweiligen Anbieter prüfen. Wir stehen mit keinem der genannten Produkte in einer Geschäftsbeziehung und sprechen keine Empfehlung aus.",
@@ -763,7 +749,7 @@
       "rows": {
         "inline": {
           "label": "Inline in jedem Eingabefeld",
-          "detail": "Der Text wird genau dort ersetzt, wo du ihn tippst — kein Popover, keine Seitenleiste, kein zweiter Tab.",
+          "detail": "Der Text wird genau dort ersetzt, wo du ihn tippst — keine Seitenleiste, kein zweiter Tab.",
           "cells": {
             "grammarly": "Inline + Popovers",
             "deepl": "Erweiterung auf unterstützten Seiten",
@@ -824,11 +810,20 @@
           }
         }
       }
+    },
+    "proofBand": {
+      "ariaLabel": "Auf einen Blick",
+      "item1Value": "Jede",
+      "item1Label": "Sprache rein, Sprache raus",
+      "item2Value": "3",
+      "item2Label": "muttersprachliche Stile nebeneinander",
+      "item3Value": "0",
+      "item3Label": "gespeicherter Text"
     }
   },
   "ext": {
     "popup": {
-      "tagline": "Frei schreiben. Sicher senden.",
+      "tagline": "Schreib in jeder Sprache, klinge muttersprachlich.",
       "usageError": "Kontingent konnte nicht geladen werden:",
       "loading": "Lädt…",
       "remainingThisMonth": "verbleibend diesen Monat",

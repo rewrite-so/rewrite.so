@@ -1,14 +1,14 @@
 {
   "meta": {
     "home": {
-      "title": "rewrite.so — Escribe con libertad. Envía con confianza.",
-      "description": "Motor de reescritura con IA a nivel de campo de entrada. 3 estilos, solo teclado, sin interrumpir tu flujo."
+      "title": "rewrite.so — Escribe en cualquier idioma, suena nativo",
+      "description": "Escribe en un segundo idioma, o en uno que estás aprendiendo. Pulsa Shift dos veces y obtén tres reescrituras nativas, en cualquier campo de texto. Gratis, código abierto, sin guardar nunca tu texto."
     },
     "login": {
       "title": "Iniciar sesión — rewrite.so"
     },
     "try": {
-      "title": "Prueba rewrite.so — Escribe con libertad. Envía con confianza."
+      "title": "Prueba rewrite.so — Escribe en cualquier idioma, suena nativo"
     },
     "settings": {
       "title": "Configuración — rewrite.so"
@@ -519,7 +519,7 @@
     "learnEnglish": "Aprender inglés"
   },
   "footer": {
-    "tagline": "Escribe con libertad. Envía con confianza.",
+    "tagline": "Escribe en cualquier idioma, suena nativo.",
     "heading": {
       "product": "Producto",
       "account": "Cuenta",
@@ -552,21 +552,16 @@
       "label": "Early Bird · 90 días gratis + 70% para siempre"
     },
     "hero": {
-      "eyebrow": "Reescritura AI en línea",
-      "h1Line1": "Escribe con libertad,",
-      "h1Line2": "envía con confianza.",
-      "subHeadline": "Pulsa Shift dos veces y recibe tres reescrituras a nivel de nativo — en cualquier idioma.",
-      "polyglot": "Cualquier idioma entra. Cualquier idioma sale.",
-      "intro": "Pulsa <kbd>Shift</kbd> <kbd>Shift</kbd> en cualquier campo de texto. La IA te da tres formas de decirlo. Elige con <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd>.",
+      "h1Line1": "Escribe en cualquier idioma.",
+      "h1Line2": "Mejora cada vez.",
+      "subHeadline": "Para trabajar en un segundo idioma, o en uno que estás aprendiendo: pulsa Shift dos veces y tres reescrituras nativas aparecen justo donde escribes.",
       "ctaPrimary": "Instalar gratis →",
       "ctaInstall": "Probar sin instalar →",
-      "ctaSecondary": "⭐ Estrella en GitHub",
-      "ctaGithub": "Ver en GitHub →",
-      "fineprint": "{count} reescrituras gratis al mes · sin tarjeta · BYOK"
+      "fineprint": "{count} reescrituras gratis al mes · Sin tarjeta"
     },
     "scenarios": {
       "h2": "¿Te suena familiar?",
-      "bridge": "Para esto exactamente fue creado rewrite.so",
+      "bridge": "Aquí es donde rewrite.so brilla",
       "useCaseWork": {
         "title": "Trabajo entre idiomas",
         "description": "Cada situación de trabajo necesita un tono distinto. Escribe en tu lengua materna; rewrite.so te da tres tonos en inglés — casual para Slack, neutral para PRs, formal para correos a clientes.",
@@ -596,12 +591,12 @@
           "faithful": "I think this take misses the point.",
           "formal": "I respectfully disagree with this view."
         }
-      }
+      },
+      "learnLink": "¿Aprendes inglés? La mejor forma es usarlo cada día. Más información →"
     },
     "privacy": {
       "eyebrow": "El contrato de privacidad",
       "h2": "Tu texto nunca se almacena. Punto.",
-      "body": "Ni en bases de datos. Ni en logs. Ni en reportadores de errores. Ni en analíticas. El texto que reescribes pasa por el worker una vez y desaparece. No usamos ningún APM de terceros (Sentry, Datadog, etc.) precisamente porque capturarían los cuerpos de las solicitudes por defecto. Esto no es una promesa — es la arquitectura, y el código fuente está abierto para que lo verifiques.",
       "shortBody": "Solo se pueden registrar length, lang, style, userId y códigos de error. El texto original y las reescrituras quedan excluidos en todas partes.",
       "linkDoc": "Leer el documento técnico de privacidad →",
       "linkSource": "Ver el código del manejador de reescritura →",
@@ -615,7 +610,8 @@
       }
     },
     "howItWorks": {
-      "h2": "Cómo funciona",
+      "eyebrow": "Cómo funciona",
+      "h2": "Tres pasos, sin tocar el ratón",
       "stepLabel": "PASO {num}",
       "step1": {
         "title": "Doble Shift",
@@ -637,20 +633,10 @@
         "title": "Lee el código tú mismo",
         "body": "Auto-aloja, audita, bifurca. Las afirmaciones de privacidad arriba no son marketing — son código que puedes leer en <repo>github.com/rewrite-so/rewrite.so</repo>."
       },
-      "byok": {
-        "label": "BYOK",
-        "title": "Trae tu propia clave",
-        "body": "Conecta tu base URL + clave + modelo compatible con OpenAI. Las reescrituras van directamente a tu proveedor, cifradas con AES-GCM en reposo, nunca registradas. No cuenta contra la cuota mensual."
-      },
       "pii": {
         "label": "EXCLUSIÓN PII DURA",
         "title": "No se activa en campos de contraseña",
-        "body": "Password / cc-* / current-password / new-password / one-time-code / campos con name o id que coincidan con password|pin|cvv|cvc|otp|secret|token — todos hardcodeados para ser ignorados. No es un ajuste. No es un feature flag."
-      },
-      "stack": {
-        "label": "STACK",
-        "title": "Cloudflare Workers + D1 + Hono",
-        "body": "Worker desplegado en el edge, formato OpenAI Chat Completions, fan-out concurrente de 3 vías con cancelación en cascada del cliente. ~5000 líneas de TypeScript. Modo strict. Sin ORM para tablas de negocio."
+        "body": "Los campos de contraseña, código de un solo uso, tarjeta de crédito y similares se excluyen directamente en el código: no es un ajuste ni una opción."
       },
       "crossLang": {
         "label": "MULTI-IDIOMA",
@@ -692,10 +678,10 @@
       "ctaSeeFull": "Ver precios completos y FAQ →"
     },
     "finalCta": {
-      "h2": "Pruébalo. Toma 30 segundos.",
-      "body": "Sin registro. Abre <code>/try</code> para la demo. Instala la extensión para usarlo en sitios compatibles.",
-      "primary": "Probar gratis →",
-      "secondary": "Iniciar sesión"
+      "h2": "Empieza hoy a escribir en cualquier idioma.",
+      "body": "Sin registro. Prueba la demo en tu navegador, o instala la extensión para usarla en todos los sitios donde escribes.",
+      "primary": "Instalar gratis →",
+      "secondary": "Probar sin instalar →"
     },
     "demo": {
       "anyInput": "campo compatible",
@@ -750,7 +736,7 @@
     "compare": {
       "eyebrow": "En qué nos diferenciamos",
       "h2": "rewrite.so frente a las alternativas",
-      "subtitle": "Tres estilos, en el mismo campo donde escribes, con el primer token en menos de un segundo.",
+      "subtitle": "Pensado para escribir entre idiomas: escribe en el tuyo y se lee nativo en el suyo.",
       "caption": "Comparativa de funciones de rewrite.so con Grammarly, DeepL Write y ChatGPT (web).",
       "recommended": "Recomendado",
       "disclaimer": "La comparativa refleja información públicamente disponible a fecha de 2026-05. Las funciones y precios de la competencia cambian con frecuencia; verifícalos con cada proveedor antes de decidir. No tenemos afiliación ni respaldamos ninguno de los productos mencionados.",
@@ -763,7 +749,7 @@
       "rows": {
         "inline": {
           "label": "En línea en cualquier campo",
-          "detail": "Reemplazamos el texto donde lo estás escribiendo — sin emergente, sin barra lateral, sin segunda pestaña.",
+          "detail": "Reemplazamos el texto donde lo estás escribiendo — sin barra lateral, sin segunda pestaña.",
           "cells": {
             "grammarly": "En línea + ventanas emergentes",
             "deepl": "Extensión solo en sitios compatibles",
@@ -824,11 +810,20 @@
           }
         }
       }
+    },
+    "proofBand": {
+      "ariaLabel": "De un vistazo",
+      "item1Value": "Cualquier",
+      "item1Label": "idioma entra, idioma sale",
+      "item2Value": "3",
+      "item2Label": "estilos nativos, lado a lado",
+      "item3Value": "0",
+      "item3Label": "texto guardado"
     }
   },
   "ext": {
     "popup": {
-      "tagline": "Escribe con libertad. Envía con confianza.",
+      "tagline": "Escribe en cualquier idioma, suena nativo.",
       "usageError": "Error al cargar la cuota:",
       "loading": "Cargando…",
       "remainingThisMonth": "restantes este mes",
