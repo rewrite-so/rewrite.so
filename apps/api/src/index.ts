@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import { pruneBehaviorLog } from './cron/prune-behavior-log.ts';
 import { reconcileSubscriptions } from './cron/reconcile.ts';
 import { processOnboardingEmails } from './emails/dispatcher.ts';
 import { createAuth } from './lib/auth.ts';
@@ -154,8 +155,9 @@ export default {
    * 每天 09:00 UTC 跑一次：
    * - onboarding 邮件 dispatcher（welcome / D1 / D7 / D14 / D30；按 email_state 表幂等）
    * - 订阅 reconcile（webhook miss 兜底；按 creem_subscription_id 幂等）
+   * - 行为日志 prune（behavior_events / rewrite_request_log 超 90 天行；DELETE 幂等）
    *
-   * 两个任务并行（waitUntil 各自独立），失败不抛——夜里没人值守，CF 重试可能会
+   * 任务并行（waitUntil 各自独立），失败不抛——夜里没人值守，CF 重试可能会
    * 把已经成功的部分再跑一遍，幂等性必须各自保证。
    */
   async scheduled(event: ScheduledEvent, env: Bindings, ctx: ExecutionContext): Promise<void> {
@@ -167,6 +169,11 @@ export default {
     ctx.waitUntil(
       reconcileSubscriptions(env).catch((err) => {
         log.error('cron.reconcile_error', { cron: event.cron, err });
+      }),
+    );
+    ctx.waitUntil(
+      pruneBehaviorLog(env).catch((err) => {
+        log.error('cron.prune_behavior_log_error', { cron: event.cron, err });
       }),
     );
   },
