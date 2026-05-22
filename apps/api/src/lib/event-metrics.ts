@@ -138,8 +138,9 @@ export type FieldValidationResult = { ok: true } | { ok: false; error: string };
  * Validate a single top-level string field. Returns ok if undefined.
  *
  * The field name is the *rule* key (one of `'page' | 'referrer_host' |
- * 'visitor_id' | 'utm'`), not the source field's exact name — utm.source,
- * utm.medium, utm.campaign all share the 'utm' rule.
+ * 'visitor_id' | 'session_id' | 'install_id' | 'utm'`), not the source
+ * field's exact name — utm.source, utm.medium, utm.campaign all share the
+ * 'utm' rule.
  */
 export function validateTopLevelField(
   rule: TopLevelFieldName,

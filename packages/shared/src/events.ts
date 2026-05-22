@@ -33,17 +33,12 @@ export const EVENT_NAMES = [
   'byok_save', // props: { has_been_set_before: 0|1 } — never the key
   // ---- Campaigns / promotions ----
   'campaign_join', // props: { campaign_slug, campaign_type } — emitted server-side from POST /v1/campaigns/:slug/join
-  // ---- Landing v2 funnel (added in PR-7) ----
-  // `section_view` is wired via SectionViewMarker today. The four below are
-  // declared up front so the whitelist is the single source of truth for the
-  // funnel — their call sites land in a follow-up PR that adds the per-section
-  // client handlers. Until then they are inert (whitelist entries do nothing
-  // by themselves; nothing fires them).
-  'section_view', // props: { section: 'hero'|'comparison'|'pricing'|'privacy'|'how'|'features'|'finalCta' } — IntersectionObserver, per-pageview dedup
-  'hero_demo_played', // props: { trigger: 'auto'|'manual', platform: 'X'|'Slack'|'Reddit'|'GitHub' } — DEFERRED: wiring lives in HomeRewriteDemo
-  'compare_row_expand', // props: { row: 'inline'|'multilang'|'keyboard'|'candidates'|'speed'|'logging'|'byok'|'openSource' } — DEFERRED: wiring lives in ComparisonTable details
-  'pricing_card_focus', // props: { card: 'free'|'pro'|'byok' } — DEFERRED: hover or keyboard focus ≥ 500ms
-  'early_bird_banner_click', // props: { surface: 'hero'|'pricing'|'nav' } — DEFERRED: wiring lives on EarlyBirdBadge + pricing banner
+  // ---- Landing v2 funnel ----
+  'section_view', // props: { section: 'hero'|'comparison'|'pricing'|'privacy'|'how'|'features'|'finalCta' } — IntersectionObserver, per-pageview dedup; wired via SectionViewMarker
+  'hero_demo_played', // props: { trigger: 'auto'|'manual', platform: 'X'|'Slack'|'Reddit'|'GitHub' } — wired in HomeRewriteDemo
+  'compare_row_expand', // props: { row: 'inline'|'multilang'|'keyboard'|'candidates'|'speed'|'logging'|'byok'|'openSource' } — wired in ComparisonTableTracked
+  'pricing_card_focus', // props: { card: 'free'|'pro'|'byok' } — hover/focus ≥ 500ms; wired in PriceTeaser
+  'early_bird_banner_click', // props: { surface: 'hero'|'pricing'|'nav' } — wired in EarlyBirdLink
   // ---- Extension rewrite lifecycle (content script → SW → /v1/events) ----
   // 扩展端事件由 apps/extension content script 经 service-worker 代理发出，
   // 统一带 install_id + site（见 EventPayloadSchema）。匿名扩展用户 subjectKind='install'。
