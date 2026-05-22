@@ -25,7 +25,7 @@ export async function pruneBehaviorLog(
   env: Bindings,
 ): Promise<{ behaviorEvents: number; rewriteRequestLog: number }> {
   const t0 = Date.now();
-  const cutoffMs = Date.now() - RETENTION_DAYS * DAY_MS;
+  const cutoffMs = t0 - RETENTION_DAYS * DAY_MS;
 
   const beResult = await env.DB.prepare('DELETE FROM behavior_events WHERE created_at < ?')
     .bind(cutoffMs)

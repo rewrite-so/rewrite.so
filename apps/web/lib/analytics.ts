@@ -148,6 +148,9 @@ function ensureVisitorId(): string | undefined {
     const legacy = window.sessionStorage.getItem(STORAGE_KEY) ?? undefined;
     const id = legacy ?? randomId('vid');
     window.localStorage.setItem(STORAGE_KEY, id);
+    // Drop the legacy session-scoped copy once promoted — keeps the migration
+    // one-way and stops a stale value lingering for the tab's lifetime.
+    if (legacy) window.sessionStorage.removeItem(STORAGE_KEY);
     return id;
   } catch {
     // localStorage can throw in private-browsing / storage-blocked scenarios

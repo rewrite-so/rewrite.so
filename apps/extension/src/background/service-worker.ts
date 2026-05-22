@@ -10,7 +10,23 @@ const EXT_SESSION_KEY = 'rs_sid';
 const EXT_SESSION_IDLE_MS = 30 * 60 * 1000;
 let sessionCache: { id: string; lastSeen: number } | null = null;
 
-async function resolveEventSessionId(): Promise<string> {
+let sessionResolution: Promise<string> | null = null;
+
+/**
+ * Resolve the current events session id. Concurrent callers coalesce onto a
+ * single in-flight resolution so a batch race cannot mint two ids; the shared
+ * promise is cleared once settled so the next call re-checks freshness.
+ */
+function resolveEventSessionId(): Promise<string> {
+  if (!sessionResolution) {
+    sessionResolution = computeEventSessionId().finally(() => {
+      sessionResolution = null;
+    });
+  }
+  return sessionResolution;
+}
+
+async function computeEventSessionId(): Promise<string> {
   const now = Date.now();
   if (!sessionCache) {
     try {

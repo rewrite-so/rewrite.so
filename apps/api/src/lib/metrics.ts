@@ -19,6 +19,7 @@
  *   double5-20: reserved
  */
 import { bucketInputLength } from '@rewrite/shared';
+import { log } from './log.ts';
 import { sanitizeTargetLang } from './sanitize-target-lang.ts';
 
 export type RewriteTier = 'anonymous_ip' | 'anonymous_install' | 'free' | 'pro' | 'byok';
@@ -181,7 +182,9 @@ export async function writeRewriteRequestLog(
         metric.styles.length,
       )
       .run();
-  } catch {
-    // intentional: fire-and-forget, never disrupt the response
+  } catch (err) {
+    // fire-and-forget — never disrupt the response, but surface the failure
+    // so a D1 outage on this mirror is debuggable (same as writeBehaviorEvents).
+    log.warn('rewrite_request_log.write_failed', { err: String(err).slice(0, 200) });
   }
 }

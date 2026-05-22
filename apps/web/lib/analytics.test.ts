@@ -257,6 +257,8 @@ describe('visitor_id management', () => {
     // the signin_success anchor) survives the sessionStorage→localStorage move.
     expect(getVisitorId()).toBe('legacy-vid-123');
     expect(env.localStore.get('rs_vid')).toBe('legacy-vid-123');
+    // …and the legacy session-scoped copy is cleared (one-way migration).
+    expect(env.sessionStore.has('rs_vid')).toBe(false);
   });
 });
 

@@ -16,13 +16,16 @@ import { ComparisonTable, type ComparisonTableProps } from './ui/ComparisonTable
  */
 export function ComparisonTableTracked(props: ComparisonTableProps) {
   const ref = useRef<HTMLDivElement>(null);
+  // Survives effect re-runs (e.g. a parent re-render with a new rows array)
+  // so a row already counted does not re-fire compare_row_expand.
+  const firedRef = useRef<Set<number>>(new Set());
 
   useEffect(() => {
     const root = ref.current;
     if (!root) return;
     const trackedRows = props.rows.filter((r) => r.detail);
     const detailsEls = Array.from(root.querySelectorAll('details'));
-    const fired = new Set<number>();
+    const fired = firedRef.current;
     const cleanups = detailsEls.map((el, i) => {
       const onToggle = () => {
         if (!el.open || fired.has(i)) return;
