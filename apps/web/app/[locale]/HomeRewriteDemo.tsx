@@ -2,6 +2,7 @@
 
 import type { CSSProperties, KeyboardEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
+import { track } from '../../lib/analytics.ts';
 import { sliceForStream } from '../../lib/sliceForStream.ts';
 import styles from './HomePage.module.css';
 import { PlatformIcon, type PlatformName } from './PlatformIcon.tsx';
@@ -66,6 +67,10 @@ export function HomeRewriteDemo({ copy }: { copy: HomeRewriteDemoCopy }) {
   const [hasEnteredView, setHasEnteredView] = useState(false);
   const [streamProgress, setStreamProgress] = useState(0);
   const [inputProgress, setInputProgress] = useState(0);
+  // hero_demo_played is fired at most once per trigger per pageview — the demo
+  // auto-cycles 4 examples, so an un-deduped event would be pure noise.
+  const firedAutoRef = useRef(false);
+  const firedManualRef = useRef(false);
 
   // Don't burn CPU on the typing/streaming rAFs (and don't make hero scroll
   // jank) until the demo is actually visible. Once it enters the viewport
@@ -93,6 +98,17 @@ export function HomeRewriteDemo({ copy }: { copy: HomeRewriteDemoCopy }) {
     io.observe(el);
     return () => io.disconnect();
   }, [hasEnteredView]);
+
+  // Fire hero_demo_played(trigger='auto') once when the demo first plays —
+  // i.e. when it enters the viewport. Platform is examples[0] (exampleIndex is
+  // still 0 here; the cycle effect only advances after hasEnteredView).
+  useEffect(() => {
+    if (!hasEnteredView || firedAutoRef.current) return;
+    firedAutoRef.current = true;
+    const platform = copy.examples[0]?.platform;
+    if (platform) track('hero_demo_played', { trigger: 'auto', platform });
+  }, [hasEnteredView, copy.examples]);
+
   const example = copy.examples[exampleIndex] ?? copy.examples[0];
   const exampleCount = copy.examples.length;
   const fullInput = example?.input ?? '';
@@ -208,6 +224,14 @@ export function HomeRewriteDemo({ copy }: { copy: HomeRewriteDemoCopy }) {
     setSelectedIndex(index);
     setPhase('accepted');
     setAcceptedVersion((v) => v + 1);
+    // accept() is only ever reached by a real user gesture (candidate click or
+    // 1/2/3 key) — the auto cycle calls setPhase('accepted') directly. So this
+    // is the manual-interaction signal.
+    if (!firedManualRef.current) {
+      firedManualRef.current = true;
+      const platform = example?.platform;
+      if (platform) track('hero_demo_played', { trigger: 'manual', platform });
+    }
   }
 
   function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {

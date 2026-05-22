@@ -16,6 +16,7 @@ import {
   type RequestMetric,
   type RewriteStatus,
   writeRequestEvent,
+  writeRewriteRequestLog,
 } from '../lib/metrics.ts';
 import {
   checkAndIncrement,
@@ -399,8 +400,11 @@ async function buildAndWriteMetric(env: AppEnv['Bindings'], input: MetricInput):
 
   try {
     writeRequestEvent(env.METRICS, metric);
+    // D1 镜像（无采样精确逐实体源）。与 AE 写并列，同 fire-and-forget 契约；
+    // writeRewriteRequestLog 内部自吞错误，这里 await 仅为让 waitUntil 等齐。
+    await writeRewriteRequestLog(env.DB, metric, Date.now());
   } catch (err) {
-    // Analytics Engine 写入失败不能影响主流程；仅留 warning（log.ts 不记原文）
+    // Analytics Engine / D1 写入失败不能影响主流程；仅留 warning（log.ts 不记原文）
     log.warn('metrics.write_failed', { err: String(err).slice(0, 200) });
   }
 }

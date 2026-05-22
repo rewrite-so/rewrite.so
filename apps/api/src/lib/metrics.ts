@@ -19,6 +19,7 @@
  *   double5-20: reserved
  */
 import { bucketInputLength } from '@rewrite/shared';
+import { log } from './log.ts';
 import { sanitizeTargetLang } from './sanitize-target-lang.ts';
 
 export type RewriteTier = 'anonymous_ip' | 'anonymous_install' | 'free' | 'pro' | 'byok';
@@ -134,5 +135,56 @@ export function writeRequestEvent(
     });
   } catch {
     // intentional: any failure here is preferable to disrupting the response
+  }
+}
+
+/**
+ * D1 mirror of writeRequestEvent — the precise, unsampled rewrite_request_log
+ * row. Same neutral-dimensions privacy contract as the AE write. Fire-and-
+ * forget: never throws, no-op when the DB binding is absent (local dev).
+ *
+ * `ts` is the server-side metric emit time (epoch ms) — there is no client
+ * clock involved here, so retention / analysis prune directly on it.
+ * See migration 0011_behavior_analytics.sql for the column contract.
+ */
+export async function writeRewriteRequestLog(
+  db: D1Database | undefined,
+  metric: RequestMetric,
+  ts: number,
+): Promise<void> {
+  if (!db) return;
+  try {
+    const sanitizedLang = sanitizeTargetLang(metric.targetLang).slice(0, TARGET_LANG_MAX_LEN);
+    const stylesCsv = [...metric.styles].sort().join(',');
+    await db
+      .prepare(
+        `INSERT INTO rewrite_request_log
+          (ts, tier, subject_id_hash, styles_csv, target_lang, target_lang_is_custom,
+           is_regen, status, error_code, upstream, input_length_bucket, input_length,
+           ms_to_first_byte, ms_total, style_count)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      )
+      .bind(
+        ts,
+        metric.tier,
+        metric.subjectId ?? null,
+        stylesCsv,
+        sanitizedLang,
+        metric.targetLangIsCustom ? 1 : 0,
+        metric.isRegen ? 1 : 0,
+        metric.status,
+        metric.errorCode ?? null,
+        metric.upstream,
+        bucketInputLength(metric.inputLength),
+        metric.inputLength,
+        metric.msToFirstByte ?? null,
+        metric.msTotal ?? null,
+        metric.styles.length,
+      )
+      .run();
+  } catch (err) {
+    // fire-and-forget — never disrupt the response, but surface the failure
+    // so a D1 outage on this mirror is debuggable (same as writeBehaviorEvents).
+    log.warn('rewrite_request_log.write_failed', { err: String(err).slice(0, 200) });
   }
 }

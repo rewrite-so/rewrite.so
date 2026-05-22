@@ -18,7 +18,7 @@ export default function PrivacyPage() {
     <article className={styles.longDoc}>
       <h1 style={{ fontSize: 32, fontWeight: 700, margin: 0 }}>Privacy Policy</h1>
       <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 8 }}>
-        Last updated: May 13, 2026
+        Last updated: May 22, 2026
       </p>
 
       <p style={{ marginTop: 28 }}>
@@ -82,11 +82,14 @@ export default function PrivacyPage() {
           Each event carries the event name, the page path (without locale prefix or query
           parameters), your interface locale, your country (derived from IP, never the IP itself), a
           coarse device type (mobile / desktop / tablet), referrer host (cross-origin only, never
-          path or query), UTM tags from marketing links, and a hashed identifier — your account ID
-          if you are signed in, otherwise a random ID stored only in your tab&apos;s session storage
-          (cleared when you close the tab). We do not collect the text you rewrite, the AI output,
-          your IP address, your email, mouse movement, scroll position, or session replay. We do not
-          use any cookies for these events.
+          path or query), UTM tags from marketing links, a per-session identifier, and a hashed
+          identifier — your account ID if you are signed in, otherwise a random visitor ID stored in
+          your browser&apos;s local storage. That visitor ID persists across visits so we can
+          understand returning traffic; it contains no personal data, is never shared with third
+          parties, and you can clear it at any time by clearing site data. It is browser storage,
+          not a cookie. We do not collect the text you rewrite, the AI output, your IP address, your
+          email, mouse movement, scroll position, or session replay. We do not use any cookies for
+          these events.
         </li>
       </ul>
 
@@ -118,15 +121,17 @@ export default function PrivacyPage() {
       <p>
         We do not sell your data. We do not run third-party advertising or behavioral analytics (no
         Google Analytics, PostHog, Mixpanel, Plausible, Vercel Analytics, or any similar product).
-        Our anonymized usage events live on Cloudflare Analytics Engine, the same infrastructure
-        provider that hosts the rest of the Service.
+        Our anonymized usage events live on Cloudflare&apos;s infrastructure (Analytics Engine and
+        our D1 database), the same provider that hosts the rest of the Service.
       </p>
 
       <h2 style={H2}>Cookies</h2>
       <p>
         We use one essential cookie: the session cookie set when you sign in. It is scoped to{' '}
         <code>.rewrite.so</code> so the browser extension and the website share authentication. We
-        do not use tracking cookies or third-party advertising cookies.
+        do not use tracking cookies or third-party advertising cookies. The identifiers used for
+        anonymized usage events are kept in browser storage (local and session storage), not in
+        cookies.
       </p>
 
       <h2 style={H2}>Data retention</h2>
@@ -145,8 +150,9 @@ export default function PrivacyPage() {
         </li>
         <li>Operational logs: retained for at most 30 days, then permanently deleted.</li>
         <li>
-          Anonymized usage events: Cloudflare Analytics Engine retains data points for at most 90
-          days, after which they are permanently deleted by the infrastructure provider.
+          Anonymized usage events: retained for at most 90 days. Aggregate data points in Cloudflare
+          Analytics Engine expire automatically; the precise per-event records in our Cloudflare D1
+          database are deleted by a daily cleanup job once they pass 90 days.
         </li>
       </ul>
 

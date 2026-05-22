@@ -4,6 +4,7 @@ import {
   isCustomTargetLang,
   type RequestMetric,
   writeRequestEvent,
+  writeRewriteRequestLog,
 } from './metrics.ts';
 
 function fakeDataset() {
@@ -162,6 +163,82 @@ describe('writeRequestEvent', () => {
     writeRequestEvent(dataset, baseMetric);
     expect((points[0] as { blobs: string[] }).blobs[8]).toBe('0');
     expect((points[1] as { blobs: string[] }).blobs[8]).toBe('0');
+  });
+});
+
+describe('writeRewriteRequestLog', () => {
+  const baseMetric: RequestMetric = {
+    tier: 'pro',
+    styles: ['faithful', 'casual'],
+    targetLang: 'zh-CN',
+    targetLangIsCustom: false,
+    inputLength: 800,
+    upstream: 'platform',
+    status: 'ok',
+    isRegen: true,
+    msToFirstByte: 90,
+    msTotal: 1200,
+    subjectId: 'abcdef0123456789',
+  };
+
+  function recordingDB() {
+    let bound: unknown[] | null = null;
+    let runs = 0;
+    const db = {
+      prepare: (_sql: string) => ({
+        bind: (...args: unknown[]) => ({
+          run: async () => {
+            bound = args;
+            runs++;
+            return { success: true };
+          },
+        }),
+      }),
+    } as unknown as D1Database;
+    return { db, getBound: () => bound, runs: () => runs };
+  }
+
+  it('inserts one row with mapped columns', async () => {
+    const { db, getBound, runs } = recordingDB();
+    await writeRewriteRequestLog(db, baseMetric, 1_800_000_000_000);
+    expect(runs()).toBe(1);
+    const b = getBound();
+    // bind order: ts, tier, subject_id_hash, styles_csv, target_lang,
+    //   target_lang_is_custom, is_regen, status, error_code, upstream,
+    //   input_length_bucket, input_length, ms_to_first_byte, ms_total, style_count
+    expect(b?.[0]).toBe(1_800_000_000_000);
+    expect(b?.[1]).toBe('pro');
+    expect(b?.[2]).toBe('abcdef0123456789');
+    expect(b?.[3]).toBe('casual,faithful'); // sorted CSV
+    expect(b?.[5]).toBe(0); // target_lang_is_custom
+    expect(b?.[6]).toBe(1); // is_regen
+    expect(b?.[7]).toBe('ok');
+    expect(b?.[14]).toBe(2); // style_count
+  });
+
+  it('stores a missing subjectId as null', async () => {
+    const { db, getBound } = recordingDB();
+    await writeRewriteRequestLog(db, { ...baseMetric, subjectId: undefined }, Date.now());
+    expect(getBound()?.[2]).toBeNull();
+  });
+
+  it('no-op when db is undefined', async () => {
+    await expect(
+      writeRewriteRequestLog(undefined, baseMetric, Date.now()),
+    ).resolves.toBeUndefined();
+  });
+
+  it('swallows a db failure — never throws', async () => {
+    const db = {
+      prepare: () => ({
+        bind: () => ({
+          run: async () => {
+            throw new Error('d1 down');
+          },
+        }),
+      }),
+    } as unknown as D1Database;
+    await expect(writeRewriteRequestLog(db, baseMetric, Date.now())).resolves.toBeUndefined();
   });
 });
 

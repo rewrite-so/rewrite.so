@@ -122,6 +122,8 @@ export const TOP_LEVEL_FIELD_RULES = {
   referrer_host: { max: 200, pattern: /^[A-Za-z0-9.-]+(?::\d+)?$/ },
   /** UUID v4 or short random id. */
   visitor_id: { max: 64, pattern: /^[A-Za-z0-9_-]+$/ },
+  /** Per-session id — UUID v4 or short random id (same shape as visitor_id). */
+  session_id: { max: 64, pattern: /^[A-Za-z0-9_-]+$/ },
   /** Extension install id — UUID v4 or short random id (same shape as visitor_id). */
   install_id: { max: 64, pattern: /^[A-Za-z0-9_-]+$/ },
   /** All utm_* tags share the same shape: marketing tooling normalises these. */
@@ -136,8 +138,9 @@ export type FieldValidationResult = { ok: true } | { ok: false; error: string };
  * Validate a single top-level string field. Returns ok if undefined.
  *
  * The field name is the *rule* key (one of `'page' | 'referrer_host' |
- * 'visitor_id' | 'utm'`), not the source field's exact name — utm.source,
- * utm.medium, utm.campaign all share the 'utm' rule.
+ * 'visitor_id' | 'session_id' | 'install_id' | 'utm'`), not the source
+ * field's exact name — utm.source, utm.medium, utm.campaign all share the
+ * 'utm' rule.
  */
 export function validateTopLevelField(
   rule: TopLevelFieldName,

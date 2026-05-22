@@ -5,9 +5,12 @@
  * - Queues events in memory, flushes every 5s or at 10 events, whichever
  *   comes first. pagehide / beforeunload uses navigator.sendBeacon so we
  *   don't drop end-of-session pageviews.
- * - visitor_id lives in sessionStorage ('rs_vid'); no cookie. This is the
- *   single anchor that lets the server JOIN anonymous events to a future
- *   logged-in user (via signin_success.linked_visitor_id).
+ * - visitor_id lives in localStorage ('rs_vid'); no cookie. Persistent across
+ *   sessions so returning visitors are trackable; it is the single anchor that
+ *   lets the server JOIN anonymous events to a future logged-in user (via
+ *   signin_success.linked_visitor_id).
+ * - session_id lives in sessionStorage ('rs_sid'); rolls after 30 min idle.
+ *   Per browsing session — distinct from the persistent visitor_id.
  * - eventsEnabled gate: if /v1/me reports the kill switch is on, every
  *   track() call no-ops. Bootstrap with the value resolved at page load;
  *   sender does not poll.
@@ -20,6 +23,8 @@
 import type { EventName } from '@rewrite/shared';
 
 const STORAGE_KEY = 'rs_vid';
+const SESSION_KEY = 'rs_sid';
+const SESSION_IDLE_MS = 30 * 60 * 1000;
 const FLUSH_INTERVAL_MS = 5000;
 const BATCH_SIZE = 10;
 const ENDPOINT = '/v1/events';
@@ -38,6 +43,7 @@ interface QueuedEvent {
   referrer_host?: string;
   utm?: UtmTags;
   visitor_id?: string;
+  session_id?: string;
   device_type?: 'mobile' | 'desktop' | 'tablet';
   props?: Record<string, string | number>;
 }
@@ -120,20 +126,71 @@ function captureContext(): ContextSnapshot {
   return snap;
 }
 
-/** Lazily generate + persist a session-scoped visitor id (UUID v4). */
+function randomId(prefix: string): string {
+  return typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+    ? crypto.randomUUID()
+    : `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
+/**
+ * Lazily generate + persist a *persistent* visitor id (UUID v4) in
+ * localStorage, so a returning visitor keeps the same id across sessions.
+ *
+ * One-time migration: a user mid-session at the deploy that flipped rs_vid
+ * from sessionStorage to localStorage still has an id in sessionStorage —
+ * promote it so their identity (and signin_success anchor) survives.
+ */
 function ensureVisitorId(): string | undefined {
   if (typeof window === 'undefined') return undefined;
   try {
-    const existing = window.sessionStorage.getItem(STORAGE_KEY);
+    const existing = window.localStorage.getItem(STORAGE_KEY);
     if (existing) return existing;
-    const id =
-      typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
-        ? crypto.randomUUID()
-        : `vid_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-    window.sessionStorage.setItem(STORAGE_KEY, id);
+    const legacy = window.sessionStorage.getItem(STORAGE_KEY) ?? undefined;
+    const id = legacy ?? randomId('vid');
+    window.localStorage.setItem(STORAGE_KEY, id);
+    // Drop the legacy session-scoped copy once promoted — keeps the migration
+    // one-way and stops a stale value lingering for the tab's lifetime.
+    if (legacy) window.sessionStorage.removeItem(STORAGE_KEY);
     return id;
   } catch {
-    // sessionStorage can throw in private-browsing / cookies-blocked scenarios
+    // localStorage can throw in private-browsing / storage-blocked scenarios
+    return undefined;
+  }
+}
+
+/**
+ * Lazily generate + persist a per-session id in sessionStorage. Rolls after
+ * SESSION_IDLE_MS of inactivity. Stored as `{ id, lastSeen }`; every call
+ * refreshes `lastSeen`. A new tab starts a fresh session — matches the
+ * "per browsing session" intent. Distinct from the persistent visitor id.
+ */
+function ensureSessionId(): string | undefined {
+  if (typeof window === 'undefined') return undefined;
+  try {
+    const now = Date.now();
+    const raw = window.sessionStorage.getItem(SESSION_KEY);
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw) as { id?: unknown; lastSeen?: unknown };
+        if (
+          typeof parsed.id === 'string' &&
+          typeof parsed.lastSeen === 'number' &&
+          now - parsed.lastSeen <= SESSION_IDLE_MS
+        ) {
+          window.sessionStorage.setItem(
+            SESSION_KEY,
+            JSON.stringify({ id: parsed.id, lastSeen: now }),
+          );
+          return parsed.id;
+        }
+      } catch {
+        // malformed value — fall through and mint a fresh session
+      }
+    }
+    const id = randomId('sid');
+    window.sessionStorage.setItem(SESSION_KEY, JSON.stringify({ id, lastSeen: now }));
+    return id;
+  } catch {
     return undefined;
   }
 }
@@ -218,7 +275,7 @@ export function isEnabled(): boolean {
 export function getVisitorId(): string | undefined {
   if (typeof window === 'undefined') return undefined;
   try {
-    return window.sessionStorage.getItem(STORAGE_KEY) ?? undefined;
+    return window.localStorage.getItem(STORAGE_KEY) ?? undefined;
   } catch {
     return undefined;
   }
@@ -257,6 +314,7 @@ function enqueueEvent(
   ts: number,
 ): void {
   const visitorId = ensureVisitorId();
+  const sessionId = ensureSessionId();
   let mergedProps = props;
   if (name === 'signin_success' && visitorId && (!props || !('linked_visitor_id' in props))) {
     mergedProps = { ...(props ?? {}), linked_visitor_id: visitorId };
@@ -271,6 +329,7 @@ function enqueueEvent(
     ...(contextSnapshot.referrerHost ? { referrer_host: contextSnapshot.referrerHost } : {}),
     ...(contextSnapshot.utm ? { utm: contextSnapshot.utm } : {}),
     ...(visitorId ? { visitor_id: visitorId } : {}),
+    ...(sessionId ? { session_id: sessionId } : {}),
     ...(contextSnapshot.deviceType ? { device_type: contextSnapshot.deviceType } : {}),
     ...(mergedProps ? { props: mergedProps } : {}),
   };

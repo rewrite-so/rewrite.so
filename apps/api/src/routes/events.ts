@@ -25,6 +25,7 @@
 import { EventsBatchSchema } from '@rewrite/shared';
 import { Hono } from 'hono';
 import { consumeEventsIp } from '../do/rate-limiter.ts';
+import { type BehaviorEventRow, writeBehaviorEvents } from '../lib/behavior-log.ts';
 import {
   type EventMetric,
   type EventSubjectKind,
@@ -118,6 +119,9 @@ eventsRoute.post('/v1/events', async (c) => {
     metric: Omit<EventMetric, 'subjectIdHash'>;
     subjectKind: EventSubjectKind;
     subjectRaw: string | undefined;
+    /** D1-only fields — not part of the AE EventMetric. */
+    ts: number;
+    sessionId: string | undefined;
   };
   const prepared: PreparedEvent[] = [];
   for (const ev of events) {
@@ -126,11 +130,16 @@ eventsRoute.post('/v1/events', async (c) => {
     // otherwise smuggle PII into page / referrer_host / utm.* / visitor_id —
     // the zod schema only caps their length, not their content.
     const topFieldChecks: Array<
-      [string, 'page' | 'referrer_host' | 'visitor_id' | 'install_id' | 'utm', string | undefined]
+      [
+        string,
+        'page' | 'referrer_host' | 'visitor_id' | 'session_id' | 'install_id' | 'utm',
+        string | undefined,
+      ]
     > = [
       ['page', 'page', ev.page],
       ['referrer_host', 'referrer_host', ev.referrer_host],
       ['visitor_id', 'visitor_id', ev.visitor_id],
+      ['session_id', 'session_id', ev.session_id],
       ['install_id', 'install_id', ev.install_id],
       ['utm.source', 'utm', ev.utm?.source],
       ['utm.medium', 'utm', ev.utm?.medium],
@@ -193,26 +202,55 @@ eventsRoute.post('/v1/events', async (c) => {
       },
       subjectKind,
       subjectRaw,
+      ts: ev.ts,
+      sessionId: ev.session_id,
     });
   }
 
-  // Resolve subject id hashes in parallel; sha-256 is ~50us per call so this
-  // adds < 1ms even for max-size batches. We await the whole batch before
-  // sending 202 (rather than handing it to executionCtx.waitUntil) so the
-  // 202 means "we attempted every write" rather than "we promised to try
-  // later" — the writes themselves are still async, just fully awaited.
-  //
-  // allSettled (not all): a single hashSubjectId rejection must not poison
-  // the other events in the batch. writeEventPoint is already self-protecting
-  // (event-metrics.ts swallows writeDataPoint errors), so this only guards
-  // against a misbehaving crypto.subtle in the hash step. Anything that
-  // throws here still degrades to "this one event silently dropped".
-  await Promise.allSettled(
-    prepared.map(async (p) => {
-      const subjectIdHash = await hashSubjectId(p.subjectKind, p.subjectRaw);
-      writeEventPoint(c.env.EVENTS, { ...p.metric, subjectIdHash });
-    }),
+  // Resolve subject id hashes once — shared by the AE write and the D1 mirror
+  // (sha-256 is ~50us per call, < 1ms even for max-size batches). allSettled
+  // (not all): a single hashSubjectId rejection from a misbehaving
+  // crypto.subtle degrades that one event to an empty hash rather than
+  // poisoning the batch — the event is still recorded.
+  const hashes = await Promise.allSettled(
+    prepared.map((p) => hashSubjectId(p.subjectKind, p.subjectRaw)),
   );
+
+  // AE write (sampled aggregate store) — awaited before 202 so the response
+  // means "every write attempted". writeEventPoint is self-protecting.
+  // The same loop collects the D1 mirror rows.
+  const behaviorRows: BehaviorEventRow[] = prepared.map((p, i) => {
+    const h = hashes[i];
+    const subjectIdHash = h?.status === 'fulfilled' ? h.value : undefined;
+    writeEventPoint(c.env.EVENTS, { ...p.metric, subjectIdHash });
+    return {
+      ts: p.ts,
+      eventName: p.metric.eventName,
+      subjectKind: p.subjectKind,
+      subjectIdHash,
+      sessionId: p.sessionId,
+      page: p.metric.pagePath,
+      locale: p.metric.locale,
+      referrerHost: p.metric.referrerHost,
+      utmSource: p.metric.utm?.source,
+      utmMedium: p.metric.utm?.medium,
+      utmCampaign: p.metric.utm?.campaign,
+      country: p.metric.country || undefined,
+      deviceType: p.metric.deviceType,
+      tier: p.metric.tier,
+      site: p.metric.site,
+      propsJson: p.metric.propsJson,
+    };
+  });
+
+  // D1 mirror (precise, unsampled per-entity source of truth). Off the
+  // response path via waitUntil; writeBehaviorEvents never throws, so the
+  // test-env fallback (no executionCtx) is a safe floating promise.
+  try {
+    c.executionCtx.waitUntil(writeBehaviorEvents(c.env.DB, behaviorRows));
+  } catch {
+    void writeBehaviorEvents(c.env.DB, behaviorRows);
+  }
 
   return c.json({}, 202);
 });

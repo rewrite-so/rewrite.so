@@ -20,7 +20,6 @@ export const EVENT_NAMES = [
   'try_input', // props: { length_bucket, lang } — never the text itself
   'try_select_candidate', // props: { style } — regen/position 维度由 rewrite metrics 的 is_regen + try_regenerate 事件覆盖（候选恒按 faithful/casual/formal 固定顺序，position 与 style 冗余）
   'try_regenerate', // props: { style }
-  'try_copy_result', // DEFERRED: /try 当前无独立"复制"动作（候选直接写回 textarea；Copy 按钮仅写入失败兜底时出现）
   // ---- Settings ----
   'settings_change', // props: { field: 'targetLang'|'uiLocale'|'triggerEnabled', is_custom?: 0|1 }
   // ---- Auth / conversion ----
@@ -34,17 +33,12 @@ export const EVENT_NAMES = [
   'byok_save', // props: { has_been_set_before: 0|1 } — never the key
   // ---- Campaigns / promotions ----
   'campaign_join', // props: { campaign_slug, campaign_type } — emitted server-side from POST /v1/campaigns/:slug/join
-  // ---- Landing v2 funnel (added in PR-7) ----
-  // `section_view` is wired via SectionViewMarker today. The four below are
-  // declared up front so the whitelist is the single source of truth for the
-  // funnel — their call sites land in a follow-up PR that adds the per-section
-  // client handlers. Until then they are inert (whitelist entries do nothing
-  // by themselves; nothing fires them).
-  'section_view', // props: { section: 'hero'|'comparison'|'pricing'|'privacy'|'how'|'features'|'finalCta' } — IntersectionObserver, per-pageview dedup
-  'hero_demo_played', // props: { trigger: 'auto'|'manual', platform: 'X'|'Slack'|'Reddit'|'GitHub' } — DEFERRED: wiring lives in HomeRewriteDemo
-  'compare_row_expand', // props: { row: 'inline'|'multilang'|'keyboard'|'candidates'|'speed'|'logging'|'byok'|'openSource' } — DEFERRED: wiring lives in ComparisonTable details
-  'pricing_card_focus', // props: { card: 'free'|'pro'|'byok' } — DEFERRED: hover or keyboard focus ≥ 500ms
-  'early_bird_banner_click', // props: { surface: 'hero'|'pricing'|'nav' } — DEFERRED: wiring lives on EarlyBirdBadge + pricing banner
+  // ---- Landing v2 funnel ----
+  'section_view', // props: { section: 'hero'|'comparison'|'pricing'|'privacy'|'how'|'features'|'finalCta' } — IntersectionObserver, per-pageview dedup; wired via SectionViewMarker
+  'hero_demo_played', // props: { trigger: 'auto'|'manual', platform: 'X'|'Slack'|'Reddit'|'GitHub' } — wired in HomeRewriteDemo
+  'compare_row_expand', // props: { row: 'inline'|'multilang'|'keyboard'|'candidates'|'speed'|'logging'|'byok'|'openSource' } — wired in ComparisonTableTracked
+  'pricing_card_focus', // props: { card: 'free'|'pro'|'byok' } — hover/focus ≥ 500ms; wired in PriceTeaser
+  'early_bird_banner_click', // props: { surface: 'hero'|'pricing'|'nav' } — wired in EarlyBirdLink
   // ---- Extension rewrite lifecycle (content script → SW → /v1/events) ----
   // 扩展端事件由 apps/extension content script 经 service-worker 代理发出，
   // 统一带 install_id + site（见 EventPayloadSchema）。匿名扩展用户 subjectKind='install'。
@@ -117,6 +111,13 @@ export const EventPayloadSchema = z.object({
     })
     .optional(),
   visitor_id: z.string().min(1).max(64).optional(),
+  /**
+   * Per-session 标记。30 分钟无活动后滚动为新 id。与持久 visitor_id 区分开：
+   * 用于把事件归入「同一次浏览会话」做时间线 / pulse 分析。web sender 存
+   * sessionStorage（新标签页 = 新会话），扩展由 background SW 自管。
+   * D1-only —— 不占 AE blob（blob15-20 仍保留）。
+   */
+  session_id: z.string().min(1).max(64).optional(),
   /**
    * 扩展安装 ID（扩展端事件专用）。仅传输用：服务端据此推导 subjectKind='install'
    * 并 hash 落 subject_id blob，**不**单独占 AE blob。web 端事件不带此字段。

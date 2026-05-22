@@ -27,7 +27,7 @@ export type ComparisonRow = {
   cells: Record<string, ComparisonCellValue>;
 };
 
-type ComparisonTableProps = {
+export type ComparisonTableProps = {
   caption: string;
   columns: ComparisonColumn[];
   rows: ComparisonRow[];

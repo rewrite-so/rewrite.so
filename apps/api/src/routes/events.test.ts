@@ -57,7 +57,11 @@ const fakeEvents = {
 } as unknown as AnalyticsEngineDataset;
 
 function makeEnv(
-  overrides: Partial<{ EVENTS_DISABLED: string; EVENTS: AnalyticsEngineDataset }> = {},
+  overrides: Partial<{
+    EVENTS_DISABLED: string;
+    EVENTS: AnalyticsEngineDataset;
+    DB: D1Database;
+  }> = {},
 ) {
   return {
     OPENAI_BASE_URL: 'https://upstream.test/v1',
@@ -82,6 +86,7 @@ function makeEvent(
     page: string;
     locale: string;
     visitor_id: string;
+    session_id: string;
     install_id: string;
     site: string;
     props: Record<string, unknown>;
@@ -125,6 +130,36 @@ describe('POST /v1/events — happy path', () => {
     expect(recordedPoints).toHaveLength(1);
     expect(recordedPoints[0]?.blobs[10]).toBe('visitor'); // subject_kind
     expect(recordedPoints[0]?.blobs[9]).toBe('anon'); // tier
+  });
+
+  it('accepts an event carrying a valid session_id', async () => {
+    const res = await app.request(
+      '/v1/events',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          events: [
+            makeEvent({ visitor_id: 'vid-1', session_id: '018f5c64-9a4d-7f5e-8001-fe8c9c54f0e1' }),
+          ],
+        }),
+      },
+      makeEnv(),
+    );
+    expect(res.status).toBe(202);
+  });
+
+  it('accepts an event with no session_id (field is optional)', async () => {
+    const res = await app.request(
+      '/v1/events',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ events: [makeEvent({ visitor_id: 'vid-1' })] }),
+      },
+      makeEnv(),
+    );
+    expect(res.status).toBe(202);
   });
 
   it('accepts a batch of multiple events', async () => {
@@ -446,6 +481,24 @@ describe('POST /v1/events — invalid payload', () => {
     expect(res.status).toBe(400);
   });
 
+  it('400 when session_id contains forbidden characters', async () => {
+    const res = await app.request(
+      '/v1/events',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          events: [makeEvent({ session_id: 'has space@x' })],
+        }),
+      },
+      makeEnv(),
+    );
+    expect(res.status).toBe(400);
+    const body = (await res.json()) as { error: string; field?: string };
+    expect(body.error).toBe('invalid_field');
+    expect(body.field).toBe('session_id');
+  });
+
   it('400 on a non-whitelisted site label', async () => {
     const res = await app.request(
       '/v1/events',
@@ -549,6 +602,64 @@ describe('POST /v1/events — fire-and-forget contract', () => {
         body: JSON.stringify({ events: [makeEvent({ visitor_id: 'vid-1' })] }),
       },
       makeEnv({ EVENTS: undefined }),
+    );
+    expect(res.status).toBe(202);
+  });
+});
+
+describe('POST /v1/events — D1 dual-write', () => {
+  /** D1 fake that records the bound args of each batched behavior_events row. */
+  function recordingDB() {
+    const binds: unknown[][] = [];
+    const db = {
+      prepare: () => ({
+        bind: (...args: unknown[]) => ({ __args: args }),
+        first: async () => null,
+      }),
+      batch: async (stmts: Array<{ __args: unknown[] }>) => {
+        for (const s of stmts) binds.push(s.__args);
+        return stmts.map(() => ({ success: true }));
+      },
+    } as unknown as D1Database;
+    return { db, binds };
+  }
+
+  it('mirrors accepted events into D1 behavior_events', async () => {
+    const { db, binds } = recordingDB();
+    const res = await app.request(
+      '/v1/events',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          events: [makeEvent({ name: 'cta_click', visitor_id: 'vid-1', session_id: 'sess-1' })],
+        }),
+      },
+      makeEnv({ DB: db }),
+    );
+    expect(res.status).toBe(202);
+    expect(binds).toHaveLength(1);
+    // bind order: ts, event_name, subject_kind, subject_id_hash, session_id, ...
+    expect(binds[0]?.[1]).toBe('cta_click');
+    expect(binds[0]?.[2]).toBe('visitor');
+    expect(binds[0]?.[4]).toBe('sess-1');
+  });
+
+  it('still returns 202 when the D1 mirror write fails', async () => {
+    const db = {
+      prepare: () => ({ bind: () => ({}), first: async () => null }),
+      batch: async () => {
+        throw new Error('d1 down');
+      },
+    } as unknown as D1Database;
+    const res = await app.request(
+      '/v1/events',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ events: [makeEvent({ visitor_id: 'vid-1' })] }),
+      },
+      makeEnv({ DB: db }),
     );
     expect(res.status).toBe(202);
   });

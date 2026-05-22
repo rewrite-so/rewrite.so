@@ -4,6 +4,7 @@ import { getCampaignEntryState } from '../lib/campaign-entry.ts';
 import { getExtensionInstallUrl } from '../lib/extension-install-url.ts';
 import { getCurrentUser } from '../lib/get-current-user.ts';
 import { CtaLink } from './CtaLink.tsx';
+import { EarlyBirdLink } from './EarlyBirdLink.tsx';
 import { LanguageSwitcher } from './LanguageSwitcher.tsx';
 import { MobileMenu } from './MobileMenu.tsx';
 import styles from './TopNav.module.css';
@@ -54,9 +55,9 @@ export async function TopNav() {
             {t('pricing')}
           </Link>
           {earlyBirdEntry.showBadge && (
-            <Link href="/early-bird" className={`${styles.link} ${styles.linkEarlyBird}`}>
+            <EarlyBirdLink surface="nav" className={`${styles.link} ${styles.linkEarlyBird}`}>
               {t('earlyBird')}
-            </Link>
+            </EarlyBirdLink>
           )}
           <a
             href="https://github.com/rewrite-so/rewrite.so"
